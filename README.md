@@ -13,10 +13,30 @@ Main repository for the University of Melbourne Research Costing and Pricing Too
 | uv      | ≥ 0.11                                     | `curl -LsSf https://astral.sh/uv/install.sh \| sh`   |
 | Node.js | ≥ 20 (22+ recommended)                     | [nodejs.org](https://nodejs.org) or `nvm install 22` |
 | pnpm    | ≥ 10                                       | `corepack enable pnpm`                              |
+| Docker  | any recent version                          | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
 
-You also need a PostgreSQL connection string. The project targets [Neon](https://neon.tech)
-serverless Postgres — SSL is required and server-side cursors are disabled, so a pooled
-Neon URL works out of the box. Any Postgres reachable over SSL will do.
+The database runs locally in Docker — no cloud account, no connection string to obtain,
+and it works offline. Only Postgres is containerised; the backend and frontend run on
+your host, where reloads are fast and debuggers attach normally.
+
+## Quick start
+
+```bash
+git clone <repo-url> research-cost-and-pricing
+cd research-cost-and-pricing
+make setup     # env files, dependencies, database, migrations
+```
+
+Then set `DJANGO_SECRET_KEY` in `backend/.env` (see below) and run the two dev servers in
+separate terminals:
+
+```bash
+make backend    # http://127.0.0.1:8000
+make frontend   # http://localhost:5173
+```
+
+`make` on its own lists every target. The rest of this document explains what those
+targets do, in case you would rather run the steps by hand.
 
 ## 1. Clone
 
@@ -25,17 +45,36 @@ git clone <repo-url> research-cost-and-pricing
 cd research-cost-and-pricing
 ```
 
-## 2. Backend setup
+## 2. Database
+
+```bash
+make db-up      # docker compose up -d --wait db
+```
+
+This starts Postgres 17 on `localhost:5433`, with data persisted in a Docker volume named
+`rcpt_pgdata` that survives `make db-down`. To wipe it and start over, use `make db-reset`.
+
+The port is **5433, not the usual 5432**. Plenty of machines already run a native Postgres
+(Postgres.app, Homebrew, the EDB installer) on 5432, and that collision either refuses to
+start the container or — worse — silently points you at the wrong server. If 5433 is also
+taken, set `POSTGRES_PORT` in a `.env` file at the repo root and update `DATABASE_URL` in
+`backend/.env` to match.
+
+`make db-shell` opens `psql` inside the container, so it always reaches the right database
+regardless of what else is installed on your machine.
+
+## 3. Backend setup
 
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-Fill in `backend/.env`:
+`backend/.env` is pre-filled to point at the local container. The only value you must
+supply is the secret key:
 
 ```dotenv
-DATABASE_URL=postgresql://<user>:<password>@<host>/<db>?sslmode=require
+DATABASE_URL=postgresql://rcpt:rcpt@127.0.0.1:5432/rcpt
 DJANGO_SECRET_KEY=<a-long-random-string>
 DJANGO_DEBUG=True
 ```
@@ -61,7 +100,7 @@ uv run python manage.py runserver
 The API is now on [http://127.0.0.1:8000](http://127.0.0.1:8000) and the Django admin on
 [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
 
-## 3. Frontend setup
+## 4. Frontend setup
 
 In a second terminal:
 
@@ -78,11 +117,22 @@ Set `frontend/.env` to point at the local backend:
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-Vite serves the app on [http://localhost:5173](http://localhost:5173). That exact origin is the only one listed
-in `CORS_ALLOWED_ORIGINS` in `backend/config/settings.py`, so if you change the dev port
-you must add the new origin there too.
+Vite serves the app on [http://localhost:5173](http://localhost:5173). That exact origin is the
+default value of `CORS_ALLOWED_ORIGINS`, so if you change the dev port you must list the new
+origin in `DJANGO_CORS_ALLOWED_ORIGINS` (comma-separated) in `backend/.env`.
 
 ## Everyday commands
+
+From the repo root, `make` lists every shortcut. The common ones:
+
+```bash
+make db-up      # start Postgres
+make db-reset   # wipe the database and re-migrate from scratch
+make db-shell   # psql prompt inside the container
+make backend    # Django dev server
+make frontend   # Vite dev server
+make test       # Django test suite
+```
 
 **Backend** (run from `backend/`):
 
@@ -105,12 +155,55 @@ pnpm lint      # eslint
 
 ## Environment variables
 
-| File              | Variable              | Purpose                                                                                                                      |
-| ----------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `backend/.env`  | `DATABASE_URL`      | Postgres connection string, parsed by`dj-database-url`. Required.                                                          |
-| `backend/.env`  | `DJANGO_SECRET_KEY` | Django signing key. Required — no fallback.                                                                                 |
-| `backend/.env`  | `DJANGO_DEBUG`      | Present in`.env.example` but **not yet wired up**; `DEBUG` is currently hard-coded to `True` in `settings.py`. |
-| `frontend/.env` | `VITE_API_URL`      | Base URL of the backend API. Only variables prefixed`VITE_` are exposed to the browser.                                    |
+| File              | Variable                          | Purpose                                                                                                                                                 |
+| ----------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `backend/.env`  | `DATABASE_URL`                  | Postgres connection string, parsed by`dj-database-url`. Required — startup fails with a pointer to this file if it is missing.                          |
+| `backend/.env`  | `DJANGO_SECRET_KEY`             | Django signing key. Required — no fallback.                                                                                                              |
+| `backend/.env`  | `DJANGO_DEBUG`                  | `True`/`False`. Defaults to`False` so an environment that forgets it fails closed.                                                                  |
+| `backend/.env`  | `DJANGO_ALLOWED_HOSTS`          | Comma-separated hostnames. Only needed when`DJANGO_DEBUG` is`False`.                                                                                  |
+| `backend/.env`  | `DJANGO_CORS_ALLOWED_ORIGINS`   | Comma-separated browser origins allowed to call the API. Defaults to`http://localhost:5173`.                                                            |
+| `backend/.env`  | `DATABASE_SSL`                  | Force TLS to the database. Defaults to on unless`DJANGO_DEBUG` is`True`; the local container serves no certificate, so leave it unset locally.        |
+| `frontend/.env` | `VITE_API_URL`                  | Base URL of the backend API. Only variables prefixed`VITE_` are exposed to the browser.                                                                 |
 
 `.env` files are gitignored; only `.env.example` is committed. Never commit real
 credentials.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request, in two independent jobs:
+
+- **Backend** — brings up a Postgres 17 service container (the same major version as
+  `docker-compose.yml`), installs with `uv sync --locked`, then runs a migration drift gate,
+  applies migrations, and runs the test suite.
+- **Frontend** — `pnpm install --frozen-lockfile`, `pnpm lint`, and `pnpm build` (which is
+  `tsc -b && vite build`, so it type-checks too).
+
+The **migration drift gate** is `manage.py makemigrations --check --dry-run`. Models are the
+source and migrations are the artefact, so a model change pushed without its migration fails
+here rather than at deploy time. If it fails, run `make makemigrations` and commit the result.
+
+Two lockfile gates ride along: `uv sync --locked` fails if `uv.lock` has drifted from
+`pyproject.toml`, and `--frozen-lockfile` does the same for `pnpm-lock.yaml`.
+
+## Deployment
+
+Nothing about the local setup ties the project to a particular host. The entire database
+configuration is one `DATABASE_URL`, so any managed Postgres works — AWS RDS, Fly, Railway,
+Neon, Supabase — without a code change. Deployed environments need:
+
+```dotenv
+DATABASE_URL=postgresql://<user>:<password>@<host>/<db>?sslmode=require
+DJANGO_SECRET_KEY=<a-long-random-string>
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=<your-api-hostname>
+DJANGO_CORS_ALLOWED_ORIGINS=<your-frontend-origin>
+```
+
+`DATABASE_SSL` needs no value there: it defaults to on whenever `DJANGO_DEBUG` is `False`.
+Server-side cursors are disabled unconditionally, so the app is safe behind a
+transaction-mode connection pooler, which is what most managed offerings put in front of
+the database.
+
+The CI job runs `manage.py check --deploy` as an advisory step. Most of what it flags (HSTS,
+secure cookies, SSL redirect) depends on the host that has not been chosen yet — read its
+output when that decision is made.
