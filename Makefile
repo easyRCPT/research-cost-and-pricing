@@ -4,20 +4,28 @@
 # Run `make` with no arguments for the list.
 
 .DEFAULT_GOAL := help
-.PHONY: help setup db-up db-down db-reset db-logs db-shell migrate makemigrations \
-        superuser backend frontend test lint
+.PHONY: help setup hooks preflight db-up db-down db-reset db-logs db-shell migrate \
+        makemigrations superuser backend frontend test lint
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-setup: ## First-time setup: env files, dependencies, database, migrations
+setup: ## First-time setup: env files, dependencies, hooks, database, migrations
 	@test -f backend/.env || (cp backend/.env.example backend/.env && echo "created backend/.env — set DJANGO_SECRET_KEY in it")
 	@test -f frontend/.env || (cp frontend/.env.example frontend/.env && echo "created frontend/.env")
 	cd backend && uv sync
 	cd frontend && pnpm install
+	$(MAKE) hooks
 	$(MAKE) db-up
 	$(MAKE) migrate
+
+hooks: ## Activate the repo's git hooks (.githooks/)
+	@git config core.hooksPath .githooks
+	@echo "git hooks activated — core.hooksPath is now .githooks/"
+
+preflight: ## Check Docker, config, database and migrations are ready
+	@sh scripts/preflight.sh
 
 db-up: ## Start Postgres and wait for it to accept connections
 	docker compose up -d --wait db
@@ -45,7 +53,7 @@ makemigrations: ## Generate migrations from model changes
 superuser: ## Create a Django admin user
 	cd backend && uv run python manage.py createsuperuser
 
-backend: ## Run the Django dev server on :8000
+backend: preflight ## Run the Django dev server on :8000
 	cd backend && uv run python manage.py runserver
 
 frontend: ## Run the Vite dev server on :5173

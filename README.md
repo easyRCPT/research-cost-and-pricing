@@ -135,9 +135,11 @@ From the repo root, `make` lists every shortcut. The common ones:
 make db-up      # start Postgres
 make db-reset   # wipe the database and re-migrate from scratch
 make db-shell   # psql prompt inside the container
-make backend    # Django dev server
+make backend    # Django dev server (runs preflight first)
 make frontend   # Vite dev server
 make test       # Django test suite
+make preflight  # check Docker, config, database and migrations are ready
+make hooks      # activate the git hooks in .githooks/
 ```
 
 **Backend** (run from `backend/`):
@@ -173,6 +175,69 @@ pnpm lint      # eslint
 
 `.env` files are gitignored; only `.env.example` is committed. Never commit real
 credentials.
+
+## Preflight and git hooks
+
+### Preflight
+
+`scripts/preflight.sh` runs before a dev server starts — `make backend` depends on it, and
+the frontend's pnpm `predev` calls it — so the ordinary path into work also guarantees the
+stack is ready. It checks that Docker is running, that `backend/.env` exists, that the
+database container is up (starting it if not), and that migrations are applied (applying
+them if not). When everything is already fine it prints nothing.
+
+It only ever migrates a **local** database. It asks Django for the resolved host and skips
+the migration step entirely unless that host is `localhost`, `127.0.0.1` or `::1`. A `.env`
+left pointing at staging or production is the normal way this would otherwise go wrong, and
+"start my dev server" should never be a way to migrate a remote database.
+
+Run it on its own with `make preflight`.
+
+### Git hooks
+
+The hooks live in `.githooks/` and are activated by `make setup`, or on their own with:
+
+```bash
+make hooks     # git config core.hooksPath .githooks
+```
+
+There is no husky and no root `package.json`. Hooks committed to `.githooks/` are versioned
+exactly as husky's are — that is `core.hooksPath` doing the work in both cases. What husky
+adds is automatic activation through its `prepare` lifecycle script, which only helps if
+everyone runs an install at the repo root. Backend work here happens entirely in `backend/`
+with uv, so `make setup` is the honest place for that one-line activation.
+
+Both hooks are advisory. They print and exit 0; neither runs a migration, and neither can
+fail a checkout or a merge.
+
+| Hook | When | What it says |
+| ---- | ---- | ------------ |
+| `post-merge` | a pull or merge brought in migration files | run `make migrate` |
+| `post-checkout` | you switched to a branch whose migrations differ | see below |
+
+`post-checkout` matters because the two directions are not equally recoverable:
+
+- **The branch has migrations you have not applied.** Your database is behind. `make migrate`
+  fixes it, and `make backend` does that for you anyway.
+- **The branch is missing migrations you have already applied.** Your database is *ahead* of
+  the code, and Django will not undo that on its own. Nothing complains at first — an extra
+  column is invisible until the migration you left behind renamed or dropped something, and
+  then the failure surfaces somewhere unrelated. `make db-reset` is the reliable answer.
+
+### Why not a database per branch
+
+The obvious next step is giving each git branch its own database, the way `c3-workspace`
+does with Supabase. Two things to know before reaching for it.
+
+It would **not** need a volume or container per branch — a Postgres database is nearly free
+within one server, so this is separate database *names* in the one container. Volumes would
+be the expensive way to buy the same isolation.
+
+But it earns its complexity only once you have local data worth preserving. Today
+`make db-reset` takes a few seconds and destroys nothing, which covers every case above
+including the ones per-branch databases do not: two branches that both add an `0005_*`
+migration still need a merge migration, no matter how the databases are arranged. Worth
+revisiting when there is a seed dataset that hurts to rebuild.
 
 ## Continuous integration
 

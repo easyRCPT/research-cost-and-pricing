@@ -1,0 +1,58 @@
+#!/bin/sh
+# Tells you how the branch you just moved to disagrees with your database.
+#
+# Django migrations only run forward on their own, so the two directions need
+# different responses and only one of them is easy:
+#
+#   gained migrations  -> your database is behind  -> `make migrate`
+#   lost migrations    -> your database is ahead   -> `make db-reset`
+#
+# The second case is the one worth catching. Nothing complains when your local
+# schema is ahead of your code: an extra column is invisible until the migration
+# you left behind renamed or dropped something, and then the failure surfaces
+# somewhere unrelated. Rather than guess, this prints which case you are in.
+#
+# Advisory only, and always exits 0. It never runs a migration and never touches
+# the database — a checkout that silently rewrites your schema is worse than the
+# problem it solves.
+
+prev=$1
+new=$2
+is_branch_checkout=$3
+
+# $3 is 0 for a file checkout (`git checkout -- path`), which changes no refs.
+[ "$is_branch_checkout" = "1" ] || exit 0
+
+# Same commit: `git checkout` on the branch you are already on.
+[ "$prev" = "$new" ] && exit 0
+
+changes=$(git diff --name-status "$prev" "$new" -- 'backend/*/migrations/*.py' 2>/dev/null \
+	| grep -v '__init__.py' || true)
+
+[ -z "$changes" ] && exit 0
+
+gained=$(echo "$changes" | awk '$1 ~ /^A/ {print $2}')
+lost=$(echo "$changes" | awk '$1 ~ /^D/ {print $2}')
+
+if [ -n "$lost" ]; then
+	echo ""
+	echo "  This branch does NOT have migrations your database has already applied:"
+	echo "$lost" | sed 's/^/    /'
+	echo ""
+	echo "  Your local schema is ahead of this branch's code. Django will not undo"
+	echo "  this for you. Unless you know the extra migrations were additive, reset:"
+	echo ""
+	echo "    make db-reset"
+	echo ""
+fi
+
+if [ -n "$gained" ]; then
+	echo ""
+	echo "  This branch has migrations you have not applied:"
+	echo "$gained" | sed 's/^/    /'
+	echo ""
+	echo "  Run 'make migrate' (or 'make backend', which does it for you)."
+	echo ""
+fi
+
+exit 0

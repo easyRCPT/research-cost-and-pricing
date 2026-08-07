@@ -1,0 +1,20 @@
+#!/bin/sh
+# After a pull or merge that brought in migrations, say so.
+#
+# Advisory only, and always exits 0 — a hook that can fail a merge, or that runs
+# migrations behind your back on a branch you have not looked at yet, is a hook
+# people disable. See .githooks/post-checkout for the harder case.
+
+added=$(git diff --name-only --diff-filter=A ORIG_HEAD HEAD -- 'backend/*/migrations/*.py' 2>/dev/null \
+	| grep -v '__init__.py' || true)
+
+if [ -n "$added" ]; then
+	echo ""
+	echo "  This merge brought in new migrations:"
+	echo "$added" | sed 's/^/    /'
+	echo ""
+	echo "  Run 'make migrate' to apply them (or just 'make backend', which does it for you)."
+	echo ""
+fi
+
+exit 0
