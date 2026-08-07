@@ -17,7 +17,7 @@ name: rcpt
 
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-rcpt}
@@ -30,7 +30,11 @@ services:
       # server. Only the host side moves; inside the container it is still 5432.
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # /var/lib/postgresql, NOT /var/lib/postgresql/data. Postgres 18 moved the
+      # data directory to /var/lib/postgresql/18/docker and declares the volume
+      # one level up. Carrying the old 17-style path over would put the database
+      # outside the volume, where it looks fine until `down` discards it.
+      - pgdata:/var/lib/postgresql
     healthcheck:
       # `make db-up` waits on this, so a follow-up `migrate` never races the
       # server's first-boot initdb.

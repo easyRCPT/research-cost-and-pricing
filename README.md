@@ -51,8 +51,14 @@ cd research-cost-and-pricing
 make db-up      # docker compose up -d --wait db
 ```
 
-This starts Postgres 17 on `localhost:5433`, with data persisted in a Docker volume named
+This starts Postgres 18 on `localhost:5433`, with data persisted in a Docker volume named
 `rcpt_pgdata` that survives `make db-down`. To wipe it and start over, use `make db-reset`.
+
+Postgres 18 relocated its data directory (`/var/lib/postgresql/18/docker`, with the volume
+declared one level up at `/var/lib/postgresql`), so `docker-compose.yml` mounts
+`/var/lib/postgresql` rather than the `/var/lib/postgresql/data` you may remember from
+17 and earlier. Changing the major version means changing that mount too, and a stale
+volume from a previous major will not start — run `make db-reset` after any such bump.
 
 The port is **5433, not the usual 5432**. Plenty of machines already run a native Postgres
 (Postgres.app, Homebrew, the EDB installer) on 5432, and that collision either refuses to
@@ -172,7 +178,7 @@ credentials.
 
 `.github/workflows/ci.yml` runs on every push and pull request, in two independent jobs:
 
-- **Backend** — brings up a Postgres 17 service container (the same major version as
+- **Backend** — brings up a Postgres 18 service container (the same major version as
   `docker-compose.yml`), installs with `uv sync --locked`, then runs a migration drift gate,
   applies migrations, and runs the test suite.
 - **Frontend** — `pnpm install --frozen-lockfile`, `pnpm lint`, and `pnpm build` (which is

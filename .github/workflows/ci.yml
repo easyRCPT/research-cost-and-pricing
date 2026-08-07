@@ -17,12 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    # The same Postgres major version as docker-compose.yml. A service container
-    # gives each run its own throwaway database, so concurrent runs cannot
-    # contend for shared state.
+    # The same Postgres major version as docker-compose.yml — keep them in step,
+    # and in step with production, so version-specific behaviour cannot differ
+    # between where code is written and where it runs. A service container gives
+    # each run its own throwaway database, so concurrent runs cannot contend for
+    # shared state. No volume is mounted here, so PG 18's relocated data
+    # directory is not a concern the way it is in docker-compose.yml.
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: rcpt
           POSTGRES_PASSWORD: rcpt
