@@ -13,7 +13,14 @@
 # the defaults are what backend/.env.example expects, so a fresh clone works
 # without creating one.
 
-name: rcpt
+# The project name namespaces the container and the volume, so it is what makes
+# one branch's database a different database from another's.
+#
+# `rcpt` here is only the fallback, used on main/master and by anything run
+# without a root .env. scripts/branch-env.sh writes COMPOSE_PROJECT_NAME (which
+# overrides this) and POSTGRES_PORT into .env for every other branch. See
+# "A database per branch" in the README.
+name: ${COMPOSE_PROJECT_NAME:-rcpt}
 
 services:
   db:

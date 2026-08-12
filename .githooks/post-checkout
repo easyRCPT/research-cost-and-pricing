@@ -1,58 +1,30 @@
 #!/bin/sh
-# Tells you how the branch you just moved to disagrees with your database.
+# Repoints this checkout at the database belonging to the branch you just moved
+# to. See scripts/branch-env.sh for how the port and project name are derived.
 #
-# Django migrations only run forward on their own, so the two directions need
-# different responses and only one of them is easy:
+# This used to diff migration files between the two commits and tell you whether
+# your database was behind or ahead of the new branch. That check made sense
+# while every branch shared one database. It does not any more, and worse, it
+# would be wrong: the database changes along with the branch, so a migration
+# "added" by the switch says nothing about whether the database you are now
+# pointed at has it. scripts/preflight.sh asks the actual database instead,
+# which is both accurate and works regardless of how you got here — checkout,
+# rebase, bisect or a fresh clone.
 #
-#   gained migrations  -> your database is behind  -> `make migrate`
-#   lost migrations    -> your database is ahead   -> `make db-reset`
+# Writes two .env files and nothing else: no Docker, no migrations, no schema
+# changes. A checkout has to stay instant, and a checkout that quietly rewrites
+# a database is worse than any problem it could solve.
 #
-# The second case is the one worth catching. Nothing complains when your local
-# schema is ahead of your code: an extra column is invisible until the migration
-# you left behind renamed or dropped something, and then the failure surfaces
-# somewhere unrelated. Rather than guess, this prints which case you are in.
-#
-# Advisory only, and always exits 0. It never runs a migration and never touches
-# the database — a checkout that silently rewrites your schema is worse than the
-# problem it solves.
+# Advisory and always exits 0 — this must never be able to fail a checkout.
 
-prev=$1
-new=$2
 is_branch_checkout=$3
 
 # $3 is 0 for a file checkout (`git checkout -- path`), which changes no refs.
 [ "$is_branch_checkout" = "1" ] || exit 0
 
-# Same commit: `git checkout` on the branch you are already on.
-[ "$prev" = "$new" ] && exit 0
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -f "$repo_root/scripts/branch-env.sh" ] || exit 0
 
-changes=$(git diff --name-status "$prev" "$new" -- 'backend/*/migrations/*.py' 2>/dev/null \
-	| grep -v '__init__.py' || true)
-
-[ -z "$changes" ] && exit 0
-
-gained=$(echo "$changes" | awk '$1 ~ /^A/ {print $2}')
-lost=$(echo "$changes" | awk '$1 ~ /^D/ {print $2}')
-
-if [ -n "$lost" ]; then
-	echo ""
-	echo "  This branch does NOT have migrations your database has already applied:"
-	echo "$lost" | sed 's/^/    /'
-	echo ""
-	echo "  Your local schema is ahead of this branch's code. Django will not undo"
-	echo "  this for you. Unless you know the extra migrations were additive, reset:"
-	echo ""
-	echo "    make db-reset"
-	echo ""
-fi
-
-if [ -n "$gained" ]; then
-	echo ""
-	echo "  This branch has migrations you have not applied:"
-	echo "$gained" | sed 's/^/    /'
-	echo ""
-	echo "  Run 'make migrate' (or 'make backend', which does it for you)."
-	echo ""
-fi
+sh "$repo_root/scripts/branch-env.sh" || true
 
 exit 0

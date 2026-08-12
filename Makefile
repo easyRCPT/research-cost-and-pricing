@@ -4,7 +4,8 @@
 # Run `make` with no arguments for the list.
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks preflight db-up db-down db-reset db-logs db-shell migrate \
+.PHONY: help setup hooks preflight db-up db-down \
+        db-down-v db-reset db-logs db-shell db-list db-prune branch-env migrate \
         makemigrations seed seed-list superuser backend frontend test lint
 
 help: ## Show this help
@@ -17,6 +18,7 @@ setup: ## First-time setup: env files, dependencies, hooks, database, migrations
 	cd backend && uv sync
 	cd frontend && pnpm install
 	$(MAKE) hooks
+	$(MAKE) branch-env
 	$(MAKE) db-up
 	$(MAKE) migrate
 	$(MAKE) seed
@@ -33,6 +35,18 @@ db-up: ## Start Postgres and wait for it to accept connections
 
 db-down: ## Stop Postgres, keeping the data volume
 	docker compose down
+
+db-down-v: ## Stop this branch's Postgres and delete its volume
+	docker compose down -v
+
+branch-env: ## Point this checkout at the current branch's database
+	@sh scripts/branch-env.sh
+
+db-list: ## Show every branch's database, and flag ones whose branch is gone
+	@sh scripts/db-list.sh
+
+db-prune: ## Delete databases for branches that no longer exist
+	@sh scripts/db-prune.sh
 
 db-reset: ## Destroy the database, recreate it, re-apply migrations and re-seed
 	docker compose down -v
