@@ -4,7 +4,7 @@
 # Run `make` with no arguments for the list.
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks preflight db-up db-down \
+.PHONY: help setup secretkey hooks preflight db-up db-down \
         db-down-v db-reset db-logs db-shell db-list db-prune branch-env migrate \
         makemigrations seed seed-list superuser backend frontend test lint
 
@@ -13,15 +13,29 @@ help: ## Show this help
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 setup: ## First-time setup: env files, dependencies, hooks, database, migrations, seeds
-	@test -f backend/.env || (cp backend/.env.example backend/.env && echo "created backend/.env — set DJANGO_SECRET_KEY in it")
+	@test -f backend/.env || (cp backend/.env.example backend/.env && echo "created backend/.env")
 	@test -f frontend/.env || (cp frontend/.env.example frontend/.env && echo "created frontend/.env")
 	cd backend && uv sync
+	$(MAKE) secretkey
 	cd frontend && pnpm install
 	$(MAKE) hooks
 	$(MAKE) branch-env
 	$(MAKE) db-up
 	$(MAKE) migrate
 	$(MAKE) seed
+
+# Both example files carry working local values, so the placeholder secret key is
+# the only thing a fresh clone would otherwise have to edit by hand. Generating it
+# here removes that step — and removes the failure mode where someone leaves the
+# literal placeholder in place because nothing complains about it locally.
+secretkey: ## Put a freshly generated DJANGO_SECRET_KEY in backend/.env if it is still the placeholder
+	@grep -q '^DJANGO_SECRET_KEY=YOUR_DJANGO_SECRET_KEY$$' backend/.env 2>/dev/null || { \
+		echo "backend/.env already has a secret key — leaving it alone"; exit 0; }; \
+	key=$$(cd backend && uv run python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"); \
+	tmp=$$(mktemp); \
+	awk -v k="$$key" '/^DJANGO_SECRET_KEY=/ {print "DJANGO_SECRET_KEY=\x27" k "\x27"; next} {print}' backend/.env > "$$tmp"; \
+	mv "$$tmp" backend/.env; \
+	echo "generated DJANGO_SECRET_KEY in backend/.env"
 
 hooks: ## Activate the repo's git hooks (.githooks/)
 	@git config core.hooksPath .githooks
