@@ -5,13 +5,13 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks preflight db-up db-down db-reset db-logs db-shell migrate \
-        makemigrations superuser backend frontend test lint
+        makemigrations seed seed-list superuser backend frontend test lint
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-setup: ## First-time setup: env files, dependencies, hooks, database, migrations
+setup: ## First-time setup: env files, dependencies, hooks, database, migrations, seeds
 	@test -f backend/.env || (cp backend/.env.example backend/.env && echo "created backend/.env — set DJANGO_SECRET_KEY in it")
 	@test -f frontend/.env || (cp frontend/.env.example frontend/.env && echo "created frontend/.env")
 	cd backend && uv sync
@@ -19,6 +19,7 @@ setup: ## First-time setup: env files, dependencies, hooks, database, migrations
 	$(MAKE) hooks
 	$(MAKE) db-up
 	$(MAKE) migrate
+	$(MAKE) seed
 
 hooks: ## Activate the repo's git hooks (.githooks/)
 	@git config core.hooksPath .githooks
@@ -33,10 +34,11 @@ db-up: ## Start Postgres and wait for it to accept connections
 db-down: ## Stop Postgres, keeping the data volume
 	docker compose down
 
-db-reset: ## Destroy the database, recreate it, and re-apply migrations
+db-reset: ## Destroy the database, recreate it, re-apply migrations and re-seed
 	docker compose down -v
 	$(MAKE) db-up
 	$(MAKE) migrate
+	$(MAKE) seed
 
 db-logs: ## Tail the Postgres logs
 	docker compose logs -f db
@@ -49,6 +51,12 @@ migrate: ## Apply migrations
 
 makemigrations: ## Generate migrations from model changes
 	cd backend && uv run python manage.py makemigrations
+
+seed: ## Load reference data from backend/seeds/ (idempotent)
+	cd backend && uv run python manage.py seed
+
+seed-list: ## Show which seed files would run, in order
+	cd backend && uv run python manage.py seed --list
 
 superuser: ## Create a Django admin user
 	cd backend && uv run python manage.py createsuperuser
