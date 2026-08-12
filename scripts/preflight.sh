@@ -90,12 +90,75 @@ localhost | 127.0.0.1 | ::1) ;;
 	;;
 esac
 
-# 6. Migrations, and the seeds that go with them.
+# 6. The database is not *ahead* of the code.
+#
+#    The opposite of an unapplied migration, and the one nothing else notices.
+#    django_migrations records a migration whose file is not in this branch —
+#    you applied it, then moved to a branch that predates it, or dropped it in a
+#    rebase. `migrate --check` is silent here, because there is nothing left to
+#    apply going forward. The schema simply has columns the code does not know
+#    about, which stays invisible until the missing migration was the one that
+#    renamed or dropped something, and then it fails somewhere unrelated.
+#
+#    Reported, never fixed: the only reliable fix is `db-reset`, which destroys
+#    the database. That is a decision, not a step, so it is asked for by name.
+#    backend/api/checks.py duplicates this, deliberately. This one catches it
+#    before the server starts, so the message arrives on its own rather than
+#    inside a wall of Django output; the system check catches it on every
+#    autoreload, which is the case this cannot see — a server already running
+#    when you switched branches.
+ghosts=$(cd backend && uv run python -c "
+import os, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+from django.apps import apps
+from django.db import connection
+from django.db.migrations.loader import MigrationLoader
+try:
+    loader = MigrationLoader(connection, ignore_no_migrations=True)
+except Exception:
+    raise SystemExit(0)
+
+on_disk = set(loader.disk_migrations)
+
+# Filtered on the app registry, not on which apps still have migration files:
+# deleting an app's only migration would otherwise remove it from that set and
+# hide the very case this check exists for.
+installed = {config.label for config in apps.get_app_configs()}
+
+# A squash records the migrations it replaced as applied while their files are
+# legitimately gone. Excluding them matters more than the check firing: a false
+# positive here tells you to run db-reset, which destroys the database.
+replaced = set()
+for migration in loader.disk_migrations.values():
+    replaced.update(getattr(migration, 'replaces', ()) or ())
+
+for app, name in sorted(loader.applied_migrations):
+    if app in installed and (app, name) not in on_disk and (app, name) not in replaced:
+        print(f'{app}.{name}')
+" 2>/dev/null) || ghosts=""
+
+if [ -n "$ghosts" ]; then
+	echo ""
+	echo "  preflight: your database has migrations this branch does not have:"
+	echo "$ghosts" | sed 's/^/    /'
+	echo ""
+	echo "  Your schema is ahead of the code. Django cannot undo this for you, and"
+	echo "  the mismatch will surface later as an unrelated-looking error."
+	echo ""
+	echo "  Unless you know those migrations were purely additive, reset:"
+	echo "    make db-reset"
+	echo ""
+	exit 1
+fi
+
+# 7. Migrations, and the seeds that go with them.
 #
 #    `migrate --check` exits non-zero when any migration is unapplied. Applied
 #    rather than reported: migrations only run forward, the database is
 #    disposable, and "you have unapplied migrations" has exactly one sensible
-#    response.
+#    response. Safe to do automatically precisely because the destructive
+#    direction was ruled out above.
 #
 #    Seeding is tied to that rather than run every time. A brand-new branch gets
 #    an empty database, and an empty database with no reference data in it is not
