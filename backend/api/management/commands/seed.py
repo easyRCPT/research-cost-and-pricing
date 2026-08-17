@@ -1,31 +1,8 @@
 """
-Loads reference data from backend/seeds/ into the database.
+Runs the .sql and .py files in backend/seeds/, in filename order.
 
-Lookup tables — funding schemes, salary scales, indexation rates — are data
-rather than schema, but they are not *sample* data either: the application is
-wrong without them, and they have to exist in every environment. That rules out
-Django fixtures, which are aimed at test scaffolding, and it rules out doing it
-by hand.
-
-Two file types, both run in filename order:
-
-    backend/seeds/0010_funding_bodies.sql   raw SQL, for bulk reference data
-    backend/seeds/0020_salary_scales.py     Python, when it needs logic
-
-Numbered prefixes because order is the only way to express a foreign key: a
-table must be seeded after whatever it points at. The numbers leave gaps on
-purpose so a later file can be slotted between two existing ones.
-
-**Every seed file must be idempotent.** This command is not a migration and
-keeps no record of what it has run — it is re-run in full on every `make
-db-reset`, on every environment, as often as anyone likes. Write upserts
-(`INSERT ... ON CONFLICT DO UPDATE`, or `update_or_create`), never bare inserts.
-The contract is deliberately "safe to run twice" rather than "runs once",
-because the alternative is a second migration-like ledger to keep in step with
-the real one.
-
-Each file runs in its own transaction, so a failure rolls that file back rather
-than leaving the table half-populated.
+Keeps no record of what it has run, so seed files must be idempotent.
+See backend/seeds/README.md.
 """
 
 import importlib.util
@@ -63,7 +40,7 @@ def run_sql(path: Path):
 
 
 def run_python(path: Path):
-    """Import the file and call its run() — no package, so load it by path."""
+    """seeds/ is not a package, so load by path."""
     spec = importlib.util.spec_from_file_location(f"seeds.{path.stem}", path)
     if spec is None or spec.loader is None:
         raise CommandError(f"could not load {path.name}")
@@ -98,9 +75,7 @@ class Command(BaseCommand):
                 raise CommandError(f"no seed file matching '{options['only']}'")
 
         if not paths:
-            # Not an error. A fresh checkout has no seeds yet, and `make
-            # db-reset` calls this unconditionally — failing here would make an
-            # empty seeds/ directory look like a broken setup.
+            # Not an error: db-reset calls this unconditionally.
             self.stdout.write("No seed files in backend/seeds/ — nothing to do.")
             return
 
@@ -114,8 +89,7 @@ class Command(BaseCommand):
             self.stdout.write(f"  {path.name} ... ", ending="")
             self.stdout.flush()
             try:
-                # Per file, so one bad seed cannot leave a table half-filled
-                # while the files after it carry on against a broken state.
+                # Per file, so a failure can't leave a table half-filled.
                 with transaction.atomic():
                     if path.suffix == ".sql":
                         run_sql(path)
