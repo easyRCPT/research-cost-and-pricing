@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 class Department(models.Model):
@@ -12,11 +13,18 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
+class User(AbstractUser):
+    department = models.ForeignKey(
+        # models.PROTECT prevents a department from being deleted if it has users
+        "Department", null=True, blank=True, on_delete=models.PROTECT
+    )
+
 # Defines the Salary Cap
 class IncrementCap(models.Model):
     level = models.CharField(max_length=20, primary_key=True)
     max_steps = models.PositiveSmallIntegerField()
 
+# Salary increases by EBA miltiplier 
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
     multiplier = models.DecimalField(max_digits=8, decimal_places=6)
@@ -24,9 +32,12 @@ class EbaIncrease(models.Model):
 class SalaryRate(models.Model):
     """
     Base rates from the RCPT workbook's tSalaryRate table.
-    'rate` holds two different units. Fortnight rows are ANNUAL salaries
-    (e.g. Level B.6 = 148023.42); Casual rows are HOURLY rates
-    (e.g. UOM 7.1 = 72.3078). The time basis multiplier converts as needed.
+
+    `rate` holds two different units. Fortnight rows are ANNUAL salaries; 
+    Casual rows are HOURLY rates. The engine converts based on the line's time
+    basis: FTE uses the annual figure directly, Daily divides it by the
+    daily_rate_divisor constant (220), and Hourly needs no conversion
+    because Casual rows are already hourly.
     """
 
     class PayrollType(models.TextChoices):
@@ -101,5 +112,38 @@ class OnCostRate(models.Model):
     def __str__(self):
         scope = self.year if self.year is not None else "all years"
         return f"{self.get_on_cost_type_display()} - {self.employment_type or 'any'} ({scope})"
-    
-    
+
+
+class NonStaffCostCategory(models.Model):
+    # The expense types a non-staff cost line can be booked against. Each one
+    # carries the finance ledger ID that ends up on the budget form, which is
+    # what lets Finance code the spend. Source: Lookup Tables H132:J149.
+    ledger_id = models.PositiveIntegerField(primary_key=True)
+    cost_category = models.CharField(max_length=100)
+    cost_subcategory = models.CharField(max_length=150)
+
+    def __str__(self):
+        return f"{self.cost_subcategory} ({self.ledger_id})"
+
+
+class MinimumCostRecoveryMultiplier(models.Model):
+    # The lowest cost recovery multiplier a budget can use before it needs
+    # Dean sign-off as well as Head of Department. The approval workflow reads
+    # this to decide whether a submitted budget gets routed to a Dean.
+
+    year = models.PositiveSmallIntegerField(primary_key=True)
+    multiplier = models.DecimalField(max_digits=4, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.year}: {self.multiplier}"
+
+
+class CalculationConstant(models.Model):
+    # Standalone numbers the costing engine needs that don't belong to any
+    # lookup table. Stored as rows rather than Python constants
+    name = models.CharField(max_length=50, primary_key=True)
+    description = models.CharField(max_length=200, blank=True)
+    value = models.DecimalField(max_digits=12, decimal_places=6)
+
+    def __str__(self):
+        return f"{self.name} = {self.value}"

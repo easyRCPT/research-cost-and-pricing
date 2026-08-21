@@ -128,6 +128,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
 }
 
+# Custom user model, so approvals can record who decided and departments can be
+# attached to people. Swapping this after the first migration is painful, hence
+# it is set before any real data exists.
+AUTH_USER_MODEL = "api.User"
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
