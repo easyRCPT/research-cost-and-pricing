@@ -14,11 +14,29 @@ from pathlib import Path
 import os
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
+
+
+def _env_bool(name, default):
+    """Read a boolean from the environment, tolerating the usual spellings."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_list(name, default):
+    """Read a comma-separated list, dropping blanks left by trailing commas."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -27,9 +45,13 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Defaults to off: an environment that forgets to set this fails closed rather
+# than serving tracebacks to the internet.
+DEBUG = _env_bool("DJANGO_DEBUG", False)
 
-ALLOWED_HOSTS = []
+# Django already allows localhost when DEBUG is on, so this only has to be set
+# in deployed environments — where an empty list would reject every request.
+ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", [])
 
 
 # Application definition
@@ -78,13 +100,38 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-DATABASES = {"default": dj_database_url.config(conn_max_age=0, ssl_require=True)}
+if not os.environ.get("DATABASE_URL"):
+    raise ImproperlyConfigured(
+        "DATABASE_URL is not set. Copy backend/.env.example to backend/.env and "
+        "start the local database with `make db-up`."
+    )
+
+# Every managed Postgres we might deploy to requires TLS; the local Docker
+# container serves no certificate, so requiring it there fails the connection
+# outright. Keying the default off DEBUG means local work needs no flag and a
+# deployment that sets nothing still gets sslmode=require.
+DATABASE_SSL = _env_bool("DATABASE_SSL", not DEBUG)
+
+DATABASES = {"default": dj_database_url.config(conn_max_age=0, ssl_require=DATABASE_SSL)}
+
+# Server-side cursors do not survive a transaction-mode connection pooler, which
+# is what most managed Postgres offerings put in front of the database. Left on
+# unconditionally so local behaviour matches deployed behaviour.
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]     # the Vite dev origin
+# Browser origins allowed to call the API; the default is the Vite dev origin.
+# Changing the Vite port means adding the new origin here or via the env var.
+CORS_ALLOWED_ORIGINS = _env_list(
+    "DJANGO_CORS_ALLOWED_ORIGINS", ["http://localhost:5173"]
+)
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
 }
+
+# Custom user model, so approvals can record who decided and departments can be
+# attached to people. Swapping this after the first migration is painful, hence
+# it is set before any real data exists.
+AUTH_USER_MODEL = "api.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators

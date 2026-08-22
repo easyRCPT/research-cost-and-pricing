@@ -1,0 +1,55 @@
+# Local development database.
+#
+# Only Postgres runs in Docker. The Django backend (uv) and the Vite frontend
+# (pnpm) stay on the host, where reloads are fast and debuggers attach without
+# ceremony. Nothing here is used in deployment — deployed environments get a
+# managed Postgres and hand its URL to the app as DATABASE_URL.
+#
+#   docker compose up -d db     start
+#   docker compose down         stop, keeping data
+#   docker compose down -v      stop and wipe the volume
+#
+# Every value below can be overridden from a `.env` file next to this one;
+# the defaults are what backend/.env.example expects, so a fresh clone works
+# without creating one.
+
+# The project name namespaces the container and the volume, so it is what makes
+# one branch's database a different database from another's.
+#
+# `rcpt` here is only the fallback, used on main/master and by anything run
+# without a root .env. scripts/branch-env.sh writes COMPOSE_PROJECT_NAME (which
+# overrides this) and POSTGRES_PORT into .env for every other branch. See
+# "A database per branch" in the README.
+name: ${COMPOSE_PROJECT_NAME:-rcpt}
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rcpt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rcpt}
+      POSTGRES_DB: ${POSTGRES_DB:-rcpt}
+    ports:
+      # 5433 on purpose, not 5432. A native Postgres (Postgres.app, Homebrew,
+      # the EDB installer) claims 5432 and the collision surfaces as an opaque
+      # "address already in use" — or worse, silently connects you to the wrong
+      # server. Only the host side moves; inside the container it is still 5432.
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      # /var/lib/postgresql, NOT /var/lib/postgresql/data. Postgres 18 moved the
+      # data directory to /var/lib/postgresql/18/docker and declares the volume
+      # one level up. Carrying the old 17-style path over would put the database
+      # outside the volume, where it looks fine until `down` discards it.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      # `make db-up` waits on this, so a follow-up `migrate` never races the
+      # server's first-boot initdb.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rcpt} -d ${POSTGRES_DB:-rcpt}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  pgdata:

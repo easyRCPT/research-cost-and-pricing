@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  # Superseded pushes on a feature branch are worth cancelling; main is the
+  # branch people read results from, so let its runs finish.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  backend:
+    name: Backend (migrations, tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # The same Postgres major version as docker-compose.yml — keep them in step,
+    # and in step with production, so version-specific behaviour cannot differ
+    # between where code is written and where it runs. A service container gives
+    # each run its own throwaway database, so concurrent runs cannot contend for
+    # shared state. No volume is mounted here, so PG 18's relocated data
+    # directory is not a concern the way it is in docker-compose.yml.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: rcpt
+          POSTGRES_PASSWORD: rcpt
+          POSTGRES_DB: rcpt
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rcpt -d rcpt"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: postgresql://rcpt:rcpt@localhost:5432/rcpt
+      # Not a secret: this runner's database is destroyed with the job, and
+      # nothing signed here outlives it.
+      DJANGO_SECRET_KEY: ci-only-not-a-real-secret
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      # DATABASE_SSL defaults to on when DEBUG is off, but the postgres image
+      # serves no certificate — requiring TLS here fails the connection.
+      DATABASE_SSL: "False"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      # --locked fails if uv.lock has drifted from pyproject.toml, so a
+      # dependency added without committing the lockfile is caught here rather
+      # than on someone else's machine.
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync --locked
+
+      # The Django analogue of a schema-freshness gate: models are the source,
+      # migrations are the artefact, and an uncommitted migration is a broken
+      # deploy waiting to happen.
+      - name: Migration drift gate
+        working-directory: backend
+        run: |
+          uv run python manage.py makemigrations --check --dry-run || {
+            echo "::error::Models changed but no migration was committed. Run 'make makemigrations' and commit the result."
+            exit 1
+          }
+
+      - name: Apply migrations
+        working-directory: backend
+        run: uv run python manage.py migrate
+
+      - name: Tests
+        working-directory: backend
+        run: uv run python manage.py test
+
+      # Advisory. Most of what --deploy flags (HSTS, secure cookies, SSL
+      # redirect) belongs to the not-yet-chosen production host, so failing on
+      # it now would only teach people to ignore the job. It runs so the
+      # checklist is visible when that host is picked.
+      - name: Deployment checklist (advisory)
+        working-directory: backend
+        continue-on-error: true
+        run: uv run python manage.py check --deploy
+
+  frontend:
+    name: Frontend (lint, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      VITE_API_URL: http://127.0.0.1:8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned rather than floating: pnpm resolution differences between majors
+      # can produce a lockfile the --frozen-lockfile check then rejects.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        working-directory: frontend
+        run: pnpm lint
+
+      # `pnpm build` is `tsc -b && vite build`, so this is the type-check too.
+      - name: Type-check and build
+        working-directory: frontend
+        run: pnpm build

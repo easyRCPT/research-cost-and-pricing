@@ -1,0 +1,30 @@
+#!/bin/sh
+# Repoints this checkout at the database belonging to the branch you just moved
+# to. See scripts/branch-env.sh for how the port and project name are derived.
+#
+# This used to diff migration files between the two commits and tell you whether
+# your database was behind or ahead of the new branch. That check made sense
+# while every branch shared one database. It does not any more, and worse, it
+# would be wrong: the database changes along with the branch, so a migration
+# "added" by the switch says nothing about whether the database you are now
+# pointed at has it. scripts/preflight.sh asks the actual database instead,
+# which is both accurate and works regardless of how you got here — checkout,
+# rebase, bisect or a fresh clone.
+#
+# Writes two .env files and nothing else: no Docker, no migrations, no schema
+# changes. A checkout has to stay instant, and a checkout that quietly rewrites
+# a database is worse than any problem it could solve.
+#
+# Advisory and always exits 0 — this must never be able to fail a checkout.
+
+is_branch_checkout=$3
+
+# $3 is 0 for a file checkout (`git checkout -- path`), which changes no refs.
+[ "$is_branch_checkout" = "1" ] || exit 0
+
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -f "$repo_root/scripts/branch-env.sh" ] || exit 0
+
+sh "$repo_root/scripts/branch-env.sh" || true
+
+exit 0
