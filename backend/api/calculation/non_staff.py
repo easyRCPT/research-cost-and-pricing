@@ -84,11 +84,14 @@ def calculate_non_staff_column(
         for row in data.values():
             value = row['numeric'].get(year) or 0
 
-            if row['info']['add_10%']:
+            indirect_rate_multiplier = row['info'].get('indirect_rate_multiplier', 1)
+
+            # If add_10% and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
+            if row['info']['add_10%'] and indirect_rate_multiplier <= 1:
                 value *= 1.1
 
             direct += value
-            total += value * row['info']['indirect_rate_multiplier']
+            total += value * indirect_rate_multiplier
 
         direct_total[year] = direct
         indirect_total[year] = total - direct
