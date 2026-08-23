@@ -6,6 +6,7 @@ def calculate_staff_table(info_table_data: Dict, num_table_data: Dict,
                           start_year, start_month, end_year, end_month) -> Dict:
     """
     Calculate the staff cost (in kind or not)
+    Return the calculation result only
     """
     staff_costs = {}
     in_kind_staff_costs = {}
@@ -28,8 +29,8 @@ def calculate_staff_table(info_table_data: Dict, num_table_data: Dict,
     in_kind_staff_costs['column_total'] = calculate_column_total(in_kind_staff_costs, start_year, end_year)
 
     return {
-        'staff_cost_result': staff_costs,
-        'in_kind_staff_cost_result': in_kind_staff_costs,
+        'cost_results': staff_costs,
+        'in_kind': in_kind_staff_costs,
     }
 
 
@@ -52,9 +53,7 @@ def calculate_year_fractions(start_year, start_month, end_year, end_month) -> Di
 
     return {
         'start_year': start_year,
-        'start_month': start_month,
         'end_year': end_year,
-        'end_month': end_month,
         'first_year_fraction': first_year_fraction,
         'last_year_fraction': last_year_fraction,
     }
@@ -80,7 +79,7 @@ def calculate_column_total(data, start_year, end_year):
     }
 
 
-def calculate_staff_row(row_data: Dict, numeric_cols: Dict, project_duration: Dict):
+def calculate_staff_row(info_data: Dict, num_data: Dict, project_duration: Dict):
     """
     Calculate the cost of a staff in each year of the project
     Return a dictionary for cost in each year {'year': cost}
@@ -96,8 +95,8 @@ def calculate_staff_row(row_data: Dict, numeric_cols: Dict, project_duration: Di
                       project_duration['end_year'] + 1):
 
         # Skip none value
-        time = numeric_cols.get(year)
-        if time is None:
+        time = num_data.get(year) or 0
+        if time == 0:
             continue
 
         # Find year fraction
@@ -109,8 +108,8 @@ def calculate_staff_row(row_data: Dict, numeric_cols: Dict, project_duration: Di
             year_fraction = 1
 
         # Calculate cost
-        salary_rate = find_salary_rate(row_data, constants, year_employed, year)
-        employment_type = row_data.get('employment_type')
+        salary_rate = find_salary_rate(info_data, constants, year_employed, year)
+        employment_type = info_data.get('employment_type')
         costs[year] = (
             calculate_staff_cost(constants, salary_rate, time, year_fraction, employment_type))
 
@@ -126,15 +125,15 @@ def calculate_staff_row(row_data: Dict, numeric_cols: Dict, project_duration: Di
     }
 
 
-def find_salary_rate(row_data: Dict, constants: Dict, year_employed: int, year: int):
+def find_salary_rate(info_data: Dict, constants: Dict, year_employed: int, year: int):
     """
     Find the salary rate for a staff in the specified year
     """
     # Get search key for salary rate
-    employment_type = row_data.get('employment_type')
-    category = row_data.get('category')
-    classification = row_data.get('classification')
-    rate_basis = row_data.get('rate_basis')
+    employment_type = info_data.get('employment_type')
+    category = info_data.get('category')
+    classification = info_data.get('classification')
+    rate_basis = info_data.get('rate_basis')
 
     # Get payroll type
     mapping = {
@@ -197,7 +196,7 @@ def calculate_staff_cost(constants: Dict, salary_rate, time, year_fraction, empl
     # Add Long Service Leave
     total_cost += on_costs['long_service_leave'][employment_type] * requested_salary
     # Add Parental Leave Provision
-    total_cost += (on_costs['parental_leave'][employment_type] * requested_salary)
+    total_cost += on_costs['parental_leave'][employment_type] * requested_salary
     # Add Override Default UoM Oncosts
     total_cost += general['override_uom_oncosts'] * requested_salary
     # Add Annual Leave Provision
@@ -206,8 +205,40 @@ def calculate_staff_cost(constants: Dict, salary_rate, time, year_fraction, empl
     return total_cost * general['cost_recovery_multiplier']
 
 
-def calculate_non_staff_table():
+def calculate_non_staff_table(table_data:Dict, start_year:int, end_year:int):
     """
     Calculate the non staff cost (in kind or not)
+    Return the completed non staff table
     """
-    return
+    non_staff_costs = {}
+    in_kind_non_staff_costs = {}
+
+    for row_id, data in table_data.items():
+        row_result = calculate_non_staff_row(data, start_year, end_year)
+        if data['in_kind']:
+            in_kind_non_staff_costs[row_id] = row_result
+        else:
+            non_staff_costs[row_id] = row_result
+
+    # need to add column calculation
+
+    return {
+        'cost results': non_staff_costs,
+        'in_kind': in_kind_non_staff_costs,
+    }
+
+
+def calculate_non_staff_row(row_data: Dict, start_year:int, end_year:int):
+    """
+    Calculate non staff cost line item
+    Return input with row total
+    """
+    total = sum(
+        row_data.get(year) or 0
+        for year in range(start_year, end_year + 1)
+    )
+
+    return {
+        'data': row_data,
+        'total': total,
+    }
