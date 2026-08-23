@@ -3,8 +3,7 @@ from . import lookup_loader
 
 
 def calculate_staff_table(
-    info_table_data: Dict,
-    num_table_data: Dict,
+    table_data: Dict,
     start_year: int,
     start_month: int,
     end_year: int,
@@ -12,7 +11,21 @@ def calculate_staff_table(
 ) -> Dict:
     """
     Calculate the staff cost (in kind or not)
-    Return the calculation result only
+    Input format: {
+        'info_table': {'<row_id>': {}},
+        'numeric_table': {'<row_id>': {}}
+    }
+
+    Return the calculation results only.
+    Source info/numeric data are not included in the result.
+    The caller is responsible for combining the calculation results with the source data.
+    Output format: {
+        'cost_results': {
+            '<row_id>': {'results': {}, 'total': number},
+            'column_total': {'results': {}, 'total': number},
+        },
+        'in_kind_cost_results': {...}
+    }
     """
     staff_costs = {}
     in_kind_staff_costs = {}
@@ -21,8 +34,8 @@ def calculate_staff_table(
     project_duration = calculate_year_fractions(start_year, start_month, end_year, end_month)
 
     # Populate staff cost and in kind staff cost result dictionary
-    for row_id, info in info_table_data.items():
-        numeric = num_table_data[row_id]
+    for row_id, info in table_data['info_table'].items():
+        numeric = table_data['numeric_table'][row_id]
         cost_result = calculate_staff_row(info, numeric, project_duration)
 
         if info['in_kind']:
@@ -81,7 +94,7 @@ def calculate_column_total(
     """
     column_total = {
         year: sum(
-            row['data'].get(year) or 0
+            row['results'].get(year) or 0
             for row in data.values()
         )
         for year in range(start_year, end_year + 1)
@@ -91,7 +104,7 @@ def calculate_column_total(
 
     # Add result into input data dictionary
     data['column_total'] = {
-        'data': column_total,
+        'results': column_total,
         'total': total
     }
 
@@ -143,7 +156,7 @@ def calculate_staff_row(
     total = sum(costs.values())
 
     return {
-        'data': costs,
+        'results': costs,
         'total': total,
     }
 
