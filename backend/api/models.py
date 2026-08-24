@@ -19,6 +19,18 @@ class User(AbstractUser):
         "Department", null=True, blank=True, on_delete=models.PROTECT
     )
 
+class SalaryRateMultiplier(models.Model):
+    # tSalaryRateMultiplier. Converts a stored rate to the entered time basis:
+    # FTE 1, Daily 1/220, Hourly 1. Hourly is 1 because Casual rows in
+    # SalaryRate are already hourly rates, not because hourly needs no
+    # conversion in general.
+    time_basis = models.CharField(max_length=20, primary_key=True)
+    multiplier = models.DecimalField(max_digits=20, decimal_places=18)
+
+    def __str__(self):
+        return f"{self.time_basis} x{self.multiplier}"
+
+
 # Defines the Salary Cap
 class IncrementCap(models.Model):
     level = models.CharField(max_length=20, primary_key=True)
@@ -32,12 +44,6 @@ class EbaIncrease(models.Model):
 class SalaryRate(models.Model):
     """
     Base rates from the RCPT workbook's tSalaryRate table.
-
-    `rate` holds two different units. Fortnight rows are ANNUAL salaries; 
-    Casual rows are HOURLY rates. The engine converts based on the line's time
-    basis: FTE uses the annual figure directly, Daily divides it by the
-    daily_rate_divisor constant (220), and Hourly needs no conversion
-    because Casual rows are already hourly.
     """
 
     class PayrollType(models.TextChoices):
