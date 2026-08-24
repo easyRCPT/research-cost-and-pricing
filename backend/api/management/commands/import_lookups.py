@@ -26,7 +26,8 @@ from api.models import (
     NonStaffCostCategory,
     #MinimumCostRecoveryMultiplier
     OnCostRate,
-    SalaryRate
+    SalaryRate,
+    SalaryRateMultiplier
 )
 
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
@@ -333,10 +334,26 @@ def import_non_staff_categories(workbook):
 # should not be changed 
 # def import_minimum_multipliers(workbook):
 
+def import_salary_rate_multipliers(workbook):
+    # Converts a stored rate to the entered time basis.
+    # FTE 1, Daily 1/220, Hourly 1.
+    count = 0
+    for time_basis, multiplier in rows(workbook, "tSalaryRateMultiplier"):
+        if not time_basis or multiplier is None:
+            continue
+
+        SalaryRateMultiplier.objects.update_or_create(
+            time_basis=time_basis, defaults={"multiplier": dec(multiplier)}
+        )
+
+        count += 1
+
+    return count
+
+
 def import_constants(workbook):
     # Numbers that belong to no table. Leave loading cap,
     # working day count, default multiplier
-
 
     for name, (defined_name, description) in CONSTANTS.items():
         CalculationConstant.objects.update_or_create(
@@ -347,24 +364,7 @@ def import_constants(workbook):
             },
         )
 
-    # walks rows and finds salary rate multiplier
-    daily = next(
-        rate
-        for basis, rate in rows(workbook, "tSalaryRateMultiplier")
-        if basis == "Daily"
-    )
-
-    # The workbook does not store 220. It holds a decimal value
-    # which holds less meaning, best to convert it back.
-    CalculationConstant.objects.update_or_create(
-        name="daily_rate_divisor",
-        defaults={
-            "value": dec(round(1 / daily)),
-            "description": "Billable days per year, for annual salary to day rate",
-        },
-    )
-
-    return len(CONSTANTS) + 1
+    return len(CONSTANTS) 
 
 
 class Command(BaseCommand):
@@ -399,6 +399,7 @@ class Command(BaseCommand):
             ("on-cost rates", import_on_costs),
             ("non-staff categories", import_non_staff_categories),
             #("minimum multipliers", import_minimum_multipliers),
+            ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
         )
 

@@ -1,0 +1,4239 @@
+[
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_01",
+  "fields": {
+    "name": "Faculty of Arts - Admin",
+    "school": "Faculty of Arts, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_01",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_02",
+  "fields": {
+    "name": "Faculty of Arts - Centres and Institutes",
+    "school": "Faculty of Arts, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_01",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_03",
+  "fields": {
+    "name": "Asia Institute (D)",
+    "school": "Asia Institute",
+    "school_code": "CCH_H1_4_02",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_04",
+  "fields": {
+    "name": "Graduate School of Humanities and Social Sciences (D)",
+    "school": "Graduate School of Humanities and Social Sciences",
+    "school_code": "CCH_H1_4_03",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_05",
+  "fields": {
+    "name": "School of Culture and Communication (D)",
+    "school": "School of Culture and Communication",
+    "school_code": "CCH_H1_4_04",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_06",
+  "fields": {
+    "name": "School of Historical and Philosophical Studies (D)",
+    "school": "School of Historical and Philosophical Studies",
+    "school_code": "CCH_H1_4_05",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_07",
+  "fields": {
+    "name": "School of Languages and Linguistics (D)",
+    "school": "School of Languages and Linguistics",
+    "school_code": "CCH_H1_4_06",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_08",
+  "fields": {
+    "name": "School of Social and Political Sciences (D)",
+    "school": "School of Social and Political Sciences",
+    "school_code": "CCH_H1_4_07",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_09",
+  "fields": {
+    "name": "The Peter Doherty Institute for Infection and Immunity",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_10",
+  "fields": {
+    "name": "Office of the CIO",
+    "school": "Chief Information Officer Group",
+    "school_code": "CCH_H1_4_09",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_100",
+  "fields": {
+    "name": "School of BioSciences - Centres and Institutes",
+    "school": "School of BioSciences",
+    "school_code": "CCH_H1_4_32",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_101",
+  "fields": {
+    "name": "School of Chemistry (D)",
+    "school": "School of Chemistry",
+    "school_code": "CCH_H1_4_33",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_102",
+  "fields": {
+    "name": "School of Chemistry - Centres and Institutes",
+    "school": "School of Chemistry",
+    "school_code": "CCH_H1_4_33",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_103",
+  "fields": {
+    "name": "School of Geography, Earth and Atmospheric Sciences (D)",
+    "school": "School of Geography, Earth and Atmospheric Sciences",
+    "school_code": "CCH_H1_4_34",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_104",
+  "fields": {
+    "name": "School of Geography, Earth and Atmospheric Sciences - Centres and Institutes",
+    "school": "School of Geography, Earth and Atmospheric Sciences",
+    "school_code": "CCH_H1_4_34",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_105",
+  "fields": {
+    "name": "School of Mathematics and Statistics (D)",
+    "school": "School of Mathematics and Statistics",
+    "school_code": "CCH_H1_4_35",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_106",
+  "fields": {
+    "name": "School of Mathematics and Statistics - Centres and Institutes",
+    "school": "School of Mathematics and Statistics",
+    "school_code": "CCH_H1_4_35",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_107",
+  "fields": {
+    "name": "School of Physics (D)",
+    "school": "School of Physics",
+    "school_code": "CCH_H1_4_36",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_108",
+  "fields": {
+    "name": "School of Physics - Centres and Institutes",
+    "school": "School of Physics",
+    "school_code": "CCH_H1_4_36",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_109",
+  "fields": {
+    "name": "Melbourne Veterinary School (D)",
+    "school": "Melbourne Veterinary School",
+    "school_code": "CCH_H1_4_37",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_11",
+  "fields": {
+    "name": "Client Services",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_110",
+  "fields": {
+    "name": "Melbourne Veterinary School - Centres and Institutes",
+    "school": "Melbourne Veterinary School",
+    "school_code": "CCH_H1_4_37",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_111",
+  "fields": {
+    "name": "Faculty of Education - Admin",
+    "school": "Faculty of Education, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_38",
+    "faculty": "Faculty of Education",
+    "faculty_code": "CCH_H1_3_09"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_112",
+  "fields": {
+    "name": "Faculty of Education - Centres and Institutes",
+    "school": "Faculty of Education, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_38",
+    "faculty": "Faculty of Education",
+    "faculty_code": "CCH_H1_3_09"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_113",
+  "fields": {
+    "name": "Faculty of Education (D)",
+    "school": "Faculty of Education (S)",
+    "school_code": "CCH_H1_4_39",
+    "faculty": "Faculty of Education",
+    "faculty_code": "CCH_H1_3_09"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_114",
+  "fields": {
+    "name": "Melbourne Law School - Admin",
+    "school": "Melbourne Law School (S)",
+    "school_code": "CCH_H1_4_40",
+    "faculty": "Melbourne Law School",
+    "faculty_code": "CCH_H1_3_10"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_115",
+  "fields": {
+    "name": "Melbourne Law School - Centres and Institutes",
+    "school": "Melbourne Law School (S)",
+    "school_code": "CCH_H1_4_40",
+    "faculty": "Melbourne Law School",
+    "faculty_code": "CCH_H1_3_10"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_116",
+  "fields": {
+    "name": "Melbourne Law School (D)",
+    "school": "Melbourne Law School (S)",
+    "school_code": "CCH_H1_4_40",
+    "faculty": "Melbourne Law School",
+    "faculty_code": "CCH_H1_3_10"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_118",
+  "fields": {
+    "name": "Office of the VP Advancement",
+    "school": "Advancement, Communications & Marketing",
+    "school_code": "CCH_H1_4_42",
+    "faculty": "Advancement, Communications & Marketing",
+    "faculty_code": "CCH_H1_3_11"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_119",
+  "fields": {
+    "name": "Advancement",
+    "school": "Advancement, Communications & Marketing",
+    "school_code": "CCH_H1_4_42",
+    "faculty": "Advancement, Communications & Marketing",
+    "faculty_code": "CCH_H1_3_11"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_12",
+  "fields": {
+    "name": "Academic Technology",
+    "school": "Chief Information Officer Group",
+    "school_code": "CCH_H1_4_09",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_120",
+  "fields": {
+    "name": "Communications and Marketing",
+    "school": "Advancement, Communications & Marketing",
+    "school_code": "CCH_H1_4_42",
+    "faculty": "Advancement, Communications & Marketing",
+    "faculty_code": "CCH_H1_3_11"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_121",
+  "fields": {
+    "name": "Office of the Chief Operating Officer (D)",
+    "school": "Office of the Chief Operating Officer",
+    "school_code": "CCH_H1_4_43",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_122",
+  "fields": {
+    "name": "Governance",
+    "school": "Office of the Chief Operating Officer",
+    "school_code": "CCH_H1_4_43",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_123",
+  "fields": {
+    "name": "Strategy, Planning and Performance",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_124",
+  "fields": {
+    "name": "Office of the CFO",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_125",
+  "fields": {
+    "name": "Corporate Finance, Property and Sustainability",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_126",
+  "fields": {
+    "name": "Financial Planning, Partnering and Advisory",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_127",
+  "fields": {
+    "name": "Procurement",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_128",
+  "fields": {
+    "name": "Strategic Financial Initiatives",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_129",
+  "fields": {
+    "name": "Office of General Counsel",
+    "school": "Legal and Risk",
+    "school_code": "CCH_H1_4_45",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_13",
+  "fields": {
+    "name": "Health & Safety",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_130",
+  "fields": {
+    "name": "Information Governance Services",
+    "school": "Legal and Risk",
+    "school_code": "CCH_H1_4_45",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_131",
+  "fields": {
+    "name": "Legal Services",
+    "school": "Legal and Risk",
+    "school_code": "CCH_H1_4_45",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_132",
+  "fields": {
+    "name": "Risk and Assurance",
+    "school": "Legal and Risk",
+    "school_code": "CCH_H1_4_45",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_133",
+  "fields": {
+    "name": "Enterprise Service Group Directorate",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_135",
+  "fields": {
+    "name": "Change Practice (EPG)",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_136",
+  "fields": {
+    "name": "University Decision Support",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_138",
+  "fields": {
+    "name": "Projects and Portfolio Management",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_14",
+  "fields": {
+    "name": "Finance Services",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_140",
+  "fields": {
+    "name": "Service Experience & Design",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_141",
+  "fields": {
+    "name": "RIC Directorate",
+    "school": "Research, Innovation and Commercialisation",
+    "school_code": "CCH_H1_4_47",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_142",
+  "fields": {
+    "name": "Commercialisation Ventures",
+    "school": "Research, Innovation and Commercialisation",
+    "school_code": "CCH_H1_4_47",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_143",
+  "fields": {
+    "name": "Innovation & Enterprise",
+    "school": "Research, Innovation and Commercialisation",
+    "school_code": "CCH_H1_4_47",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_144",
+  "fields": {
+    "name": "Melbourne Entrepreneurial Centre (MEC)",
+    "school": "Research, Innovation and Commercialisation",
+    "school_code": "CCH_H1_4_47",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_145",
+  "fields": {
+    "name": "Office of Research Management",
+    "school": "Research, Innovation and Commercialisation",
+    "school_code": "CCH_H1_4_47",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_146",
+  "fields": {
+    "name": "Student and Scholarly Services Directorate",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_147",
+  "fields": {
+    "name": "Future Students",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_15",
+  "fields": {
+    "name": "Enterprise Technology",
+    "school": "Chief Information Officer Group",
+    "school_code": "CCH_H1_4_09",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_150",
+  "fields": {
+    "name": "University Colleges and Residential Life",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_151",
+  "fields": {
+    "name": "Scholarly Services",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_152",
+  "fields": {
+    "name": "Student Administration",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_154",
+  "fields": {
+    "name": "Student Success",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_155",
+  "fields": {
+    "name": "Office of the DVC Global, Culture and Engagement",
+    "school": "Global, Culture and Engagement (S)",
+    "school_code": "CCH_H1_4_49",
+    "faculty": "Global, Culture and Engagement",
+    "faculty_code": "CCH_H1_3_12"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_16",
+  "fields": {
+    "name": "HR Services",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_162",
+  "fields": {
+    "name": "Engagement (GCE)",
+    "school": "Global, Culture and Engagement (S)",
+    "school_code": "CCH_H1_4_49",
+    "faculty": "Global, Culture and Engagement",
+    "faculty_code": "CCH_H1_3_12"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_164",
+  "fields": {
+    "name": "Melbourne Theatre Company",
+    "school": "Global, Culture and Engagement (S)",
+    "school_code": "CCH_H1_4_49",
+    "faculty": "Global, Culture and Engagement",
+    "faculty_code": "CCH_H1_3_12"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_17",
+  "fields": {
+    "name": "Research Computing Services",
+    "school": "Chief Information Officer Group",
+    "school_code": "CCH_H1_4_09",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_171",
+  "fields": {
+    "name": "Office of the DVC Indigenous",
+    "school": "Deputy Vice-Chancellor Indigenous (S)",
+    "school_code": "CCH_H1_4_66",
+    "faculty": "Deputy Vice-Chancellor Indigenous",
+    "faculty_code": "CCH_H1_3_26"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_173",
+  "fields": {
+    "name": "People and Community",
+    "school": "Office of the Provost (S)",
+    "school_code": "CCH_H1_4_50",
+    "faculty": "Office of the Provost",
+    "faculty_code": "CCH_H1_3_13"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_174",
+  "fields": {
+    "name": "Office of the Vice-Chancellor (D)",
+    "school": "Office of the Vice-Chancellor (S)",
+    "school_code": "CCH_H1_4_51",
+    "faculty": "Office of the Vice-Chancellor",
+    "faculty_code": "CCH_H1_3_14"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_175",
+  "fields": {
+    "name": "Office of the DVC Research",
+    "school": "Research & Enterprise (S)",
+    "school_code": "CCH_H1_4_52",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_176",
+  "fields": {
+    "name": "Atlantic Fellows for Social Equity",
+    "school": "Atlantic Fellows for Social Equity",
+    "school_code": "CCH_H1_4_69",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_178",
+  "fields": {
+    "name": "Melbourne Connect",
+    "school": "Melbourne Connect",
+    "school_code": "CCH_H1_4_70",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_18",
+  "fields": {
+    "name": "Campus Management",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_184",
+  "fields": {
+    "name": "Corporate",
+    "school": "University Corporate",
+    "school_code": "CCH_H1_4_53",
+    "faculty": "University Central Reporting Group",
+    "faculty_code": "CCH_H1_3_16"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_185",
+  "fields": {
+    "name": "Service Recipients",
+    "school": "University Corporate",
+    "school_code": "CCH_H1_4_53",
+    "faculty": "University Central Reporting Group",
+    "faculty_code": "CCH_H1_3_16"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_187",
+  "fields": {
+    "name": "Nossal Institute Ltd (D)",
+    "school": "Nossal Institute Ltd (S)",
+    "school_code": "CCH_H1_4_55",
+    "faculty": "Nossal Institute Ltd",
+    "faculty_code": "CCH_H1_3_17"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_188",
+  "fields": {
+    "name": "Office of the Provost (D)",
+    "school": "Office of the Provost (S)",
+    "school_code": "CCH_H1_4_50",
+    "faculty": "Office of the Provost",
+    "faculty_code": "CCH_H1_3_13"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_189",
+  "fields": {
+    "name": "UM Commercialisation Pty Ltd (D)",
+    "school": "UM Commercialisation Pty Ltd (S)",
+    "school_code": "CCH_H1_4_56",
+    "faculty": "UM Commercialisation Pty Ltd",
+    "faculty_code": "CCH_H1_3_18"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_19",
+  "fields": {
+    "name": "Planning & Assurance",
+    "school": "Chief Information Officer Group",
+    "school_code": "CCH_H1_4_09",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_190",
+  "fields": {
+    "name": "UM Commercialisation Trust (D)",
+    "school": "UM Commercialisation Trust (S)",
+    "school_code": "CCH_H1_4_57",
+    "faculty": "UM Commercialisation Trust",
+    "faculty_code": "CCH_H1_3_19"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_191",
+  "fields": {
+    "name": "UMELB (Singapore) (D)",
+    "school": "UMELB (Singapore) (S)",
+    "school_code": "CCH_H1_4_58",
+    "faculty": "UMELB (Singapore)",
+    "faculty_code": "CCH_H1_3_20"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_192",
+  "fields": {
+    "name": "UOM Commercial Ltd (D)",
+    "school": "UOM Commercial Ltd (S)",
+    "school_code": "CCH_H1_4_59",
+    "faculty": "UOM Commercial Ltd",
+    "faculty_code": "CCH_H1_3_21"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_193",
+  "fields": {
+    "name": "Melbourne Business School Limited Group (D)",
+    "school": "Melbourne Business School Limited Group (S)",
+    "school_code": "CCH_H1_4_60",
+    "faculty": "Melbourne Business School Limited Group",
+    "faculty_code": "CCH_H1_3_22"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_194",
+  "fields": {
+    "name": "UoM International Holdings Limited Group (D)",
+    "school": "UoM International Holdings Limited Group (S)",
+    "school_code": "CCH_H1_4_61",
+    "faculty": "UoM International Holdings Limited Group",
+    "faculty_code": "CCH_H1_3_23"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_195",
+  "fields": {
+    "name": "Ao Mo Da (Beijing) Consulting Co. Ltd (D)",
+    "school": "Ao Mo Da (Beijing) Consulting Co. Ltd (S)",
+    "school_code": "CCH_H1_4_62",
+    "faculty": "Ao Mo Da (Beijing) Consulting Co. Ltd",
+    "faculty_code": "CCH_H1_3_24"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_196",
+  "fields": {
+    "name": "Unimelb Germany GmbH (D)",
+    "school": "Unimelb Germany GmbH (S)",
+    "school_code": "CCH_H1_4_63",
+    "faculty": "Unimelb Germany GmbH",
+    "faculty_code": "CCH_H1_3_25"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_197",
+  "fields": {
+    "name": "School of Chemical and Biomedical Engineering (D)",
+    "school": "School of Chemical and Biomedical Engineering",
+    "school_code": "CCH_H1_4_18",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_198",
+  "fields": {
+    "name": "Melbourne Online",
+    "school": "Melbourne Online",
+    "school_code": "CCH_H1_4_68",
+    "faculty": "Office of the Provost",
+    "faculty_code": "CCH_H1_3_13"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_199",
+  "fields": {
+    "name": "Asia Institute - Centres and Institutes",
+    "school": "Asia Institute",
+    "school_code": "CCH_H1_4_02",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_20",
+  "fields": {
+    "name": "Cybersecurity",
+    "school": "Chief Information Officer Group",
+    "school_code": "CCH_H1_4_09",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_200",
+  "fields": {
+    "name": "School of Languages and Linguistics - Centres and Institutes",
+    "school": "School of Languages and Linguistics",
+    "school_code": "CCH_H1_4_06",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_201",
+  "fields": {
+    "name": "School of Social and Political Sciences - Centres and Institutes",
+    "school": "School of Social and Political Sciences",
+    "school_code": "CCH_H1_4_07",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_202",
+  "fields": {
+    "name": "Global (GCE)",
+    "school": "Global, Culture and Engagement (S)",
+    "school_code": "CCH_H1_4_49",
+    "faculty": "Global, Culture and Engagement",
+    "faculty_code": "CCH_H1_3_12"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_203",
+  "fields": {
+    "name": "Culture (GCE)",
+    "school": "Global, Culture and Engagement (S)",
+    "school_code": "CCH_H1_4_49",
+    "faculty": "Global, Culture and Engagement",
+    "faculty_code": "CCH_H1_3_12"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_204",
+  "fields": {
+    "name": "Melbourne Academy of Surgical Anatomy (MDHS)",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_205",
+  "fields": {
+    "name": "Melbourne Teaching Health Clinics",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_206",
+  "fields": {
+    "name": "Clinical Research Support (MISCH)",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_207",
+  "fields": {
+    "name": "Melbourne Academic Centre for Health (MACH)",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_208",
+  "fields": {
+    "name": "Robert Cripps Institute for Cultural Conservation",
+    "school": "Faculty of Arts, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_01",
+    "faculty": "Faculty of Arts",
+    "faculty_code": "CCH_H1_3_01"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_209",
+  "fields": {
+    "name": "Melbourne National Security and Defence",
+    "school": "Research & Enterprise (S)",
+    "school_code": "CCH_H1_4_52",
+    "faculty": "Research & Enterprise",
+    "faculty_code": "CCH_H1_3_15"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_21",
+  "fields": {
+    "name": "Melbourne Bio-Resources",
+    "school": "Enterprise Service Group",
+    "school_code": "CCH_H1_4_46",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_210",
+  "fields": {
+    "name": "Chief People Officer",
+    "school": "Chief People Officer",
+    "school_code": "CCH_H1_4_64",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_211",
+  "fields": {
+    "name": "Corporate Development Directorate",
+    "school": "Corporate Development",
+    "school_code": "CCH_H1_4_65",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_212",
+  "fields": {
+    "name": "Infrastructure",
+    "school": "Corporate Development",
+    "school_code": "CCH_H1_4_65",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_213",
+  "fields": {
+    "name": "Sustainability",
+    "school": "Corporate Development",
+    "school_code": "CCH_H1_4_65",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_214",
+  "fields": {
+    "name": "Office of the DVC Education",
+    "school": "Deputy Vice-Chancellor Education (S)",
+    "school_code": "CCH_H1_4_67",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_215",
+  "fields": {
+    "name": "Melbourne Institute of Applied Economic and Social Research",
+    "school": "Faculty of Business and Economics (S)",
+    "school_code": "CCH_H1_4_14",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_216",
+  "fields": {
+    "name": "Wellbeing Services",
+    "school": "Student and Scholarly Services",
+    "school_code": "CCH_H1_4_48",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_217",
+  "fields": {
+    "name": "Commercial Management",
+    "school": "Corporate Development",
+    "school_code": "CCH_H1_4_65",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_218",
+  "fields": {
+    "name": "Stakeholder Relations and Engagement",
+    "school": "Corporate Development",
+    "school_code": "CCH_H1_4_65",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_219",
+  "fields": {
+    "name": "Funding Policy Planning",
+    "school": "Chief Financial Officer Group",
+    "school_code": "CCH_H1_4_44",
+    "faculty": "Chief Operating Officer",
+    "faculty_code": "CCH_H1_3_03"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_22",
+  "fields": {
+    "name": "Faculty of Architecture, Building and Planning - Admin",
+    "school": "Faculty of Architecture, Building and Planning, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_10",
+    "faculty": "Faculty of Architecture, Building and Planning",
+    "faculty_code": "CCH_H1_3_04"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_23",
+  "fields": {
+    "name": "Faculty of Architecture, Building and Planning - Centres and Institutes",
+    "school": "Faculty of Architecture, Building and Planning, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_10",
+    "faculty": "Faculty of Architecture, Building and Planning",
+    "faculty_code": "CCH_H1_3_04"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_24",
+  "fields": {
+    "name": "Faculty of Architecture, Building and Planning (D)",
+    "school": "Faculty of Architecture, Building and Planning (S)",
+    "school_code": "CCH_H1_4_11",
+    "faculty": "Faculty of Architecture, Building and Planning",
+    "faculty_code": "CCH_H1_3_04"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_26",
+  "fields": {
+    "name": "Faculty of Business and Economics - Admin",
+    "school": "Faculty of Business and Economics, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_13",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_27",
+  "fields": {
+    "name": "Faculty of Business and Economics - Centres and Institutes",
+    "school": "Faculty of Business and Economics, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_13",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_28",
+  "fields": {
+    "name": "Department of Accounting",
+    "school": "Faculty of Business and Economics (S)",
+    "school_code": "CCH_H1_4_14",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_29",
+  "fields": {
+    "name": "Department of Business Administration",
+    "school": "Faculty of Business and Economics (S)",
+    "school_code": "CCH_H1_4_14",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_30",
+  "fields": {
+    "name": "Department of Economics",
+    "school": "Faculty of Business and Economics (S)",
+    "school_code": "CCH_H1_4_14",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_31",
+  "fields": {
+    "name": "Department of Finance",
+    "school": "Faculty of Business and Economics (S)",
+    "school_code": "CCH_H1_4_14",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_32",
+  "fields": {
+    "name": "Department of Management and Marketing",
+    "school": "Faculty of Business and Economics (S)",
+    "school_code": "CCH_H1_4_14",
+    "faculty": "Faculty of Business and Economics",
+    "faculty_code": "CCH_H1_3_05"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_34",
+  "fields": {
+    "name": "Melbourne Professional Education (MPE)",
+    "school": "Deputy Vice-Chancellor Education (S)",
+    "school_code": "CCH_H1_4_67",
+    "faculty": "Deputy Vice-Chancellor Education",
+    "faculty_code": "CCH_H1_3_27"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_35",
+  "fields": {
+    "name": "Faculty of Engineering and Information Technology – Admin",
+    "school": "Faculty of Engineering and Information Technology, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_17",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_36",
+  "fields": {
+    "name": "Faculty of Engineering and Information Technology - Centres and Institutes",
+    "school": "Faculty of Engineering and Information Technology, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_17",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_37",
+  "fields": {
+    "name": "Department of Biomedical Engineering",
+    "school": "School of Chemical and Biomedical Engineering",
+    "school_code": "CCH_H1_4_18",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_38",
+  "fields": {
+    "name": "Department of Chemical Engineering",
+    "school": "School of Chemical and Biomedical Engineering",
+    "school_code": "CCH_H1_4_18",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_39",
+  "fields": {
+    "name": "School of Computing and Information Systems (D)",
+    "school": "School of Computing and Information Systems",
+    "school_code": "CCH_H1_4_19",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_40",
+  "fields": {
+    "name": "School of Electrical, Mechanical and Infrastructure Eng (D)",
+    "school": "School of Electrical, Mechanical and Infrastructure Engineering",
+    "school_code": "CCH_H1_4_20",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_41",
+  "fields": {
+    "name": "Department of Electrical and Electronic Engineering",
+    "school": "School of Electrical, Mechanical and Infrastructure Engineering",
+    "school_code": "CCH_H1_4_20",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_42",
+  "fields": {
+    "name": "Department of Infrastructure Engineering",
+    "school": "School of Electrical, Mechanical and Infrastructure Engineering",
+    "school_code": "CCH_H1_4_20",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_43",
+  "fields": {
+    "name": "Department of Mechanical Engineering",
+    "school": "School of Electrical, Mechanical and Infrastructure Engineering",
+    "school_code": "CCH_H1_4_20",
+    "faculty": "Faculty of Engineering and Information Technology",
+    "faculty_code": "CCH_H1_3_06"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_44",
+  "fields": {
+    "name": "Faculty of Fine Arts and Music - Admin",
+    "school": "Faculty of Fine Arts and Music, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_21",
+    "faculty": "Faculty of Fine Arts and Music",
+    "faculty_code": "CCH_H1_3_07"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_46",
+  "fields": {
+    "name": "Melbourne Conservatorium of Music",
+    "school": "Faculty of Fine Arts and Music (S)",
+    "school_code": "CCH_H1_4_22",
+    "faculty": "Faculty of Fine Arts and Music",
+    "faculty_code": "CCH_H1_3_07"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_47",
+  "fields": {
+    "name": "Victorian College of the Arts",
+    "school": "Faculty of Fine Arts and Music (S)",
+    "school_code": "CCH_H1_4_22",
+    "faculty": "Faculty of Fine Arts and Music",
+    "faculty_code": "CCH_H1_3_07"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_48",
+  "fields": {
+    "name": "Faculty of Medicine, Dentistry and Health Sciences - Admin (D)",
+    "school": "Faculty of Medicine, Dentistry and Health Sciences - Admin",
+    "school_code": "CCH_H1_4_23",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_49",
+  "fields": {
+    "name": "Centre for Cancer Research",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_50",
+  "fields": {
+    "name": "Centre for Collaborative Practice",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_51",
+  "fields": {
+    "name": "Centre for Digital Transformation of Health",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_52",
+  "fields": {
+    "name": "Centre for Youth Mental Health (Orygen)",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_53",
+  "fields": {
+    "name": "Comprehensive Dementia Centre",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_54",
+  "fields": {
+    "name": "Department of Medical Biology (WEHI)",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_55",
+  "fields": {
+    "name": "Florey Department of Neuroscience and Mental Health",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_56",
+  "fields": {
+    "name": "Medical Bionics Department",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_57",
+  "fields": {
+    "name": "Melbourne Bioinformatics (VLSCI)",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_60",
+  "fields": {
+    "name": "Melbourne Poche Centre for Indigenous Health",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_61",
+  "fields": {
+    "name": "National Ageing Research Institute",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_62",
+  "fields": {
+    "name": "Australian Biocommons",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_63",
+  "fields": {
+    "name": "The Sir Peter MacCallum Department of Oncology",
+    "school": "MDHS Centres and Institutes",
+    "school_code": "CCH_H1_4_08",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_65",
+  "fields": {
+    "name": "Melbourne Dental School (D)",
+    "school": "Melbourne Dental School",
+    "school_code": "CCH_H1_4_24",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_66",
+  "fields": {
+    "name": "Melbourne Medical School - Admin",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_69",
+  "fields": {
+    "name": "Baker Department of Cardiometabolic Health",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_70",
+  "fields": {
+    "name": "Department of Clinical Pathology",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_71",
+  "fields": {
+    "name": "Department of Critical Care",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_72",
+  "fields": {
+    "name": "Department of General Practice and Primary Care",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_73",
+  "fields": {
+    "name": "Department of Infectious Diseases",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_74",
+  "fields": {
+    "name": "Department of Medical Education",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_75",
+  "fields": {
+    "name": "Department of Medicine",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_76",
+  "fields": {
+    "name": "Department of Obstetrics, Gynaecology and Newborn Health",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_77",
+  "fields": {
+    "name": "Department of Paediatrics",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_78",
+  "fields": {
+    "name": "Department of Psychiatry",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_79",
+  "fields": {
+    "name": "Department of Radiology",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_80",
+  "fields": {
+    "name": "Department of Rural Health",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_81",
+  "fields": {
+    "name": "Department of Surgery",
+    "school": "Melbourne Medical School",
+    "school_code": "CCH_H1_4_25",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_82",
+  "fields": {
+    "name": "Melbourne School of Health Sciences - Admin",
+    "school": "Melbourne School of Health Sciences",
+    "school_code": "CCH_H1_4_26",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_83",
+  "fields": {
+    "name": "Department of Audiology and Speech Pathology",
+    "school": "Melbourne School of Health Sciences",
+    "school_code": "CCH_H1_4_26",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_84",
+  "fields": {
+    "name": "Department of Nursing",
+    "school": "Melbourne School of Health Sciences",
+    "school_code": "CCH_H1_4_26",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_85",
+  "fields": {
+    "name": "Department of Optometry and Vision Sciences",
+    "school": "Melbourne School of Health Sciences",
+    "school_code": "CCH_H1_4_26",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_86",
+  "fields": {
+    "name": "Department of Physiotherapy",
+    "school": "Melbourne School of Health Sciences",
+    "school_code": "CCH_H1_4_26",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_87",
+  "fields": {
+    "name": "Department of Social Work",
+    "school": "Melbourne School of Health Sciences",
+    "school_code": "CCH_H1_4_26",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_88",
+  "fields": {
+    "name": "Melbourne School of Population and Global Health (D)",
+    "school": "Melbourne School of Population and Global Health",
+    "school_code": "CCH_H1_4_27",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_89",
+  "fields": {
+    "name": "Melbourne School of Population and Global Health - Centres and Institutes",
+    "school": "Melbourne School of Population and Global Health",
+    "school_code": "CCH_H1_4_27",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_90",
+  "fields": {
+    "name": "Melbourne School of Psychological Sciences (D)",
+    "school": "Melbourne School of Psychological Sciences",
+    "school_code": "CCH_H1_4_28",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_91",
+  "fields": {
+    "name": "Melbourne School of Psychological Sciences - Centres and Institutes",
+    "school": "Melbourne School of Psychological Sciences",
+    "school_code": "CCH_H1_4_28",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_92",
+  "fields": {
+    "name": "School of Biomedical Sciences - Admin",
+    "school": "School of Biomedical Sciences",
+    "school_code": "CCH_H1_4_29",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_93",
+  "fields": {
+    "name": "Department of Anatomy and Physiology",
+    "school": "School of Biomedical Sciences",
+    "school_code": "CCH_H1_4_29",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_94",
+  "fields": {
+    "name": "Department of Biochemistry and Pharmacology",
+    "school": "School of Biomedical Sciences",
+    "school_code": "CCH_H1_4_29",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_95",
+  "fields": {
+    "name": "Department of Microbiology and Immunology",
+    "school": "School of Biomedical Sciences",
+    "school_code": "CCH_H1_4_29",
+    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
+    "faculty_code": "CCH_H1_3_02"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_96",
+  "fields": {
+    "name": "Faculty of Science - Admin",
+    "school": "Faculty of Science, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_30",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_97",
+  "fields": {
+    "name": "Faculty of Science - Centres and Institutes",
+    "school": "Faculty of Science, Admin, Centres and Institute",
+    "school_code": "CCH_H1_4_30",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_98",
+  "fields": {
+    "name": "School of Agriculture, Food and Ecosystem Sciences (D)",
+    "school": "School of Agriculture, Food and Ecosystem Sciences",
+    "school_code": "CCH_H1_4_31",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.department",
+  "pk": "CCH_H1_5_99",
+  "fields": {
+    "name": "School of BioSciences (D)",
+    "school": "School of BioSciences",
+    "school_code": "CCH_H1_4_32",
+    "faculty": "Faculty of Science",
+    "faculty_code": "CCH_H1_3_08"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 1,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "RA Grade 1.1",
+    "rate": "79677.3000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 2,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "RA Grade 1.2",
+    "rate": "82274.2200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 3,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "RA Grade 1.3",
+    "rate": "87266.1000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 4,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.1",
+    "rate": "87266.1000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 5,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.2",
+    "rate": "92242.6800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 6,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.3",
+    "rate": "97233.5400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 7,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.4",
+    "rate": "102218.2800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 8,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.5",
+    "rate": "106272.7800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 9,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.6",
+    "rate": "110319.1200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 10,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.7",
+    "rate": "114366.4800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 11,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level A.8",
+    "rate": "118415.8800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 12,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level B.1",
+    "rate": "124656.2400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 13,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level B.2",
+    "rate": "129326.8200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 14,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level B.3",
+    "rate": "134000.4600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 15,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level B.4",
+    "rate": "138673.0800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 16,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level B.5",
+    "rate": "143351.8200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 17,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level B.6",
+    "rate": "148023.4200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 18,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level C.1",
+    "rate": "152695.0200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 19,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level C.2",
+    "rate": "157378.8600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 20,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level C.3",
+    "rate": "162045.3600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 21,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level C.4",
+    "rate": "166712.8800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 22,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level C.5",
+    "rate": "171385.5000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 23,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level C.6",
+    "rate": "176065.2600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 24,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level D.1",
+    "rate": "183859.0800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 25,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level D.2",
+    "rate": "190088.2200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 26,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level D.3",
+    "rate": "196315.3200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 27,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level D.4",
+    "rate": "202555.6800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 28,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Academic",
+    "classification": "Level E.1",
+    "rate": "236823.6000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 29,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 1.1",
+    "rate": "61274.4600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 30,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 1.2",
+    "rate": "62509.6800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 31,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 1.3",
+    "rate": "63751.0200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 32,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 2.1",
+    "rate": "66492.7800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 33,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 2.2",
+    "rate": "67823.8800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 34,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 2.3",
+    "rate": "69181.5000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 35,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 3.1",
+    "rate": "69553.8000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 36,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 3.2",
+    "rate": "70948.1400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 37,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 3.3",
+    "rate": "72361.8600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 38,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 3.4",
+    "rate": "73810.2600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 39,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 3.5",
+    "rate": "75290.2800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 40,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 3.6",
+    "rate": "76794.7800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 41,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 4.1",
+    "rate": "80400.4800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 42,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 4.2",
+    "rate": "82011.0600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 43,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 4.3",
+    "rate": "83652.2400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 44,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 4.4",
+    "rate": "85328.1000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 45,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.1",
+    "rate": "86942.7600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 46,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.2",
+    "rate": "88677.7800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 47,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.3",
+    "rate": "90448.5000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 48,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.4",
+    "rate": "92259.0000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 49,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.5",
+    "rate": "94102.1400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 50,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.6",
+    "rate": "95992.2000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 51,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.7",
+    "rate": "97904.7000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 52,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 5.8",
+    "rate": "99864.1200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 53,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 6.1",
+    "rate": "100847.4000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 54,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 6.2",
+    "rate": "102869.0400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 55,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 6.3",
+    "rate": "104917.2000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 56,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 6.4",
+    "rate": "107019.4200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 57,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 6.5",
+    "rate": "109163.4600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 58,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 7.1",
+    "rate": "111274.8600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 59,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 7.2",
+    "rate": "113505.6000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 60,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 7.3",
+    "rate": "115772.0400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 61,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 7.4",
+    "rate": "118086.4200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 62,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 7.5",
+    "rate": "120452.8200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 63,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 8.1",
+    "rate": "125190.7200"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 64,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 8.2",
+    "rate": "127690.7400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 65,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 8.3",
+    "rate": "130241.7600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 66,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 8.4",
+    "rate": "132848.8800"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 67,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 8.5",
+    "rate": "135503.9400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 68,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 9.1",
+    "rate": "146048.7000"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 69,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 9.2",
+    "rate": "148963.8600"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 70,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 9.3",
+    "rate": "151951.4400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 71,
+  "fields": {
+    "payroll_type": "Fortnight",
+    "category": "Professional",
+    "classification": "UOM 10",
+    "rate": "156480.2400"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 72,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 1.1",
+    "rate": "39.8208"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 73,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 1.2",
+    "rate": "40.6266"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 74,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 1.3",
+    "rate": "41.4324"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 75,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 2.1",
+    "rate": "43.2174"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 76,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 2.2",
+    "rate": "44.0844"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 77,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 2.3",
+    "rate": "44.9616"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 78,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 3.1",
+    "rate": "45.2064"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 79,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 3.2",
+    "rate": "46.1040"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 80,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 3.3",
+    "rate": "47.0220"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 81,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 3.4",
+    "rate": "47.9706"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 82,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 3.5",
+    "rate": "48.9294"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 83,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 3.6",
+    "rate": "49.9086"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 84,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 4.1",
+    "rate": "52.2444"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 85,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 4.2",
+    "rate": "53.2848"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 86,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 4.3",
+    "rate": "54.3558"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 87,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 4.4",
+    "rate": "55.4370"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 88,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.1",
+    "rate": "56.4978"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 89,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.2",
+    "rate": "57.6198"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 90,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.3",
+    "rate": "58.7724"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 91,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.4",
+    "rate": "59.9556"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 92,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.5",
+    "rate": "61.1490"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 93,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.6",
+    "rate": "62.3730"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 94,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.7",
+    "rate": "63.6174"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 95,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 5.8",
+    "rate": "64.8924"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 96,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 6.1",
+    "rate": "65.5248"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 97,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 6.2",
+    "rate": "66.8406"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 98,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 6.3",
+    "rate": "68.1768"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 99,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 6.4",
+    "rate": "69.5436"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 100,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 6.5",
+    "rate": "70.9308"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 101,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 7.1",
+    "rate": "72.3078"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 102,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 7.2",
+    "rate": "73.7460"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 103,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 7.3",
+    "rate": "75.2250"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 104,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 7.4",
+    "rate": "76.7346"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 105,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 7.5",
+    "rate": "78.2646"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 106,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 8.1",
+    "rate": "81.3450"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 107,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 8.2",
+    "rate": "82.9668"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 108,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 8.3",
+    "rate": "84.6294"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 109,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 8.4",
+    "rate": "86.3226"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 110,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 8.5",
+    "rate": "88.0464"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 111,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 9.1",
+    "rate": "94.9008"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 112,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 9.2",
+    "rate": "96.7878"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 113,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 9.3",
+    "rate": "98.7258"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 114,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Professional",
+    "classification": "UOM 10",
+    "rate": "101.6736"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 115,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "RA Grade 1.1",
+    "rate": "51.7854"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 116,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "RA Grade 1.2",
+    "rate": "53.4684"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 117,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "RA Grade 1.3",
+    "rate": "56.7018"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 118,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.1",
+    "rate": "56.7018"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 119,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.2",
+    "rate": "59.9454"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 120,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.3",
+    "rate": "63.1788"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 121,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.4",
+    "rate": "66.4224"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 122,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.5",
+    "rate": "69.0540"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 123,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.6",
+    "rate": "71.6856"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 124,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.7",
+    "rate": "74.3070"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 125,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level A.8",
+    "rate": "76.9386"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 126,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level B.1",
+    "rate": "80.9880"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 127,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level B.2",
+    "rate": "84.0276"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 128,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level B.3",
+    "rate": "87.0774"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 129,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level B.4",
+    "rate": "90.1068"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 130,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level B.5",
+    "rate": "93.1464"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 131,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level B.6",
+    "rate": "96.1758"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 132,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level C.1",
+    "rate": "99.2154"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 133,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level C.2",
+    "rate": "102.2550"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 134,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level C.3",
+    "rate": "105.2946"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 135,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level C.4",
+    "rate": "108.3240"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 136,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level C.5",
+    "rate": "111.3636"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 137,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level C.6",
+    "rate": "114.3930"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 138,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level D.1",
+    "rate": "119.4624"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 139,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level D.2",
+    "rate": "123.5118"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 140,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level D.3",
+    "rate": "127.5510"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 141,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level D.4",
+    "rate": "131.6106"
+  }
+},
+{
+  "model": "api.salaryrate",
+  "pk": 142,
+  "fields": {
+    "payroll_type": "Casual",
+    "category": "Academic",
+    "classification": "Level E.1",
+    "rate": "153.8670"
+  }
+},
+{
+  "model": "api.salaryratemultiplier",
+  "pk": "Daily",
+  "fields": {
+    "multiplier": "0.004545454545454545"
+  }
+},
+{
+  "model": "api.salaryratemultiplier",
+  "pk": "FTE",
+  "fields": {
+    "multiplier": "1.000000000000000000"
+  }
+},
+{
+  "model": "api.salaryratemultiplier",
+  "pk": "Hourly",
+  "fields": {
+    "multiplier": "1.000000000000000000"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 1,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0134"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 2,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0134"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 3,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 4,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0050"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 5,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0050"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 6,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0050"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 7,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0050"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 8,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0050"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 9,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 10,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0100"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 11,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0100"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 12,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 13,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.1200"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 14,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.1200"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 15,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 16,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2021,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 17,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2021,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 18,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2021,
+    "rate": "0.0950"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 19,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2022,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 20,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2022,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 21,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2022,
+    "rate": "0.1000"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 22,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2023,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 23,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2023,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 24,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2023,
+    "rate": "0.1050"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 25,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2024,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 26,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2024,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 27,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2024,
+    "rate": "0.1100"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 28,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2025,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 29,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2025,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 30,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2025,
+    "rate": "0.1150"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 31,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 32,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.1700"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 33,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.1200"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 34,
+  "fields": {
+    "on_cost_type": "payroll_tax",
+    "employment_type": null,
+    "year": 2023,
+    "rate": "0.0585"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 35,
+  "fields": {
+    "on_cost_type": "payroll_tax",
+    "employment_type": null,
+    "year": 2024,
+    "rate": "0.0585"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 36,
+  "fields": {
+    "on_cost_type": "payroll_tax",
+    "employment_type": null,
+    "year": 2025,
+    "rate": "0.0585"
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 37,
+  "fields": {
+    "on_cost_type": "payroll_tax",
+    "employment_type": null,
+    "year": null,
+    "rate": "0.0585"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2025,
+  "fields": {
+    "multiplier": "1.000000"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2026,
+  "fields": {
+    "multiplier": "1.030000"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2027,
+  "fields": {
+    "multiplier": "1.060900"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2028,
+  "fields": {
+    "multiplier": "1.092727"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2029,
+  "fields": {
+    "multiplier": "1.125509"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2030,
+  "fields": {
+    "multiplier": "1.159274"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2031,
+  "fields": {
+    "multiplier": "1.194052"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2032,
+  "fields": {
+    "multiplier": "1.229874"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2033,
+  "fields": {
+    "multiplier": "1.266770"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2034,
+  "fields": {
+    "multiplier": "1.304773"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2035,
+  "fields": {
+    "multiplier": "1.343916"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2036,
+  "fields": {
+    "multiplier": "1.384234"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2037,
+  "fields": {
+    "multiplier": "1.425761"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2038,
+  "fields": {
+    "multiplier": "1.468534"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2039,
+  "fields": {
+    "multiplier": "1.512590"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2040,
+  "fields": {
+    "multiplier": "1.557967"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2041,
+  "fields": {
+    "multiplier": "1.604706"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2042,
+  "fields": {
+    "multiplier": "1.652848"
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2043,
+  "fields": {
+    "multiplier": "1.702433"
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "Level A",
+  "fields": {
+    "max_steps": 8
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "Level B",
+  "fields": {
+    "max_steps": 6
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "Level C",
+  "fields": {
+    "max_steps": 6
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "Level D",
+  "fields": {
+    "max_steps": 4
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "Level E",
+  "fields": {
+    "max_steps": 1
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "RA Grade 1",
+  "fields": {
+    "max_steps": 3
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 1",
+  "fields": {
+    "max_steps": 3
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 10",
+  "fields": {
+    "max_steps": 1
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 2",
+  "fields": {
+    "max_steps": 3
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 3",
+  "fields": {
+    "max_steps": 6
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 4",
+  "fields": {
+    "max_steps": 4
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 5",
+  "fields": {
+    "max_steps": 8
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 6",
+  "fields": {
+    "max_steps": 5
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 7",
+  "fields": {
+    "max_steps": 5
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 8",
+  "fields": {
+    "max_steps": 5
+  }
+},
+{
+  "model": "api.incrementcap",
+  "pk": "UOM 9",
+  "fields": {
+    "max_steps": 3
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 1640,
+  "fields": {
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Property Plant and Equipment - Cost"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5040,
+  "fields": {
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Consultants"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5041,
+  "fields": {
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Contracted Services (ex. ICA)"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5042,
+  "fields": {
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Other Expert Services"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5060,
+  "fields": {
+    "cost_category": "Advertising and marketing",
+    "cost_subcategory": "Advertising, Marketing and Promotional Expenses"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5061,
+  "fields": {
+    "cost_category": "Consumable Goods and Supplies",
+    "cost_subcategory": "Library"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5062,
+  "fields": {
+    "cost_category": "Consumable Goods and Supplies",
+    "cost_subcategory": "Consumable Service"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5063,
+  "fields": {
+    "cost_category": "Consumable Goods and Supplies",
+    "cost_subcategory": "Consumable Goods"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5100,
+  "fields": {
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Minor Assets and Equipment (Asset < $10,000) Non-Capitalised Equipment"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5101,
+  "fields": {
+    "cost_category": "Data Management",
+    "cost_subcategory": "Computer Software and Services"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5181,
+  "fields": {
+    "cost_category": "Shared Grant Payments",
+    "cost_subcategory": "Contributions to HEPS"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5182,
+  "fields": {
+    "cost_category": "Shared Grant Payments",
+    "cost_subcategory": "Other Grants"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5201,
+  "fields": {
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Rental and Hire"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5220,
+  "fields": {
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Repairs and Maintenance"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5240,
+  "fields": {
+    "cost_category": "Student Support",
+    "cost_subcategory": "Scholarships"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5241,
+  "fields": {
+    "cost_category": "Student Support",
+    "cost_subcategory": "Other Student Support"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5260,
+  "fields": {
+    "cost_category": "Travel and entertainment",
+    "cost_subcategory": "Travel, Staff Development, and Conference Expense"
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 5261,
+  "fields": {
+    "cost_category": "Travel and entertainment",
+    "cost_subcategory": "Entertainment"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "full_cost_recovery_multiplier",
+  "fields": {
+    "description": "Default cost recovery multiplier",
+    "value": "1.700000"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "max_leave_loading",
+  "fields": {
+    "description": "Leave loading is capped at this many dollars per year",
+    "value": "1611.300000"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "working_days_per_year",
+  "fields": {
+    "description": "Weekdays in a year. Used only for the annual leave deduction.",
+    "value": "260.892000"
+  }
+}
+]
