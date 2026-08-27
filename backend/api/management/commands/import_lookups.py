@@ -27,7 +27,9 @@ from api.models import (
     #MinimumCostRecoveryMultiplier
     OnCostRate,
     SalaryRate,
-    SalaryRateMultiplier
+    SalaryRateMultiplier,
+    Activity,
+    Region,
 )
 
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
@@ -56,6 +58,17 @@ CONSTANTS = {
         "dfullrecovery",
         "Default cost recovery multiplier"
     ),
+}
+
+LITERAL_CONSTANTS = {
+    "in_kind_multiplier": (
+        Decimal("1.7"),
+        "Matches full cost recovery."
+    ),
+    "gst_rate": (
+        Decimal("0.10"), 
+        "Goods and Services Tax Amount"
+    )
 }
 
 def dec(value):
@@ -364,7 +377,41 @@ def import_constants(workbook):
             },
         )
 
-    return len(CONSTANTS) 
+    # Import literal constants 
+    for name, (value, description) in LITERAL_CONSTANTS.items():
+        CalculationConstant.objects.update_or_create(
+            name=name,
+            defaults={"value": value, "description": description}
+        )
+
+    return len(CONSTANTS) + len(LITERAL_CONSTANTS)
+
+def import_activities(workbook):
+    count = 0
+    for name_cell, code_cell in workbook["Lookup Tables"]["O3:P7"]:
+        name, code = name_cell.value, code_cell.value
+        # The range covers the header and some spare rows
+        
+        if not code or not str(code).startswith("ACT_"):
+            continue
+
+        Activity.objects.update_or_create(code=code, defaults={"name": name})
+
+        count += 1
+    return count
+
+def import_regions(workbook):
+    count = 0
+    for name_cell, code_cell in workbook["Lookup Tables"]["O10:P47"]:
+        name, code = name_cell.value, code_cell.value
+        if not code or not str(code).startswith("RE_"):
+            continue
+
+        Region.objects.update_or_create(code=code, defaults={"name":name})
+        count += 1
+
+    return count
+
 
 
 class Command(BaseCommand):
@@ -400,6 +447,8 @@ class Command(BaseCommand):
             ("non-staff categories", import_non_staff_categories),
             #("minimum multipliers", import_minimum_multipliers),
             ("salary rate multipliers", import_salary_rate_multipliers),
+            ("regions", import_regions),
+            ("activities", import_activities), 
             ("constants", import_constants),
         )
 

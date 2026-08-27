@@ -4213,10 +4213,250 @@
   }
 },
 {
+  "model": "api.activity",
+  "pk": "ACT_02",
+  "fields": {
+    "name": "Research"
+  }
+},
+{
+  "model": "api.activity",
+  "pk": "ACT_03",
+  "fields": {
+    "name": "Research Training"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_001",
+  "fields": {
+    "name": "Parkville"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_002",
+  "fields": {
+    "name": "Creswick"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_003",
+  "fields": {
+    "name": "Werribee"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_004",
+  "fields": {
+    "name": "Burnley"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_005",
+  "fields": {
+    "name": "Dookie"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_006",
+  "fields": {
+    "name": "Southbank"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_007",
+  "fields": {
+    "name": "Fishermans Bend"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_008",
+  "fields": {
+    "name": "Victorian Comprehensive Cancer Centre"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_009",
+  "fields": {
+    "name": "Royal Women's Hospital"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_010",
+  "fields": {
+    "name": "St Vincent's Health"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_011",
+  "fields": {
+    "name": "Northern Health"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_012",
+  "fields": {
+    "name": "Western Health"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_013",
+  "fields": {
+    "name": "Mercy Public Hospitals"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_014",
+  "fields": {
+    "name": "Melbourne Health"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_015",
+  "fields": {
+    "name": "Royal Victorian Eye & Ear Hospital"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_016",
+  "fields": {
+    "name": "Austin Health"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_017",
+  "fields": {
+    "name": "Royal Children's Hospital"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_018",
+  "fields": {
+    "name": "Dental Health Services Victoria"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_019",
+  "fields": {
+    "name": "Rural Health Service"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_020",
+  "fields": {
+    "name": "Residential - Clinical"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_021",
+  "fields": {
+    "name": "Residential - Student Accommodation"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_022",
+  "fields": {
+    "name": "Portfolio - Special Crown Leases"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_023",
+  "fields": {
+    "name": "Portfolio - Bequests/Trust Properties"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_024",
+  "fields": {
+    "name": "Portfolio - Commercial"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_025",
+  "fields": {
+    "name": "Hawthorn"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_026",
+  "fields": {
+    "name": "Shepparton"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_027",
+  "fields": {
+    "name": "Ballarat"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_028",
+  "fields": {
+    "name": "Germany"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_029",
+  "fields": {
+    "name": "Singapore"
+  }
+},
+{
+  "model": "api.region",
+  "pk": "RE_030",
+  "fields": {
+    "name": "China"
+  }
+},
+{
   "model": "api.calculationconstant",
   "pk": "full_cost_recovery_multiplier",
   "fields": {
     "description": "Default cost recovery multiplier",
+    "value": "1.700000"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "gst_rate",
+  "fields": {
+    "description": "Goods and Services Tax Amount",
+    "value": "0.100000"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "in_kind_multiplier",
+  "fields": {
+    "description": "Matches full cost recovery.",
     "value": "1.700000"
   }
 },
