@@ -86,6 +86,8 @@ def build_staff_numeric_table(staff_lines) -> Dict:
 def build_non_staff_info_table(non_staff_lines) -> Dict:
     return {
         line.id: {
+            'cost_group': line.category.cost_category,
+            'expense_type': line.category.cost_subcategory,
             'description': line.description,
             'in_kind': line.in_kind,
             'add_ten_percent': line.add_ten_percent,
@@ -111,5 +113,19 @@ def build_budget_info(budget: Budget) -> Dict:
         'cost_multiplier': budget.cost_multiplier,
         'in_kind_multiplier': budget.in_kind_multiplier,
         'gst_applicable': budget.gst_applicable,
+        'cash_co_contribution': budget.cash_co_contribution,
+        'comments': budget.comments,
         'status': budget.status,
+        'deliverables': [
+            {
+                'number': deliverable.number,
+                'description': deliverable.description,
+                'deliverable_type': deliverable.deliverable_type.name,
+                'invoice_amount': deliverable.invoice_amount,
+                'due_date': deliverable.due_date,
+                'dependency': deliverable.dependency,
+                'sponsor': deliverable.sponsor,
+            }
+            for deliverable in budget.deliverables.all()
+        ],
     }

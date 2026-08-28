@@ -36,12 +36,14 @@ class SalaryRateMultiplier(models.Model):
         return f"{self.time_basis} x{self.multiplier}"
 
 
+# TODO: Consider to remove. Not used in calculation. Max steps are maintained and checked in SalaryRate.
 # Defines the Salary Cap
 class IncrementCap(models.Model):
     level = models.CharField(max_length=20, primary_key=True)
     max_steps = models.PositiveSmallIntegerField()
 
-# Salary increases by EBA miltiplier 
+# TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
+# Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
     multiplier = models.DecimalField(max_digits=8, decimal_places=6)
@@ -78,6 +80,7 @@ class SalaryRate(models.Model):
     def __str__(self):
         return f"{self.payroll_type} {self.category} {self.classification}"
 
+# TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
 class OnCostRate(models.Model):
     """
     On-cost percentages from the excel's lookup tables.
@@ -124,7 +127,7 @@ class OnCostRate(models.Model):
         scope = self.year if self.year is not None else "all years"
         return f"{self.get_on_cost_type_display()} - {self.employment_type or 'any'} ({scope})"
 
-
+# TODO: Check if there is a contingency category when import. eg. (some ledger id like 0000, contingency, contingency)
 class NonStaffCostCategory(models.Model):
     # The expense types a non-staff cost line can be booked against. Each one
     # carries the finance ledger ID that ends up on the budget form, which is
@@ -136,7 +139,8 @@ class NonStaffCostCategory(models.Model):
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
 
-
+# TODO: Consider whether this should be stored as a calculation constant
+# Calculation engine uses multiplier stored in Budget not this
 class MinimumCostRecoveryMultiplier(models.Model):
     # The lowest cost recovery multiplier a budget can use before it needs
     # Dean sign-off as well as Head of Department. The approval workflow reads
@@ -189,7 +193,7 @@ class RevenueCategory(models.Model):
     def __str__(self):
         return f"{self.description} ({self.budget_ledger_id})"
 
-
+# TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
 
 #------------------- Schema for Data Derived From Application -------------
 
@@ -272,7 +276,7 @@ class Budget(models.Model):
 
     comments = models.TextField(blank=True, default="")
 
-    # Plain CharField rather than whatever it will be when 
+    # Plain CharField rather than whatever it will be when
     # authentication comes in
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.DRAFT

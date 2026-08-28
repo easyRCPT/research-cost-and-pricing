@@ -241,18 +241,18 @@ def calculate_staff_cost(
     """
     Calculate the total cost of a staff in a year, with base salary rate calculated in previous
     """
-    on_costs = constants['on_cost_components']
+    on_costs = constants['on_cost_components'][employment_type]
     general = constants['constants']
 
     # Requested salary
     requested_salary = salary_rate * time * year_fraction
     # Leave loading
     # MAX_LEAVE_LOADING = 1611.3
-    leave_loading = on_costs['leave_loading'][employment_type] * requested_salary
+    leave_loading = on_costs['leave_loading'] * requested_salary
     max_leave_loading = general['max_leave_loading']
     leave_loading = min(leave_loading, max_leave_loading)
     # Superannuation
-    superannuation = on_costs['superannuation'][employment_type] * requested_salary
+    superannuation = on_costs['superannuation'] * requested_salary
 
     # The intermediate value used to calculate payroll tax and WorkCover
     subtotal_cost = requested_salary + leave_loading + superannuation
@@ -260,15 +260,15 @@ def calculate_staff_cost(
     # Add Payroll Tax (on subtotal)
     total_cost = subtotal_cost + general['max_payroll_tax'] * subtotal_cost
     # Add WorkCover (on subtotal)
-    total_cost += on_costs['workcover'][employment_type] * subtotal_cost
+    total_cost += on_costs['workcover'] * subtotal_cost
     # Add Long Service Leave
-    total_cost += on_costs['long_service_leave'][employment_type] * requested_salary
+    total_cost += on_costs['long_service_leave'] * requested_salary
     # Add Parental Leave Provision
-    total_cost += on_costs['parental_leave'][employment_type] * requested_salary
+    total_cost += on_costs['parental_leave'] * requested_salary
     # Add Override Default UoM Oncosts
     total_cost += general['override_uom_oncosts'] * requested_salary
     # Add Annual Leave Provision
-    total_cost += on_costs['annual_leave_provision'][employment_type] * requested_salary
+    total_cost += on_costs['annual_leave_provision'] * requested_salary
     # Recovery
     total_cost *= cost_recovery_multiplier
 

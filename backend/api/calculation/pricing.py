@@ -12,7 +12,6 @@ def pricing(
     non_staff_table: Dict,
     budget_info: Dict,
     contingency_table: Dict,
-    total_cash_co_contribution: Decimal,
 ) -> Dict:
     """
     Main entry point for the calculation engine.
@@ -44,7 +43,7 @@ def pricing(
         non_staff_result,
         budget_info,
         contingency_table,
-        total_cash_co_contribution,
+        budget_info['cash_co_contribution'],
     )
     return {
         'staff_result': staff_result,
