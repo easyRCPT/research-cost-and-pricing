@@ -24,7 +24,7 @@ def calculate_staff_table(
     The caller is responsible for combining the calculation results with the source data.
     Output format: {
         'cost_results': {
-            '<row_id>': {'results': {}, 'total': number},
+            '<row_id>': {'rate_2025': number, 'results': {}, 'total': number},
             'column_total': {'results': {}, 'total': number},
         },
         'in_kind_cost_results': {...}
