@@ -3,7 +3,17 @@ from ..models import Project, Budget
 
 
 def load_budget_data(budget: Budget) -> Dict:
+    """
+    Load budget data from the database.
+    """
     project_info = build_project_info(budget.project)
+
+    project_duration = {
+        'start_year': project_info['start_year'],
+        'start_month': project_info['project_info']['start_month'],
+        'end_year': project_info['project_info']['end_year'],
+        'end_month': project_info['project_info']['end_month'],
+    }
 
     staff_lines = list(budget.staff_lines.all())
     staff_table = {
@@ -21,6 +31,7 @@ def load_budget_data(budget: Budget) -> Dict:
 
     return {
         'project_info': project_info,
+        'project_duration': project_duration,
         'staff_table': staff_table,
         'non_staff_table': non_staff_table,
         'budget_info': budget_info,

@@ -1,11 +1,12 @@
 from typing import Dict
 from decimal import Decimal
-from . import lookup_loader, staff, non_staff
+from . import staff, non_staff
 
 GST_MULTIPLIER = Decimal('1.1')
 
 
 def pricing(
+    constants: Dict,
     project_duration: Dict,
     staff_table: Dict,
     non_staff_table: Dict,
@@ -17,9 +18,6 @@ def pricing(
     Main entry point for the calculation engine.
     Calculate staff and non-staff costs and the budget form summary.
     """
-    # Get lookup dictionary from cache
-    constants = lookup_loader.get_constants()
-
     # staff cost table result
     staff_result = staff.calculate_staff_table(
         staff_table,
