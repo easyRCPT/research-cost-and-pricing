@@ -1,8 +1,8 @@
 """
 Imports lookup tables from RCPT excel workbook. 
 
-Table ranges resolved through defined names, 
-not fixed ranges. Names stay put even if tables may shift.
+Table ranges resolved through defined names where able to,
+otherwise cell ranges are used. Names stay put even if tables may shift.
 
 Re-running is safe since rows are matched on their
 natural key. 
@@ -30,6 +30,8 @@ from api.models import (
     SalaryRateMultiplier,
     Activity,
     Region,
+    DeliverableType,
+    RevenueCategory,
 )
 
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
@@ -117,14 +119,19 @@ def is_number(value):
 
 def import_departments(workbook):
     count = 0
-    for row in rows(workbook, "tb_Org_Units"):
+    # AC3:AH207 is tb_Org_Units. Budget unit sits at AJ, past an empty AI,
+    # so the range is widened rather than read through the defined name.
+    for row in workbook["Lookup Tables"]["AC3:AJ207"]:
         # the spreadsheet's header row lavels
         # last two columns "faculty code" and
         # "faculty" when they should be swapped around
-        # depending on the data stored 
-        dept_name, dept_code, school, school_code, faculty, faculty_code = row[:6]
+        # depending on the data stored
+        dept_name, dept_code, school, school_code, faculty, faculty_code = (
+            cell.value for cell in row[:6]
+        )
+        budget_unit = row[7].value
 
-        # Skip headers 
+        # Skip headers
         if not dept_code or dept_code == "Dept code":
             continue
 
@@ -137,6 +144,7 @@ def import_departments(workbook):
                 "school_code": school_code,
                 "faculty": faculty,
                 "faculty_code": faculty_code,
+                "budget_unit": budget_unit or "",
             }
         )
 
@@ -412,6 +420,36 @@ def import_regions(workbook):
 
     return count
 
+def import_deliverable_types(workbook):
+    count = 0
+    # Code first, name second - the reverse of the activity and region tables.
+    for code_cell, name_cell in workbook["Lookup Tables"]["O50:P60"]:
+        code, name = code_cell.value, name_cell.value
+        if not code or code == "Type":
+            continue
+
+        DeliverableType.objects.update_or_create(code=code, defaults={"name": name})
+        count += 1
+
+    return count
+
+def import_revenue_categories(workbook):
+    count = 0
+    # The income-side counterpart to the non-staff ledger IDs.
+    for party_cell, desc_cell, ledger_cell in workbook["Lookup Tables"]["AN2:AP20"]:
+        party, description, ledger_id = (
+            party_cell.value, desc_cell.value, ledger_cell.value
+        )
+        if not is_number(ledger_id):
+            continue
+
+        RevenueCategory.objects.update_or_create(
+            budget_ledger_id=int(ledger_id),
+            defaults={"external_party": party, "description": description},
+        )
+        count += 1
+
+    return count
 
 
 class Command(BaseCommand):
@@ -448,7 +486,9 @@ class Command(BaseCommand):
             #("minimum multipliers", import_minimum_multipliers),
             ("salary rate multipliers", import_salary_rate_multipliers),
             ("regions", import_regions),
-            ("activities", import_activities), 
+            ("activities", import_activities),
+            ("deliverable types", import_deliverable_types),
+            ("revenue categories", import_revenue_categories),
             ("constants", import_constants),
         )
 
