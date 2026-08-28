@@ -1,9 +1,9 @@
 from typing import Dict
-from . import lookup_loader
 
 
 def calculate_staff_table(
     table_data: Dict,
+    constants: Dict,
     start_year: int,
     start_month: int,
     end_year: int,
@@ -36,9 +36,9 @@ def calculate_staff_table(
     # Populate staff cost and in kind staff cost result dictionary
     for row_id, info in table_data['info_table'].items():
         numeric = table_data['numeric_table'][row_id]
-        cost_result = calculate_staff_row(info, numeric, project_duration)
+        cost_result = calculate_staff_row(info, numeric, constants, project_duration)
 
-        if info['in_kind']:
+        if info.get('in_kind', 0):
             in_kind_staff_costs[row_id] = cost_result
         else:
             staff_costs[row_id] = cost_result
@@ -114,14 +114,13 @@ def calculate_column_total(
 def calculate_staff_row(
     info_data: Dict,
     num_data: Dict,
+    constants: Dict,
     project_duration: Dict,
 ) -> Dict:
     """
     Calculate the cost of a staff in each year of the project
     Return a dictionary for cost in each year {'year': cost}
     """
-    # Get lookup dictionary from cache
-    constants = lookup_loader.get_constants()
 
     # The cost dictionary for each year
     costs = {}
