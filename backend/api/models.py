@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings 
+from decimal import Decimal
 
 # Create your models here.
 
 #------------------- Schema for Lookup table data -------------
-# TODO: Add 'budget_unit'. Not used, but present in the Excel workbook
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
@@ -13,6 +13,7 @@ class Department(models.Model):
     school_code = models.CharField(max_length=20)
     faculty = models.CharField(max_length=150)
     faculty_code = models.CharField(max_length=20)
+    budget_unit = models.CharField(max_length=20, blank=True, default="")
 
     def __str__(self):
         return self.name
@@ -42,7 +43,7 @@ class IncrementCap(models.Model):
     max_steps = models.PositiveSmallIntegerField()
 
 # TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
-# Salary increases by EBA miltiplier 
+# Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
     multiplier = models.DecimalField(max_digits=8, decimal_places=6)
@@ -177,6 +178,21 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
+class DeliverableType(models.Model):
+    code = models.CharField(max_length=10, primary_key=True)
+    name = models.CharField(max_length = 100)
+
+    def __str__(self):
+        return self.name
+
+class RevenueCategory(models.Model):
+    budget_ledger_id = models.PositiveIntegerField(primary_key=True)
+    external_party = models.CharField(max_length=20)
+    description = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.description} ({self.budget_ledger_id})"
+
 # TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
 
 #------------------- Schema for Data Derived From Application -------------
@@ -224,7 +240,6 @@ class Project(models.Model):
         return self.title
 
 
-# TODO: Add cash co-contribution and a deliverables table (separate model)
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
     # attempt, a revision after a rejection, a variant for a different funder,
@@ -256,7 +271,12 @@ class Budget(models.Model):
 
     gst_applicable = models.BooleanField(default=True)
 
-    # Plain CharField rather than whatever it will be when 
+    cash_co_contribution = models.DecimalField(max_digits=12, decimal_places=2,
+                                               default=Decimal("0.00"))
+
+    comments = models.TextField(blank=True, default="")
+
+    # Plain CharField rather than whatever it will be when
     # authentication comes in
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.DRAFT
@@ -267,6 +287,30 @@ class Budget(models.Model):
 
     def __str__(self):
         return f"{self.project} ({self.get_status_display()})"
+
+class Deliverable(models.Model):
+    budget = models.ForeignKey("Budget", related_name="deliverables",
+                               on_delete=models.CASCADE)
+    number = models.PositiveSmallIntegerField()
+    description = models.CharField(max_length=200)
+    deliverable_type = models.ForeignKey("DeliverableType", on_delete=models.PROTECT)
+    invoice_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
+    due_date = models.CharField(max_length=100, blank=True)
+    dependency = models.PositiveSmallIntegerField(null=True, blank=True)
+    sponsor = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["budget","number"], name="unique_deliverable_number"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.number}. {self.description}"
 
 
 class StaffCostLine(models.Model):
@@ -327,7 +371,6 @@ class YearAllocation(models.Model):
     def __str__(self):
         return f"{self.staff_line} {self.year}: {self.time}"
 
-# TODO: Add category (foreign key)
 class NonStaffCostLine(models.Model):
     """
     A non-salary cost on a budget: equipment, travel etc.
@@ -337,6 +380,8 @@ class NonStaffCostLine(models.Model):
     # Carries reference data, FK allows that data to be connected
     budget = models.ForeignKey("Budget", related_name="non_staff_lines",
                                on_delete=models.CASCADE)
+
+    category = models.ForeignKey("NonStaffCostCategory", on_delete=models.PROTECT)
 
     description = models.CharField(max_length=200, blank=True)
 
