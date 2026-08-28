@@ -1,13 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/source-sans-3";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: 'Source Sans 3 Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,30 +49,30 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
+    --background: oklch(0.95815 0.00011 271.152);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.25069 0.08767 263.371);
+    --primary-foreground: oklch(1 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --muted: oklch(0.95571 0.00266 286.349);
+    --muted-foreground: oklch(0.50062 0.02156 258.372);
+    --accent: oklch(0.97343 0.00143 285.217);
+    --accent-foreground: oklch(0.25069 0.08767 263.371);
+    --destructive: oklch(0.48213 0.15299 27.027);
+    --border: oklch(0.9005 0.00713 268.543);
+    --input: oklch(0.90051 0.00724 268.587);
+    --ring: oklch(0.32528 0.10931 262.021);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
+    --radius: 0.5rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -127,4 +127,32 @@
   html {
     @apply font-sans;
     }
+}
+/* Status colours. */
+@theme {
+  --color-warn: oklch(40.672% 0.07895 90.101);
+  --color-warn-bg: oklch(96.518% 0.04258 95.492);
+  --color-warn-line: oklch(88.392% 0.0755 95.123);
+  --color-good: oklch(47.833% 0.09751 164.851);
+  --color-good-bg: oklch(94.602% 0.01682 168.493);
+  --color-bad: oklch(48.213% 0.15299 27.027);
+  --color-bad-bg: oklch(94.781% 0.01986 25.173);
+  --color-inkind: oklch(46.039% 0.09919 293.239);
+  --color-inkind-bg: oklch(94.315% 0.01764 296.627);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Spinners eat width the narrow entry columns cannot spare. */
+.no-spin::-webkit-outer-spin-button,
+.no-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spin {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
