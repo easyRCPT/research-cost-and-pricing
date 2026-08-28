@@ -6,9 +6,10 @@ GST_MULTIPLIER = Decimal('1.1')
 
 
 def pricing(
+    project_duration: Dict,
     staff_table: Dict,
     non_staff_table: Dict,
-    project_duration: Dict,
+    budget_info: Dict,
     contingency_table: Dict,
     total_cash_co_contribution: Decimal,
 ) -> Dict:
@@ -27,6 +28,8 @@ def pricing(
         project_duration['start_month'],
         project_duration['end_year'],
         project_duration['end_month'],
+        budget_info['cost_multiplier'],
+        budget_info['in_kind_multiplier'],
     )
 
     # non staff cost table result
@@ -41,7 +44,7 @@ def pricing(
         staff_table['info_table'],
         staff_result,
         non_staff_result,
-        constants,
+        budget_info,
         contingency_table,
         total_cash_co_contribution,
     )
@@ -56,7 +59,7 @@ def calculate_budget_summary(
     staff_info_table: Dict,
     staff_result: Dict,
     non_staff_result: Dict,
-    constants: Dict,
+    budget_info: Dict,
     contingency_table: Dict,
     total_cash_co_contribution: Decimal,
 ) -> Dict:
@@ -64,27 +67,28 @@ def calculate_budget_summary(
     Calculate summary for budget form
     """
     # price summary
+    contingency = sum(contingency_table.values()) if contingency_table else Decimal('0')
     price_summary = calculate_price_summary(
         staff_result,
         non_staff_result,
-        contingency_table,
+        contingency,
         total_cash_co_contribution,
+        budget_info['gst_applicable'],
     )
 
     # staff budget
     # not include in-kind costs
-    cost_recovery_multiplier = constants['constants']['cost_recovery_multiplier']
     staff_budget = calculate_staff_budget(
         staff_info_table,
         staff_result['cost_results'],
-        cost_recovery_multiplier,
+        budget_info['cost_multiplier'],
     )
 
     # non-staff budget
     # not include in-kind costs
     non_staff_budget = calculate_non_staff_budget(
         non_staff_result['cost_results'],
-        contingency_table,
+        contingency,
     )
     direct_total = non_staff_budget['direct_total']
     indirect_total = non_staff_result['indirect_total']['total']
@@ -97,11 +101,11 @@ def calculate_budget_summary(
     in_kind_staff_budget = calculate_staff_budget(
         staff_info_table,
         staff_result['in_kind_cost_results'],
-        cost_recovery_multiplier,
+        budget_info['in_kind_multiplier'],
     )
     in_kind_non_staff_budget = calculate_non_staff_budget(
-        non_staff_result['cost_results'],
-        contingency_table,
+        non_staff_result['in_kind_cost_results'],
+        contingency,
     )
     in_kind_costs = {
         'in_kind_staff_budget': in_kind_staff_budget,
@@ -121,28 +125,31 @@ def calculate_budget_summary(
 def calculate_price_summary(
     staff_result: Dict,
     non_staff_result: Dict,
-    contingency_table: Dict,
+    contingency: Decimal,
     total_cash_co_contribution: Decimal,
+    gst_applicable: bool,
 ) -> Dict:
     """
     Calculate price summary
     """
     staff_cost = staff_result['cost_results']['column_total']['total']
-    non_staff_cost = (non_staff_result['cost_results']['column_total']['total']
-                       + sum(contingency_table.values()))
+    non_staff_cost = non_staff_result['cost_results']['column_total']['total'] + contingency
     project_cost = staff_cost + non_staff_cost
 
     in_kind_staff_cost = staff_result['in_kind_cost_results']['column_total']['total']
     in_kind_non_staff_cost = non_staff_result['in_kind_cost_results']['column_total']['total']
     in_kind_project_cost = in_kind_staff_cost + in_kind_non_staff_cost
 
-    staff_cost_percentage = staff_cost / project_cost
-    non_staff_cost_percentage = non_staff_cost / project_cost
+    staff_cost_percentage = staff_cost / project_cost if project_cost else Decimal('0')
+    non_staff_cost_percentage = non_staff_cost / project_cost if project_cost else Decimal('0')
 
     total_project_cost = project_cost + in_kind_project_cost
 
     total_price_exc_gst = project_cost
-    total_price_inc_gst = total_price_exc_gst * GST_MULTIPLIER
+    if gst_applicable:
+        total_price_inc_gst = total_price_exc_gst * GST_MULTIPLIER
+    else:
+        total_price_inc_gst = total_price_exc_gst
 
     cash_benefit = total_price_exc_gst - project_cost
     total_in_kind_contribution = in_kind_project_cost
@@ -174,7 +181,7 @@ def calculate_price_summary(
 def calculate_staff_budget(
     info_table: Dict,
     staff_result: Dict,
-    cost_recovery_multiplier: Decimal,
+    multiplier: Decimal,
 ) -> Dict:
     """
     Calculate staff cost summary
@@ -188,24 +195,24 @@ def calculate_staff_budget(
         category = info_table[row_id]['category']
         employment_type = info_table[row_id]['employment_type']
         key = f"{category}_{employment_type}"
-        result[key] = result.get(key, 0) + row['total'] / cost_recovery_multiplier
+        result[key] = result.get(key, 0) + row['total'] / multiplier
 
     # Calculate total
     cost_before_recovery = sum(result.values())
-    total_staff_costs = cost_before_recovery * cost_recovery_multiplier
+    total_staff_costs = cost_before_recovery * multiplier
 
     return {
         'category_totals': result,
         'cost_before_recovery': cost_before_recovery,
         'cost_recovery': total_staff_costs - cost_before_recovery,
-        'cost_recovery_multiplier': cost_recovery_multiplier,
+        'cost_recovery_multiplier': multiplier,
         'total_staff_costs': total_staff_costs,
     }
 
 
 def calculate_non_staff_budget(
     non_staff_result: Dict,
-    contingency_table: Dict,
+    contingency: Decimal,
 ) -> Dict:
     """
     Calculate non staff cost summary
@@ -223,8 +230,7 @@ def calculate_non_staff_budget(
         result[cost_group] = result.get(cost_group, 0) + row['direct_total']
 
     # Add contingency
-    if contingency_table is not None:
-        result['contingency'] = sum(contingency_table.values())
+    result['contingency'] = contingency
 
     # Add summary
     direct_total = sum(result.values())

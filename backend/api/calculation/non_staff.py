@@ -28,7 +28,7 @@ def calculate_non_staff_table(
     for row_id, info in table_data['info_table'].items():
         numeric = table_data['numeric_table'][row_id]
         row_result = calculate_non_staff_row(info, numeric, start_year, end_year)
-        if info.get('in_kind', 0):
+        if info.get('in_kind', False):
             in_kind_non_staff_costs[row_id] = row_result
         else:
             non_staff_costs[row_id] = row_result
@@ -59,7 +59,7 @@ def calculate_non_staff_row(
         for year in range(start_year, end_year + 1)
     )
 
-    has_additional_direct_rate = info_data.get('add_10%', False)
+    has_additional_direct_rate = info_data.get('add_ten_percent', False)
     indirect_rate_multiplier = info_data.get('indirect_rate_multiplier', Decimal('1'))
     direct_total = total * find_direct_rate_multiplier(has_additional_direct_rate, indirect_rate_multiplier)
 
@@ -91,7 +91,7 @@ def calculate_non_staff_column(
         for row in data.values():
             value = row['numeric'].get(year) or 0
 
-            has_additional_direct_rate = row['info'].get('add_10%', 0)
+            has_additional_direct_rate = row['info'].get('add_ten_percent', 0)
             indirect_rate_multiplier = row['info'].get('indirect_rate_multiplier', 1)
 
             # direct rate
@@ -126,7 +126,7 @@ def find_direct_rate_multiplier(
 ):
     """
     Find direct rate multiplier according to selected additional direct rate and input indirect rate
-    If add_10% and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
+    If add_ten_percent and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
     """
     if has_additional_direct_rate and indirect_rate_multiplier <= 1:
         return 1.1

@@ -1,4 +1,5 @@
 from typing import Dict
+from decimal import Decimal
 
 
 def calculate_staff_table(
@@ -8,6 +9,8 @@ def calculate_staff_table(
     start_month: int,
     end_year: int,
     end_month: int,
+    cost_multiplier: Decimal,
+    in_kind_multiplier: Decimal,
 ) -> Dict:
     """
     Calculate the staff cost (in kind or not)
@@ -36,12 +39,15 @@ def calculate_staff_table(
     # Populate staff cost and in kind staff cost result dictionary
     for row_id, info in table_data['info_table'].items():
         numeric = table_data['numeric_table'][row_id]
-        cost_result = calculate_staff_row(info, numeric, constants, project_duration)
 
-        if info.get('in_kind', 0):
-            in_kind_staff_costs[row_id] = cost_result
+        if info.get('in_kind', False):
+            costs = in_kind_staff_costs
+            multiplier = in_kind_multiplier
         else:
-            staff_costs[row_id] = cost_result
+            costs = staff_costs
+            multiplier = cost_multiplier
+
+        costs[row_id] = calculate_staff_row(info, numeric, constants, project_duration, multiplier)
 
     # Calculate column total
     staff_costs = calculate_column_total(staff_costs, start_year, end_year)
@@ -69,11 +75,11 @@ def calculate_year_fractions(
         raise ValueError("Invalid project duration.")
 
     if start_year == end_year:
-        first_year_fraction = (end_month - start_month + 1) / 12
+        first_year_fraction = Decimal(end_month - start_month + 1) / Decimal('12')
         last_year_fraction = first_year_fraction
     else:
-        first_year_fraction = (12 - start_month + 1) / 12
-        last_year_fraction = end_month / 12
+        first_year_fraction = Decimal(12 - start_month + 1) / Decimal('12')
+        last_year_fraction = Decimal(end_month) / Decimal('12')
 
     return {
         'start_year': start_year,
@@ -116,11 +122,14 @@ def calculate_staff_row(
     num_data: Dict,
     constants: Dict,
     project_duration: Dict,
+    cost_recovery_multiplier: Decimal,
 ) -> Dict:
     """
     Calculate the cost of a staff in each year of the project
     Return a dictionary for cost in each year {'year': cost}
     """
+    # salary rate as at 1-NOV-2025
+    rate_2025 = find_salary_rate(info_data, constants, 0, 2025)
 
     # The cost dictionary for each year
     costs = {}
@@ -143,10 +152,21 @@ def calculate_staff_row(
             year_fraction = 1
 
         # Calculate cost
-        salary_rate = find_salary_rate(info_data, constants, year_employed, year)
+        salary_rate = find_salary_rate(
+            info_data,
+            constants,
+            year_employed,
+            year
+        )
         employment_type = info_data.get('employment_type')
-        costs[year] = (
-            calculate_staff_cost(constants, salary_rate, time, year_fraction, employment_type))
+        costs[year] = calculate_staff_cost(
+                constants,
+                salary_rate,
+                time,
+                year_fraction,
+                employment_type,
+                cost_recovery_multiplier
+        )
 
         # Increment by one year when employed
         year_employed += 1
@@ -155,6 +175,7 @@ def calculate_staff_row(
     total = sum(costs.values())
 
     return {
+        'rate_2025': rate_2025,
         'results': costs,
         'total': total,
     }
@@ -173,7 +194,7 @@ def find_salary_rate(
     employment_type = info_data.get('employment_type')
     category = info_data.get('category')
     classification = info_data.get('classification')
-    rate_basis = info_data.get('rate_basis')
+    time_basis = info_data.get('time_basis')
 
     # Get payroll type
     mapping = {
@@ -204,7 +225,7 @@ def find_salary_rate(
     base_salary_rate = constants['salary_rate'][key]
 
     # Calculate salary rate
-    salary_rate_multiplier = constants['salary_rate_multiplier'][rate_basis]
+    salary_rate_multiplier = constants['salary_rate_multiplier'][time_basis]
     eba_multiplier = constants['eba'][year]
     return base_salary_rate * salary_rate_multiplier * eba_multiplier
 
@@ -215,6 +236,7 @@ def calculate_staff_cost(
     time,
     year_fraction,
     employment_type,
+    cost_recovery_multiplier,
 ):
     """
     Calculate the total cost of a staff in a year, with base salary rate calculated in previous
@@ -247,5 +269,7 @@ def calculate_staff_cost(
     total_cost += general['override_uom_oncosts'] * requested_salary
     # Add Annual Leave Provision
     total_cost += on_costs['annual_leave_provision'][employment_type] * requested_salary
+    # Recovery
+    total_cost *= cost_recovery_multiplier
 
-    return total_cost * general['cost_recovery_multiplier']
+    return total_cost
