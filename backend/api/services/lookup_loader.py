@@ -1,7 +1,7 @@
 from typing import Dict
 from django.core.cache import cache
 from ..models import SalaryRate, SalaryRateMultiplier, EbaIncrease, OnCostRate, CalculationConstant, Department, \
-    NonStaffCostCategory, Activity, Region
+    NonStaffCostCategory, Activity, Region, DeliverableType, RevenueCategory
 
 CACHE_KEY = 'lookup_constants_dict'
 
@@ -78,8 +78,11 @@ def load_lookup_dict() -> Dict:
             'school_code': item['school_code'],
             'faculty': item['faculty'],
             'faculty_code': item['faculty_code'],
+            'budget_unit': item['budget_unit'],
         }
-        for item in Department.objects.values('code', 'name', 'school', 'school_code', 'faculty', 'faculty_code')
+        for item in Department.objects.values(
+            'code', 'name', 'school', 'school_code', 'faculty', 'faculty_code', 'budget_unit'
+        )
     }
 
     non_staff_cost_categories = {
@@ -100,6 +103,19 @@ def load_lookup_dict() -> Dict:
         for item in Region.objects.values('code', 'name')
     }
 
+    deliverable_types = {
+        item['code']: item['name']
+        for item in DeliverableType.objects.values('code', 'name')
+    }
+
+    revenue_categories = {
+        item['budget_ledger_id']: {
+            'external_party': item['external_party'],
+            'description': item['description'],
+        }
+        for item in RevenueCategory.objects.values('budget_ledger_id', 'external_party', 'description')
+    }
+
     # Store all lookup dictionaries into a single dictionary.
     return {
         'salary_rate': salary_rate_data,
@@ -111,6 +127,8 @@ def load_lookup_dict() -> Dict:
         'non_staff_cost_categories': non_staff_cost_categories,
         'activities': activities,
         'regions': regions,
+        'deliverable_types': deliverable_types,
+        'revenue_categories': revenue_categories,
     }
 
 

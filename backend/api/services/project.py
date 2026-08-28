@@ -1,5 +1,4 @@
 from typing import Dict
-from decimal import Decimal
 from ..models import Budget
 from . import data_loader, lookup_loader
 from ..calculation import pricing
@@ -16,10 +15,9 @@ def get_project_details(budget: Budget) -> Dict:
     # Budget data
     budget_data = data_loader.load_budget_data(budget)
 
-    # TODO: Load contingency and cash co-contribution from budget data.
-    # models are not implemented
+    # TODO: Load contingency from budget data.
+    # as non staff line
     contingency_table = {}
-    cash_co_contribution = Decimal(0)
 
     # Calculation
     calculation_result = pricing.pricing(
@@ -29,7 +27,6 @@ def get_project_details(budget: Budget) -> Dict:
         budget_data['non_staff_table'],
         budget_data['budget_info'],
         contingency_table,
-        cash_co_contribution,
     )
 
     # Merge staff table and result
