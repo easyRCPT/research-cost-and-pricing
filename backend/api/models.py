@@ -5,6 +5,7 @@ from django.conf import settings
 # Create your models here.
 
 #------------------- Schema for Lookup table data -------------
+# TODO: Add 'budget_unit'. Not used, but present in the Excel workbook
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
@@ -34,11 +35,13 @@ class SalaryRateMultiplier(models.Model):
         return f"{self.time_basis} x{self.multiplier}"
 
 
+# TODO: Consider to remove. Not used in calculation. Max steps are maintained and checked in SalaryRate.
 # Defines the Salary Cap
 class IncrementCap(models.Model):
     level = models.CharField(max_length=20, primary_key=True)
     max_steps = models.PositiveSmallIntegerField()
 
+# TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
 # Salary increases by EBA miltiplier 
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
@@ -76,6 +79,7 @@ class SalaryRate(models.Model):
     def __str__(self):
         return f"{self.payroll_type} {self.category} {self.classification}"
 
+# TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
 class OnCostRate(models.Model):
     """
     On-cost percentages from the excel's lookup tables.
@@ -122,7 +126,7 @@ class OnCostRate(models.Model):
         scope = self.year if self.year is not None else "all years"
         return f"{self.get_on_cost_type_display()} - {self.employment_type or 'any'} ({scope})"
 
-
+# TODO: Check if there is a contingency category when import. eg. (some ledger id like 0000, contingency, contingency)
 class NonStaffCostCategory(models.Model):
     # The expense types a non-staff cost line can be booked against. Each one
     # carries the finance ledger ID that ends up on the budget form, which is
@@ -134,7 +138,8 @@ class NonStaffCostCategory(models.Model):
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
 
-
+# TODO: Consider whether this should be stored as a calculation constant
+# Calculation engine uses multiplier stored in Budget not this
 class MinimumCostRecoveryMultiplier(models.Model):
     # The lowest cost recovery multiplier a budget can use before it needs
     # Dean sign-off as well as Head of Department. The approval workflow reads
@@ -171,6 +176,8 @@ class Region(models.Model):
 
     def __str__(self):
         return self.name
+
+# TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
 
 #------------------- Schema for Data Derived From Application -------------
 
@@ -217,6 +224,7 @@ class Project(models.Model):
         return self.title
 
 
+# TODO: Add cash co-contribution and a deliverables table (separate model)
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
     # attempt, a revision after a rejection, a variant for a different funder,
@@ -319,6 +327,7 @@ class YearAllocation(models.Model):
     def __str__(self):
         return f"{self.staff_line} {self.year}: {self.time}"
 
+# TODO: Add category (foreign key)
 class NonStaffCostLine(models.Model):
     """
     A non-salary cost on a budget: equipment, travel etc.
