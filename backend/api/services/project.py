@@ -15,10 +15,6 @@ def get_project_details(budget: Budget) -> Dict:
     # Budget data
     budget_data = data_loader.load_budget_data(budget)
 
-    # TODO: Load contingency from budget data.
-    # as non staff line
-    contingency_table = {}
-
     # Calculation
     calculation_result = pricing.pricing(
         constants,
@@ -26,7 +22,6 @@ def get_project_details(budget: Budget) -> Dict:
         budget_data['staff_table'],
         budget_data['non_staff_table'],
         budget_data['budget_info'],
-        contingency_table,
     )
 
     # Merge staff table and result
