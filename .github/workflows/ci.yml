@@ -92,6 +92,39 @@ jobs:
         continue-on-error: true
         run: uv run python manage.py check --deploy
 
+  backend-lint:
+    name: Backend (lint, type-check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync --locked
+
+      # Runs Ruff via an ephemeral uv-managed environment so pyproject.toml
+      # and uv.lock do not need to be touched to add this check.
+      - name: Ruff lint
+        working-directory: backend
+        run: uv run --with ruff ruff check .
+
+      - name: Ruff format check
+        working-directory: backend
+        run: uv run --with ruff ruff format --check .
+
+      # Pyright is the CLI engine behind Pylance, so this enforces the same
+      # strict type-checking in CI that contributors see locally in VS Code.
+      - name: Type check (Pyright)
+        working-directory: backend
+        run: uv run --with pyright pyright .
+
   frontend:
     name: Frontend (lint, build)
     runs-on: ubuntu-latest
