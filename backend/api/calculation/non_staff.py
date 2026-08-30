@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Dict
 
 
@@ -59,9 +58,7 @@ def calculate_non_staff_row(
         for year in range(start_year, end_year + 1)
     )
 
-    has_additional_direct_rate = info_data.get('add_ten_percent', False)
-    indirect_rate_multiplier = info_data.get('indirect_rate_multiplier', Decimal('1'))
-    direct_total = total * find_direct_rate_multiplier(has_additional_direct_rate, indirect_rate_multiplier)
+    direct_total = total * find_direct_rate_multiplier(info_data)
 
     return {
         'info': info_data,
@@ -91,13 +88,15 @@ def calculate_non_staff_column(
         for row in data.values():
             value = row['numeric'].get(year) or 0
 
-            has_additional_direct_rate = row['info'].get('add_ten_percent', 0)
-            indirect_rate_multiplier = row['info'].get('indirect_rate_multiplier', 1)
-
             # direct rate
-            value *= find_direct_rate_multiplier(has_additional_direct_rate, indirect_rate_multiplier)
+            value *= find_direct_rate_multiplier(row['info'])
             direct += value
+
             # indirect rate
+            indirect_rate_multiplier = row['info'].get('indirect_rate_multiplier', 1)
+            # Contingency should not apply additional direct rate and indirect rate
+            if row['info']['cost_group'] != 'contingency':
+                indirect_rate_multiplier = 1
             total += value * indirect_rate_multiplier
 
         direct_total[year] = direct
@@ -121,14 +120,18 @@ def calculate_non_staff_column(
 
 
 def find_direct_rate_multiplier(
-    has_additional_direct_rate: bool,
-    indirect_rate_multiplier: Decimal,
+    info_data: Dict,
 ):
     """
     Find direct rate multiplier according to selected additional direct rate and input indirect rate
     If add_ten_percent and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
     """
-    if has_additional_direct_rate and indirect_rate_multiplier <= 1:
+    has_additional_direct_rate = info_data.get('add_ten_percent', False)
+    indirect_rate_multiplier = info_data.get('indirect_rate_multiplier', 1)
+    cost_group = info_data['cost_group']
+
+    # Contingency should not apply additional direct rate and indirect rate
+    if cost_group != 'contingency' and has_additional_direct_rate and indirect_rate_multiplier <= 1:
         return 1.1
     else:
         return 1

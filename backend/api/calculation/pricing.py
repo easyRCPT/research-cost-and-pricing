@@ -61,16 +61,9 @@ def calculate_budget_summary(
     Calculate summary for budget form
     """
     # price summary
-    # Contingency is handled as a line item in non-staff cost input.
-    contingency = next(
-        (row['total']
-         for row in non_staff_result['cost_results'].values()
-         if row['info']['cost_group'] == 'contingency'), 0
-    )
     price_summary = calculate_price_summary(
         staff_result,
         non_staff_result,
-        contingency,
         total_cash_co_contribution,
         budget_info['gst_applicable'],
     )
@@ -85,10 +78,7 @@ def calculate_budget_summary(
 
     # non-staff budget
     # not include in-kind costs
-    non_staff_budget = calculate_non_staff_budget(
-        non_staff_result['cost_results'],
-        contingency,
-    )
+    non_staff_budget = calculate_non_staff_budget(non_staff_result['cost_results'])
     direct_total = non_staff_budget['direct_total']
     indirect_total = non_staff_result['indirect_total']['total']
     non_staff_budget['indirect_cost_recovery'] = indirect_total
@@ -102,10 +92,7 @@ def calculate_budget_summary(
         staff_result['in_kind_cost_results'],
         budget_info['in_kind_multiplier'],
     )
-    in_kind_non_staff_budget = calculate_non_staff_budget(
-        non_staff_result['in_kind_cost_results'],
-        contingency,
-    )
+    in_kind_non_staff_budget = calculate_non_staff_budget(non_staff_result['in_kind_cost_results'])
     in_kind_costs = {
         'in_kind_staff_budget': in_kind_staff_budget,
         'in_kind_non_staff_budget': in_kind_non_staff_budget,
@@ -124,7 +111,6 @@ def calculate_budget_summary(
 def calculate_price_summary(
     staff_result: Dict,
     non_staff_result: Dict,
-    contingency: Decimal,
     total_cash_co_contribution: Decimal,
     gst_applicable: bool,
 ) -> Dict:
@@ -132,7 +118,7 @@ def calculate_price_summary(
     Calculate price summary
     """
     staff_cost = staff_result['cost_results']['column_total']['total']
-    non_staff_cost = non_staff_result['cost_results']['column_total']['total'] + contingency
+    non_staff_cost = non_staff_result['cost_results']['column_total']['total']
     project_cost = staff_cost + non_staff_cost
 
     in_kind_staff_cost = staff_result['in_kind_cost_results']['column_total']['total']
@@ -211,7 +197,6 @@ def calculate_staff_budget(
 
 def calculate_non_staff_budget(
     non_staff_result: Dict,
-    contingency: Decimal,
 ) -> Dict:
     """
     Calculate non staff cost summary
@@ -227,10 +212,6 @@ def calculate_non_staff_budget(
             continue
         cost_group = row['info']['cost_group']
         result[cost_group] = result.get(cost_group, 0) + row['direct_total']
-
-    # Add contingency
-    if contingency > 0:
-        result['contingency'] = contingency
 
     # Add summary
     direct_total = sum(result.values())
