@@ -479,3 +479,47 @@ the database.
 The CI job runs `manage.py check --deploy` as an advisory step. Most of what it flags
 (HSTS, secure cookies, SSL redirect) depends on the host, which has not been chosen yet.
 Read its output when that decision is made.
+
+## Code Style & Static Analysis
+
+This project keeps linting and type checking strict so the codebase stays consistent, readable, and hard to break. The rules below apply to everyone contributing.
+
+### Linting with Ruff
+
+All Python code must pass Ruff before it can be merged. Ruff enforces:
+
+- PEP 8 compliance, including naming, indentation, and a line length of 88 characters
+- Removal of unused imports and variables
+- Import sorting using isort rules
+- Common bug patterns, such as mutable default arguments and bare exceptions
+
+Run it locally:
+
+```
+ruff check .
+ruff format .
+```
+
+It runs in CI/CD too. A pull request fails automatically if `ruff check` reports any errors.
+
+### Type Checking with Pylance / Pyright
+
+Every new function and variable needs an explicit type annotation. Strict mode does not allow implicit `Any` types.
+
+- Function signatures require both parameter and return type hints
+- Class attributes must be typed when they are declared
+- `pyrightconfig.json` is set to `"typeCheckingMode": "strict"`
+
+Required style:
+
+```python
+def calculate_total_cost(unit_price: float, quantity: int) -> float:
+    return unit_price * quantity
+```
+
+Not accepted:
+
+```python
+def calculate_total_cost(unit_price, quantity):
+    return unit_price * quantity
+```
