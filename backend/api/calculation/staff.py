@@ -138,7 +138,7 @@ def calculate_staff_row(
                       project_duration['end_year'] + 1):
 
         # Skip none value
-        time = num_data.get(year) or Decimal('0')
+        time = num_data.get(year) or Decimal(0)
         if time == 0:
             continue
 

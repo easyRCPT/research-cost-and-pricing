@@ -1,4 +1,4 @@
-from ..models import Budget, Project, StaffCostLine, NonStaffCostLine
+from ..models import Budget, NonStaffCostLine, Project, StaffCostLine
 
 
 def load_budget_data(budget: Budget) -> dict:

@@ -134,4 +134,4 @@ def find_direct_rate_multiplier(
     if cost_group != 'contingency' and has_additional_direct_rate and indirect_rate_multiplier <= 1:
         return Decimal('1.1')
     else:
-        return Decimal('1')
+        return Decimal(1)

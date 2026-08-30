@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from . import staff, non_staff
+from . import non_staff, staff
 
 GST_MULTIPLIER = Decimal('1.1')
 
