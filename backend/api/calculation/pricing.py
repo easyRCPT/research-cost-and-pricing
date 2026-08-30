@@ -11,7 +11,6 @@ def pricing(
     staff_table: Dict,
     non_staff_table: Dict,
     budget_info: Dict,
-    contingency_table: Dict,
 ) -> Dict:
     """
     Main entry point for the calculation engine.
@@ -42,7 +41,6 @@ def pricing(
         staff_result,
         non_staff_result,
         budget_info,
-        contingency_table,
         budget_info['cash_co_contribution'],
     )
     return {
@@ -57,14 +55,18 @@ def calculate_budget_summary(
     staff_result: Dict,
     non_staff_result: Dict,
     budget_info: Dict,
-    contingency_table: Dict,
     total_cash_co_contribution: Decimal,
 ) -> Dict:
     """
     Calculate summary for budget form
     """
     # price summary
-    contingency = sum(contingency_table.values()) if contingency_table else Decimal('0')
+    # Contingency is handled as a line item in non-staff cost input.
+    contingency = next(
+        (row['total']
+         for row in non_staff_result['cost_results'].values()
+         if row['info']['cost_group'] == 'contingency'), 0
+    )
     price_summary = calculate_price_summary(
         staff_result,
         non_staff_result,
@@ -227,7 +229,8 @@ def calculate_non_staff_budget(
         result[cost_group] = result.get(cost_group, 0) + row['direct_total']
 
     # Add contingency
-    result['contingency'] = contingency
+    if contingency > 0:
+        result['contingency'] = contingency
 
     # Add summary
     direct_total = sum(result.values())
