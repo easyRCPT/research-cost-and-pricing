@@ -1,17 +1,16 @@
-from typing import Dict
 from decimal import Decimal
 
 
 def calculate_staff_table(
-    table_data: Dict,
-    constants: Dict,
+    table_data: dict,
+    constants: dict,
     start_year: int,
     start_month: int,
     end_year: int,
     end_month: int,
     cost_multiplier: Decimal,
     in_kind_multiplier: Decimal,
-) -> Dict:
+) -> dict:
     """
     Calculate the staff cost (in kind or not)
     Input format: {
@@ -64,7 +63,7 @@ def calculate_year_fractions(
     start_month: int,
     end_year: int,
     end_month: int,
-) -> Dict:
+) -> dict:
     """
     Calculate the fractions of the start and end years.
     """
@@ -75,11 +74,11 @@ def calculate_year_fractions(
         raise ValueError("Invalid project duration.")
 
     if start_year == end_year:
-        first_year_fraction = Decimal(end_month - start_month + 1) / Decimal('12')
+        first_year_fraction = Decimal(end_month - start_month + 1) / Decimal(12)
         last_year_fraction = first_year_fraction
     else:
-        first_year_fraction = Decimal(12 - start_month + 1) / Decimal('12')
-        last_year_fraction = Decimal(end_month) / Decimal('12')
+        first_year_fraction = Decimal(12 - start_month + 1) / Decimal(12)
+        last_year_fraction = Decimal(end_month) / Decimal(12)
 
     return {
         'start_year': start_year,
@@ -90,10 +89,10 @@ def calculate_year_fractions(
 
 
 def calculate_column_total(
-    data: Dict,
+    data: dict,
     start_year: int,
     end_year: int,
-):
+) -> dict:
     """
     Calculate column total and grand total value
     Add result into input data dictionary
@@ -118,12 +117,12 @@ def calculate_column_total(
 
 
 def calculate_staff_row(
-    info_data: Dict,
-    num_data: Dict,
-    constants: Dict,
-    project_duration: Dict,
+    info_data: dict,
+    num_data: dict,
+    constants: dict,
+    project_duration: dict,
     cost_recovery_multiplier: Decimal,
-) -> Dict:
+) -> dict:
     """
     Calculate the cost of a staff in each year of the project
     Return a dictionary for cost in each year {'year': cost}
@@ -139,7 +138,7 @@ def calculate_staff_row(
                       project_duration['end_year'] + 1):
 
         # Skip none value
-        time = num_data.get(year) or 0
+        time = num_data.get(year) or Decimal('0')
         if time == 0:
             continue
 
@@ -182,11 +181,11 @@ def calculate_staff_row(
 
 
 def find_salary_rate(
-    info_data: Dict,
-    constants: Dict,
+    info_data: dict,
+    constants: dict,
     year_employed: int,
     year: int,
-):
+) -> Decimal:
     """
     Find the salary rate for a staff in the specified year
     """
@@ -231,13 +230,13 @@ def find_salary_rate(
 
 
 def calculate_staff_cost(
-    constants: Dict,
-    salary_rate,
-    time,
-    year_fraction,
-    employment_type,
-    cost_recovery_multiplier,
-):
+    constants: dict,
+    salary_rate: Decimal,
+    time: Decimal,
+    year_fraction: Decimal,
+    employment_type: str,
+    cost_recovery_multiplier: Decimal,
+) -> Decimal:
     """
     Calculate the total cost of a staff in a year, with base salary rate calculated in previous
     """

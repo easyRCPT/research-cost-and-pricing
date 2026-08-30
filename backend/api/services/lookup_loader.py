@@ -1,12 +1,22 @@
-from typing import Dict
 from django.core.cache import cache
-from ..models import SalaryRate, SalaryRateMultiplier, EbaIncrease, OnCostRate, CalculationConstant, Department, \
-    NonStaffCostCategory, Activity, Region, DeliverableType, RevenueCategory
+from ..models import (
+    Activity,
+    CalculationConstant,
+    DeliverableType,
+    Department,
+    EbaIncrease,
+    NonStaffCostCategory,
+    OnCostRate,
+    Region,
+    RevenueCategory,
+    SalaryRate,
+    SalaryRateMultiplier,
+)
 
 CACHE_KEY = 'lookup_constants_dict'
 
 
-def get_lookup_tables() -> Dict:
+def get_lookup_tables() -> dict:
     """
     Public data access interface with table formatting.
     Used for displaying lookup tables.
@@ -28,7 +38,7 @@ def get_lookup_tables() -> Dict:
     }
 
 
-def get_constants():
+def get_constants() -> dict:
     """
     Public data access interface with caching.
     Used for calculation.
@@ -40,7 +50,7 @@ def get_constants():
     return constants
 
 
-def load_lookup_dict() -> Dict:
+def load_lookup_dict() -> dict:
     """
     Load lookup tables from database, and convert them into plain python dictionaries.
     This function is executed only once when the cache is invalidated.

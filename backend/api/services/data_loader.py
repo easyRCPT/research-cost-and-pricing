@@ -1,8 +1,7 @@
-from typing import Dict
-from ..models import Project, Budget
+from ..models import Budget, Project, StaffCostLine, NonStaffCostLine
 
 
-def load_budget_data(budget: Budget) -> Dict:
+def load_budget_data(budget: Budget) -> dict:
     """
     Load budget data from the database.
     """
@@ -38,7 +37,7 @@ def load_budget_data(budget: Budget) -> Dict:
     }
 
 
-def build_project_info(project: Project) -> Dict:
+def build_project_info(project: Project) -> dict:
     return {
         'title': project.title,
         'chief_investigator': project.chief_investigator,
@@ -59,7 +58,7 @@ def build_project_info(project: Project) -> Dict:
     }
 
 
-def build_staff_info_table(staff_lines) -> Dict:
+def build_staff_info_table(staff_lines: list[StaffCostLine]) -> dict:
     return {
         line.id: {
             'name_role': line.name_role,
@@ -73,7 +72,7 @@ def build_staff_info_table(staff_lines) -> Dict:
     }
 
 
-def build_staff_numeric_table(staff_lines) -> Dict:
+def build_staff_numeric_table(staff_lines: list[StaffCostLine]) -> dict:
     return {
         line.id: {
             allocation.year: allocation.time
@@ -83,7 +82,7 @@ def build_staff_numeric_table(staff_lines) -> Dict:
     }
 
 
-def build_non_staff_info_table(non_staff_lines) -> Dict:
+def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
     return {
         line.id: {
             'cost_group': line.category.cost_category,
@@ -97,7 +96,7 @@ def build_non_staff_info_table(non_staff_lines) -> Dict:
     }
 
 
-def build_non_staff_numeric_table(non_staff_lines) -> Dict:
+def build_non_staff_numeric_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
     return {
         line.id: {
             amount.year: amount.amount
@@ -107,7 +106,7 @@ def build_non_staff_numeric_table(non_staff_lines) -> Dict:
     }
 
 
-def build_budget_info(budget: Budget) -> Dict:
+def build_budget_info(budget: Budget) -> dict:
     return {
         'mode': budget.mode,
         'cost_multiplier': budget.cost_multiplier,

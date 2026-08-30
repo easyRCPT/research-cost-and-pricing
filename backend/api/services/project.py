@@ -1,10 +1,9 @@
-from typing import Dict
+from ..calculation import pricing
 from ..models import Budget
 from . import data_loader, lookup_loader
-from ..calculation import pricing
 
 
-def get_project_details(budget: Budget) -> Dict:
+def get_project_details(budget: Budget) -> dict:
     """
     Get project details from database.
     Calculate cost and price result.
@@ -50,10 +49,10 @@ def get_project_details(budget: Budget) -> Dict:
 
 
 def merge_staff_table_with_result(
-        staff_table: Dict,
-        staff_result_table: Dict,
-        project_duration: Dict,
-) -> Dict:
+        staff_table: dict,
+        staff_result_table: dict,
+        project_duration: dict,
+) -> dict:
     start_year = project_duration['start_year']
     end_year = project_duration['end_year']
 

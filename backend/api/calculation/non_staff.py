@@ -1,11 +1,11 @@
-from typing import Dict
+from decimal import Decimal
 
 
 def calculate_non_staff_table(
-    table_data: Dict,
+    table_data: dict,
     start_year: int,
     end_year: int,
-) -> Dict:
+) -> dict:
     """
     Calculate the non staff cost (in kind or not)
     Input format: {'info_table': {}, 'numeric_table': {}}
@@ -43,11 +43,11 @@ def calculate_non_staff_table(
 
 
 def calculate_non_staff_row(
-    info_data: Dict,
-    num_data: Dict,
+    info_data: dict,
+    num_data: dict,
     start_year: int,
     end_year: int,
-) -> Dict:
+) -> dict:
     """
     Calculate non staff cost line item
     Return input with row total and direct total.
@@ -69,10 +69,10 @@ def calculate_non_staff_row(
 
 
 def calculate_non_staff_column(
-    data: Dict,
+    data: dict,
     start_year: int,
     end_year: int,
-) -> Dict:
+) -> dict:
     """
     Calculate direct and indirect non-staff cost
     Add results into input data dictionary
@@ -120,8 +120,8 @@ def calculate_non_staff_column(
 
 
 def find_direct_rate_multiplier(
-    info_data: Dict,
-):
+    info_data: dict,
+) -> Decimal:
     """
     Find direct rate multiplier according to selected additional direct rate and input indirect rate
     If add_ten_percent and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
@@ -132,6 +132,6 @@ def find_direct_rate_multiplier(
 
     # Contingency should not apply additional direct rate and indirect rate
     if cost_group != 'contingency' and has_additional_direct_rate and indirect_rate_multiplier <= 1:
-        return 1.1
+        return Decimal('1.1')
     else:
-        return 1
+        return Decimal('1')

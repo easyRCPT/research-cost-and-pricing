@@ -1,17 +1,17 @@
-from typing import Dict
 from decimal import Decimal
+
 from . import staff, non_staff
 
 GST_MULTIPLIER = Decimal('1.1')
 
 
 def pricing(
-    constants: Dict,
-    project_duration: Dict,
-    staff_table: Dict,
-    non_staff_table: Dict,
-    budget_info: Dict,
-) -> Dict:
+    constants: dict,
+    project_duration: dict,
+    staff_table: dict,
+    non_staff_table: dict,
+    budget_info: dict,
+) -> dict:
     """
     Main entry point for the calculation engine.
     Calculate staff and non-staff costs and the budget form summary.
@@ -51,12 +51,12 @@ def pricing(
 
 
 def calculate_budget_summary(
-    staff_info_table: Dict,
-    staff_result: Dict,
-    non_staff_result: Dict,
-    budget_info: Dict,
+    staff_info_table: dict,
+    staff_result: dict,
+    non_staff_result: dict,
+    budget_info: dict,
     total_cash_co_contribution: Decimal,
-) -> Dict:
+) -> dict:
     """
     Calculate summary for budget form
     """
@@ -109,11 +109,11 @@ def calculate_budget_summary(
 
 
 def calculate_price_summary(
-    staff_result: Dict,
-    non_staff_result: Dict,
+    staff_result: dict,
+    non_staff_result: dict,
     total_cash_co_contribution: Decimal,
     gst_applicable: bool,
-) -> Dict:
+) -> dict:
     """
     Calculate price summary
     """
@@ -125,8 +125,8 @@ def calculate_price_summary(
     in_kind_non_staff_cost = non_staff_result['in_kind_cost_results']['column_total']['total']
     in_kind_project_cost = in_kind_staff_cost + in_kind_non_staff_cost
 
-    staff_cost_percentage = staff_cost / project_cost if project_cost else Decimal('0')
-    non_staff_cost_percentage = non_staff_cost / project_cost if project_cost else Decimal('0')
+    staff_cost_percentage = staff_cost / project_cost if project_cost else Decimal(0)
+    non_staff_cost_percentage = non_staff_cost / project_cost if project_cost else Decimal(0)
 
     total_project_cost = project_cost + in_kind_project_cost
 
@@ -164,10 +164,10 @@ def calculate_price_summary(
 
 
 def calculate_staff_budget(
-    info_table: Dict,
-    staff_result: Dict,
+    info_table: dict,
+    staff_result: dict,
     multiplier: Decimal,
-) -> Dict:
+) -> dict:
     """
     Calculate staff cost summary
     """
@@ -196,8 +196,8 @@ def calculate_staff_budget(
 
 
 def calculate_non_staff_budget(
-    non_staff_result: Dict,
-) -> Dict:
+    non_staff_result: dict,
+) -> dict:
     """
     Calculate non staff cost summary
     Contingency is included in direct costs and total non staff costs,
