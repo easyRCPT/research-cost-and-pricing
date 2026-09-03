@@ -21,6 +21,7 @@ of continuing in a state whose failures show up somewhere unrelated.
 """
 
 from django.core.checks import Error, register
+from django.db import OperationalError
 
 
 def _ghost_migrations():
@@ -64,7 +65,7 @@ def check_database_not_ahead_of_code(app_configs, **kwargs):
 
     try:
         ghosts = _ghost_migrations()
-    except Exception:
+    except OperationalError:
         # An unreachable or uninitialised database is not this check's problem;
         # every other path reports it far more clearly. Staying quiet also keeps
         # `manage.py` usable when the container simply is not up yet.

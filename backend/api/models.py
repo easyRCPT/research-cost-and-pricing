@@ -1,7 +1,8 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings 
 from decimal import Decimal
+
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 # Create your models here.
 
@@ -232,9 +233,7 @@ class Project(models.Model):
     def account_string(self):
         if not (self.activity_id and self.region_id):
             return ""
-        return "-".join(
-            (self.COMPANY_CODE, self.department_id, self.activity_id, self.region_id)
-        )
+        return f"{self.COMPANY_CODE}-{self.department_id}-{self.activity_id}-{self.region_id}"
 
     def __str__(self):
         return self.title

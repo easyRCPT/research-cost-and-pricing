@@ -17,3 +17,7 @@ dependencies = [
 dev = [
     "openpyxl>=3.1.5",
 ]
+
+# RUF012 is not suitable for Django model Meta and migration declarations.
+[tool.ruff.lint]
+ignore = ["RUF012"]

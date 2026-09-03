@@ -19,19 +19,18 @@ from openpyxl import load_workbook
 from openpyxl.cell.cell import Cell
 
 from api.models import (
+    Activity,
     CalculationConstant,
+    DeliverableType,
     Department,
     EbaIncrease,
     IncrementCap,
     NonStaffCostCategory,
-    #MinimumCostRecoveryMultiplier
     OnCostRate,
+    Region,
+    RevenueCategory,
     SalaryRate,
     SalaryRateMultiplier,
-    Activity,
-    Region,
-    DeliverableType,
-    RevenueCategory,
 )
 
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
@@ -172,7 +171,7 @@ def import_salary_rates(workbook):
         # first column is the next 3 concatenated 
         # for lookup purposes, can be skipped
         # since we can rebuild the key if needed
-        key, payroll_type, category, classification, rate = row[:5]
+        _, payroll_type, category, classification, rate = row[:5]
 
         # Skip headers 
         if not classification or rate is None:
