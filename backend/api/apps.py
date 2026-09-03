@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class ApiConfig(AppConfig):
-    name = 'api'
+    name = "api"
 
     def ready(self):
         # Importing registers the check. Kept here rather than at module level

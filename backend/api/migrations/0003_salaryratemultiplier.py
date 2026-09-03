@@ -4,17 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0002_calculationconstant_minimumcostrecoverymultiplier_and_more'),
+        ("api", "0002_calculationconstant_minimumcostrecoverymultiplier_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SalaryRateMultiplier',
+            name="SalaryRateMultiplier",
             fields=[
-                ('time_basis', models.CharField(max_length=20, primary_key=True, serialize=False)),
-                ('multiplier', models.DecimalField(decimal_places=10, max_digits=12)),
+                (
+                    "time_basis",
+                    models.CharField(max_length=20, primary_key=True, serialize=False),
+                ),
+                ("multiplier", models.DecimalField(decimal_places=10, max_digits=12)),
             ],
         ),
     ]

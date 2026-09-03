@@ -26,7 +26,11 @@ def discover():
     if not directory.is_dir():
         return []
     return sorted(
-        (path for path in directory.iterdir() if path.suffix in SUFFIXES and not path.name.startswith("_")),
+        (
+            path
+            for path in directory.iterdir()
+            if path.suffix in SUFFIXES and not path.name.startswith("_")
+        ),
         key=lambda path: path.name,
     )
 

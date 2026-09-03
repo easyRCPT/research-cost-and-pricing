@@ -48,7 +48,9 @@ def _ghost_migrations():
     return sorted(
         f"{app}.{name}"
         for app, name in loader.applied_migrations
-        if app in installed and (app, name) not in on_disk and (app, name) not in replaced
+        if app in installed
+        and (app, name) not in on_disk
+        and (app, name) not in replaced
     )
 
 
