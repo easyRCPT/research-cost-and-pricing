@@ -16,6 +16,12 @@ from ..models import (
 
 CACHE_KEY = 'lookup_constants_dict'
 
+REQUIRED_CONSTANTS = {
+    'max_leave_loading',
+    'max_payroll_tax',
+    'override_uom_oncosts',
+}
+
 
 def get_lookup_tables() -> dict:
     """
@@ -81,6 +87,7 @@ def load_lookup_dict() -> dict:
         item['name']: item['value']
         for item in CalculationConstant.objects.values('name', 'value')
     }
+    validate_constants(constants)
 
     departments = {
         item['code']: {
@@ -143,7 +150,15 @@ def load_lookup_dict() -> dict:
     }
 
 
-def invalidate_lookup_cache():
+def validate_constants(constants: dict) -> None:
+    missing = REQUIRED_CONSTANTS - constants.keys()
+    if missing:
+        raise KeyError(
+            f'Missing required calculation constants: {','.join(sorted(missing))}'
+        )
+
+
+def invalidate_lookup_cache() -> None:
     """
     Refresh the cache after an administrator modifies Lookup table data.
     """

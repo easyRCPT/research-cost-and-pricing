@@ -143,12 +143,12 @@ def calculate_staff_row(
             continue
 
         # Find year fraction
-        if year == project_duration['start_year']:
-            year_fraction = project_duration['first_year_fraction']
-        elif year == project_duration['end_year']:
-            year_fraction = project_duration['last_year_fraction']
-        else:
-            year_fraction = 1
+        year_fraction = Decimal(1)
+        if info_data.get('time_basis') == 'FTE':
+            if year == project_duration['start_year']:
+                year_fraction = project_duration['first_year_fraction']
+            elif year == project_duration['end_year']:
+                year_fraction = project_duration['last_year_fraction']
 
         # Calculate cost
         salary_rate = find_salary_rate(
@@ -239,6 +239,7 @@ def calculate_staff_cost(
 ) -> Decimal:
     """
     Calculate the total cost of a staff in a year, with base salary rate calculated in previous
+    year_fraction is calculated by the caller and is 1 for non-FTE time basis
     """
     on_costs = constants['on_cost_components'][employment_type]
     general = constants['constants']

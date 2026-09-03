@@ -60,6 +60,14 @@ CONSTANTS = {
         "dfullrecovery",
         "Default cost recovery multiplier"
     ),
+    "max_payroll_tax": (
+        "vl_MaxPayrollTax",
+        "Maximum payroll tax rate"
+    ),
+    "override_uom_oncosts": (
+        "vl_overridden_uom_oncosts_per",
+        "Override multiplier for UoM on-costs"
+    ),
 }
 
 LITERAL_CONSTANTS = {
