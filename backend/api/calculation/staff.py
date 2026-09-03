@@ -150,7 +150,7 @@ def calculate_staff_row(
 
         # Calculate cost
         salary_rate = find_salary_rate(info_data, constants, year_employed, year)
-        employment_type = info_data.get("employment_type")
+        employment_type = info_data["employment_type"]
         costs[year] = calculate_staff_cost(
             constants,
             salary_rate,
@@ -183,10 +183,10 @@ def find_salary_rate(
     Find the salary rate for a staff in the specified year
     """
     # Get search key for salary rate
-    employment_type = info_data.get("employment_type")
-    category = info_data.get("category")
-    classification = info_data.get("classification")
-    time_basis = info_data.get("time_basis")
+    employment_type = info_data["employment_type"]
+    category = info_data["category"]
+    classification = info_data["classification"]
+    time_basis = info_data["time_basis"]
 
     # Get payroll type
     mapping = {
