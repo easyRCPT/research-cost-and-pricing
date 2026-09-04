@@ -3,7 +3,7 @@ from ..models import Budget
 from . import data_loader, lookup_loader
 
 
-def get_project_details(budget: Budget) -> dict:
+def get_budget_details(budget: Budget) -> dict:
     """
     Get project details from database.
     Calculate cost and price result.
