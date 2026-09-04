@@ -309,7 +309,9 @@ class PriceSummarySerializer(serializers.Serializer):
 
 
 class StaffBudgetSerializer(serializers.Serializer):
-    category_totals = serializers.DictField(child=CostDecimalField(max_digits=14, decimal_places=2))
+    category_totals = serializers.DictField(
+        child=CostDecimalField(max_digits=14, decimal_places=2)
+    )
 
     cost_before_recovery = CostDecimalField(
         max_digits=14,
@@ -333,7 +335,9 @@ class StaffBudgetSerializer(serializers.Serializer):
 
 
 class NonStaffBudgetSerializer(serializers.Serializer):
-    category_totals = serializers.DictField(child=CostDecimalField(max_digits=14, decimal_places=2))
+    category_totals = serializers.DictField(
+        child=CostDecimalField(max_digits=14, decimal_places=2)
+    )
 
     direct_total = CostDecimalField(
         max_digits=14,
@@ -373,7 +377,7 @@ class BudgetSummarySerializer(serializers.Serializer):
 # ------------------------------------------------------------------
 
 
-class ProjectDetailSerializer(serializers.Serializer):
+class BudgetDetailSerializer(serializers.Serializer):
     project_info = ProjectInfoSerializer()
     budget_info = BudgetInfoSerializer()
 
