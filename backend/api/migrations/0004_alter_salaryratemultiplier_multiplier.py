@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0003_salaryratemultiplier'),
+        ("api", "0003_salaryratemultiplier"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='salaryratemultiplier',
-            name='multiplier',
+            model_name="salaryratemultiplier",
+            name="multiplier",
             field=models.DecimalField(decimal_places=10, max_digits=18),
         ),
     ]

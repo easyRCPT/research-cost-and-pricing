@@ -1,11 +1,11 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings 
 from decimal import Decimal
 
-# Create your models here.
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.db import models
 
-#------------------- Schema for Lookup table data -------------
+
+# ------------------- Schema for Lookup table data -------------
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
@@ -18,11 +18,16 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
+
 class User(AbstractUser):
     department = models.ForeignKey(
         # models.PROTECT prevents a department from being deleted if it has users
-        "Department", null=True, blank=True, on_delete=models.PROTECT
+        "Department",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
     )
+
 
 class SalaryRateMultiplier(models.Model):
     # tSalaryRateMultiplier. Converts a stored rate to the entered time basis:
@@ -42,11 +47,13 @@ class IncrementCap(models.Model):
     level = models.CharField(max_length=20, primary_key=True)
     max_steps = models.PositiveSmallIntegerField()
 
+
 # TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
 # Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
     multiplier = models.DecimalField(max_digits=8, decimal_places=6)
+
 
 class SalaryRate(models.Model):
     """
@@ -62,10 +69,10 @@ class SalaryRate(models.Model):
         ACADEMIC = "Academic", "Academic"
         PROFESSIONAL = "Professional", "Professional"
 
-    payroll_type = models.CharField(max_length = 20, choices = PayrollType.choices)
+    payroll_type = models.CharField(max_length=20, choices=PayrollType.choices)
     category = models.CharField(max_length=20, choices=Category.choices)
     classification = models.CharField(max_length=20)
-    rate = models.DecimalField(max_digits=12,decimal_places=4)
+    rate = models.DecimalField(max_digits=12, decimal_places=4)
 
     class Meta:
         constraints = [
@@ -80,6 +87,7 @@ class SalaryRate(models.Model):
     def __str__(self):
         return f"{self.payroll_type} {self.category} {self.classification}"
 
+
 # TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
 class OnCostRate(models.Model):
     """
@@ -90,13 +98,31 @@ class OnCostRate(models.Model):
     """
 
     class OnCostType(models.TextChoices):
-        SUPERANNUATION = "superannuation", "Superannuation" # year + employment_type, year falls back to None
-        PAYROLL_TAX = "payroll_tax", "Payroll Tax" #year only, employment_type always None
-        WORKCOVER = "workcover", "WorkCover" # employment_type only, year always None
-        LEAVE_LOADING = "leave_loading", "Leave Loading" # employment_type only, year always None
-        LONG_SERVICE_LEAVE = "long_service_leave", "Long Service Leave"  # employment_type only; year always None
-        PARENTAL_LEAVE = "parental_leave", "Parental Leave"  # employment_type only; year always None
-        ANNUAL_LEAVE_PROVISION = "annual_leave_provision", "Annual Leave Provision"  # employment_type only; year always None
+        SUPERANNUATION = (
+            "superannuation",
+            "Superannuation",
+        )  # year + employment_type, year falls back to None
+        PAYROLL_TAX = (
+            "payroll_tax",
+            "Payroll Tax",
+        )  # year only, employment_type always None
+        WORKCOVER = "workcover", "WorkCover"  # employment_type only, year always None
+        LEAVE_LOADING = (
+            "leave_loading",
+            "Leave Loading",
+        )  # employment_type only, year always None
+        LONG_SERVICE_LEAVE = (
+            "long_service_leave",
+            "Long Service Leave",
+        )  # employment_type only; year always None
+        PARENTAL_LEAVE = (
+            "parental_leave",
+            "Parental Leave",
+        )  # employment_type only; year always None
+        ANNUAL_LEAVE_PROVISION = (
+            "annual_leave_provision",
+            "Annual Leave Provision",
+        )  # employment_type only; year always None
 
     class EmploymentType(models.TextChoices):
         CONTINUING = "Continuing", "Continuing"
@@ -107,18 +133,19 @@ class OnCostRate(models.Model):
     employment_type = models.CharField(
         max_length=20, choices=EmploymentType.choices, null=True, blank=True
     )
-    year = models.PositiveSmallIntegerField(null=True,blank=True)
+    year = models.PositiveSmallIntegerField(null=True, blank=True)
 
     rate = models.DecimalField(
-        max_digits=6, decimal_places=4,
-        help_text="Proportion, not percentage. E.g 0.1200 means 12%"
+        max_digits=6,
+        decimal_places=4,
+        help_text="Proportion, not percentage. E.g 0.1200 means 12%",
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields = ["on_cost_type", "employment_type", "year"],
-                name= "unique_on_cost_rate",
+                fields=["on_cost_type", "employment_type", "year"],
+                name="unique_on_cost_rate",
                 nulls_distinct=False,
             )
         ]
@@ -126,6 +153,7 @@ class OnCostRate(models.Model):
     def __str__(self):
         scope = self.year if self.year is not None else "all years"
         return f"{self.get_on_cost_type_display()} - {self.employment_type or 'any'} ({scope})"
+
 
 # TODO: Check if there is a contingency category when import. eg. (some ledger id like 0000, contingency, contingency)
 class NonStaffCostCategory(models.Model):
@@ -138,6 +166,7 @@ class NonStaffCostCategory(models.Model):
 
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
+
 
 # TODO: Consider whether this should be stored as a calculation constant
 # Calculation engine uses multiplier stored in Budget not this
@@ -163,6 +192,7 @@ class CalculationConstant(models.Model):
     def __str__(self):
         return f"{self.name} = {self.value}"
 
+
 class Activity(models.Model):
     code = models.CharField(max_length=10, primary_key=True)
     name = models.CharField(max_length=50)
@@ -178,12 +208,14 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
+
 class DeliverableType(models.Model):
     code = models.CharField(max_length=10, primary_key=True)
-    name = models.CharField(max_length = 100)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
+
 
 class RevenueCategory(models.Model):
     budget_ledger_id = models.PositiveIntegerField(primary_key=True)
@@ -193,9 +225,11 @@ class RevenueCategory(models.Model):
     def __str__(self):
         return f"{self.description} ({self.budget_ledger_id})"
 
+
 # TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
 
-#------------------- Schema for Data Derived From Application -------------
+# ------------------- Schema for Data Derived From Application -------------
+
 
 class Project(models.Model):
     COMPANY_CODE = "C001"
@@ -232,21 +266,20 @@ class Project(models.Model):
     def account_string(self):
         if not (self.activity_id and self.region_id):
             return ""
-        return "-".join(
-            (self.COMPANY_CODE, self.department_id, self.activity_id, self.region_id)
-        )
+        return f"{self.COMPANY_CODE}-{self.department_id}-{self.activity_id}-{self.region_id}"
 
     def __str__(self):
         return self.title
 
 
+# TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
     # attempt, a revision after a rejection, a variant for a different funder,
     # which is the thing the workbook cannot do, since one file is one budget.
     #
     # The multipliers are stored per budget rather than read from
-    # CalculationConstant at calculation time. 
+    # CalculationConstant at calculation time.
     class Mode(models.TextChoices):
         SIMPLE = "simple", "Simple"
         FULL = "full", "Full"
@@ -271,8 +304,9 @@ class Budget(models.Model):
 
     gst_applicable = models.BooleanField(default=True)
 
-    cash_co_contribution = models.DecimalField(max_digits=12, decimal_places=2,
-                                               default=Decimal("0.00"))
+    cash_co_contribution = models.DecimalField(
+        max_digits=12, decimal_places=2, default=Decimal("0.00")
+    )
 
     comments = models.TextField(blank=True, default="")
 
@@ -288,9 +322,11 @@ class Budget(models.Model):
     def __str__(self):
         return f"{self.project} ({self.get_status_display()})"
 
+
 class Deliverable(models.Model):
-    budget = models.ForeignKey("Budget", related_name="deliverables",
-                               on_delete=models.CASCADE)
+    budget = models.ForeignKey(
+        "Budget", related_name="deliverables", on_delete=models.CASCADE
+    )
     number = models.PositiveSmallIntegerField()
     description = models.CharField(max_length=200)
     deliverable_type = models.ForeignKey("DeliverableType", on_delete=models.PROTECT)
@@ -305,7 +341,7 @@ class Deliverable(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["budget","number"], name="unique_deliverable_number"
+                fields=["budget", "number"], name="unique_deliverable_number"
             )
         ]
 
@@ -371,6 +407,7 @@ class YearAllocation(models.Model):
     def __str__(self):
         return f"{self.staff_line} {self.year}: {self.time}"
 
+
 class NonStaffCostLine(models.Model):
     """
     A non-salary cost on a budget: equipment, travel etc.
@@ -378,8 +415,9 @@ class NonStaffCostLine(models.Model):
     """
 
     # Carries reference data, FK allows that data to be connected
-    budget = models.ForeignKey("Budget", related_name="non_staff_lines",
-                               on_delete=models.CASCADE)
+    budget = models.ForeignKey(
+        "Budget", related_name="non_staff_lines", on_delete=models.CASCADE
+    )
 
     category = models.ForeignKey("NonStaffCostCategory", on_delete=models.PROTECT)
 
@@ -391,15 +429,16 @@ class NonStaffCostLine(models.Model):
     add_ten_percent = models.BooleanField(default=False)
 
     indirect_rate_multiplier = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True 
+        max_digits=4, decimal_places=2, null=True, blank=True
     )
 
     def __str__(self):
         return f"{self.category} - {self.description}"
 
+
 class YearAmount(models.Model):
     """
-    What a non-staff line costs in one project year. 
+    What a non-staff line costs in one project year.
     Holds actual cost directly, compared to Year Allocation which
     holds time.
     """
@@ -423,7 +462,3 @@ class YearAmount(models.Model):
 
     def __str__(self):
         return f"{self.non_staff_line} {self.year}: {self.amount}"
-
-
-    
-

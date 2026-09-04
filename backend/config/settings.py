@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -57,12 +57,12 @@ ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", [])
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',    
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
     "api",
@@ -79,7 +79,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -112,7 +112,9 @@ if not os.environ.get("DATABASE_URL"):
 # deployment that sets nothing still gets sslmode=require.
 DATABASE_SSL = _env_bool("DATABASE_SSL", not DEBUG)
 
-DATABASES = {"default": dj_database_url.config(conn_max_age=0, ssl_require=DATABASE_SSL)}
+DATABASES = {
+    "default": dj_database_url.config(conn_max_age=0, ssl_require=DATABASE_SSL)
+}
 
 # Server-side cursors do not survive a transaction-mode connection pooler, which
 # is what most managed Postgres offerings put in front of the database. Left on
@@ -137,7 +139,9 @@ AUTH_USER_MODEL = "api.User"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -155,4 +159,4 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
