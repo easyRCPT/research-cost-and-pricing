@@ -128,6 +128,7 @@ CORS_ALLOWED_ORIGINS = _env_list(
 )
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "COERCE_DECIMAL_TO_STRING": False,
 }
 
 # Custom user model, so approvals can record who decided and departments can be
