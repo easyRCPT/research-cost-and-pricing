@@ -272,6 +272,7 @@ class Project(models.Model):
         return self.title
 
 
+# TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
     # attempt, a revision after a rejection, a variant for a different funder,

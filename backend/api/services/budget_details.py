@@ -42,6 +42,7 @@ def get_project_details(budget: Budget) -> dict:
 
     return {
         "project_info": budget_data["project_info"],
+        "budget_info": budget_data["budget_info"],
         "staff_table": staff_table,
         "non_staff_table": calculation_result["non_staff_result"],
         "budget_summary": calculation_result["budget_summary"],
