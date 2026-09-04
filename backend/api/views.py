@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.request import Request
@@ -26,7 +28,7 @@ class BudgetDetailView(APIView):
         serializer = BudgetUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        result = budget_update.update(budget, serializer.validated_data)
+        result = budget_update.update(budget, cast(dict, serializer.validated_data))
 
         if result is not None:
             result_serializer = BudgetDetailSerializer(result)
