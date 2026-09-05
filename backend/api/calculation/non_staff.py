@@ -129,6 +129,8 @@ def find_direct_rate_multiplier(
     indirect_rate_multiplier = info_data.get("indirect_rate_multiplier", 1)
     cost_group = info_data["cost_group"]
 
+    # TODO(Chenhao): Also exclude Student Support and Shared Grant Payments; the UI
+    # disables this flag for those groups, but stored lines can still have it set.
     # Contingency should not apply additional direct rate and indirect rate
     if (
         cost_group != "contingency"
