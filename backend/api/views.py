@@ -1,6 +1,5 @@
 from typing import cast
 
-from drf_spectacular.utils import extend_schema
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers, status
@@ -10,7 +9,11 @@ from rest_framework.views import APIView
 
 from .models import Budget, Deliverable, NonStaffCostLine, StaffCostLine
 from .serializers.budget_detail_serializer import BudgetDetailSerializer
-from .serializers.budget_update_serializer import UPDATE_SERIALIZERS, BudgetUpdateSchema, SectionSerializer
+from .serializers.budget_update_serializer import (
+    UPDATE_SERIALIZERS,
+    BudgetUpdateSchema,
+    SectionSerializer,
+)
 from .serializers.deliverable_serializer import DeliverableSerializer
 from .serializers.non_staff_line_serializer import NonStaffLineSerializer
 from .serializers.staff_line_serializer import StaffLineSerializer
