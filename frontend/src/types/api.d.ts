@@ -130,8 +130,28 @@ export interface components {
             non_staff_in_kind_cost: components["schemas"]["NonStaffCost"];
             budget_summary: components["schemas"]["BudgetSummary"];
         };
+        /**
+         * @description * `cash_co_contribution` - cash_co_contribution
+         *     * `comments` - comments
+         *     * `cost_multiplier` - cost_multiplier
+         *     * `gst_applicable` - gst_applicable
+         *     * `in_kind_multiplier` - in_kind_multiplier
+         *     * `mode` - mode
+         *     * `status` - status
+         * @enum {string}
+         */
+        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "gst_applicable" | "in_kind_multiplier" | "mode" | "status";
+        BudgetFieldUpdate: {
+            value: unknown;
+            field: components["schemas"]["BudgetFieldEnum"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            section: "budget";
+        };
         BudgetInfo: {
-            mode: string;
+            mode: components["schemas"]["ModeEnum"];
             /** Format: double */
             cost_multiplier: number;
             /** Format: double */
@@ -140,7 +160,7 @@ export interface components {
             /** Format: double */
             cash_co_contribution: number;
             comments: string;
-            status: string;
+            status: components["schemas"]["StatusEnum"];
             deliverables: components["schemas"]["DeliverableResult"][];
         };
         BudgetSummary: {
@@ -149,12 +169,18 @@ export interface components {
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
         };
+        BudgetUpdate: components["schemas"]["ProjectUpdate"] | components["schemas"]["BudgetFieldUpdate"] | components["schemas"]["StaffUpdate"] | components["schemas"]["NonStaffUpdate"] | components["schemas"]["DeliverableUpdate"];
         /**
          * @description * `Academic` - Academic
          *     * `Professional` - Professional
          * @enum {string}
          */
         CategoryEnum: "Academic" | "Professional";
+        /**
+         * @description * `client_error` - Client Error
+         * @enum {string}
+         */
+        ClientErrorEnum: "client_error";
         Deliverable: {
             number: number;
             description: string;
@@ -165,6 +191,17 @@ export interface components {
             dependency?: number | null;
             sponsor?: string;
         };
+        /**
+         * @description * `deliverable_type` - deliverable_type
+         *     * `dependency` - dependency
+         *     * `description` - description
+         *     * `due_date` - due_date
+         *     * `invoice_amount` - invoice_amount
+         *     * `number` - number
+         *     * `sponsor` - sponsor
+         * @enum {string}
+         */
+        DeliverableFieldEnum: "deliverable_type" | "dependency" | "description" | "due_date" | "invoice_amount" | "number" | "sponsor";
         DeliverableResult: {
             number: number;
             description: string;
@@ -175,6 +212,159 @@ export interface components {
             dependency: number | null;
             sponsor: string;
         };
+        DeliverableUpdate: {
+            value: unknown;
+            row_id: number;
+            field: components["schemas"]["DeliverableFieldEnum"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            section: "deliverable";
+        };
+        DeliverablesCreateDeliverableTypeErrorComponent: {
+            /**
+             * @description * `deliverable_type` - deliverable_type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "deliverable_type";
+            /**
+             * @description * `does_not_exist` - does_not_exist
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "does_not_exist" | "invalid" | "null" | "required";
+            detail: string;
+        };
+        DeliverablesCreateDependencyErrorComponent: {
+            /**
+             * @description * `dependency` - dependency (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "dependency";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_string_length` - max_string_length
+             *     * `min_value` - min_value
+             * @enum {string}
+             */
+            code: "invalid" | "max_string_length" | "min_value";
+            detail: string;
+        };
+        DeliverablesCreateDescriptionErrorComponent: {
+            /**
+             * @description * `description` - description (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "description";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        DeliverablesCreateDueDateErrorComponent: {
+            /**
+             * @description * `due_date` - due_date (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "due_date";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        DeliverablesCreateError: components["schemas"]["DeliverablesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["DeliverablesCreateNumberErrorComponent"] | components["schemas"]["DeliverablesCreateDescriptionErrorComponent"] | components["schemas"]["DeliverablesCreateDeliverableTypeErrorComponent"] | components["schemas"]["DeliverablesCreateInvoiceAmountErrorComponent"] | components["schemas"]["DeliverablesCreateDueDateErrorComponent"] | components["schemas"]["DeliverablesCreateDependencyErrorComponent"] | components["schemas"]["DeliverablesCreateSponsorErrorComponent"];
+        DeliverablesCreateErrorResponse400: components["schemas"]["DeliverablesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        DeliverablesCreateInvoiceAmountErrorComponent: {
+            /**
+             * @description * `invoice_amount` - invoice_amount (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "invoice_amount";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_decimal_places` - max_decimal_places
+             *     * `max_digits` - max_digits
+             *     * `max_string_length` - max_string_length
+             *     * `max_whole_digits` - max_whole_digits
+             * @enum {string}
+             */
+            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits";
+            detail: string;
+        };
+        DeliverablesCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        DeliverablesCreateNumberErrorComponent: {
+            /**
+             * @description * `number` - number (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "number";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_string_length` - max_string_length
+             *     * `min_value` - min_value
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "max_string_length" | "min_value" | "null" | "required";
+            detail: string;
+        };
+        DeliverablesCreateSponsorErrorComponent: {
+            /**
+             * @description * `sponsor` - sponsor (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "sponsor";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        DeliverablesCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["DeliverablesCreateError"][];
+        };
+        DeliverablesDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         /**
          * @description * `Continuing` - Continuing
          *     * `Fixed-Term` - Fixed-Term
@@ -182,12 +372,103 @@ export interface components {
          * @enum {string}
          */
         EmploymentTypeEnum: "Continuing" | "Fixed-Term" | "Casual";
+        Error401: {
+            code: components["schemas"]["ErrorCode401Enum"];
+            detail: string;
+            attr: string | null;
+        };
+        Error404: {
+            code: components["schemas"]["ErrorCode404Enum"];
+            detail: string;
+            attr: string | null;
+        };
+        Error405: {
+            code: components["schemas"]["ErrorCode405Enum"];
+            detail: string;
+            attr: string | null;
+        };
+        Error406: {
+            code: components["schemas"]["ErrorCode406Enum"];
+            detail: string;
+            attr: string | null;
+        };
+        Error415: {
+            code: components["schemas"]["ErrorCode415Enum"];
+            detail: string;
+            attr: string | null;
+        };
+        Error500: {
+            code: components["schemas"]["ErrorCode500Enum"];
+            detail: string;
+            attr: string | null;
+        };
+        /**
+         * @description * `authentication_failed` - Authentication Failed
+         *     * `not_authenticated` - Not Authenticated
+         * @enum {string}
+         */
+        ErrorCode401Enum: "authentication_failed" | "not_authenticated";
+        /**
+         * @description * `not_found` - Not Found
+         * @enum {string}
+         */
+        ErrorCode404Enum: "not_found";
+        /**
+         * @description * `method_not_allowed` - Method Not Allowed
+         * @enum {string}
+         */
+        ErrorCode405Enum: "method_not_allowed";
+        /**
+         * @description * `not_acceptable` - Not Acceptable
+         * @enum {string}
+         */
+        ErrorCode406Enum: "not_acceptable";
+        /**
+         * @description * `unsupported_media_type` - Unsupported Media Type
+         * @enum {string}
+         */
+        ErrorCode415Enum: "unsupported_media_type";
+        /**
+         * @description * `error` - Error
+         * @enum {string}
+         */
+        ErrorCode500Enum: "error";
+        ErrorResponse401: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error401"][];
+        };
+        ErrorResponse404: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error404"][];
+        };
+        ErrorResponse405: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error405"][];
+        };
+        ErrorResponse406: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error406"][];
+        };
+        ErrorResponse415: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error415"][];
+        };
+        ErrorResponse500: {
+            type: components["schemas"]["ServerErrorEnum"];
+            errors: components["schemas"]["Error500"][];
+        };
         InKindCosts: {
             in_kind_staff_budget: components["schemas"]["StaffBudget"];
             in_kind_non_staff_budget: components["schemas"]["NonStaffBudget"];
             /** Format: double */
             total_in_kind_costs: number;
         };
+        /**
+         * @description * `simple` - Simple
+         *     * `full` - Full
+         * @enum {string}
+         */
+        ModeEnum: "simple" | "full";
         NonStaffBudget: {
             category_totals: {
                 [key: string]: number;
@@ -205,6 +486,16 @@ export interface components {
             indirect_total: components["schemas"]["NonStaffTotal"];
             column_total: components["schemas"]["NonStaffTotal"];
         };
+        /**
+         * @description * `add_ten_percent` - add_ten_percent
+         *     * `category` - category
+         *     * `description` - description
+         *     * `in_kind` - in_kind
+         *     * `indirect_rate_multiplier` - indirect_rate_multiplier
+         *     * `year_value` - year_value
+         * @enum {string}
+         */
+        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "indirect_rate_multiplier" | "year_value";
         NonStaffLine: {
             id: number;
             cost_group: string;
@@ -232,6 +523,192 @@ export interface components {
             indirect_rate_multiplier?: number | null;
             amounts?: components["schemas"]["YearAmount"][];
         };
+        NonStaffLinesCreateAddTenPercentErrorComponent: {
+            /**
+             * @description * `add_ten_percent` - add_ten_percent (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "add_ten_percent";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        NonStaffLinesCreateAmountsINDEXAmountErrorComponent: {
+            /**
+             * @description * `amounts.INDEX.amount` - amounts.INDEX.amount (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "amounts.INDEX.amount";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_decimal_places` - max_decimal_places
+             *     * `max_digits` - max_digits
+             *     * `max_string_length` - max_string_length
+             *     * `max_whole_digits` - max_whole_digits
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits" | "null" | "required";
+            detail: string;
+        };
+        NonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `amounts.INDEX.non_field_errors` - amounts.INDEX.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "amounts.INDEX.non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        NonStaffLinesCreateAmountsINDEXYearErrorComponent: {
+            /**
+             * @description * `amounts.INDEX.year` - amounts.INDEX.year (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "amounts.INDEX.year";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_string_length` - max_string_length
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "max_string_length" | "null" | "required";
+            detail: string;
+        };
+        NonStaffLinesCreateAmountsNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `amounts.non_field_errors` - amounts.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "amounts.non_field_errors";
+            /**
+             * @description * `not_a_list` - not_a_list
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_list" | "null";
+            detail: string;
+        };
+        NonStaffLinesCreateCostGroupErrorComponent: {
+            /**
+             * @description * `cost_group` - cost_group (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "cost_group";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        NonStaffLinesCreateDescriptionErrorComponent: {
+            /**
+             * @description * `description` - description (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "description";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        NonStaffLinesCreateError: components["schemas"]["NonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["NonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["NonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["NonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["NonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["NonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["NonStaffLinesCreateIndirectRateMultiplierErrorComponent"] | components["schemas"]["NonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["NonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["NonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["NonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
+        NonStaffLinesCreateErrorResponse400: components["schemas"]["NonStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        NonStaffLinesCreateExpenseTypeErrorComponent: {
+            /**
+             * @description * `expense_type` - expense_type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "expense_type";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        NonStaffLinesCreateInKindErrorComponent: {
+            /**
+             * @description * `in_kind` - in_kind (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "in_kind";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        NonStaffLinesCreateIndirectRateMultiplierErrorComponent: {
+            /**
+             * @description * `indirect_rate_multiplier` - indirect_rate_multiplier (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "indirect_rate_multiplier";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_decimal_places` - max_decimal_places
+             *     * `max_digits` - max_digits
+             *     * `max_string_length` - max_string_length
+             *     * `max_whole_digits` - max_whole_digits
+             * @enum {string}
+             */
+            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits";
+            detail: string;
+        };
+        NonStaffLinesCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        NonStaffLinesCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["NonStaffLinesCreateError"][];
+        };
+        NonStaffLinesDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         NonStaffTotal: {
             by_year: components["schemas"]["NonStaffTotalYear"][];
             /** Format: double */
@@ -242,16 +719,39 @@ export interface components {
             /** Format: double */
             cost: number;
         };
+        NonStaffUpdate: {
+            value: unknown;
+            row_id: number;
+            year?: number;
+            field: components["schemas"]["NonStaffFieldEnum"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            section: "non_staff";
+        };
         NonStaffYear: {
             year: number;
             /** Format: double */
             amount: number;
         };
-        PatchedBudgetUpdate: {
-            section?: components["schemas"]["SectionEnum"];
-            row_id?: number | null;
-            field?: string;
-            value?: unknown;
+        ParseError: {
+            code: components["schemas"]["ParseErrorCodeEnum"];
+            detail: string;
+            attr: string | null;
+        };
+        /**
+         * @description * `parse_error` - Parse Error
+         * @enum {string}
+         */
+        ParseErrorCodeEnum: "parse_error";
+        ParseErrorResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "client_error";
+            errors: components["schemas"]["ParseError"][];
         };
         PriceSummary: {
             /** Format: double */
@@ -285,6 +785,22 @@ export interface components {
             /** Format: double */
             university_position: number;
         };
+        /**
+         * @description * `activity` - activity
+         *     * `additional_information` - additional_information
+         *     * `chief_investigator` - chief_investigator
+         *     * `department` - department
+         *     * `end_month` - end_month
+         *     * `end_year` - end_year
+         *     * `funder` - funder
+         *     * `region` - region
+         *     * `scheme` - scheme
+         *     * `start_month` - start_month
+         *     * `start_year` - start_year
+         *     * `title` - title
+         * @enum {string}
+         */
+        ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "region" | "scheme" | "start_month" | "start_year" | "title";
         ProjectInfo: {
             title: string;
             chief_investigator: string;
@@ -302,14 +818,106 @@ export interface components {
             region: string | null;
             additional_information: string;
         };
+        ProjectUpdate: {
+            value: unknown;
+            field: components["schemas"]["ProjectFieldEnum"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            section: "project";
+        };
+        RootPartialUpdateError: components["schemas"]["RootPartialUpdateNonFieldErrorsErrorComponent"] | components["schemas"]["RootPartialUpdateValueErrorComponent"] | components["schemas"]["RootPartialUpdateFieldErrorComponent"] | components["schemas"]["RootPartialUpdateRowIdErrorComponent"] | components["schemas"]["RootPartialUpdateYearErrorComponent"];
+        RootPartialUpdateErrorResponse400: components["schemas"]["RootPartialUpdateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        RootPartialUpdateFieldErrorComponent: {
+            /**
+             * @description * `field` - field (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "field";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        RootPartialUpdateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        RootPartialUpdateRowIdErrorComponent: {
+            /**
+             * @description * `row_id` - row_id (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "row_id";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_string_length` - max_string_length
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "max_string_length" | "null" | "required";
+            detail: string;
+        };
+        RootPartialUpdateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["RootPartialUpdateError"][];
+        };
+        RootPartialUpdateValueErrorComponent: {
+            /**
+             * @description * `value` - value (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "value";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        RootPartialUpdateYearErrorComponent: {
+            /**
+             * @description * `year` - year (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "year";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_string_length` - max_string_length
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "max_string_length" | "null";
+            detail: string;
+        };
+        RootRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         /**
-         * @description * `project` - project
-         *     * `budget` - budget
-         *     * `staff` - staff
-         *     * `non_staff` - non_staff
+         * @description * `server_error` - Server Error
          * @enum {string}
          */
-        SectionEnum: "project" | "budget" | "staff" | "non_staff";
+        ServerErrorEnum: "server_error";
         StaffBudget: {
             category_totals: {
                 [key: string]: number;
@@ -327,6 +935,17 @@ export interface components {
             lines: components["schemas"]["StaffLine"][];
             column_total: components["schemas"]["StaffTotal"];
         };
+        /**
+         * @description * `category` - category
+         *     * `classification` - classification
+         *     * `employment_type` - employment_type
+         *     * `in_kind` - in_kind
+         *     * `name_role` - name_role
+         *     * `time_basis` - time_basis
+         *     * `year_value` - year_value
+         * @enum {string}
+         */
+        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "name_role" | "time_basis" | "year_value";
         StaffLine: {
             id: number;
             name_role: string;
@@ -351,6 +970,191 @@ export interface components {
             in_kind: boolean;
             allocations?: components["schemas"]["YearAllocation"][];
         };
+        StaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `allocations.INDEX.non_field_errors` - allocations.INDEX.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "allocations.INDEX.non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        StaffLinesCreateAllocationsINDEXTimeErrorComponent: {
+            /**
+             * @description * `allocations.INDEX.time` - allocations.INDEX.time (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "allocations.INDEX.time";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_decimal_places` - max_decimal_places
+             *     * `max_digits` - max_digits
+             *     * `max_string_length` - max_string_length
+             *     * `max_whole_digits` - max_whole_digits
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits" | "null" | "required";
+            detail: string;
+        };
+        StaffLinesCreateAllocationsINDEXYearErrorComponent: {
+            /**
+             * @description * `allocations.INDEX.year` - allocations.INDEX.year (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "allocations.INDEX.year";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_string_length` - max_string_length
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "max_string_length" | "null" | "required";
+            detail: string;
+        };
+        StaffLinesCreateAllocationsNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `allocations.non_field_errors` - allocations.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "allocations.non_field_errors";
+            /**
+             * @description * `not_a_list` - not_a_list
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_list" | "null";
+            detail: string;
+        };
+        StaffLinesCreateCategoryErrorComponent: {
+            /**
+             * @description * `category` - category (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "category";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        StaffLinesCreateClassificationErrorComponent: {
+            /**
+             * @description * `classification` - classification (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "classification";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        StaffLinesCreateEmploymentTypeErrorComponent: {
+            /**
+             * @description * `employment_type` - employment_type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "employment_type";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        StaffLinesCreateError: components["schemas"]["StaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["StaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["StaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["StaffLinesCreateCategoryErrorComponent"] | components["schemas"]["StaffLinesCreateClassificationErrorComponent"] | components["schemas"]["StaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["StaffLinesCreateInKindErrorComponent"] | components["schemas"]["StaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["StaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["StaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["StaffLinesCreateAllocationsINDEXTimeErrorComponent"];
+        StaffLinesCreateErrorResponse400: components["schemas"]["StaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        StaffLinesCreateInKindErrorComponent: {
+            /**
+             * @description * `in_kind` - in_kind (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "in_kind";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        StaffLinesCreateNameRoleErrorComponent: {
+            /**
+             * @description * `name_role` - name_role (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "name_role";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        StaffLinesCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        StaffLinesCreateTimeBasisErrorComponent: {
+            /**
+             * @description * `time_basis` - time_basis (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "time_basis";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        StaffLinesCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["StaffLinesCreateError"][];
+        };
+        StaffLinesDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         StaffTotal: {
             by_year: components["schemas"]["StaffTotalYear"][];
             /** Format: double */
@@ -361,6 +1165,17 @@ export interface components {
             /** Format: double */
             cost: number;
         };
+        StaffUpdate: {
+            value: unknown;
+            row_id: number;
+            year?: number;
+            field: components["schemas"]["StaffFieldEnum"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            section: "staff";
+        };
         StaffYear: {
             year: number;
             /** Format: double */
@@ -369,12 +1184,27 @@ export interface components {
             cost: number;
         };
         /**
+         * @description * `draft` - Draft
+         *     * `submitted` - Submitted
+         *     * `hod_review` - Head of Department review
+         *     * `dean_review` - Dean review
+         *     * `approved` - Approved
+         *     * `withdrawn` - Withdrawn
+         * @enum {string}
+         */
+        StatusEnum: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "withdrawn";
+        /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily
          *     * `Hourly` - Hourly
          * @enum {string}
          */
         TimeBasisEnum: "FTE" | "Daily" | "Hourly";
+        /**
+         * @description * `validation_error` - Validation Error
+         * @enum {string}
+         */
+        ValidationErrorEnum: "validation_error";
         YearAllocation: {
             year: number;
             /** Format: double */
@@ -413,6 +1243,62 @@ export interface operations {
                     "application/json": components["schemas"]["BudgetDetail"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RootRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
         };
     };
     root_partial_update: {
@@ -426,9 +1312,9 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": components["schemas"]["PatchedBudgetUpdate"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedBudgetUpdate"];
-                "multipart/form-data": components["schemas"]["PatchedBudgetUpdate"];
+                "application/json": components["schemas"]["BudgetUpdate"];
+                "application/x-www-form-urlencoded": components["schemas"]["BudgetUpdate"];
+                "multipart/form-data": components["schemas"]["BudgetUpdate"];
             };
         };
         responses: {
@@ -446,6 +1332,62 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RootPartialUpdateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
             };
         };
     };
@@ -473,6 +1415,62 @@ export interface operations {
                 };
                 content?: never;
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliverablesCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
         };
     };
     deliverables_destroy: {
@@ -493,6 +1491,62 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliverablesDestroyErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
             };
         };
     };
@@ -521,6 +1575,62 @@ export interface operations {
                     "application/json": components["schemas"]["BudgetDetail"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NonStaffLinesCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
         };
     };
     non_staff_lines_destroy: {
@@ -535,12 +1645,69 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NonStaffLinesDestroyErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
             };
         };
     };
@@ -569,6 +1736,62 @@ export interface operations {
                     "application/json": components["schemas"]["BudgetDetail"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffLinesCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
         };
     };
     staff_lines_destroy: {
@@ -589,6 +1812,62 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffLinesDestroyErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
             };
         };
     };

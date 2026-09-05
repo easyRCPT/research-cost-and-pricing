@@ -66,7 +66,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "api",
-    "drf_spectacular"
+    "drf_spectacular",
+    "drf_standardized_errors"
 ]
 
 MIDDLEWARE = [
@@ -130,7 +131,34 @@ CORS_ALLOWED_ORIGINS = _env_list(
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "COERCE_DECIMAL_TO_STRING": False,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler"
+}
+
+SPECTACULAR_SETTINGS = {
+    # Our PATCH is a single-field command, not a partial object: keep section/field required
+    "COMPONENT_SPLIT_PATCH": False,
+    "POSTPROCESSING_HOOKS": ["drf_standardized_errors.openapi_hooks.postprocess_schema_enums"],
+    "ENUM_NAME_OVERRIDES": {
+        # Named enums for the error responses
+        "ValidationErrorEnum": "drf_standardized_errors.openapi_serializers.ValidationErrorEnum.choices",
+        "ClientErrorEnum": "drf_standardized_errors.openapi_serializers.ClientErrorEnum.choices",
+        "ServerErrorEnum": "drf_standardized_errors.openapi_serializers.ServerErrorEnum.choices",
+        "ErrorCode401Enum": "drf_standardized_errors.openapi_serializers.ErrorCode401Enum.choices",
+        "ErrorCode403Enum": "drf_standardized_errors.openapi_serializers.ErrorCode403Enum.choices",
+        "ErrorCode404Enum": "drf_standardized_errors.openapi_serializers.ErrorCode404Enum.choices",
+        "ErrorCode405Enum": "drf_standardized_errors.openapi_serializers.ErrorCode405Enum.choices",
+        "ErrorCode406Enum": "drf_standardized_errors.openapi_serializers.ErrorCode406Enum.choices",
+        "ErrorCode415Enum": "drf_standardized_errors.openapi_serializers.ErrorCode415Enum.choices",
+        "ErrorCode429Enum": "drf_standardized_errors.openapi_serializers.ErrorCode429Enum.choices",
+        "ErrorCode500Enum": "drf_standardized_errors.openapi_serializers.ErrorCode500Enum.choices",
+        # Named enums for each project field
+        "ProjectFieldEnum": "api.serializers.budget_update_serializer.PROJECT_FIELDS",
+        "BudgetFieldEnum": "api.serializers.budget_update_serializer.BUDGET_FIELDS",
+        "StaffFieldEnum": "api.serializers.budget_update_serializer.STAFF_FIELDS",
+        "NonStaffFieldEnum": "api.serializers.budget_update_serializer.NON_STAFF_FIELDS",
+        "DeliverableFieldEnum": "api.serializers.budget_update_serializer.DELIVERABLE_FIELDS",
+    },
 }
 
 # Custom user model, so approvals can record who decided and departments can be

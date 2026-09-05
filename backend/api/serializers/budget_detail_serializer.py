@@ -70,9 +70,10 @@ class DeliverableResultSerializer(serializers.Serializer):
 
 
 class BudgetInfoSerializer(serializers.Serializer):
-    mode = serializers.CharField()
-
+    from ..models import Budget
+    mode = serializers.ChoiceField(choices=Budget.Mode.choices)
     cost_multiplier = serializers.DecimalField(
+
         max_digits=4,
         decimal_places=2,
     )
@@ -90,7 +91,7 @@ class BudgetInfoSerializer(serializers.Serializer):
     )
 
     comments = serializers.CharField(allow_blank=True)
-    status = serializers.CharField()
+    status = serializers.ChoiceField(choices=Budget.Status.choices)
 
     deliverables = DeliverableResultSerializer(many=True)
 
@@ -120,6 +121,7 @@ class StaffLineSerializer(serializers.Serializer):
     employment_type = serializers.CharField()
     category = serializers.CharField()
     classification = serializers.CharField()
+    # TODO: ChoiceField(StaffCostLine.TimeBasis.choices) so the response type matches the input
     time_basis = serializers.CharField()
     in_kind = serializers.BooleanField()
 

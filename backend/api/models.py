@@ -1,3 +1,8 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
+
 from decimal import Decimal
 
 from django.conf import settings
@@ -291,6 +296,11 @@ class Budget(models.Model):
         DEAN_REVIEW = "dean_review", "Dean review"
         APPROVED = "approved", "Approved"
         WITHDRAWN = "withdrawn", "Withdrawn"
+
+    if TYPE_CHECKING:
+        deliverables: RelatedManager["Deliverable"]
+        staff_lines: RelatedManager["StaffCostLine"]
+        non_staff_lines: RelatedManager["NonStaffCostLine"]
 
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE

@@ -1,8 +1,8 @@
 from decimal import Decimal, InvalidOperation
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Model
+from rest_framework.exceptions import ValidationError
 
 from ..models import (
     Activity,
@@ -32,6 +32,7 @@ def update_field(
     row_id = data.get("row_id")
     field = data["field"]
     value = data["value"]
+    year = data.get("year")
 
     if section == "project":
         requires_calculation = update_project(budget, field, value)
@@ -40,11 +41,11 @@ def update_field(
     elif section == "staff":
         if row_id is None:
             raise ValidationError("row_id is required for staff.")
-        requires_calculation = update_staff(budget, row_id, field, value)
+        requires_calculation = update_staff(budget, row_id, field, value, year)
     elif section == "non_staff":
         if row_id is None:
             raise ValidationError("row_id is required for non_staff.")
-        requires_calculation = update_non_staff(budget, row_id, field, value)
+        requires_calculation = update_non_staff(budget, row_id, field, value, year)
     elif section == "deliverable":
         if row_id is None:
             raise ValidationError("row_id is required for deliverable.")
@@ -178,6 +179,7 @@ def update_staff(
     row_id: int,
     field: str,
     value: object,
+    year: int | None
 ) -> bool:
     try:
         staff_line = budget.staff_lines.get(id=row_id)
@@ -211,9 +213,13 @@ def update_staff(
         _set_boolean_field(staff_line, field, value)
         return True
 
-    # Year allocation
-    update_year_value(staff_line, field, value)
-    return True
+    if field == "year_value":
+        if year is None:
+            raise ValidationError("year is required for year_value.")
+        update_year_value(staff_line, year, value)
+        return True
+
+    raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
 def update_non_staff(
@@ -221,6 +227,7 @@ def update_non_staff(
     row_id: int,
     field: str,
     value: object,
+    year: int | None
 ) -> bool:
     try:
         non_staff_line = budget.non_staff_lines.get(id=row_id)
@@ -261,22 +268,20 @@ def update_non_staff(
         non_staff_line.save(update_fields=["category"])
         return True
 
-    # Year amount
-    update_year_value(non_staff_line, field, value)
-    return True
+    if field == "year_value":
+        if year is None:
+            raise ValidationError("year is required for year_value.")
+        update_year_value(non_staff_line, year, value)
+        return True
+
+    raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
 def update_year_value(
     line: StaffCostLine | NonStaffCostLine,
-    field: str,
+    year: int,
     value: object,
 ) -> None:
-    # Check valid year
-    try:
-        year = int(field)
-    except ValueError:
-        raise ValidationError(f"Invalid field '{field}'.")
-
     project = line.budget.project
 
     # Check in project duration
@@ -304,7 +309,7 @@ def update_year_value(
     try:
         decimal_value = Decimal(str(value))
     except (InvalidOperation, ValueError, TypeError):
-        raise ValidationError(f"Field '{field}' must be a valid decimal.")
+        raise ValidationError(f"Year '{year}' must be a valid number.")
 
     # Update or create
     if isinstance(line, StaffCostLine):
