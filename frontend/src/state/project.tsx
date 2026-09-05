@@ -7,22 +7,28 @@ import {
   type NonStaffRow, type Project, type StaffRow, type Summary,
 } from "@/lib/rcpt-engine"
 import * as api from "@/lib/api"
-import type { BudgetStatus } from "@/lib/api"
+import {
+  PROJECT_FIELD_MAP, BUDGET_FIELD_MAP, STAFF_FIELD_MAP, NON_STAFF_FIELD_MAP,
+  type BudgetStatus, type BudgetMeta,
+} from "@/lib/api"
+
+const DEBOUNCE_MS = 500
 
 interface ProjectContextValue {
   project: Project
   /**
    * Full local breakdown (staffByBucket, triggers, cat1Exempt, multiplier,
    * deanRequired, minRecovery, etc). Computed on every edit via rcpt-engine.ts.
-   * This stays the source of truth for on-screen figures because the
-   * backend's price_summary doesn't yet return this level of detail —
-   * see api.ts's file header. Once it does, this should be replaced by
-   * whatever `calculateBudget()` returns instead of being computed here.
+   * Kept as the source of truth for on-screen figures because it includes
+   * things the backend's budget_summary doesn't yet (dean-required/triggers).
+   * For a real (backend-loaded) budget, `serverSummary` below reflects what
+   * the backend actually computed after the last successful patch.
    */
   summary: Summary
+  serverSummary: api.BudgetSummary | null
+  meta: BudgetMeta | null
   years: number[]
   set: <K extends keyof Project>(key: K, value: Project[K]) => void
-  /** Several fields at once, for changes that have to stay consistent together. */
   patch: (values: Partial<Project>) => void
   patchStaff: (id: string, patch: Partial<StaffRow>) => void
   patchNonStaff: (id: string, patch: Partial<NonStaffRow>) => void
@@ -30,12 +36,9 @@ interface ProjectContextValue {
   addNonStaff: () => void
   removeStaff: (id: string) => void
   removeNonStaff: (id: string) => void
-
-  // --- backend-backed state, from api.ts ---
-  /** Null until the initial create/load call resolves. */
-  budgetId: string | null
+  isBackedByRealBudget: boolean
+  budgetId: number | null
   status: BudgetStatus | null
-  /** True once status has moved past "draft" — screens should stop editing. */
   isReadOnly: boolean
   initializing: boolean
   saving: boolean
@@ -52,42 +55,48 @@ export function ProjectProvider({
 }: {
   children: ReactNode
   initial?: () => Project
-  /** Load an existing budget instead of creating a fresh draft on mount. */
-  budgetId?: string
+  /** Pass a real backend budget id (e.g. from `manage.py seed`) to load and
+   * persist against the actual API. Omit it to fall back to the in-memory
+   * mock flow, for working on the UI without a running backend. */
+  budgetId?: number
 }) {
   const [project, setProject] = useState<Project>(initial ?? (() => emptyProject(6, 6)))
-  const [budgetId, setBudgetId] = useState<string | null>(null)
+  const [serverSummary, setServerSummary] = useState<api.BudgetSummary | null>(null)
+  const [meta, setMeta] = useState<BudgetMeta | null>(null)
+  const [budgetId, setBudgetId] = useState<number | null>(null)
   const [status, setStatus] = useState<BudgetStatus | null>(null)
+  const [isBackedByRealBudget, setIsBackedByRealBudget] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const didInit = useRef(false)
+  const debounceTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>())
 
-  // Load an existing budget, or spin up a placeholder project + draft budget
-  // so "Save draft" has somewhere real to write to from the very first edit.
-  // Runs once; deliberately not re-run on `project` changes.
   useEffect(() => {
     if (didInit.current) return
     didInit.current = true
 
     async function init() {
       try {
-        if (loadBudgetId) {
-          const record = await api.getBudget(loadBudgetId)
-          setProject(record.data)
-          setBudgetId(record.id)
-          setStatus(record.status)
+        if (loadBudgetId != null) {
+          const detail = await api.getBudgetDetail(loadBudgetId)
+          setProject(api.budgetDetailToProject(detail))
+          setMeta(api.budgetDetailToMeta(detail))
+          setServerSummary(detail.budget_summary)
+          setBudgetId(loadBudgetId)
+          setStatus(detail.budget_info.status)
+          setIsBackedByRealBudget(true)
           return
         }
+        // No real budget id given — fall back to the mock flow so the UI is
+        // still usable without a running backend.
         const proj = await api.createProject({
-          title: "Untitled project",
-          department: "",
-          funder: "",
+          title: "Untitled project", department: "", funder: "",
         })
-        const budget = await api.createBudget(proj.id, "full", project)
-        setBudgetId(budget.id)
-        setStatus(budget.status)
+        const mockBudget = await api.createMockBudget(proj.id, "full", project)
+        setBudgetId(mockBudget.id)
+        setStatus(mockBudget.status)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to initialise budget")
       } finally {
@@ -98,28 +107,103 @@ export function ProjectProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  function schedulePatch(
+    section: api.PatchSection,
+    fieldMap: Record<string, string | null>,
+    localField: string,
+    value: unknown,
+    rowId?: number,
+  ) {
+    if (!isBackedByRealBudget || budgetId == null) return
+    const backendField = fieldMap[localField]
+    if (backendField === undefined) {
+      console.warn(`No backend mapping for ${section}.${localField} — not persisted.`)
+      return
+    }
+    if (backendField === null) return // known-unsupported field, local-only for now
+
+    const key = `${section}:${rowId ?? ""}:${backendField}`
+    const timers = debounceTimers.current
+    clearTimeout(timers.get(key))
+    timers.set(
+      key,
+      setTimeout(() => {
+        timers.delete(key)
+        setSaving(true)
+        api.patchBudgetField(budgetId, section, backendField, value, rowId)
+          .then((detail) => {
+            if (detail) setServerSummary(detail.budget_summary)
+            setError(null)
+          })
+          .catch((err) => {
+            setError(err instanceof Error ? err.message : `Failed to save ${localField}`)
+          })
+          .finally(() => setSaving(false))
+      }, DEBOUNCE_MS),
+    )
+  }
+
   const value = useMemo<ProjectContextValue>(() => {
-    const set: ProjectContextValue["set"] = (key, val) =>
+    const set: ProjectContextValue["set"] = (key, val) => {
       setProject((p) => ({ ...p, [key]: val }))
+      const k = key as string
+      if (k in PROJECT_FIELD_MAP) schedulePatch("project", PROJECT_FIELD_MAP, k, val)
+      else if (k in BUDGET_FIELD_MAP) schedulePatch("budget", BUDGET_FIELD_MAP, k, val)
+    }
 
     const isReadOnly = status !== null && status !== "draft"
 
     return {
       project,
       summary: summarise(project),
+      serverSummary,
+      meta,
       years: projectYears(project),
       set,
-      patch: (values) => setProject((p) => ({ ...p, ...values })),
-      patchStaff: (id, patch) =>
+      patch: (values) => {
+        setProject((p) => ({ ...p, ...values }))
+        for (const [k, v] of Object.entries(values)) {
+          if (k in PROJECT_FIELD_MAP) schedulePatch("project", PROJECT_FIELD_MAP, k, v)
+          else if (k in BUDGET_FIELD_MAP) schedulePatch("budget", BUDGET_FIELD_MAP, k, v)
+        }
+      },
+      patchStaff: (id, patch) => {
         setProject((p) => ({
           ...p,
           staff: p.staff.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-        })),
-      patchNonStaff: (id, patch) =>
+        }))
+        const rowId = Number(id)
+        for (const [k, v] of Object.entries(patch)) {
+          if (k === "time") {
+            // Per-year values PATCH using the year itself as the field name.
+            const years = projectYears(project)
+            ;(v as number[]).forEach((amount, i) => {
+              schedulePatch("staff", {}, String(years[i]), amount, rowId)
+            })
+            continue
+          }
+          schedulePatch("staff", STAFF_FIELD_MAP, k, v, rowId)
+        }
+      },
+      patchNonStaff: (id, patch) => {
         setProject((p) => ({
           ...p,
           nonStaff: p.nonStaff.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-        })),
+        }))
+        const rowId = Number(id)
+        for (const [k, v] of Object.entries(patch)) {
+          if (k === "amounts") {
+            const years = projectYears(project)
+            ;(v as number[]).forEach((amount, i) => {
+              schedulePatch("non_staff", {}, String(years[i]), amount, rowId)
+            })
+            continue
+          }
+          schedulePatch("non_staff", NON_STAFF_FIELD_MAP, k, v, rowId)
+        }
+      },
+      // Adding/removing rows has no backend endpoint yet (no create/delete
+      // for staff or non-staff lines) — local-state only until that exists.
       addStaff: (inKind = false) =>
         setProject((p) => ({ ...p, staff: [...p.staff, blank(inKind)] })),
       addNonStaff: () =>
@@ -129,6 +213,7 @@ export function ProjectProvider({
       removeNonStaff: (id) =>
         setProject((p) => ({ ...p, nonStaff: p.nonStaff.filter((r) => r.id !== id) })),
 
+      isBackedByRealBudget,
       budgetId,
       status,
       isReadOnly,
@@ -137,11 +222,12 @@ export function ProjectProvider({
       submitting,
       error,
       save: async () => {
+        if (isBackedByRealBudget) return // real edits already persist per-field
         if (!budgetId) return
         setSaving(true)
         setError(null)
         try {
-          await api.saveBudget(budgetId, project)
+          await api.saveMockBudget(budgetId, project)
         } catch (err) {
           setError(err instanceof Error ? err.message : "Failed to save draft")
         } finally {
@@ -153,9 +239,11 @@ export function ProjectProvider({
         setSubmitting(true)
         setError(null)
         try {
-          // Persist the latest edits first, so what gets submitted matches
-          // exactly what's shown on screen.
-          await api.saveBudget(budgetId, project)
+          if (!isBackedByRealBudget) {
+            await api.saveMockBudget(budgetId, project)
+          }
+          // No real submit endpoint exists yet — this always goes through
+          // the mock flow for now, even for a real-budget id.
           const record = await api.submitForApproval(budgetId)
           setStatus(record.status)
         } catch (err) {
@@ -165,7 +253,10 @@ export function ProjectProvider({
         }
       },
     }
-  }, [project, budgetId, status, initializing, saving, submitting, error])
+  }, [
+    project, serverSummary, meta, budgetId, status, isBackedByRealBudget,
+    initializing, saving, submitting, error,
+  ])
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
 }
