@@ -6,7 +6,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help setup secretkey hooks preflight db-up db-down \
         db-down-v db-reset db-logs db-shell db-list db-prune branch-env migrate \
-        makemigrations seed seed-list superuser backend frontend test lint
+        makemigrations seed seed-list superuser backend frontend test lint gen-api
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -100,3 +100,7 @@ test: ## Run the Django test suite
 
 lint: ## Lint the frontend and type-check the build
 	cd frontend && pnpm lint && pnpm exec tsc -b
+
+gen-api: ## Regenerate frontend/src/types/api.d.ts from the DRF/Django schema
+	cd backend && uv run python manage.py spectacular --file ../frontend/schema.yml
+	cd frontend && pnpm gen:api

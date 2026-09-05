@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "gen:api": "openapi-typescript http://localhost:8000/api/schema/ -o src/types/api.d.ts"
+    "gen:api": "openapi-typescript schema.yml -o src/types/api.d.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
