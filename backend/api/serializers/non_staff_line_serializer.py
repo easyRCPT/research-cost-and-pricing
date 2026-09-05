@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from ..models import NonStaffCostCategory
@@ -10,7 +11,7 @@ class YearAmountSerializer(serializers.Serializer):
         decimal_places=2,
     )
 
-
+@extend_schema_serializer(component_name="NonStaffLineInput")
 class NonStaffLineSerializer(serializers.Serializer):
     cost_group = serializers.CharField()
     expense_type = serializers.CharField()

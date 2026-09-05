@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from ..models import OnCostRate, SalaryRate, StaffCostLine
@@ -10,7 +11,7 @@ class YearAllocationSerializer(serializers.Serializer):
         decimal_places=4,
     )
 
-
+@extend_schema_serializer(component_name="StaffLineInput")
 class StaffLineSerializer(serializers.Serializer):
     name_role = serializers.CharField(max_length=100)
     employment_type = serializers.ChoiceField(choices=OnCostRate.EmploymentType.choices)
