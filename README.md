@@ -147,6 +147,7 @@ make seed          # load reference data from backend/seeds/
 make backend       # Django dev server (runs preflight first)
 make frontend      # Vite dev server
 make test          # Django test suite
+make gen-api       # regenerate frontend/src/types/api.d.ts from the DRF serializers
 make preflight     # check Docker, config, database, migrations and seeds are ready
 make hooks         # activate the git hooks in .githooks/
 make secretkey     # generate DJANGO_SECRET_KEY if backend/.env still has the placeholder
@@ -444,8 +445,8 @@ pointed at whichever branch's database you were last on.
 `.github/workflows/ci.yml` runs on every push and pull request, in two independent jobs:
 
 - **Backend** - brings up a Postgres 18 service container (the same major version as
-  `docker-compose.yml`), installs with `uv sync --locked`, then runs a migration drift gate,
-  applies migrations, and runs the test suite.
+  `docker-compose.yml`), installs with `uv sync --locked`, then runs a migration drift gate
+  and an API type drift gate, applies migrations, and runs the test suite.
 - **Frontend** - `pnpm install --frozen-lockfile`, `pnpm lint`, and `pnpm build` (which is
   `tsc -b && vite build`, so it type-checks too).
 
@@ -453,6 +454,12 @@ The **migration drift gate** is `manage.py makemigrations --check --dry-run`. Mo
 the source and migrations are the artefact, so a model change pushed without its migration
 fails here rather than at deploy time. If it fails, run `make makemigrations` and commit
 the result.
+
+The **API type drift gate** is the same idea for the frontend's view of the API.
+Serializers are the source and `frontend/src/types/api.d.ts` is the artefact: the backend
+job regenerates it (`manage.py spectacular` → `frontend/schema.yml` → `openapi-typescript`)
+and fails if the committed file differs. If it fails, run `make gen-api` and commit the
+result. `schema.yml` itself is an intermediate and is gitignored.
 
 Two lockfile gates ride along. `uv sync --locked` fails if `uv.lock` has drifted from
 `pyproject.toml`, and `--frozen-lockfile` does the same for `pnpm-lock.yaml`.
