@@ -7,3 +7,4 @@ export {
 } from './Sidebar'
 export { TopBar } from './TopBar'
 export { SECTIONS } from './sections'
+export { FieldRow } from './FieldRow'
