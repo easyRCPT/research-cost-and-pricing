@@ -21,7 +21,7 @@ from ..models import (
 from . import budget_details
 
 
-def update(
+def update_field(
     budget: Budget,
     data: dict,
 ) -> dict | None:
