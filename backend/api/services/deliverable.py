@@ -1,9 +1,16 @@
-from api.models import Budget
+from django.db import transaction
+
+from ..models import Budget, Deliverable
 
 
+@transaction.atomic
 def create(budget: Budget, data: dict) -> None:
-    return
+    Deliverable.objects.create(
+        budget=budget,
+        **data,
+    )
 
 
-def delete(budget: Budget, deliverable_id: int) -> None:
-    return
+@transaction.atomic
+def delete(deliverable: Deliverable) -> None:
+    deliverable.delete()

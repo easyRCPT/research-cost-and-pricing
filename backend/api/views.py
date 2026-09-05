@@ -6,7 +6,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Budget
+from .models import Budget, Deliverable, NonStaffCostLine, StaffCostLine
 from .serializers.budget_detail_serializer import BudgetDetailSerializer
 from .serializers.budget_update_serializer import BudgetUpdateSerializer
 from .serializers.deliverable_serializer import DeliverableSerializer
@@ -71,9 +71,12 @@ class StaffLineView(APIView):
         )
 
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
+        # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        # Check that the line belongs to the budget
+        line = get_object_or_404(StaffCostLine, id=line_id, budget=budget)
 
-        result = staff_line.delete(budget, line_id)
+        result = staff_line.delete(budget, line)
 
         result_serializer = BudgetDetailSerializer(result)
 
@@ -85,6 +88,7 @@ class StaffLineView(APIView):
 
 class NonStaffLineView(APIView):
     def post(self, request: Request, budget_id: int) -> Response:
+        # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
 
         serializer = NonStaffLineSerializer(
@@ -103,9 +107,12 @@ class NonStaffLineView(APIView):
         )
 
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
+        # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        # Check that the line belongs to the budget
+        line = get_object_or_404(NonStaffCostLine, id=line_id, budget=budget)
 
-        result = non_staff_line.delete(budget, line_id)
+        result = non_staff_line.delete(budget, line)
 
         result_serializer = BudgetDetailSerializer(result)
 
@@ -117,6 +124,7 @@ class NonStaffLineView(APIView):
 
 class DeliverableView(APIView):
     def post(self, request: Request, budget_id: int) -> Response:
+        # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
 
         serializer = DeliverableSerializer(data=request.data)
@@ -127,8 +135,11 @@ class DeliverableView(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request: Request, budget_id: int, deliverable_id: int) -> Response:
+        # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        # Check that the deliverable belongs to the budget
+        item = get_object_or_404(Deliverable, id=deliverable_id, budget=budget)
 
-        deliverable.delete(budget, deliverable_id)
+        deliverable.delete(item)
 
         return Response(status=status.HTTP_204_NO_CONTENT)

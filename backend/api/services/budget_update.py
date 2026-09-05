@@ -1,6 +1,7 @@
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Model
 
 from ..models import (
@@ -21,6 +22,7 @@ from ..models import (
 from . import budget_details
 
 
+@transaction.atomic
 def update_field(
     budget: Budget,
     data: dict,
