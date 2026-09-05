@@ -1,0 +1,4 @@
+frontend/dist
+frontend/node_modules
+frontend/pnpm-lock.yaml
+frontend/src/types/api.d.ts
