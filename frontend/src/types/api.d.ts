@@ -11,13 +11,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["budgets_retrieve"];
+        get: operations["root_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["budgets_partial_update"];
+        patch: operations["root_partial_update"];
         trace?: never;
     };
     "/api/budgets/{budget_id}/deliverables/": {
@@ -29,7 +29,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["budgets_deliverables_create"];
+        post: operations["deliverables_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -46,7 +46,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["budgets_deliverables_destroy"];
+        delete: operations["deliverables_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -61,7 +61,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["budgets_non_staff_lines_create"];
+        post: operations["non_staff_lines_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -78,7 +78,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["budgets_non_staff_lines_destroy"];
+        delete: operations["non_staff_lines_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -93,7 +93,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["budgets_staff_lines_create"];
+        post: operations["staff_lines_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -110,29 +110,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["budgets_staff_lines_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/schema/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description OpenApi3 schema for this API. Format can be selected via content negotiation.
-         *
-         *     - YAML: application/vnd.oai.openapi
-         *     - JSON: application/vnd.oai.openapi+json
-         */
-        get: operations["schema_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
+        delete: operations["staff_lines_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -416,7 +394,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    budgets_retrieve: {
+    root_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -437,7 +415,7 @@ export interface operations {
             };
         };
     };
-    budgets_partial_update: {
+    root_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -471,7 +449,7 @@ export interface operations {
             };
         };
     };
-    budgets_deliverables_create: {
+    deliverables_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -497,7 +475,7 @@ export interface operations {
             };
         };
     };
-    budgets_deliverables_destroy: {
+    deliverables_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -518,7 +496,7 @@ export interface operations {
             };
         };
     };
-    budgets_non_staff_lines_create: {
+    non_staff_lines_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -545,7 +523,7 @@ export interface operations {
             };
         };
     };
-    budgets_non_staff_lines_destroy: {
+    non_staff_lines_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -566,7 +544,7 @@ export interface operations {
             };
         };
     };
-    budgets_staff_lines_create: {
+    staff_lines_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -593,7 +571,7 @@ export interface operations {
             };
         };
     };
-    budgets_staff_lines_destroy: {
+    staff_lines_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -611,39 +589,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    schema_retrieve: {
-        parameters: {
-            query?: {
-                format?: "json" | "yaml";
-                lang?: "af" | "ar" | "ar-dz" | "ast" | "az" | "be" | "bg" | "bn" | "br" | "bs" | "ca" | "ckb" | "cs" | "cy" | "da" | "de" | "dsb" | "el" | "en" | "en-au" | "en-gb" | "eo" | "es" | "es-ar" | "es-co" | "es-mx" | "es-ni" | "es-ve" | "et" | "eu" | "fa" | "fi" | "fr" | "fy" | "ga" | "gd" | "gl" | "he" | "hi" | "hr" | "hsb" | "ht" | "hu" | "hy" | "ia" | "id" | "ig" | "io" | "is" | "it" | "ja" | "ka" | "kab" | "kk" | "km" | "kn" | "ko" | "ky" | "lb" | "lt" | "lv" | "mk" | "ml" | "mn" | "mr" | "ms" | "my" | "nb" | "ne" | "nl" | "nn" | "os" | "pa" | "pl" | "pt" | "pt-br" | "ro" | "ru" | "sk" | "sl" | "sq" | "sr" | "sr-latn" | "sv" | "sw" | "ta" | "te" | "tg" | "th" | "tk" | "tr" | "tt" | "udm" | "ug" | "uk" | "ur" | "uz" | "vi" | "zh-hans" | "zh-hant";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.oai.openapi": {
-                        [key: string]: unknown;
-                    };
-                    "application/yaml": {
-                        [key: string]: unknown;
-                    };
-                    "application/vnd.oai.openapi+json": {
-                        [key: string]: unknown;
-                    };
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
             };
         };
     };
