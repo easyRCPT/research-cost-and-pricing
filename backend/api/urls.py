@@ -1,8 +1,20 @@
 from django.urls import path
 
-from .views import BudgetDetailView, DeliverableView, NonStaffLineView, StaffLineView
+from .views import (
+    BudgetDetailView,
+    DeliverableView,
+    LookupView,
+    NonStaffLineView,
+    StaffLineView,
+)
 
 urlpatterns = [
+    # Lookups
+    path(
+        "lookups/",
+        LookupView.as_view(http_method_names=["get"]),
+        name="lookups",
+    ),
     # Budget
     path(
         "budgets/<int:budget_id>/",
@@ -42,4 +54,5 @@ urlpatterns = [
         DeliverableView.as_view(http_method_names=["delete"]),
         name="deliverable-detail",
     ),
+    #
 ]

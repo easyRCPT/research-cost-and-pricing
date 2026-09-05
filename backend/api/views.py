@@ -1,8 +1,8 @@
 from typing import cast
 
 from django.shortcuts import get_object_or_404
-
-from rest_framework import serializers, status
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,12 +15,14 @@ from .serializers.budget_update_serializer import (
     SectionSerializer,
 )
 from .serializers.deliverable_serializer import DeliverableSerializer
+from .serializers.lookup_serializer import LookupTablesSerializer
 from .serializers.non_staff_line_serializer import NonStaffLineSerializer
 from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
     budget_details,
     budget_update,
     deliverable,
+    lookups,
     non_staff_line,
     staff_line,
 )
@@ -134,3 +136,9 @@ class DeliverableView(APIView):
         deliverable.delete(item)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LookupView(APIView):
+    @extend_schema(responses=LookupTablesSerializer)
+    def get(self, request: Request) -> Response:
+        tables = lookups.get_lookup_tables()
+        return Response(LookupTablesSerializer(tables).data)

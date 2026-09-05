@@ -13,6 +13,7 @@ from ..models import (
     SalaryRate,
     SalaryRateMultiplier,
 )
+from . import lookups
 
 CACHE_KEY = "lookup_constants_dict"
 
@@ -21,29 +22,6 @@ REQUIRED_CONSTANTS = {
     "max_payroll_tax",
     "override_uom_oncosts",
 }
-
-
-def get_lookup_tables() -> dict:
-    """
-    Public data access interface with table formatting.
-    Used for displaying lookup tables.
-    """
-    lookup_tables = get_constants()
-    salary_rate = lookup_tables["salary_rate"]
-
-    return {
-        **lookup_tables,
-        "salary_rate": {
-            f"{row_id[0]}_{row_id[1]}_{row_id[2]}": {
-                "payroll_type": row_id[0],
-                "category": row_id[1],
-                "classification": row_id[2],
-                "rate": rate,
-            }
-            for row_id, rate in salary_rate.items()
-        },
-    }
-
 
 def get_constants() -> dict:
     """
@@ -175,3 +153,4 @@ def invalidate_lookup_cache() -> None:
     Refresh the cache after an administrator modifies Lookup table data.
     """
     cache.delete(CACHE_KEY)
+    cache.delete_many([CACHE_KEY, lookups.CACHE_KEY])
