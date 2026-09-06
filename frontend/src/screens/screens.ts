@@ -16,13 +16,10 @@ export const SCREEN_HEADINGS: Record<
     title: 'Non-Staff Costs',
     subtitle: 'Part C — equipment, services, travel and student support',
   },
-  cash: {
-    title: 'Cash Co-Contributions',
-    subtitle: 'Part D — University cash committed to the project',
-  },
-  adjust: {
-    title: 'Adjust Price',
-    subtitle: 'Identify in-kind contributions and review the proposed price',
+  inkind: {
+    title: 'In-Kind Contributions',
+    subtitle:
+      'University investment in the project — not included in the price charged',
   },
   price: {
     title: 'Price Summary',
@@ -31,5 +28,9 @@ export const SCREEN_HEADINGS: Record<
   budget: {
     title: 'Budget Form',
     subtitle: 'The costing record prepared for authorisation',
+  },
+  approvals: {
+    title: 'Approvals',
+    subtitle: 'Signatures required before the budget form can be submitted',
   },
 }

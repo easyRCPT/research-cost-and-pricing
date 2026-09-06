@@ -7,6 +7,8 @@ export type LookupTables = S['LookupTables']
 export type LookupTableNames = keyof LookupTables
 export type NonStaffCategory = S['NonStaffCostCategory']
 export type Department = S['Department']
+export type SalaryRate = S['SalaryRate']
+export type SalaryRateMultiplier = S['SalaryRateMultiplier']
 
 // Project Details
 export type ProjectInfo = S['ProjectInfo']

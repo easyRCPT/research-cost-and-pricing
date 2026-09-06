@@ -17,6 +17,8 @@ interface AppContentProps {
 
 export type AppScreen = EditorScreen | typeof LOOKUP_SCREEN
 
+const DEMO_BUDGET_ID = 1
+
 export function AppContent({ screen, setScreen }: AppContentProps) {
   const { data: lookups } = useLookups()
   const [project, setProject] = useState<ProjectInfo>(EMPTY_PROJECT)
@@ -56,6 +58,7 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
             years,
             setLines: setNonStaffLines,
           }}
+          budgetId={DEMO_BUDGET_ID}
         />
       )}
     </AppShell>

@@ -2,6 +2,7 @@ import { type EditorScreen } from '@/components/shell'
 import type { LookupTables, ProjectInfo } from '@/types'
 import { ProjectDetails } from './ProjectDetails'
 import { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
+import { StaffCosts } from './StaffCosts'
 import { EmptyStateScreen } from './EmptyStateScreen'
 
 interface EditorScreenContentProps {
@@ -10,6 +11,7 @@ interface EditorScreenContentProps {
   project: ProjectInfo
   onChange: (patch: Partial<ProjectInfo>) => void
   nonStaff: Omit<NonStaffCostsProps, 'lookups'>
+  budgetId: number
 }
 
 export function EditorScreenContent({
@@ -18,6 +20,7 @@ export function EditorScreenContent({
   project,
   onChange,
   nonStaff,
+  budgetId,
 }: EditorScreenContentProps) {
   switch (screen) {
     case 'details':
@@ -28,6 +31,8 @@ export function EditorScreenContent({
           lookups={lookups}
         />
       )
+    case 'staff':
+      return <StaffCosts budgetId={budgetId} lookups={lookups} />
     case 'nonstaff':
       return <NonStaffCosts {...nonStaff} lookups={lookups} />
     default:
