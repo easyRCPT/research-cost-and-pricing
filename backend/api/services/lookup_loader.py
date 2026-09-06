@@ -150,13 +150,7 @@ def get_constants() -> dict:
         list[CalculationConstant],
         tables["calculation_constants"],
     )
-    constants = {
-        row.name: {
-            "description": row.description,
-            "value": row.value,
-        }
-        for row in calculation_constants
-    }
+    constants = {row.name: row.value for row in calculation_constants}
 
     validate_constants(constants)
 

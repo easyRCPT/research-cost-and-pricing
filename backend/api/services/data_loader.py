@@ -9,9 +9,9 @@ def load_budget_data(budget: Budget) -> dict:
 
     project_duration = {
         "start_year": project_info["start_year"],
-        "start_month": project_info["project_info"]["start_month"],
-        "end_year": project_info["project_info"]["end_year"],
-        "end_month": project_info["project_info"]["end_month"],
+        "start_month": project_info["start_month"],
+        "end_year": project_info["end_year"],
+        "end_month": project_info["end_month"],
     }
 
     staff_lines = list(budget.staff_lines.all())

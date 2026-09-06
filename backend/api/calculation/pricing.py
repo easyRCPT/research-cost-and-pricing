@@ -79,10 +79,6 @@ def calculate_budget_summary(
     # non-staff budget
     # not include in-kind costs
     non_staff_budget = calculate_non_staff_budget(non_staff_result["cost_results"])
-    direct_total = non_staff_budget["direct_total"]
-    indirect_total = non_staff_result["indirect_total"]["total"]
-    non_staff_budget["indirect_cost_recovery"] = indirect_total
-    non_staff_budget["total_non_staff_costs"] = direct_total + indirect_total
 
     # in kind costs
     # non-staff total not include indirect costs
@@ -219,8 +215,11 @@ def calculate_non_staff_budget(
 
     # Add summary
     direct_total = sum(result.values())
+    indirect_total = non_staff_result["indirect_total"]["total"]
 
     return {
         "category_totals": result,
         "direct_total": direct_total,
+        "indirect_cost_recovery": indirect_total,
+        "total_non_staff_costs": direct_total + indirect_total,
     }

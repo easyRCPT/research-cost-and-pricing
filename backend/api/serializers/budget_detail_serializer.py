@@ -17,7 +17,7 @@ class CostDecimalField(serializers.DecimalField):
 
     def to_representation(self, value):
         if value is not None:
-            value = value.quantize(
+            value = Decimal(value).quantize(
                 Decimal("0.01"),
                 rounding=ROUND_HALF_UP,
             )
