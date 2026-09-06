@@ -21,7 +21,13 @@ export function EditorScreenContent({
 }: EditorScreenContentProps) {
   switch (screen) {
     case 'details':
-      return <ProjectDetails project={project} onChange={onChange} />
+      return (
+        <ProjectDetails
+          project={project}
+          onChange={onChange}
+          lookups={lookups}
+        />
+      )
     case 'nonstaff':
       return <NonStaffCosts {...nonStaff} lookups={lookups} />
     default:
