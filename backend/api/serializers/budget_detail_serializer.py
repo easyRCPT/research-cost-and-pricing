@@ -71,9 +71,9 @@ class DeliverableResultSerializer(serializers.Serializer):
 
 class BudgetInfoSerializer(serializers.Serializer):
     from ..models import Budget
+
     mode = serializers.ChoiceField(choices=Budget.Mode.choices)
     cost_multiplier = serializers.DecimalField(
-
         max_digits=4,
         decimal_places=2,
     )

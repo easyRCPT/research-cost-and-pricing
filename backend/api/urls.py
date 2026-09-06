@@ -19,7 +19,7 @@ urlpatterns = [
     path(
         "budgets/<int:budget_id>/",
         BudgetDetailView.as_view(http_method_names=["get", "patch"]),
-        name="budget-detail"
+        name="budget-detail",
     ),
     # Staff lines
     path(
