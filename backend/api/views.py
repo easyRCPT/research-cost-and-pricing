@@ -10,12 +10,14 @@ from .models import Budget, Deliverable, NonStaffCostLine, StaffCostLine
 from .serializers.budget_detail_serializer import BudgetDetailSerializer
 from .serializers.budget_update_serializer import BudgetUpdateSerializer
 from .serializers.deliverable_serializer import DeliverableSerializer
+from .serializers.lookup_tables_serializer import LookupTablesSerializer
 from .serializers.non_staff_line_serializer import NonStaffLineSerializer
 from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
     budget_details,
     budget_update,
     deliverable,
+    lookup_loader,
     non_staff_line,
     staff_line,
 )
@@ -143,3 +145,11 @@ class DeliverableView(APIView):
         deliverable.delete(item)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LookupTablesView(APIView):
+    def get(self, request):
+        lookup_data = lookup_loader.get_constants()
+        serializer = LookupTablesSerializer(lookup_data)
+
+        return Response(serializer.data)

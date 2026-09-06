@@ -242,7 +242,7 @@ def calculate_staff_cost(
     # Leave loading
     # MAX_LEAVE_LOADING = 1611.3
     leave_loading = on_costs["leave_loading"] * requested_salary
-    max_leave_loading = general["max_leave_loading"]
+    max_leave_loading = general["max_leave_loading"]["value"]
     leave_loading = min(leave_loading, max_leave_loading)
     # Superannuation
     superannuation = on_costs["superannuation"] * requested_salary
@@ -251,7 +251,7 @@ def calculate_staff_cost(
     subtotal_cost = requested_salary + leave_loading + superannuation
 
     # Add Payroll Tax (on subtotal)
-    total_cost = subtotal_cost + general["max_payroll_tax"] * subtotal_cost
+    total_cost = subtotal_cost + general["max_payroll_tax"]["value"] * subtotal_cost
     # Add WorkCover (on subtotal)
     total_cost += on_costs["workcover"] * subtotal_cost
     # Add Long Service Leave
@@ -259,7 +259,7 @@ def calculate_staff_cost(
     # Add Parental Leave Provision
     total_cost += on_costs["parental_leave"] * requested_salary
     # Add Override Default UoM Oncosts
-    total_cost += general["override_uom_oncosts"] * requested_salary
+    total_cost += general["override_uom_oncosts"]["value"] * requested_salary
     # Add Annual Leave Provision
     total_cost += on_costs["annual_leave_provision"] * requested_salary
     # Recovery

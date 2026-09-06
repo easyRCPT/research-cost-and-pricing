@@ -1,10 +1,26 @@
 from django.urls import path
 
-from .views import BudgetDetailView, DeliverableView, NonStaffLineView, StaffLineView
+from .views import (
+    BudgetDetailView,
+    DeliverableView,
+    LookupTablesView,
+    NonStaffLineView,
+    StaffLineView,
+)
 
 urlpatterns = [
+    # Lookup tables
+    path(
+        "lookup-tables/",
+        LookupTablesView.as_view(),
+        name="lookup-tables",
+    ),
     # Budget
-    path("budgets/<int:budget_id>/", BudgetDetailView.as_view(), name="budget-detail"),
+    path(
+        "budgets/<int:budget_id>/",
+        BudgetDetailView.as_view(),
+        name="budget-detail",
+    ),
     # Staff lines
     path(
         "budgets/<int:budget_id>/staff-lines/",
