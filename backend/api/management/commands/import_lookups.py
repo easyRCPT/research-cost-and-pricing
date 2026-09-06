@@ -34,6 +34,9 @@ from api.models import (
     SalaryRateMultiplier,
 )
 
+# 0 represents a non-ledger category for "contingency".
+CONTINGENCY_LEDGER_ID = 0
+
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
 EMPLOYMENT_TYPES = {"Continuing", "Fixed-Term", "Casual"}
@@ -358,6 +361,16 @@ def import_non_staff_categories(workbook):
         )
 
         count += 1
+
+        # Contingency is handled separately in the Excel workbook,
+        # but is a category option in RCPT.
+        NonStaffCostCategory.objects.update_or_create(
+            ledger_id=CONTINGENCY_LEDGER_ID,
+            defaults={
+                "cost_category": "Contingency",
+                "cost_subcategory": "Contingency",
+            },
+        )
 
     return count
 

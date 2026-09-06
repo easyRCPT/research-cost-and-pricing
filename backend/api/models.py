@@ -95,7 +95,7 @@ class SalaryRate(models.Model):
 # TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
 class OnCostRate(models.Model):
     """
-    On-cost percentages from the excel's lookup tables.
+    On-cost percentages from the Excel's lookup tables.
 
     employment_type and year are both nullable; which one applies
     (or neither) depends on on_cost_type.
@@ -163,7 +163,6 @@ class OnCostRate(models.Model):
         return f"{self.get_on_cost_type_display()} - {self.employment_type or 'any'} ({scope})"
 
 
-# TODO: Check if there is a contingency category when import. eg. (some ledger id like 0000, contingency, contingency)
 class NonStaffCostCategory(models.Model):
     # The expense types a non-staff cost line can be booked against. Each one
     # carries the finance ledger ID that ends up on the budget form, which is
