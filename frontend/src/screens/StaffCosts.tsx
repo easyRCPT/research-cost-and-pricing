@@ -111,6 +111,7 @@ export function StaffCosts({ budgetId, lookups }: StaffCostsProps) {
         <StaffTable
           lines={lines}
           years={years}
+          columnTotal={budget.staff_cost.column_total}
           salaryRates={lookups.salary_rates}
           multipliers={lookups.salary_rate_multipliers}
           patchLine={patchLine}

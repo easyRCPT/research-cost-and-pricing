@@ -1,14 +1,19 @@
 import { FootTd } from '@/components/shell'
 import { money } from '@/lib/format/utils'
-import { costFor } from '@/lib/staff'
-import type { StaffLine } from '@/types'
+import type { StaffTotal } from '@/types'
 
 interface StaffTableFooterProps {
   years: number[]
-  lines: StaffLine[]
+  columnTotal: StaffTotal
 }
 
-export function StaffTableFooter({ years, lines }: StaffTableFooterProps) {
+export function StaffTableFooter({
+  years,
+  columnTotal,
+}: StaffTableFooterProps) {
+  const costFor = (year: number) =>
+    columnTotal.by_year.find((entry) => entry.year === year)?.cost ?? 0
+
   return (
     <tfoot>
       <tr>
@@ -17,9 +22,7 @@ export function StaffTableFooter({ years, lines }: StaffTableFooterProps) {
         </FootTd>
         {years.map((year) => [
           <FootTd key={`${year}-time`} />,
-          <FootTd key={`${year}-total`}>
-            {money(lines.reduce((sum, line) => sum + costFor(line, year), 0))}
-          </FootTd>,
+          <FootTd key={`${year}-total`}>{money(costFor(year))}</FootTd>,
         ])}
         <FootTd />
       </tr>

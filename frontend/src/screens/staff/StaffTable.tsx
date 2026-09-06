@@ -1,6 +1,11 @@
 import { Grid } from '@/components/shell'
 import { Button } from '@/components/ui/button'
-import type { SalaryRate, SalaryRateMultiplier, StaffLine } from '@/types'
+import type {
+  SalaryRate,
+  SalaryRateMultiplier,
+  StaffLine,
+  StaffTotal,
+} from '@/types'
 import { Plus } from 'lucide-react'
 import { StaffTableBody } from './StaffTableBody'
 import { StaffTableFooter } from './StaffTableFooter'
@@ -9,6 +14,7 @@ import { StaffTableHeader } from './StaffTableHeader'
 interface StaffTableProps {
   lines: StaffLine[]
   years: number[]
+  columnTotal: StaffTotal
   salaryRates: SalaryRate[]
   multipliers: SalaryRateMultiplier[]
   patchLine: (id: number, patch: Partial<StaffLine>) => void
@@ -19,6 +25,7 @@ interface StaffTableProps {
 export function StaffTable({
   lines,
   years,
+  columnTotal,
   salaryRates,
   multipliers,
   patchLine,
@@ -37,7 +44,7 @@ export function StaffTable({
           patchLine={patchLine}
           removeLine={removeLine}
         />
-        <StaffTableFooter lines={lines} years={years} />
+        <StaffTableFooter years={years} columnTotal={columnTotal} />
       </Grid>
       <Button variant="outline" size="sm" className="mt-3" onClick={addLine}>
         <Plus /> Add row
