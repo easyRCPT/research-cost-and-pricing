@@ -1,5 +1,12 @@
 from decimal import Decimal
 
+# Cost groups that should not apply additional direct rate and indirect rate
+EXCLUDED_COST_GROUPS = {
+    "contingency",
+    "student_support",
+    "shared_grant_payments",
+}
+
 
 def calculate_non_staff_table(
     table_data: dict,
@@ -93,8 +100,7 @@ def calculate_non_staff_column(
 
             # indirect rate
             indirect_rate_multiplier = row["info"].get("indirect_rate_multiplier", 1)
-            # Contingency should not apply additional direct rate and indirect rate
-            if row["info"]["cost_group"] != "contingency":
+            if row["info"]["cost_group"] in EXCLUDED_COST_GROUPS:
                 indirect_rate_multiplier = 1
             total += value * indirect_rate_multiplier
 
@@ -129,11 +135,8 @@ def find_direct_rate_multiplier(
     indirect_rate_multiplier = info_data.get("indirect_rate_multiplier", 1)
     cost_group = info_data["cost_group"]
 
-    # TODO(Chenhao): Also exclude Student Support and Shared Grant Payments; the UI
-    # disables this flag for those groups, but stored lines can still have it set.
-    # Contingency should not apply additional direct rate and indirect rate
     if (
-        cost_group != "contingency"
+        cost_group not in EXCLUDED_COST_GROUPS
         and has_additional_direct_rate
         and indirect_rate_multiplier <= 1
     ):
