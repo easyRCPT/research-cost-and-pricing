@@ -65,6 +65,41 @@ export function useRemoveStaffLine(budgetId: number) {
   })
 }
 
+export function useUpdateProjectFields(budgetId: number) {
+  return useBudgetMutation(budgetId, async (patch: Record<string, unknown>) => {
+    let latest: BudgetDetail | undefined
+    for (const [field, value] of Object.entries(patch)) {
+      const { data, error, response } = await api.PATCH(
+        '/api/budgets/{budget_id}/',
+        {
+          params: { path: { budget_id: budgetId } },
+          body: { section: 'project', field, value } as never,
+        },
+      )
+      if (error) throw new ApiError(response.status, error)
+      latest = (data as BudgetDetail | undefined) ?? latest
+    }
+    return latest
+  })
+}
+
+export function useUpdateBudgetField(budgetId: number) {
+  return useBudgetMutation(
+    budgetId,
+    async (update: { field: string; value: unknown }) => {
+      const { data, error, response } = await api.PATCH(
+        '/api/budgets/{budget_id}/',
+        {
+          params: { path: { budget_id: budgetId } },
+          body: { section: 'budget', ...update } as never,
+        },
+      )
+      if (error) throw new ApiError(response.status, error)
+      return data as BudgetDetail | undefined
+    },
+  )
+}
+
 interface StaffFieldUpdate {
   row_id: number
   field: string
