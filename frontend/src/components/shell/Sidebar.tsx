@@ -10,7 +10,7 @@ export interface SidebarSection {
 
 interface SideBarProps {
   sections: readonly SidebarSection[]
-  current: EditorScreen
+  current: EditorScreen | null
   onSelect: (screen: EditorScreen) => void
 }
 

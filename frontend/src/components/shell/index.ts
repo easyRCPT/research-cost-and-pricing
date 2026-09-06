@@ -8,6 +8,7 @@ export {
 export { TopBar } from './TopBar'
 export { SECTIONS } from './sections'
 export { FieldRow } from './FieldRow'
+export { Note } from './Note'
 export {
   Grid,
   Th,

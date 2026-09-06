@@ -28,3 +28,7 @@ export type TimeBasis = S['TimeBasisEnum']
 /** model.py enums  */
 export type Mode = S['ModeEnum']
 export type Status = S['StatusEnum']
+
+// Lookups
+export type LookupTables = S['LookupTables']
+export type LookupTableNames = keyof LookupTables

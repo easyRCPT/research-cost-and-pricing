@@ -19,9 +19,15 @@ const ALIGN: Record<Align, string> = {
 }
 
 /** Sizes to its content and scrolls sideways rather than squeezing the year columns. */
-export function Grid({ children }: { children: ReactNode }) {
+export function Grid({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
   return (
-    <div className="overflow-x-auto rounded-md border">
+    <div className={cn('overflow-x-auto rounded-md border', className)}>
       <table className="w-max min-w-full border-collapse text-[13px]">
         {children}
       </table>
