@@ -1,17 +1,19 @@
 import { type EditorScreen } from '@/components/shell'
-import type { ProjectInfo } from '@/types'
+import type { LookupTables, ProjectInfo } from '@/types'
 import { ProjectDetails } from './ProjectDetails'
 import { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
 import { EmptyStateScreen } from './EmptyStateScreen'
 
 interface EditorScreenContentProps {
+  lookups: LookupTables
   screen: EditorScreen
   project: ProjectInfo
   onChange: (patch: Partial<ProjectInfo>) => void
-  nonStaff: NonStaffCostsProps
+  nonStaff: Omit<NonStaffCostsProps, 'lookups'>
 }
 
 export function EditorScreenContent({
+  lookups,
   screen,
   project,
   onChange,
@@ -21,7 +23,7 @@ export function EditorScreenContent({
     case 'details':
       return <ProjectDetails project={project} onChange={onChange} />
     case 'nonstaff':
-      return <NonStaffCosts {...nonStaff} />
+      return <NonStaffCosts {...nonStaff} lookups={lookups} />
     default:
       return <EmptyStateScreen />
   }

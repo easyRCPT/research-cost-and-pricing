@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query'
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api'
 import type { LookupTables } from '@/types'
 
@@ -13,5 +13,5 @@ export const lookupsQuery = queryOptions({
 })
 
 export function useLookups() {
-  return useQuery(lookupsQuery)
+  return useSuspenseQuery(lookupsQuery)
 }
