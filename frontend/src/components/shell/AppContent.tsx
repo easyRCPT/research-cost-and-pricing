@@ -2,7 +2,8 @@ import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
 import type { EditorScreen } from './Sidebar'
 import { useState } from 'react'
-import { EMPTY_PROJECT } from '@/lib/constants'
+import { EMPTY_PROJECT, STARTING_ROWS } from '@/lib/constants'
+import { emptyNonStaffLine } from '@/lib/non-staff'
 import { type ProjectInfo, type NonStaffLine } from '@/types'
 import { projectYears } from '@/lib/budget'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
@@ -22,7 +23,11 @@ const DEMO_BUDGET_ID = 1
 export function AppContent({ screen, setScreen }: AppContentProps) {
   const { data: lookups } = useLookups()
   const [project, setProject] = useState<ProjectInfo>(EMPTY_PROJECT)
-  const [nonStaffLines, setNonStaffLines] = useState<NonStaffLine[]>([])
+  const [nonStaffLines, setNonStaffLines] = useState<NonStaffLine[]>(() =>
+    Array.from({ length: STARTING_ROWS }, (_, index) =>
+      emptyNonStaffLine(-(index + 1), projectYears(EMPTY_PROJECT)),
+    ),
+  )
 
   const lookupsOpen = screen === LOOKUP_SCREEN
   const pageHeading = lookupsOpen

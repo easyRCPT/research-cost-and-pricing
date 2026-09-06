@@ -9,9 +9,8 @@ import { Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { emptyStaffLine, isComplete, timeFor, toInput } from '@/lib/staff'
 import type { LookupTables, StaffLine } from '@/types'
+import { STARTING_ROWS } from '@/lib/constants'
 import { StaffTable } from './staff/StaffTable'
-
-const STARTING_ROWS = 6
 
 const startingIds = () =>
   Array.from({ length: STARTING_ROWS }, (_, index) => -(index + 1))

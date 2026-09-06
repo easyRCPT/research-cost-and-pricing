@@ -1,5 +1,7 @@
 import type { ProjectInfo } from '@/types'
 
+export const STARTING_ROWS = 6
+
 export const MONTHS = [
   'January',
   'February',
