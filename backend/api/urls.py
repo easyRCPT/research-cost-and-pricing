@@ -54,5 +54,4 @@ urlpatterns = [
         DeliverableView.as_view(http_method_names=["delete"]),
         name="deliverable-detail",
     ),
-    #
 ]

@@ -32,3 +32,4 @@ export type Status = S['StatusEnum']
 // Lookups
 export type LookupTables = S['LookupTables']
 export type LookupTableNames = keyof LookupTables
+export type NonStaffCategory = S['NonStaffCostCategory']

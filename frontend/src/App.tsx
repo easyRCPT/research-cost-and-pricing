@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ProjectInfo } from './types'
+import { type NonStaffLine, type ProjectInfo } from './types'
 import {
   PageHead,
   Sidebar,
@@ -11,10 +11,13 @@ import { LOOKUPS, LookupButton } from '@/components/lookups/LookupButton'
 import { SCREEN_HEADINGS, Lookups } from '@/screens/'
 import { EMPTY_PROJECT } from './lib/constants'
 import { EditorScreenContent } from './screens/EditorScreenContent'
+import { projectYears } from './lib/budget'
 
 function App() {
   const [screen, setScreen] = useState<EditorScreen | typeof LOOKUPS>('details')
   const [project, setProject] = useState<ProjectInfo>(EMPTY_PROJECT)
+  const [nonStaffLines, setNonStaffLines] = useState<NonStaffLine[]>([])
+  const years = projectYears(project)
 
   const patchProject = (patch: Partial<ProjectInfo>) =>
     setProject((current) => ({ ...current, ...patch }))
@@ -50,6 +53,11 @@ function App() {
               screen={screen}
               project={project}
               onChange={patchProject}
+              nonStaff={{
+                lines: nonStaffLines,
+                years,
+                setLines: setNonStaffLines,
+              }}
             />
           )}
         </main>

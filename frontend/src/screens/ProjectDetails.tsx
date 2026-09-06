@@ -52,7 +52,7 @@ export function ProjectDetails({ project, onChange }: ProjectDetailsProps) {
         />
       </FieldRow>
 
-      <FieldRow label="Lead UoM chief investigator" htmlFor="ci">
+      <FieldRow label="Lead UoM chief investigator" required htmlFor="ci">
         <Input
           id="ci"
           className="max-w-sm"
@@ -122,10 +122,7 @@ export function ProjectDetails({ project, onChange }: ProjectDetailsProps) {
         </div>
       </FieldRow>
 
-      <FieldRow
-        label="Project attributes"
-        hint="Company and cost centre follow the department."
-      >
+      <FieldRow label="Project attributes">
         <div className="grid max-w-xl grid-cols-2 gap-3 rounded-md bg-muted px-4 py-3 md:grid-cols-4">
           <Attribute label="Company" value={project.company} />
           <Attribute label="Cost centre" value={project.cost_centre} />

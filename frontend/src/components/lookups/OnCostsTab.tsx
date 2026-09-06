@@ -1,4 +1,4 @@
-import { Grid, Note, Panel, Td, Th } from '@/components/shell'
+import { Grid, Panel, Td, Th } from '@/components/shell'
 import type { LookupTables } from '@/types'
 
 type OnCostRate = LookupTables['on_cost_rates'][number]

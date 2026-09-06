@@ -1,31 +1,28 @@
-import { Panel, type EditorScreen } from '@/components/shell'
+import { type EditorScreen } from '@/components/shell'
 import type { ProjectInfo } from '@/types'
 import { ProjectDetails } from './ProjectDetails'
+import { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
+import { EmptyStateScreen } from './EmptyStateScreen'
 
 interface EditorScreenContentProps {
   screen: EditorScreen
   project: ProjectInfo
   onChange: (patch: Partial<ProjectInfo>) => void
+  nonStaff: NonStaffCostsProps
 }
 
 export function EditorScreenContent({
   screen,
   project,
   onChange,
+  nonStaff,
 }: EditorScreenContentProps) {
-  return (
-    <>
-      {screen === 'details' ? (
-        <ProjectDetails project={project} onChange={onChange} />
-      ) : (
-        <Panel>
-          <div className="grid min-h-64 place-items-center rounded-md border border-dashed bg-muted/35 px-6 text-center">
-            <p className="max-w-md text-sm text-muted-foreground">
-              Content will be available soon.
-            </p>
-          </div>
-        </Panel>
-      )}
-    </>
-  )
+  switch (screen) {
+    case 'details':
+      return <ProjectDetails project={project} onChange={onChange} />
+    case 'nonstaff':
+      return <NonStaffCosts {...nonStaff} />
+    default:
+      return <EmptyStateScreen />
+  }
 }
