@@ -8,7 +8,7 @@ import { type ProjectInfo, type NonStaffLine } from '@/types'
 import { projectYears } from '@/lib/budget'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
-import { PageHead, SECTIONS, Sidebar } from '.'
+import { PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
 
 interface AppContentProps {
@@ -53,18 +53,21 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
       {lookupsOpen ? (
         <LookupsScreen lookups={lookups} />
       ) : (
-        <EditorScreenContent
-          lookups={lookups}
-          screen={screen}
-          project={project}
-          onChange={patchProject}
-          nonStaff={{
-            lines: nonStaffLines,
-            years,
-            setLines: setNonStaffLines,
-          }}
-          budgetId={DEMO_BUDGET_ID}
-        />
+        <>
+          <EditorScreenContent
+            lookups={lookups}
+            screen={screen}
+            project={project}
+            onChange={patchProject}
+            nonStaff={{
+              lines: nonStaffLines,
+              years,
+              setLines: setNonStaffLines,
+            }}
+            budgetId={DEMO_BUDGET_ID}
+          />
+          <ScreenNav screen={screen} onSelect={setScreen} />
+        </>
       )}
     </AppShell>
   )
