@@ -11,6 +11,7 @@ class YearAmountSerializer(serializers.Serializer):
         decimal_places=2,
     )
 
+
 @extend_schema_serializer(component_name="NonStaffLineInput")
 class NonStaffLineSerializer(serializers.Serializer):
     cost_group = serializers.CharField()

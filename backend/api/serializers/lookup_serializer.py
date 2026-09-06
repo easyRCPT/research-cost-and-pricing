@@ -30,10 +30,12 @@ class DepartmentSerializer(serializers.ModelSerializer):
             "budget_unit",
         ]
 
+
 class SalaryRateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalaryRate
         fields = ["payroll_type", "category", "classification", "rate"]
+
 
 class SalaryRateMultiplierSerializer(serializers.ModelSerializer):
     class Meta:
@@ -109,7 +111,9 @@ class LookupTablesSerializer(serializers.Serializer):
     eba_increases = EbaIncreaseSerializer(many=True)
     on_cost_rates = OnCostRateSerializer(many=True)
     non_staff_cost_categories = NonStaffCostCategorySerializer(many=True)
-    minimum_cost_recovery_multipliers = MinimumCostRecoveryMultiplierSerializer(many=True)
+    minimum_cost_recovery_multipliers = MinimumCostRecoveryMultiplierSerializer(
+        many=True
+    )
     calculation_constants = CalculationConstantSerializer(many=True)
     activities = ActivitySerializer(many=True)
     regions = RegionSerializer(many=True)

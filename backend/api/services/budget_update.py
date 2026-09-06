@@ -175,11 +175,7 @@ def update_budget(
 
 
 def update_staff(
-    budget: Budget,
-    row_id: int,
-    field: str,
-    value: object,
-    year: int | None
+    budget: Budget, row_id: int, field: str, value: object, year: int | None
 ) -> bool:
     try:
         staff_line = budget.staff_lines.get(id=row_id)
@@ -223,11 +219,7 @@ def update_staff(
 
 
 def update_non_staff(
-    budget: Budget,
-    row_id: int,
-    field: str,
-    value: object,
-    year: int | None
+    budget: Budget, row_id: int, field: str, value: object, year: int | None
 ) -> bool:
     try:
         non_staff_line = budget.non_staff_lines.get(id=row_id)

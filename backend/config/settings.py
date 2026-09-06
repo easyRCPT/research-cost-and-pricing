@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "api",
     "drf_spectacular",
-    "drf_standardized_errors"
+    "drf_standardized_errors",
 ]
 
 MIDDLEWARE = [
@@ -132,13 +132,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
-    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler"
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
     # Our PATCH is a single-field command, not a partial object: keep section/field required
     "COMPONENT_SPLIT_PATCH": False,
-    "POSTPROCESSING_HOOKS": ["drf_standardized_errors.openapi_hooks.postprocess_schema_enums"],
+    "POSTPROCESSING_HOOKS": [
+        "drf_standardized_errors.openapi_hooks.postprocess_schema_enums"
+    ],
     "ENUM_NAME_OVERRIDES": {
         # Named enums for the error responses
         "ValidationErrorEnum": "drf_standardized_errors.openapi_serializers.ValidationErrorEnum.choices",

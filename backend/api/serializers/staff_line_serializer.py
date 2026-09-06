@@ -11,6 +11,7 @@ class YearAllocationSerializer(serializers.Serializer):
         decimal_places=4,
     )
 
+
 @extend_schema_serializer(component_name="StaffLineInput")
 class StaffLineSerializer(serializers.Serializer):
     name_role = serializers.CharField(max_length=100)

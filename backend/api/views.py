@@ -22,7 +22,7 @@ from .services import (
     budget_details,
     budget_update,
     deliverable,
-    lookups,
+    lookup_loader,
     non_staff_line,
     staff_line,
 )
@@ -55,6 +55,7 @@ class BudgetDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(BudgetDetailSerializer(result).data, status=status.HTTP_200_OK)
 
+
 class StaffLineView(APIView):
     @extend_schema(request=StaffLineSerializer, responses={201: BudgetDetailSerializer})
     def post(self, request: Request, budget_id: int) -> Response:
@@ -86,7 +87,9 @@ class StaffLineView(APIView):
 
 
 class NonStaffLineView(APIView):
-    @extend_schema(request=NonStaffLineSerializer, responses={201: BudgetDetailSerializer})
+    @extend_schema(
+        request=NonStaffLineSerializer, responses={201: BudgetDetailSerializer}
+    )
     def post(self, request: Request, budget_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
@@ -137,8 +140,9 @@ class DeliverableView(APIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class LookupView(APIView):
     @extend_schema(responses=LookupTablesSerializer)
     def get(self, request: Request) -> Response:
-        tables = lookups.get_lookup_tables()
+        tables = lookup_loader.get_lookup_tables()
         return Response(LookupTablesSerializer(tables).data)
