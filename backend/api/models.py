@@ -1,13 +1,12 @@
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from django.db.models.manager import RelatedManager
-
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
 
 
 # ------------------- Schema for Lookup table data -------------
@@ -101,6 +100,10 @@ class OnCostRate(models.Model):
     employment_type and year are both nullable; which one applies
     (or neither) depends on on_cost_type.
     """
+
+    if TYPE_CHECKING:
+
+        def get_on_cost_type_display(self) -> str: ...
 
     class OnCostType(models.TextChoices):
         SUPERANNUATION = (
@@ -237,6 +240,11 @@ class RevenueCategory(models.Model):
 
 
 class Project(models.Model):
+    if TYPE_CHECKING:
+        department_id: str
+        activity_id: str | None
+        region_id: str | None
+
     COMPANY_CODE = "C001"
 
     # Store the central data
@@ -285,6 +293,11 @@ class Budget(models.Model):
     #
     # The multipliers are stored per budget rather than read from
     # CalculationConstant at calculation time.
+
+    if TYPE_CHECKING:
+
+        def get_status_display(self) -> str: ...
+
     class Mode(models.TextChoices):
         SIMPLE = "simple", "Simple"
         FULL = "full", "Full"
@@ -373,6 +386,10 @@ class StaffCostLine(models.Model):
         DAILY = "Daily", "Daily"
         HOURLY = "Hourly", "Hourly"
 
+    if TYPE_CHECKING:
+        id: int
+        allocations: RelatedManager["YearAllocation"]
+
     budget = models.ForeignKey(
         "Budget", related_name="staff_lines", on_delete=models.CASCADE
     )
@@ -423,6 +440,10 @@ class NonStaffCostLine(models.Model):
     A non-salary cost on a budget: equipment, travel etc.
     Amounts live in YearAmount, one row per project year.
     """
+
+    if TYPE_CHECKING:
+        id: int
+        amounts: RelatedManager["YearAmount"]
 
     # Carries reference data, FK allows that data to be connected
     budget = models.ForeignKey(

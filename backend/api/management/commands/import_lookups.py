@@ -11,6 +11,7 @@ natural key.
 
 from decimal import Decimal
 from pathlib import Path
+from typing import TypeGuard
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -116,7 +117,7 @@ def scalar(workbook, name):
     raise CommandError(f"'{name}' resolved to no cells")
 
 
-def is_number(value):
+def is_number(value: object) -> TypeGuard[int | float]:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
@@ -266,7 +267,11 @@ def import_on_costs(workbook):
 
     # Second shape: superannuation varies by both year and employment type.
     for _key, year, employment_type, rate in rows(workbook, "tbSuperannuation"):
-        if employment_type not in EMPLOYMENT_TYPES or not is_number(rate):
+        if (
+            employment_type not in EMPLOYMENT_TYPES
+            or not is_number(year)
+            or not is_number(rate)
+        ):
             continue
 
         OnCostRate.objects.update_or_create(
