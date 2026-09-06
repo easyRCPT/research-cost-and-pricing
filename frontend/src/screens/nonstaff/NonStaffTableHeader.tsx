@@ -12,17 +12,14 @@ export function NonStaffTableHeader({ years }: NonStaffTableHeaderProps) {
         <Th>Expense type</Th>
         <Th>Description</Th>
         {years.map((year, i) => (
-          <Th key={year} align="right" className="text-primary">
+          <Th key={year} align="right" className="w-28 text-primary">
             Year {i + 1} ({year})
           </Th>
         ))}
-        <Th align="right">Total (AUD)</Th>
-        <Th align="center">
-          Additional 10%
-          <span className="block font-normal text-muted-foreground">
-            added to direct cost*
-          </span>
+        <Th align="right" className="w-28">
+          Total (AUD)
         </Th>
+        <Th align="center">Additional 10%</Th>
         <Th className="w-8" />
       </tr>
     </thead>

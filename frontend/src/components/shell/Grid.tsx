@@ -44,7 +44,7 @@ export function Th({
     <th
       {...rest}
       className={cn(
-        'border-r border-b bg-muted px-2 py-1.5 align-bottom font-semibold whitespace-nowrap last:border-r-0',
+        'border-r border-b bg-muted px-1.5 py-1 align-bottom font-semibold whitespace-nowrap last:border-r-0',
         ALIGN[align],
         className,
       )}
