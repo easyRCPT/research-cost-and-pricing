@@ -66,7 +66,7 @@ export function NonStaffTableBody({
                 options={expenseTypesFor(categories, line.cost_group)}
                 placeholder={line.cost_group ? 'Select…' : '—'}
                 disabled={!line.cost_group}
-                onChange={(expense_type) => onChange(line.id, { expense_type })}
+                onChange={(expense_type) => patchLine(line.id, { expense_type })}
               />
             </CellTd>
             <CellTd>
@@ -74,7 +74,7 @@ export function NonStaffTableBody({
                 className="min-w-52"
                 value={line.description}
                 onChange={(e) =>
-                  onChange(line.id, { description: e.target.value })
+                  patchLine(line.id, { description: e.target.value })
                 }
               />
             </CellTd>
