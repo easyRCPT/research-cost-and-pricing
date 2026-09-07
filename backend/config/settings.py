@@ -53,6 +53,10 @@ DEBUG = _env_bool("DJANGO_DEBUG", False)
 # in deployed environments — where an empty list would reject every request.
 ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", [])
 
+# Render terminates TLS at its proxy and forwards the original scheme in this
+# header. Trust it so Django correctly recognises production requests as HTTPS.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # Application definition
 
