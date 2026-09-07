@@ -42,6 +42,7 @@ def pricing(
         non_staff_result,
         budget_info,
         budget_info["cash_co_contribution"],
+        constants["constants"],
     )
     return {
         "staff_result": staff_result,
@@ -56,6 +57,7 @@ def calculate_budget_summary(
     non_staff_result: dict,
     budget_info: dict,
     total_cash_co_contribution: Decimal,
+    general: dict,
 ) -> dict:
     """
     Calculate summary for budget form
@@ -103,7 +105,23 @@ def calculate_budget_summary(
         "staff_budget": staff_budget,
         "non_staff_budget": non_staff_budget,
         "in_kind_costs": in_kind_costs,
+        "dean_required": calculate_dean_required(budget_info, general),
     }
+
+
+def calculate_dean_required(
+    budget_info: dict,
+    general: dict,
+) -> bool:
+    """
+    A budget priced below the default cost recovery multiplier needs a Dean's
+    authorisation as well as the Head of Department's.
+    """
+    default_multiplier = general.get("full_cost_recovery_multiplier")
+    if default_multiplier is None:
+        return False
+
+    return budget_info["cost_multiplier"] < default_multiplier
 
 
 def calculate_price_summary(
