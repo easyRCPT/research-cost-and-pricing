@@ -94,11 +94,51 @@ export function useRemoveStaffLine() {
   }))
 }
 
+// The engine reads none of these and nothing is derived from them, so editing
+// one needs no round trip. Duration, department, activity and region are absent
+// deliberately: they change the year columns or the account string.
+const DISPLAY_ONLY_PROJECT_FIELDS = new Set([
+  'title',
+  'chief_investigator',
+  'funder',
+  'other_funder',
+  'other_funder_category',
+  'scheme',
+  'additional_information',
+])
+
 export function useUpdateProjectFields() {
-  return useBudgetMutation((current, patch: Partial<ProjectInfoInput>) => ({
-    ...current,
-    project_info: { ...current.project_info, ...patch },
-  }))
+  const queryClient = useQueryClient()
+  const recalculate = useBudgetMutation(
+    (current, patch: Partial<ProjectInfoInput>) => ({
+      ...current,
+      project_info: { ...current.project_info, ...patch },
+    }),
+  )
+
+  const mutate = (patch: Partial<ProjectInfoInput>) => {
+    const changed = Object.keys(patch)
+    if (!changed.every((field) => DISPLAY_ONLY_PROJECT_FIELDS.has(field))) {
+      recalculate.mutate(patch)
+      return
+    }
+
+    const current = getBudgetInput()
+    setBudgetInput({
+      ...current,
+      project_info: { ...current.project_info, ...patch },
+    })
+    queryClient.setQueryData(
+      budgetKey,
+      (budget: BudgetDetail | undefined) =>
+        budget && {
+          ...budget,
+          project_info: { ...budget.project_info, ...patch },
+        },
+    )
+  }
+
+  return { mutate }
 }
 
 export function useUpdateBudgetField() {
