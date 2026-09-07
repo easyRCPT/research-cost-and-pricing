@@ -6,6 +6,8 @@ FIELDS_BY_SECTION = {
         "title",
         "chief_investigator",
         "funder",
+        "other_funder",
+        "other_funder_category",
         "scheme",
         "additional_information",
         "start_year",
@@ -18,6 +20,9 @@ FIELDS_BY_SECTION = {
     },
     "budget": {
         "comments",
+        "justification",
+        "justification_notes",
+        "dean_exemption_reason",
         "mode",
         "status",
         "cost_multiplier",

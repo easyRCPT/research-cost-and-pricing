@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from . import non_staff, staff
 
-GST_MULTIPLIER = Decimal("1.1")
-
 
 def pricing(
     constants: dict,
@@ -42,6 +40,7 @@ def pricing(
         non_staff_result,
         budget_info,
         budget_info["cash_co_contribution"],
+        constants["constants"],
     )
     return {
         "staff_result": staff_result,
@@ -56,6 +55,7 @@ def calculate_budget_summary(
     non_staff_result: dict,
     budget_info: dict,
     total_cash_co_contribution: Decimal,
+    general: dict,
 ) -> dict:
     """
     Calculate summary for budget form
@@ -66,6 +66,7 @@ def calculate_budget_summary(
         non_staff_result,
         total_cash_co_contribution,
         budget_info["gst_applicable"],
+        general,
     )
 
     # staff budget
@@ -79,10 +80,6 @@ def calculate_budget_summary(
     # non-staff budget
     # not include in-kind costs
     non_staff_budget = calculate_non_staff_budget(non_staff_result["cost_results"])
-    direct_total = non_staff_budget["direct_total"]
-    indirect_total = non_staff_result["indirect_total"]["total"]
-    non_staff_budget["indirect_cost_recovery"] = indirect_total
-    non_staff_budget["total_non_staff_costs"] = direct_total + indirect_total
 
     # in kind costs
     # non-staff total not include indirect costs
@@ -107,7 +104,23 @@ def calculate_budget_summary(
         "staff_budget": staff_budget,
         "non_staff_budget": non_staff_budget,
         "in_kind_costs": in_kind_costs,
+        "dean_required": calculate_dean_required(budget_info, general),
     }
+
+
+def calculate_dean_required(
+    budget_info: dict,
+    general: dict,
+) -> bool:
+    """
+    A budget priced below the default cost recovery multiplier needs a Dean's
+    authorisation as well as the Head of Department's.
+    """
+    default_multiplier = general.get("full_cost_recovery_multiplier")
+    if default_multiplier is None:
+        return False
+
+    return budget_info["cost_multiplier"] < default_multiplier
 
 
 def calculate_price_summary(
@@ -115,6 +128,7 @@ def calculate_price_summary(
     non_staff_result: dict,
     total_cash_co_contribution: Decimal,
     gst_applicable: bool,
+    general: dict,
 ) -> dict:
     """
     Calculate price summary
@@ -138,7 +152,8 @@ def calculate_price_summary(
 
     total_price_exc_gst = project_cost
     if gst_applicable:
-        total_price_inc_gst = total_price_exc_gst * GST_MULTIPLIER
+        gst_multiplier = general["gst_rate"] + Decimal(1)
+        total_price_inc_gst = total_price_exc_gst * gst_multiplier
     else:
         total_price_inc_gst = total_price_exc_gst
 
@@ -219,8 +234,11 @@ def calculate_non_staff_budget(
 
     # Add summary
     direct_total = sum(result.values())
+    indirect_total = non_staff_result["indirect_total"]["total"]
 
     return {
         "category_totals": result,
         "direct_total": direct_total,
+        "indirect_cost_recovery": indirect_total,
+        "total_non_staff_costs": direct_total + indirect_total,
     }

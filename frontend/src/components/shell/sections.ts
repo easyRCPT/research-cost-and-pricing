@@ -7,18 +7,20 @@ export const SECTIONS = [
     items: [
       { id: 'staff', label: 'Staff Costs' },
       { id: 'nonstaff', label: 'Non-Staff Costs' },
-      { id: 'cash', label: 'Cash Co-Contributions' },
     ],
   },
   {
     label: 'Pricing',
     items: [
-      { id: 'adjust', label: 'Adjust Price' },
+      { id: 'inkind', label: 'In-Kind Contributions' },
       { id: 'price', label: 'Price Summary' },
     ],
   },
   {
     label: 'Authorisation',
-    items: [{ id: 'budget', label: 'Budget Form' }],
+    items: [
+      { id: 'budget', label: 'Budget Form' },
+      { id: 'approvals', label: 'Approvals' },
+    ],
   },
 ] satisfies readonly SidebarSection[]

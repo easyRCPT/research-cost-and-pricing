@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 export type EditorScreen =
-  'details' | 'staff' | 'nonstaff' | 'cash' | 'adjust' | 'price' | 'budget'
+  'details' | 'staff' | 'nonstaff' | 'inkind' | 'price' | 'budget' | 'approvals'
 
 export interface SidebarSection {
   label?: string

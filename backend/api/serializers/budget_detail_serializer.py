@@ -17,7 +17,7 @@ class CostDecimalField(serializers.DecimalField):
 
     def to_representation(self, value):
         if value is not None:
-            value = value.quantize(
+            value = Decimal(value).quantize(
                 Decimal("0.01"),
                 rounding=ROUND_HALF_UP,
             )
@@ -48,6 +48,8 @@ class ProjectInfoSerializer(serializers.Serializer):
     activity = serializers.CharField(allow_null=True)
     region = serializers.CharField(allow_null=True)
     additional_information = serializers.CharField(allow_blank=True)
+    other_funder = serializers.CharField(allow_blank=True)
+    other_funder_category = serializers.CharField(allow_blank=True)
 
 
 # ------------------------------------------------------------------
@@ -91,6 +93,9 @@ class BudgetInfoSerializer(serializers.Serializer):
     )
 
     comments = serializers.CharField(allow_blank=True)
+    justification = serializers.CharField(allow_blank=True)
+    justification_notes = serializers.CharField(allow_blank=True)
+    dean_exemption_reason = serializers.CharField(allow_blank=True)
     status = serializers.ChoiceField(choices=Budget.Status.choices)
 
     deliverables = DeliverableResultSerializer(many=True)
@@ -372,6 +377,7 @@ class BudgetSummarySerializer(serializers.Serializer):
     staff_budget = StaffBudgetSerializer()
     non_staff_budget = NonStaffBudgetSerializer()
     in_kind_costs = InKindCostsSerializer()
+    dean_required = serializers.BooleanField()
 
 
 # ------------------------------------------------------------------

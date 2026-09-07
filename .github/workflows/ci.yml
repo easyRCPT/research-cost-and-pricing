@@ -1,14 +1,18 @@
 name: CI
 
 on:
+  # A feature branch is covered by its pull_request run. Listening to every push
+  # as well ran the same commit twice at once, and the two runs raced on the
+  # shared uv cache — one would type-check against a half-resolved environment.
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  # Superseded pushes on a feature branch are worth cancelling; main is the
-  # branch people read results from, so let its runs finish.
+  # Superseded runs on a pull request are worth cancelling; main is the branch
+  # people read results from, so let its runs finish.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:

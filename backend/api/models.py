@@ -240,9 +240,11 @@ class RevenueCategory(models.Model):
 
 class Project(models.Model):
     if TYPE_CHECKING:
+        id: int
         department_id: str
         activity_id: str | None
         region_id: str | None
+        budgets: RelatedManager["Budget"]
 
     COMPANY_CODE = "C001"
 
@@ -251,6 +253,8 @@ class Project(models.Model):
     department = models.ForeignKey("Department", on_delete=models.PROTECT)
     chief_investigator = models.CharField(max_length=100, blank=True)
     funder = models.CharField(max_length=100)
+    other_funder = models.CharField(max_length=200, blank=True, default="")
+    other_funder_category = models.CharField(max_length=100, blank=True, default="")
     scheme = models.CharField(max_length=200, blank=True)
 
     # Dictates potential year allocations for staff
@@ -310,6 +314,7 @@ class Budget(models.Model):
         WITHDRAWN = "withdrawn", "Withdrawn"
 
     if TYPE_CHECKING:
+        id: int
         deliverables: RelatedManager["Deliverable"]
         staff_lines: RelatedManager["StaffCostLine"]
         non_staff_lines: RelatedManager["NonStaffCostLine"]
@@ -331,6 +336,10 @@ class Budget(models.Model):
     )
 
     comments = models.TextField(blank=True, default="")
+
+    justification = models.CharField(max_length=200, blank=True, default="")
+    justification_notes = models.TextField(blank=True, default="")
+    dean_exemption_reason = models.TextField(blank=True, default="")
 
     # Plain CharField rather than whatever it will be when
     # authentication comes in

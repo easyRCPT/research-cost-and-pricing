@@ -11,8 +11,10 @@ dependencies = [
     "djangorestframework>=3.17.1",
     "drf-spectacular>=0.30.0",
     "drf-standardized-errors[openapi]>=0.16.0",
+    "gunicorn>=23.0.0",
     "psycopg[binary]>=3.3.4",
     "python-dotenv>=1.2.2",
+    "whitenoise>=6.9.0",
 ]
 
 [dependency-groups]

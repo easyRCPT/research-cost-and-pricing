@@ -15,6 +15,7 @@ from .serializers.budget_update_serializer import (
     BudgetUpdateSchema,
     SectionSerializer,
 )
+from .serializers.calculate_serializer import CalculateRequestSerializer
 from .serializers.deliverable_serializer import DeliverableSerializer
 from .serializers.lookup_serializer import (
     LOOKUP_SERIALIZERS,
@@ -27,6 +28,7 @@ from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
     budget_details,
     budget_update,
+    calculate,
     deliverable,
     lookup_loader,
     lookup_update,
@@ -189,3 +191,21 @@ class LookupView(APIView):
             data=cast(dict, validated_data["values"]),
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# TODO: temporary. Delete this view when auth lands and the frontend goes back
+# to GET/PATCH /api/budgets/{id}/.
+class CalculateView(APIView):
+    """Calculate a whole budget from the request body. Nothing is saved."""
+
+    @extend_schema(
+        request=CalculateRequestSerializer,
+        responses={200: BudgetDetailSerializer},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = CalculateRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        result = calculate.calculate(cast(dict, serializer.validated_data))
+
+        return Response(BudgetDetailSerializer(result).data, status=status.HTTP_200_OK)

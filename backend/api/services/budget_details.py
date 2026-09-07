@@ -8,12 +8,17 @@ def get_budget_details(budget: Budget) -> dict:
     Get project details from database.
     Calculate cost and price result.
     """
-    # Lookup tables
-    constants = lookup_loader.get_constants()
+    return build_budget_details(
+        lookup_loader.get_constants(),
+        data_loader.load_budget_data(budget),
+    )
 
-    # Budget data
-    budget_data = data_loader.load_budget_data(budget)
 
+def build_budget_details(constants: dict, budget_data: dict) -> dict:
+    """
+    Run the engine over one budget's inputs and shape the response.
+    Split out so services/calculate.py can feed it without a database row.
+    """
     # Calculation
     calculation_result = pricing.pricing(
         constants,
