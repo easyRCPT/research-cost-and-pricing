@@ -108,11 +108,18 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-if not os.environ.get("DATABASE_URL"):
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
     raise ImproperlyConfigured(
         "DATABASE_URL is not set. Copy backend/.env.example to backend/.env and "
         "start the local database with `make db-up`."
     )
+
+# Tolerate a connection string whose scheme went missing. The Render Blueprint
+# secret prompt has been known to store a scheme-less value ("://host/db");
+# a Postgres URL without a scheme can only be postgresql.
+if DATABASE_URL.startswith("://"):
+    DATABASE_URL = "postgresql" + DATABASE_URL
 
 # Every managed Postgres we might deploy to requires TLS; the local Docker
 # container serves no certificate, so requiring it there fails the connection
@@ -120,9 +127,17 @@ if not os.environ.get("DATABASE_URL"):
 # deployment that sets nothing still gets sslmode=require.
 DATABASE_SSL = _env_bool("DATABASE_SSL", not DEBUG)
 
-DATABASES = {
-    "default": dj_database_url.config(conn_max_age=0, ssl_require=DATABASE_SSL)
-}
+try:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL, conn_max_age=0, ssl_require=DATABASE_SSL
+        )
+    }
+except Exception as exc:  # dj_database_url raises its own errors for bad URLs
+    raise ImproperlyConfigured(
+        "DATABASE_URL does not look like a Postgres URL. Expected "
+        "postgresql://user:password@host:port/database?sslmode=require"
+    ) from exc
 
 # Server-side cursors do not survive a transaction-mode connection pooler, which
 # is what most managed Postgres offerings put in front of the database. Left on
