@@ -1176,6 +1176,8 @@ export interface components {
          *     * `end_month` - end_month
          *     * `end_year` - end_year
          *     * `funder` - funder
+         *     * `other_funder` - other_funder
+         *     * `other_funder_category` - other_funder_category
          *     * `region` - region
          *     * `scheme` - scheme
          *     * `start_month` - start_month
@@ -1183,7 +1185,7 @@ export interface components {
          *     * `title` - title
          * @enum {string}
          */
-        ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "region" | "scheme" | "start_month" | "start_year" | "title";
+        ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "other_funder" | "other_funder_category" | "region" | "scheme" | "start_month" | "start_year" | "title";
         ProjectInfo: {
             title: string;
             chief_investigator: string;
