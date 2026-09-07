@@ -16,15 +16,14 @@ const startingIds = () =>
   Array.from({ length: STARTING_ROWS }, (_, index) => -(index + 1))
 
 export interface StaffCostsProps {
-  budgetId: number
   lookups: LookupTables
 }
 
-export function StaffCosts({ budgetId, lookups }: StaffCostsProps) {
-  const { data: budget } = useBudget(budgetId)
-  const addStaffLine = useAddStaffLine(budgetId)
-  const removeStaffLine = useRemoveStaffLine(budgetId)
-  const updateStaffField = useUpdateStaffField(budgetId)
+export function StaffCosts({ lookups }: StaffCostsProps) {
+  const { data: budget } = useBudget()
+  const addStaffLine = useAddStaffLine()
+  const removeStaffLine = useRemoveStaffLine()
+  const updateStaffField = useUpdateStaffField()
   const [draftIds, setDraftIds] = useState<number[]>(startingIds)
   const [draftEdits, setDraftEdits] = useState<
     Record<number, Partial<StaffLine>>

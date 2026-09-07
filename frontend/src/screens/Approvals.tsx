@@ -46,13 +46,12 @@ const fullRecoveryBasis = (lookups: LookupTables) =>
   )?.value
 
 export interface ApprovalsProps {
-  budgetId: number
   lookups: LookupTables
 }
 
-export function Approvals({ budgetId, lookups }: ApprovalsProps) {
-  const { data: budget } = useBudget(budgetId)
-  const updateBudgetField = useUpdateBudgetField(budgetId)
+export function Approvals({ lookups }: ApprovalsProps) {
+  const { data: budget } = useBudget()
+  const updateBudgetField = useUpdateBudgetField()
   const [drafts, setDrafts] = useState<Record<string, string>>({})
 
   const info = budget.budget_info
