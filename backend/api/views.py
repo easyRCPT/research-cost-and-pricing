@@ -3,6 +3,7 @@ from typing import cast
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,7 +17,12 @@ from .serializers.budget_update_serializer import (
 )
 from .serializers.calculate_serializer import CalculateRequestSerializer
 from .serializers.deliverable_serializer import DeliverableSerializer
-from .serializers.lookup_serializer import LookupTablesSerializer
+from .serializers.lookup_serializer import (
+    LOOKUP_SERIALIZERS,
+    LookupCreateSerializer,
+    LookupTablesSerializer,
+    LookupUpdateSerializer,
+)
 from .serializers.non_staff_line_serializer import NonStaffLineSerializer
 from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
@@ -25,6 +31,7 @@ from .services import (
     calculate,
     deliverable,
     lookup_loader,
+    lookup_update,
     non_staff_line,
     staff_line,
 )
@@ -148,6 +155,42 @@ class LookupView(APIView):
     def get(self, request: Request) -> Response:
         tables = lookup_loader.get_lookup_tables()
         return Response(LookupTablesSerializer(tables).data)
+
+    @extend_schema(request=LookupCreateSerializer, responses={201: None})
+    def post(self, request: Request, table: str) -> Response:
+        serializer = LookupCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            serializer_class = LOOKUP_SERIALIZERS[table]
+        except KeyError:
+            raise ValidationError(f"Invalid lookup table: {table}")
+
+        validated_data = cast(dict, serializer.validated_data)
+
+        row_serializer = serializer_class(data=validated_data["values"])
+        row_serializer.is_valid(raise_exception=True)
+
+        lookup_update.create(
+            table=table,
+            data=cast(dict, row_serializer.validated_data),
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=LookupUpdateSerializer, responses={204: None})
+    def patch(self, request: Request, table: str) -> Response:
+        serializer = LookupUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        validated_data = cast(dict, serializer.validated_data)
+
+        lookup_update.update(
+            table=table,
+            lookup=cast(dict, validated_data["lookup"]),
+            data=cast(dict, validated_data["values"]),
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # TODO: temporary. Delete this view when auth lands and the frontend goes back
