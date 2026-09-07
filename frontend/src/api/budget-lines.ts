@@ -62,6 +62,19 @@ function useBudgetMutation<TVariables>(
     onSuccess: (budget) => {
       queryClient.setQueryData(budgetKey, budget)
     },
+    // A rejected edit leaves the store holding what was typed while the cache
+    // keeps the last good budget, which looks like nothing happened. Say so.
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        console.error(
+          'calculate rejected the budget:',
+          error.message,
+          error.fields,
+        )
+        return
+      }
+      console.error('calculate failed:', error)
+    },
   })
 }
 
