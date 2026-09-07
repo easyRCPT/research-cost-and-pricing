@@ -39,7 +39,7 @@ export function ProjectAttributesRow({
             </SelectTrigger>
             <SelectContent>
               {activities.map((o) => (
-                <SelectItem key={o.code} value={o.name}>
+                <SelectItem key={o.code} value={o.code}>
                   {o.name}
                 </SelectItem>
               ))}
@@ -59,7 +59,7 @@ export function ProjectAttributesRow({
             </SelectTrigger>
             <SelectContent>
               {regions.map((o) => (
-                <SelectItem key={o.code} value={o.name}>
+                <SelectItem key={o.code} value={o.code}>
                   {o.name}
                 </SelectItem>
               ))}

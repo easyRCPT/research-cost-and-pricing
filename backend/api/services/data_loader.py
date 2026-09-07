@@ -51,9 +51,11 @@ def build_project_info(project: Project) -> dict:
         "end_month": project.end_month,
         "company": project.COMPANY_CODE,
         "cost_centre": project.department.code,
-        "activity": project.activity.name if project.activity else None,
-        "region": project.region.name if project.region else None,
+        "activity": project.activity.code if project.activity else None,
+        "region": project.region.code if project.region else None,
         "additional_information": project.additional_information,
+        "other_funder": project.other_funder,
+        "other_funder_category": project.other_funder_category,
     }
 
 
