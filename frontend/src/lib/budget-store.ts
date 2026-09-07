@@ -27,6 +27,7 @@ export interface BudgetInput {
 
 /** Only until the real value arrives from calculation_constants. */
 const FALLBACK_MULTIPLIER = 1.7
+const DEFAULT_MARGIN = 0.3
 
 export const yearsOf = (project: ProjectInfoInput): number[] =>
   Array.from(
@@ -43,6 +44,7 @@ function initialBudget(): BudgetInput {
       mode: 'full',
       cost_multiplier: FALLBACK_MULTIPLIER,
       in_kind_multiplier: FALLBACK_MULTIPLIER,
+      margin: DEFAULT_MARGIN,
       gst_applicable: true,
       cash_co_contribution: 0,
       comments: '',

@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from . import non_staff, staff
 
+DEFAULT_MARGIN = Decimal("0.30")
+
 
 def pricing(
     constants: dict,
@@ -67,6 +69,7 @@ def calculate_budget_summary(
         total_cash_co_contribution,
         budget_info["gst_applicable"],
         general,
+        budget_info["margin"],
     )
 
     # staff budget
@@ -117,10 +120,14 @@ def calculate_dean_required(
     authorisation as well as the Head of Department's.
     """
     default_multiplier = general.get("full_cost_recovery_multiplier")
-    if default_multiplier is None:
-        return False
+    if default_multiplier is not None and (
+        budget_info["cost_multiplier"] < default_multiplier
+    ):
+        return True
 
-    return budget_info["cost_multiplier"] < default_multiplier
+    default_margin = general.get("default_margin", DEFAULT_MARGIN)
+
+    return budget_info["margin"] < default_margin
 
 
 def calculate_price_summary(
@@ -129,6 +136,7 @@ def calculate_price_summary(
     total_cash_co_contribution: Decimal,
     gst_applicable: bool,
     general: dict,
+    margin: Decimal,
 ) -> dict:
     """
     Calculate price summary
@@ -150,7 +158,8 @@ def calculate_price_summary(
 
     total_project_cost = project_cost + in_kind_project_cost
 
-    total_price_exc_gst = project_cost
+    margin_amount = project_cost * margin
+    total_price_exc_gst = project_cost + margin_amount
     if gst_applicable:
         gst_multiplier = general["gst_rate"] + Decimal(1)
         total_price_inc_gst = total_price_exc_gst * gst_multiplier
@@ -164,6 +173,8 @@ def calculate_price_summary(
     )
 
     return {
+        "margin": margin,
+        "margin_amount": margin_amount,
         "staff_cost": staff_cost,
         "non_staff_cost": non_staff_cost,
         "project_cost": project_cost,

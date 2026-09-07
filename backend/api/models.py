@@ -92,7 +92,9 @@ class SalaryRate(models.Model):
         return f"{self.payroll_type} {self.category} {self.classification}"
 
 
-# TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
+# Payroll tax is not here: it is a state tax on the employer with no
+# employment type, read from the max_payroll_tax constant. If it ever needs a
+# year-based rate it belongs in its own model.
 class OnCostRate(models.Model):
     """
     On-cost percentages from the Excel's lookup tables.
@@ -110,10 +112,6 @@ class OnCostRate(models.Model):
             "superannuation",
             "Superannuation",
         )  # year + employment_type, year falls back to None
-        PAYROLL_TAX = (
-            "payroll_tax",
-            "Payroll Tax",
-        )  # year only, employment_type always None
         WORKCOVER = "workcover", "WorkCover"  # employment_type only, year always None
         LEAVE_LOADING = (
             "leave_loading",
@@ -238,6 +236,17 @@ class RevenueCategory(models.Model):
 # ------------------- Schema for Data Derived From Application -------------
 
 
+def build_account_string(
+    company: str,
+    cost_centre: str,
+    activity: str | None,
+    region: str | None,
+) -> str:
+    if not (activity and region):
+        return ""
+    return f"{company}-{cost_centre}-{activity}-{region}"
+
+
 class Project(models.Model):
     if TYPE_CHECKING:
         id: int
@@ -280,9 +289,12 @@ class Project(models.Model):
     # Account string computed fresh from existing fields
     @property
     def account_string(self):
-        if not (self.activity_id and self.region_id):
-            return ""
-        return f"{self.COMPANY_CODE}-{self.department_id}-{self.activity_id}-{self.region_id}"
+        return build_account_string(
+            self.COMPANY_CODE,
+            self.department_id,
+            self.activity_id,
+            self.region_id,
+        )
 
     def __str__(self):
         return self.title
@@ -328,6 +340,10 @@ class Budget(models.Model):
     # field default, because the current values live in the database.
     cost_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
     in_kind_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
+
+    margin = models.DecimalField(
+        max_digits=5, decimal_places=4, default=Decimal("0.30")
+    )
 
     gst_applicable = models.BooleanField(default=True)
 

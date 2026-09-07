@@ -4,6 +4,7 @@ import {
   useBudget,
   useRemoveStaffLine,
   useUpdateStaffField,
+  useUpdateStaffFields,
 } from '@/api/budget-lines'
 import { Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -24,6 +25,7 @@ export function StaffCosts({ lookups }: StaffCostsProps) {
   const addStaffLine = useAddStaffLine()
   const removeStaffLine = useRemoveStaffLine()
   const updateStaffField = useUpdateStaffField()
+  const updateStaffFields = useUpdateStaffFields()
   const [draftIds, setDraftIds] = useState<number[]>(startingIds)
   const [draftEdits, setDraftEdits] = useState<
     Record<number, Partial<StaffLine>>
@@ -66,9 +68,11 @@ export function StaffCosts({ lookups }: StaffCostsProps) {
   const patchSaved = (id: number, patch: Partial<StaffLine>) => {
     const line = saved.find((row) => row.id === id)
     if (!line) return
-    const [field, value] = Object.entries(patch)[0]
-    if (field !== 'by_year') {
-      updateStaffField.mutate({ row_id: id, field, value })
+    const entries = Object.entries(patch)
+    if (!entries.some(([field]) => field === 'by_year')) {
+      updateStaffFields.mutate(
+        entries.map(([field, value]) => ({ row_id: id, field, value })),
+      )
       return
     }
     const next = { ...line, by_year: patch.by_year! }

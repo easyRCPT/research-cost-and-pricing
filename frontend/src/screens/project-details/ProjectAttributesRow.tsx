@@ -67,6 +67,17 @@ export function ProjectAttributesRow({
           </Select>
         </label>
       </div>
+
+      <div className="mt-2 flex max-w-180 items-baseline gap-3 px-4 text-[13px]">
+        <span className="text-muted-foreground">Account string</span>
+        <span className="tabular">
+          {project.account_string || (
+            <span className="text-muted-foreground">
+              Select an activity and region
+            </span>
+          )}
+        </span>
+      </div>
     </FieldRow>
   )
 }

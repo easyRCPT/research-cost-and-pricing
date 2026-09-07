@@ -29,8 +29,16 @@ export const classificationsFor = (
   ),
 ]
 
-export const timeBases = (multipliers: readonly SalaryRateMultiplier[]) =>
-  multipliers.map((multiplier) => multiplier.time_basis)
+export const timeBasesFor = (
+  multipliers: readonly SalaryRateMultiplier[],
+  employmentType: string,
+) => {
+  const bases = multipliers.map((multiplier) => multiplier.time_basis)
+  if (!employmentType) return []
+  return employmentType === 'Casual'
+    ? bases.filter((basis) => basis === 'Hourly')
+    : bases.filter((basis) => basis !== 'Hourly')
+}
 
 export const timeFor = (line: StaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.time ?? 0

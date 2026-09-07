@@ -218,7 +218,9 @@ def find_salary_rate(
 
     # Find base salary rate in 2025 from lookup table
     key = (payroll_type, category, new_classification)
-    base_salary_rate = constants["salary_rate"][key]
+    # A row can carry a category/classification pair with no rate while it is
+    # still being filled in. Cost it at zero rather than failing the budget.
+    base_salary_rate = constants["salary_rate"].get(key, Decimal(0))
 
     # Calculate salary rate
     salary_rate_multiplier = constants["salary_rate_multiplier"][time_basis]

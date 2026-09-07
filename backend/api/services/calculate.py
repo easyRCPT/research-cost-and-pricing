@@ -4,6 +4,7 @@
 
 from rest_framework.exceptions import ValidationError
 
+from ..models import build_account_string
 from . import budget_details, lookup_loader
 
 STAFF_INFO_FIELDS = (
@@ -43,7 +44,15 @@ def calculate(payload: dict) -> dict:
 
 def build_budget_data(payload: dict) -> dict:
     """Turn the request body into the dicts data_loader builds from model rows."""
-    project_info = payload["project_info"]
+    project_info = {
+        **payload["project_info"],
+        "account_string": build_account_string(
+            payload["project_info"]["company"],
+            payload["project_info"]["cost_centre"],
+            payload["project_info"]["activity"],
+            payload["project_info"]["region"],
+        ),
+    }
 
     project_duration = {
         "start_year": project_info["start_year"],

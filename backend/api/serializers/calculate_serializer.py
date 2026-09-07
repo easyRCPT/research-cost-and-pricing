@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 # TODO: temporary. Delete this file when auth lands and the frontend goes back
 # to the budget routes.
 """Input side of the stateless calculator."""
@@ -82,6 +84,9 @@ class BudgetInfoInputSerializer(serializers.Serializer):
 
     cost_multiplier = serializers.DecimalField(max_digits=4, decimal_places=2)
     in_kind_multiplier = serializers.DecimalField(max_digits=4, decimal_places=2)
+    margin = serializers.DecimalField(
+        max_digits=5, decimal_places=4, required=False, default=Decimal("0.30")
+    )
 
     gst_applicable = serializers.BooleanField(default=True)
     cash_co_contribution = serializers.DecimalField(

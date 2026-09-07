@@ -27,6 +27,7 @@ FIELDS_BY_SECTION = {
         "status",
         "cost_multiplier",
         "in_kind_multiplier",
+        "margin",
         "cash_co_contribution",
         "gst_applicable",
     },

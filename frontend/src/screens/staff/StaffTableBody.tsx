@@ -13,7 +13,7 @@ import {
   classificationsFor,
   costFor,
   staffCategories,
-  timeBases,
+  timeBasesFor,
   timeFor,
   withTime,
 } from '@/lib/staff'
@@ -38,7 +38,6 @@ export function StaffTableBody({
   removeLine,
 }: StaffTableBodyProps) {
   const categories = staffCategories(salaryRates)
-  const bases = timeBases(multipliers)
 
   return (
     <tbody>
@@ -58,9 +57,15 @@ export function StaffTableBody({
               value={line.employment_type}
               options={EMPLOYMENT_TYPES}
               placeholder="—"
-              onChange={(employment_type) =>
-                patchLine(line.id, { employment_type })
-              }
+              onChange={(employment_type) => {
+                const bases = timeBasesFor(multipliers, employment_type)
+                patchLine(line.id, {
+                  employment_type,
+                  ...(bases.includes(line.time_basis)
+                    ? {}
+                    : { time_basis: bases[0] ?? line.time_basis }),
+                })
+              }}
             />
           </CellTd>
           <CellTd>
@@ -68,9 +73,15 @@ export function StaffTableBody({
               value={line.category}
               options={categories}
               placeholder="—"
-              onChange={(category) =>
-                patchLine(line.id, { category, classification: '' })
-              }
+              onChange={(category) => {
+                const options = classificationsFor(salaryRates, category)
+                patchLine(line.id, {
+                  category,
+                  ...(options.includes(line.classification)
+                    ? {}
+                    : { classification: options[0] ?? line.classification }),
+                })
+              }}
             />
           </CellTd>
           <CellTd>
@@ -87,8 +98,9 @@ export function StaffTableBody({
           <CellTd>
             <CellChoice
               value={line.time_basis}
-              options={bases}
+              options={timeBasesFor(multipliers, line.employment_type)}
               placeholder="—"
+              disabled={!line.employment_type}
               onChange={(time_basis) => patchLine(line.id, { time_basis })}
             />
           </CellTd>

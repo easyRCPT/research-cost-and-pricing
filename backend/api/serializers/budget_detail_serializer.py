@@ -47,6 +47,7 @@ class ProjectInfoSerializer(serializers.Serializer):
     cost_centre = serializers.CharField()
     activity = serializers.CharField(allow_null=True)
     region = serializers.CharField(allow_null=True)
+    account_string = serializers.CharField(allow_blank=True)
     additional_information = serializers.CharField(allow_blank=True)
     other_funder = serializers.CharField(allow_blank=True)
     other_funder_category = serializers.CharField(allow_blank=True)
@@ -83,6 +84,11 @@ class BudgetInfoSerializer(serializers.Serializer):
     in_kind_multiplier = serializers.DecimalField(
         max_digits=4,
         decimal_places=2,
+    )
+
+    margin = serializers.DecimalField(
+        max_digits=5,
+        decimal_places=4,
     )
 
     gst_applicable = serializers.BooleanField()
@@ -239,6 +245,9 @@ class NonStaffCostSerializer(serializers.Serializer):
 
 
 class PriceSummarySerializer(serializers.Serializer):
+    margin = serializers.DecimalField(max_digits=5, decimal_places=4)
+    margin_amount = CostDecimalField(max_digits=14, decimal_places=2)
+
     staff_cost = CostDecimalField(
         max_digits=14,
         decimal_places=2,

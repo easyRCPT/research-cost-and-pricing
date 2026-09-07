@@ -146,6 +146,17 @@ export function useUpdateStaffField() {
   }))
 }
 
+export function useUpdateStaffFields() {
+  return useBudgetMutation((current, updates: StaffFieldUpdate[]) => ({
+    ...current,
+    staff_lines: current.staff_lines.map((line) =>
+      updates
+        .filter((update) => update.row_id === line.id)
+        .reduce(applyStaffField, line),
+    ),
+  }))
+}
+
 /** Same setState signature as before, but each change now recalculates. */
 export function useNonStaffLines(): [
   NonStaffLine[],
