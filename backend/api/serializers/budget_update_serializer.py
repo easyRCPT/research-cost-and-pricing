@@ -6,6 +6,8 @@ FIELDS_BY_SECTION = {
         "title",
         "chief_investigator",
         "funder",
+        "other_funder",
+        "other_funder_category",
         "scheme",
         "additional_information",
         "start_year",

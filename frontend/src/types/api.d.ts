@@ -1200,6 +1200,8 @@ export interface components {
             activity: string | null;
             region: string | null;
             additional_information: string;
+            other_funder: string;
+            other_funder_category: string;
         };
         ProjectUpdate: {
             value: unknown;

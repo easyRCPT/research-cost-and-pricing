@@ -253,6 +253,8 @@ class Project(models.Model):
     department = models.ForeignKey("Department", on_delete=models.PROTECT)
     chief_investigator = models.CharField(max_length=100, blank=True)
     funder = models.CharField(max_length=100)
+    other_funder = models.CharField(max_length=200, blank=True, default="")
+    other_funder_category = models.CharField(max_length=100, blank=True, default="")
     scheme = models.CharField(max_length=200, blank=True)
 
     # Dictates potential year allocations for staff

@@ -48,6 +48,8 @@ class ProjectInfoSerializer(serializers.Serializer):
     activity = serializers.CharField(allow_null=True)
     region = serializers.CharField(allow_null=True)
     additional_information = serializers.CharField(allow_blank=True)
+    other_funder = serializers.CharField(allow_blank=True)
+    other_funder_category = serializers.CharField(allow_blank=True)
 
 
 # ------------------------------------------------------------------
