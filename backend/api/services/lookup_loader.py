@@ -28,6 +28,7 @@ REQUIRED_CONSTANTS = {
     "max_leave_loading",
     "max_payroll_tax",
     "override_uom_oncosts",
+    "gst_rate",
 }
 
 
