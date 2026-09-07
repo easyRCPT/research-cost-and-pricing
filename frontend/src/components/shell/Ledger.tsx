@@ -19,19 +19,33 @@ interface LedgerRowProps {
   label: ReactNode
   value: ReactNode
   secondValue?: ReactNode
-  tone?: 'rule'
+  tone?: 'rule' | 'sub'
 }
 
 export function LedgerRow({ label, value, secondValue, tone }: LedgerRowProps) {
   return (
     <tr className={cn('border-b', tone === 'rule' && 'font-semibold')}>
-      <td className="py-1.5 pr-6 text-left align-middle">{label}</td>
+      <td
+        className={cn(
+          'py-1.5 pr-6 text-left align-middle',
+          tone === 'sub' && 'pl-5 text-muted-foreground',
+        )}
+      >
+        {label}
+      </td>
       {secondValue !== undefined && (
         <td className="tabular py-1.5 text-right align-middle">
           {secondValue}
         </td>
       )}
-      <td className="tabular py-1.5 text-right align-middle">{value}</td>
+      <td
+        className={cn(
+          'tabular py-1.5 text-right align-middle',
+          tone === 'sub' && 'text-muted-foreground',
+        )}
+      >
+        {value}
+      </td>
     </tr>
   )
 }

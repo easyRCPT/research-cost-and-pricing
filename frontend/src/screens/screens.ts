@@ -16,10 +16,13 @@ export const SCREEN_HEADINGS: Record<
     title: 'Non-Staff Costs',
     subtitle: 'Part C — equipment, services, travel and student support',
   },
-  inkind: {
-    title: 'In-Kind Contributions',
-    subtitle:
-      'University investment in the project. (Important) Must note that this is not included in the price charged',
+  cash: {
+    title: 'Cash Co-Contributions',
+    subtitle: 'Cash the University puts in alongside the funder',
+  },
+  adjust: {
+    title: 'Adjust Price',
+    subtitle: 'In-kind contributions, then the margin',
   },
   price: {
     title: 'Price Summary',

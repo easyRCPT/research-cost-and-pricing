@@ -153,6 +153,7 @@ def update_budget(
     decimal_fields = {
         "cost_multiplier",
         "in_kind_multiplier",
+        "margin",
         "cash_co_contribution",
     }
 

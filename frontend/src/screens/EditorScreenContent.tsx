@@ -4,7 +4,8 @@ import { ProjectDetails } from './ProjectDetails'
 import { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
 import { StaffCosts } from './StaffCosts'
 import { PriceSummary } from './PriceSummary'
-import { InKind } from './InKind'
+import { AdjustPrice } from './AdjustPrice'
+import { CashCoContributions } from './CashCoContributions'
 import { BudgetForm } from './BudgetForm'
 import { Approvals } from './Approvals'
 import { EmptyStateScreen } from './EmptyStateScreen'
@@ -35,8 +36,10 @@ export function EditorScreenContent({
       )
     case 'staff':
       return <StaffCosts lookups={lookups} />
-    case 'inkind':
-      return <InKind lookups={lookups} nonStaff={nonStaff} />
+    case 'cash':
+      return <CashCoContributions />
+    case 'adjust':
+      return <AdjustPrice nonStaff={nonStaff} />
     case 'price':
       return <PriceSummary lookups={lookups} />
     case 'budget':

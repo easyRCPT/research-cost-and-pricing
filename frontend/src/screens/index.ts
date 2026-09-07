@@ -4,7 +4,11 @@ export { LookupsScreen } from './LookupsScreen'
 export { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
 export { StaffCosts, type StaffCostsProps } from './StaffCosts'
 export { PriceSummary, type PriceSummaryProps } from './PriceSummary'
-export { InKind, type InKindProps } from './InKind'
+export { AdjustPrice, type AdjustPriceProps } from './AdjustPrice'
+export {
+  CashCoContributions,
+  type CashCoContributionsProps,
+} from './CashCoContributions'
 export { BudgetForm, type BudgetFormProps } from './BudgetForm'
 export { Approvals, type ApprovalsProps } from './Approvals'
 export { EmptyStateScreen } from './EmptyStateScreen'

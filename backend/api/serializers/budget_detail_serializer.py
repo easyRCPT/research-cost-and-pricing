@@ -85,6 +85,11 @@ class BudgetInfoSerializer(serializers.Serializer):
         decimal_places=2,
     )
 
+    margin = serializers.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+    )
+
     gst_applicable = serializers.BooleanField()
 
     cash_co_contribution = CostDecimalField(
@@ -239,6 +244,9 @@ class NonStaffCostSerializer(serializers.Serializer):
 
 
 class PriceSummarySerializer(serializers.Serializer):
+    margin = serializers.DecimalField(max_digits=5, decimal_places=4)
+    margin_amount = CostDecimalField(max_digits=14, decimal_places=2)
+
     staff_cost = CostDecimalField(
         max_digits=14,
         decimal_places=2,

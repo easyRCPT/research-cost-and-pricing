@@ -108,6 +108,7 @@ def build_budget_info(budget: Budget) -> dict:
         "mode": budget.mode,
         "cost_multiplier": budget.cost_multiplier,
         "in_kind_multiplier": budget.in_kind_multiplier,
+        "margin": budget.margin,
         "gst_applicable": budget.gst_applicable,
         "cash_co_contribution": budget.cash_co_contribution,
         "comments": budget.comments,

@@ -7,12 +7,13 @@ export const SECTIONS = [
     items: [
       { id: 'staff', label: 'Staff Costs' },
       { id: 'nonstaff', label: 'Non-Staff Costs' },
+      { id: 'cash', label: 'Cash Co-Contributions' },
     ],
   },
   {
     label: 'Pricing',
     items: [
-      { id: 'inkind', label: 'In-Kind Contributions' },
+      { id: 'adjust', label: 'Adjust Price' },
       { id: 'price', label: 'Price Summary' },
     ],
   },

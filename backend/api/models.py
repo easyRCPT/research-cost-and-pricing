@@ -329,6 +329,10 @@ class Budget(models.Model):
     cost_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
     in_kind_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
 
+    margin = models.DecimalField(
+        max_digits=5, decimal_places=4, default=Decimal("0.30")
+    )
+
     gst_applicable = models.BooleanField(default=True)
 
     cash_co_contribution = models.DecimalField(

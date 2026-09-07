@@ -13,7 +13,7 @@ import {
   classificationsFor,
   costFor,
   staffCategories,
-  timeBases,
+  timeBasesFor,
   timeFor,
   withTime,
 } from '@/lib/staff'
@@ -38,7 +38,6 @@ export function StaffTableBody({
   removeLine,
 }: StaffTableBodyProps) {
   const categories = staffCategories(salaryRates)
-  const bases = timeBases(multipliers)
 
   return (
     <tbody>
@@ -59,7 +58,14 @@ export function StaffTableBody({
               options={EMPLOYMENT_TYPES}
               placeholder="—"
               onChange={(employment_type) =>
-                patchLine(line.id, { employment_type })
+                patchLine(line.id, {
+                  employment_type,
+                  ...(timeBasesFor(multipliers, employment_type).includes(
+                    line.time_basis,
+                  )
+                    ? {}
+                    : { time_basis: '' }),
+                })
               }
             />
           </CellTd>
@@ -87,8 +93,9 @@ export function StaffTableBody({
           <CellTd>
             <CellChoice
               value={line.time_basis}
-              options={bases}
+              options={timeBasesFor(multipliers, line.employment_type)}
               placeholder="—"
+              disabled={!line.employment_type}
               onChange={(time_basis) => patchLine(line.id, { time_basis })}
             />
           </CellTd>
