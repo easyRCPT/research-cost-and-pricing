@@ -109,6 +109,9 @@ def build_budget_info(budget: Budget) -> dict:
         "gst_applicable": budget.gst_applicable,
         "cash_co_contribution": budget.cash_co_contribution,
         "comments": budget.comments,
+        "justification": budget.justification,
+        "justification_notes": budget.justification_notes,
+        "dean_exemption_reason": budget.dean_exemption_reason,
         "status": budget.status,
         "deliverables": [
             {

@@ -18,6 +18,9 @@ FIELDS_BY_SECTION = {
     },
     "budget": {
         "comments",
+        "justification",
+        "justification_notes",
+        "dean_exemption_reason",
         "mode",
         "status",
         "cost_multiplier",

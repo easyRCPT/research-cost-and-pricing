@@ -138,6 +138,9 @@ def update_budget(
 ) -> bool:
     string_fields = {
         "comments",
+        "justification",
+        "justification_notes",
+        "dean_exemption_reason",
     }
 
     choice_fields = {

@@ -91,6 +91,9 @@ class BudgetInfoSerializer(serializers.Serializer):
     )
 
     comments = serializers.CharField(allow_blank=True)
+    justification = serializers.CharField(allow_blank=True)
+    justification_notes = serializers.CharField(allow_blank=True)
+    dean_exemption_reason = serializers.CharField(allow_blank=True)
     status = serializers.ChoiceField(choices=Budget.Status.choices)
 
     deliverables = DeliverableResultSerializer(many=True)
@@ -372,6 +375,7 @@ class BudgetSummarySerializer(serializers.Serializer):
     staff_budget = StaffBudgetSerializer()
     non_staff_budget = NonStaffBudgetSerializer()
     in_kind_costs = InKindCostsSerializer()
+    dean_required = serializers.BooleanField()
 
 
 # ------------------------------------------------------------------

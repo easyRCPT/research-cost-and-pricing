@@ -332,6 +332,10 @@ class Budget(models.Model):
 
     comments = models.TextField(blank=True, default="")
 
+    justification = models.CharField(max_length=200, blank=True, default="")
+    justification_notes = models.TextField(blank=True, default="")
+    dean_exemption_reason = models.TextField(blank=True, default="")
+
     # Plain CharField rather than whatever it will be when
     # authentication comes in
     status = models.CharField(
