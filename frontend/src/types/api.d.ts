@@ -2271,7 +2271,6 @@ export interface components {
         };
         /**
          * @description * `superannuation` - Superannuation
-         *     * `payroll_tax` - Payroll Tax
          *     * `workcover` - WorkCover
          *     * `leave_loading` - Leave Loading
          *     * `long_service_leave` - Long Service Leave
@@ -2279,7 +2278,7 @@ export interface components {
          *     * `annual_leave_provision` - Annual Leave Provision
          * @enum {string}
          */
-        OnCostTypeEnum: "superannuation" | "payroll_tax" | "workcover" | "leave_loading" | "long_service_leave" | "parental_leave" | "annual_leave_provision";
+        OnCostTypeEnum: "superannuation" | "workcover" | "leave_loading" | "long_service_leave" | "parental_leave" | "annual_leave_provision";
         ParseError: {
             code: components["schemas"]["ParseErrorCodeEnum"];
             detail: string;
