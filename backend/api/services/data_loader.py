@@ -9,9 +9,9 @@ def load_budget_data(budget: Budget) -> dict:
 
     project_duration = {
         "start_year": project_info["start_year"],
-        "start_month": project_info["project_info"]["start_month"],
-        "end_year": project_info["project_info"]["end_year"],
-        "end_month": project_info["project_info"]["end_month"],
+        "start_month": project_info["start_month"],
+        "end_year": project_info["end_year"],
+        "end_month": project_info["end_month"],
     }
 
     staff_lines = list(budget.staff_lines.all())
@@ -51,9 +51,11 @@ def build_project_info(project: Project) -> dict:
         "end_month": project.end_month,
         "company": project.COMPANY_CODE,
         "cost_centre": project.department.code,
-        "activity": project.activity.name if project.activity else None,
-        "region": project.region.name if project.region else None,
+        "activity": project.activity.code if project.activity else None,
+        "region": project.region.code if project.region else None,
         "additional_information": project.additional_information,
+        "other_funder": project.other_funder,
+        "other_funder_category": project.other_funder_category,
     }
 
 
@@ -109,6 +111,9 @@ def build_budget_info(budget: Budget) -> dict:
         "gst_applicable": budget.gst_applicable,
         "cash_co_contribution": budget.cash_co_contribution,
         "comments": budget.comments,
+        "justification": budget.justification,
+        "justification_notes": budget.justification_notes,
+        "dean_exemption_reason": budget.dean_exemption_reason,
         "status": budget.status,
         "deliverables": [
             {
