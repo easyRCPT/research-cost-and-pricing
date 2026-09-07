@@ -103,19 +103,45 @@ class RevenueCategorySerializer(serializers.ModelSerializer):
         fields = ["budget_ledger_id", "external_party", "description"]
 
 
+LOOKUP_SERIALIZERS = {
+    "departments": DepartmentSerializer,
+    "salary_rates": SalaryRateSerializer,
+    "salary_rate_multipliers": SalaryRateMultiplierSerializer,
+    "increment_caps": IncrementCapSerializer,
+    "eba_increases": EbaIncreaseSerializer,
+    "on_cost_rates": OnCostRateSerializer,
+    "non_staff_cost_categories": NonStaffCostCategorySerializer,
+    "minimum_cost_recovery_multipliers": MinimumCostRecoveryMultiplierSerializer,
+    "calculation_constants": CalculationConstantSerializer,
+    "activities": ActivitySerializer,
+    "regions": RegionSerializer,
+    "deliverable_types": DeliverableTypeSerializer,
+    "revenue_categories": RevenueCategorySerializer,
+}
+
+
 class LookupTablesSerializer(serializers.Serializer):
-    departments = DepartmentSerializer(many=True)
-    salary_rates = SalaryRateSerializer(many=True)
-    salary_rate_multipliers = SalaryRateMultiplierSerializer(many=True)
-    increment_caps = IncrementCapSerializer(many=True)
-    eba_increases = EbaIncreaseSerializer(many=True)
-    on_cost_rates = OnCostRateSerializer(many=True)
-    non_staff_cost_categories = NonStaffCostCategorySerializer(many=True)
-    minimum_cost_recovery_multipliers = MinimumCostRecoveryMultiplierSerializer(
-        many=True
+    def get_fields(self):
+        fields = {}
+
+        for name, serializer_class in LOOKUP_SERIALIZERS.items():
+            fields[name] = serializer_class(many=True)
+
+        return fields
+
+
+class LookupCreateSerializer(serializers.Serializer):
+    values = serializers.DictField(
+        child=serializers.JSONField(),
     )
-    calculation_constants = CalculationConstantSerializer(many=True)
-    activities = ActivitySerializer(many=True)
-    regions = RegionSerializer(many=True)
-    deliverable_types = DeliverableTypeSerializer(many=True)
-    revenue_categories = RevenueCategorySerializer(many=True)
+
+
+class LookupUpdateSerializer(serializers.Serializer):
+    lookup = serializers.DictField(
+        child=serializers.JSONField(),
+    )
+    values = serializers.DictField(
+        child=serializers.JSONField(),
+        required=False,
+        default=dict,
+    )

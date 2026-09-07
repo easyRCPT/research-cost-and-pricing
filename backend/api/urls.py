@@ -23,6 +23,11 @@ urlpatterns = [
         LookupView.as_view(http_method_names=["get"]),
         name="lookups",
     ),
+    path(
+        "lookups/<table>/",
+        LookupView.as_view(http_method_names=["post", "patch"]),
+        name="lookup-table",
+    ),
     # Budget
     path(
         "budgets/<int:budget_id>/",
