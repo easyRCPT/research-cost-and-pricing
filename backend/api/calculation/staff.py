@@ -151,12 +151,16 @@ def calculate_staff_row(
         # Calculate cost
         salary_rate = find_salary_rate(info_data, constants, year_employed, year)
         employment_type = info_data["employment_type"]
+        on_costs = get_on_cost_rates(
+            constants["on_cost_components"], employment_type, year
+        )
+        general = constants["constants"]
         costs[year] = calculate_staff_cost(
-            constants,
+            on_costs,
+            general,
             salary_rate,
             time,
             year_fraction,
-            employment_type,
             cost_recovery_multiplier,
         )
 
@@ -222,20 +226,37 @@ def find_salary_rate(
     return base_salary_rate * salary_rate_multiplier * eba_multiplier
 
 
+def get_on_cost_rates(
+    on_cost_components: dict,
+    employment_type: str,
+    year: int,
+) -> dict:
+    rates = {}
+
+    for on_cost_type, employment_rates in on_cost_components.items():
+        year_rates = employment_rates[employment_type]
+
+        # Use default value if value of the year does not exist in the database
+        if year in year_rates:
+            rates[on_cost_type] = year_rates[year]
+        else:
+            rates[on_cost_type] = year_rates[None]
+
+    return rates
+
+
 def calculate_staff_cost(
-    constants: dict,
+    on_costs: dict,
+    general: dict,
     salary_rate: Decimal,
     time: Decimal,
     year_fraction: Decimal,
-    employment_type: str,
     cost_recovery_multiplier: Decimal,
 ) -> Decimal:
     """
     Calculate the total cost of a staff in a year, with base salary rate calculated in previous
     year_fraction is calculated by the caller and is 1 for non-FTE time basis
     """
-    on_costs = constants["on_cost_components"][employment_type]
-    general = constants["constants"]
 
     # Requested salary
     requested_salary = salary_rate * time * year_fraction

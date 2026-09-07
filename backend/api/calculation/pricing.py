@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from . import non_staff, staff
 
-GST_MULTIPLIER = Decimal("1.1")
-
 
 def pricing(
     constants: dict,
@@ -68,6 +66,7 @@ def calculate_budget_summary(
         non_staff_result,
         total_cash_co_contribution,
         budget_info["gst_applicable"],
+        general,
     )
 
     # staff budget
@@ -129,6 +128,7 @@ def calculate_price_summary(
     non_staff_result: dict,
     total_cash_co_contribution: Decimal,
     gst_applicable: bool,
+    general: dict,
 ) -> dict:
     """
     Calculate price summary
@@ -152,7 +152,8 @@ def calculate_price_summary(
 
     total_price_exc_gst = project_cost
     if gst_applicable:
-        total_price_inc_gst = total_price_exc_gst * GST_MULTIPLIER
+        gst_multiplier = general["gst_rate"] + Decimal(1)
+        total_price_inc_gst = total_price_exc_gst * gst_multiplier
     else:
         total_price_inc_gst = total_price_exc_gst
 

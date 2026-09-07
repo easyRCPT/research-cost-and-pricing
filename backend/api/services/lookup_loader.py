@@ -28,6 +28,7 @@ REQUIRED_CONSTANTS = {
     "max_leave_loading",
     "max_payroll_tax",
     "override_uom_oncosts",
+    "gst_rate",
 }
 
 
@@ -141,10 +142,19 @@ def get_constants() -> dict:
     )
     on_cost_components = {}
 
+    # Structure: employment_type -> year -> on_cost_type -> rate
     for row in on_cost_rates:
-        on_cost_components.setdefault(row.employment_type, {})[row.on_cost_type] = (
-            row.rate
-        )
+        on_cost_components.setdefault(row.on_cost_type, {}).setdefault(
+            row.employment_type, {}
+        )[row.year] = row.rate
+
+    # Check that each on-cost type has a default rate
+    for on_cost_type, employment_rates in on_cost_components.items():
+        for employment_type, year_rates in employment_rates.items():
+            if None not in year_rates:
+                raise ValueError(
+                    f"Missing default rate for {on_cost_type} and {employment_type}"
+                )
 
     calculation_constants = cast(
         list[CalculationConstant],
