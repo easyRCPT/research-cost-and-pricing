@@ -6,6 +6,7 @@ import { StaffCosts } from './StaffCosts'
 import { PriceSummary } from './PriceSummary'
 import { InKind } from './InKind'
 import { BudgetForm } from './BudgetForm'
+import { Approvals } from './Approvals'
 import { EmptyStateScreen } from './EmptyStateScreen'
 
 interface EditorScreenContentProps {
@@ -44,6 +45,8 @@ export function EditorScreenContent({
       return <PriceSummary budgetId={budgetId} lookups={lookups} />
     case 'budget':
       return <BudgetForm budgetId={budgetId} lookups={lookups} />
+    case 'approvals':
+      return <Approvals budgetId={budgetId} lookups={lookups} />
     case 'nonstaff':
       return <NonStaffCosts {...nonStaff} lookups={lookups} />
     default:

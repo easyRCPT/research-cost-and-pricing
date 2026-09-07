@@ -156,13 +156,16 @@ export interface components {
          * @description * `cash_co_contribution` - cash_co_contribution
          *     * `comments` - comments
          *     * `cost_multiplier` - cost_multiplier
+         *     * `dean_exemption_reason` - dean_exemption_reason
          *     * `gst_applicable` - gst_applicable
          *     * `in_kind_multiplier` - in_kind_multiplier
+         *     * `justification` - justification
+         *     * `justification_notes` - justification_notes
          *     * `mode` - mode
          *     * `status` - status
          * @enum {string}
          */
-        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "gst_applicable" | "in_kind_multiplier" | "mode" | "status";
+        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "dean_exemption_reason" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "mode" | "status";
         BudgetFieldUpdate: {
             value: unknown;
             field: components["schemas"]["BudgetFieldEnum"];
@@ -182,6 +185,9 @@ export interface components {
             /** Format: double */
             cash_co_contribution: number;
             comments: string;
+            justification: string;
+            justification_notes: string;
+            dean_exemption_reason: string;
             status: components["schemas"]["StatusEnum"];
             deliverables: components["schemas"]["DeliverableResult"][];
         };
@@ -190,6 +196,7 @@ export interface components {
             staff_budget: components["schemas"]["StaffBudget"];
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
+            dean_required: boolean;
         };
         BudgetUpdate: components["schemas"]["ProjectUpdate"] | components["schemas"]["BudgetFieldUpdate"] | components["schemas"]["StaffUpdate"] | components["schemas"]["NonStaffUpdate"] | components["schemas"]["DeliverableUpdate"];
         BudgetsDeliverablesCreateDeliverableTypeErrorComponent: {
