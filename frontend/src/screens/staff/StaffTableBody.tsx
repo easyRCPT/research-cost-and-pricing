@@ -57,16 +57,15 @@ export function StaffTableBody({
               value={line.employment_type}
               options={EMPLOYMENT_TYPES}
               placeholder="—"
-              onChange={(employment_type) =>
+              onChange={(employment_type) => {
+                const bases = timeBasesFor(multipliers, employment_type)
                 patchLine(line.id, {
                   employment_type,
-                  ...(timeBasesFor(multipliers, employment_type).includes(
-                    line.time_basis,
-                  )
+                  ...(bases.includes(line.time_basis)
                     ? {}
-                    : { time_basis: '' }),
+                    : { time_basis: bases[0] ?? line.time_basis }),
                 })
-              }
+              }}
             />
           </CellTd>
           <CellTd>
@@ -74,9 +73,15 @@ export function StaffTableBody({
               value={line.category}
               options={categories}
               placeholder="—"
-              onChange={(category) =>
-                patchLine(line.id, { category, classification: '' })
-              }
+              onChange={(category) => {
+                const options = classificationsFor(salaryRates, category)
+                patchLine(line.id, {
+                  category,
+                  ...(options.includes(line.classification)
+                    ? {}
+                    : { classification: options[0] ?? line.classification }),
+                })
+              }}
             />
           </CellTd>
           <CellTd>
