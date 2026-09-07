@@ -19,7 +19,7 @@ export const SCREEN_HEADINGS: Record<
   inkind: {
     title: 'In-Kind Contributions',
     subtitle:
-      'University investment in the project — not included in the price charged',
+      'University investment in the project. (Important) Must note that this is not included in the price charged',
   },
   price: {
     title: 'Price Summary',

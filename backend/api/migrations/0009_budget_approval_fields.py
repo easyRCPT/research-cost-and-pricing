@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0008_deliverabletype_revenuecategory_and_more'),
+        ("api", "0008_deliverabletype_revenuecategory_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='budget',
-            name='dean_exemption_reason',
-            field=models.TextField(blank=True, default=''),
+            model_name="budget",
+            name="dean_exemption_reason",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AddField(
-            model_name='budget',
-            name='justification',
-            field=models.CharField(blank=True, default='', max_length=200),
+            model_name="budget",
+            name="justification",
+            field=models.CharField(blank=True, default="", max_length=200),
         ),
         migrations.AddField(
-            model_name='budget',
-            name='justification_notes',
-            field=models.TextField(blank=True, default=''),
+            model_name="budget",
+            name="justification_notes",
+            field=models.TextField(blank=True, default=""),
         ),
     ]

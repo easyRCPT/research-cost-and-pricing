@@ -240,9 +240,11 @@ class RevenueCategory(models.Model):
 
 class Project(models.Model):
     if TYPE_CHECKING:
+        id: int
         department_id: str
         activity_id: str | None
         region_id: str | None
+        budgets: RelatedManager["Budget"]
 
     COMPANY_CODE = "C001"
 
@@ -310,6 +312,7 @@ class Budget(models.Model):
         WITHDRAWN = "withdrawn", "Withdrawn"
 
     if TYPE_CHECKING:
+        id: int
         deliverables: RelatedManager["Deliverable"]
         staff_lines: RelatedManager["StaffCostLine"]
         non_staff_lines: RelatedManager["NonStaffCostLine"]
