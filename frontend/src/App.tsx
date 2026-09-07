@@ -1,68 +1,25 @@
-import { useState } from 'react'
-import { type NonStaffLine, type ProjectInfo } from './types'
-import {
-  PageHead,
-  Sidebar,
-  TopBar,
-  SECTIONS,
-  type EditorScreen,
-} from '@/components/shell'
-import { LOOKUPS, LookupButton } from '@/components/lookups/LookupButton'
-import { SCREEN_HEADINGS, Lookups } from '@/screens/'
-import { EMPTY_PROJECT } from './lib/constants'
-import { EditorScreenContent } from './screens/EditorScreenContent'
-import { projectYears } from './lib/budget'
+import { Suspense, useState } from 'react'
+import { AppContent, type AppScreen } from '@/components/shell/AppContent'
+import { QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { AppErrorState, AppSkeleton } from './components/shell'
 
 function App() {
-  const [screen, setScreen] = useState<EditorScreen | typeof LOOKUPS>('details')
-  const [project, setProject] = useState<ProjectInfo>(EMPTY_PROJECT)
-  const [nonStaffLines, setNonStaffLines] = useState<NonStaffLine[]>([])
-  const years = projectYears(project)
-
-  const patchProject = (patch: Partial<ProjectInfo>) =>
-    setProject((current) => ({ ...current, ...patch }))
-
-  const lookupsOpen = screen === LOOKUPS
-  const lookupHeading = {
-    title: 'Lookup Tables',
-    subtitle: 'Read-only',
-  }
-  const currPageHeading = lookupsOpen ? lookupHeading : SCREEN_HEADINGS[screen]
+  const [screen, setScreen] = useState<AppScreen>('details')
 
   return (
-    <div className="min-h-screen bg-background">
-      <TopBar
-        right={<LookupButton open={lookupsOpen} handleClick={setScreen} />}
-      />
-      <div className="grid md:grid-cols-[236px_minmax(0,1fr)]">
-        <Sidebar
-          sections={SECTIONS}
-          current={lookupsOpen ? null : screen}
-          onSelect={setScreen}
-        />
-        <main className="w-full max-w-7xl px-8 py-7 pb-24">
-          <PageHead
-            title={currPageHeading.title}
-            subtitle={currPageHeading.subtitle}
-          />
-          {/* --- Main Content Section --- */}
-          {screen === LOOKUPS ? (
-            <Lookups />
-          ) : (
-            <EditorScreenContent
-              screen={screen}
-              project={project}
-              onChange={patchProject}
-              nonStaff={{
-                lines: nonStaffLines,
-                years,
-                setLines: setNonStaffLines,
-              }}
-            />
-          )}
-        </main>
-      </div>
-    </div>
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={(props) => <AppErrorState {...props} />}
+        >
+          <Suspense fallback={<AppSkeleton screen={screen} />}>
+            <AppContent screen={screen} setScreen={setScreen} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
   )
 }
 

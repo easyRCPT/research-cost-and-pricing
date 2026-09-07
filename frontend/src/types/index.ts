@@ -2,12 +2,25 @@ import type { components } from './api'
 
 type S = components['schemas']
 
+// Lookups
+export type LookupTables = S['LookupTables']
+export type LookupTableNames = keyof LookupTables
+export type NonStaffCategory = S['NonStaffCostCategory']
+export type Department = S['Department']
+export type SalaryRate = S['SalaryRate']
+export type SalaryRateMultiplier = S['SalaryRateMultiplier']
+
+// Project Details
+export type ProjectInfo = S['ProjectInfo']
+export type Activity = S['Activity']
+export type Region = S['Region']
+
 // Response types
 export type BudgetDetail = S['BudgetDetail']
-export type ProjectInfo = S['ProjectInfo']
 export type StaffLine = S['StaffLine']
 export type NonStaffLine = S['NonStaffLine']
 export type StaffCost = S['StaffCost']
+export type StaffTotal = S['StaffTotal']
 export type NonStaffCost = S['NonStaffCost']
 export type PriceSummary = S['PriceSummary']
 export type StaffBudget = S['StaffBudget']
@@ -28,8 +41,3 @@ export type TimeBasis = S['TimeBasisEnum']
 /** model.py enums  */
 export type Mode = S['ModeEnum']
 export type Status = S['StatusEnum']
-
-// Lookups
-export type LookupTables = S['LookupTables']
-export type LookupTableNames = keyof LookupTables
-export type NonStaffCategory = S['NonStaffCostCategory']

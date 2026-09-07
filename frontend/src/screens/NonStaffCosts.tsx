@@ -1,7 +1,5 @@
-import { useLookups } from '@/api/lookups'
-import type { NonStaffLine } from '@/types'
+import type { LookupTables, NonStaffLine } from '@/types'
 import { Panel } from '@/components/shell'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { NonStaffTable } from './nonstaff/NonStaffTable'
 import { emptyNonStaffLine } from '@/lib/non-staff'
 import { nextTempId } from '@/lib/utils'
@@ -11,10 +9,15 @@ export interface NonStaffCostsProps {
   lines: NonStaffLine[]
   years: number[]
   setLines: Dispatch<SetStateAction<NonStaffLine[]>>
+  lookups: LookupTables
 }
 
-export function NonStaffCosts({ lines, years, setLines }: NonStaffCostsProps) {
-  const lookups = useLookups()
+export function NonStaffCosts({
+  lines,
+  years,
+  setLines,
+  lookups,
+}: NonStaffCostsProps) {
   const patchLine = (id: number, patch: Partial<NonStaffLine>) =>
     setLines((lines) =>
       lines.map((line) => (line.id === id ? { ...line, ...patch } : line)),
@@ -24,28 +27,12 @@ export function NonStaffCosts({ lines, years, setLines }: NonStaffCostsProps) {
   const removeLine = (id: number) =>
     setLines((lines) => lines.filter((line) => line.id !== id))
 
-  if (lookups.isError) {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Could not load the expense types</AlertTitle>
-        <AlertDescription>{lookups.error.message}</AlertDescription>
-      </Alert>
-    )
-  }
-
-  if (lookups.isPending) {
-    return (
-      <Panel>
-        <div className="h-48 animate-pulse rounded-md bg-muted" />
-      </Panel>
-    )
-  }
   return (
     <Panel>
       <NonStaffTable
         years={years}
         lines={lines}
-        categories={lookups.data.non_staff_cost_categories}
+        categories={lookups.non_staff_cost_categories}
         patchLine={patchLine}
         removeLine={removeLine}
         addLine={addLine}
