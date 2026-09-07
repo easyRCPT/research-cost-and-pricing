@@ -55,7 +55,7 @@ def calculate_budget_summary(
     non_staff_result: dict,
     budget_info: dict,
     total_cash_co_contribution: Decimal,
-    calculation_constants: dict,
+    general: dict,
 ) -> dict:
     """
     Calculate summary for budget form
@@ -66,7 +66,7 @@ def calculate_budget_summary(
         non_staff_result,
         total_cash_co_contribution,
         budget_info["gst_applicable"],
-        calculation_constants,
+        general,
     )
 
     # staff budget
@@ -104,19 +104,19 @@ def calculate_budget_summary(
         "staff_budget": staff_budget,
         "non_staff_budget": non_staff_budget,
         "in_kind_costs": in_kind_costs,
-        "dean_required": calculate_dean_required(budget_info, calculation_constants),
+        "dean_required": calculate_dean_required(budget_info, general),
     }
 
 
 def calculate_dean_required(
     budget_info: dict,
-    calculation_constants: dict,
+    general: dict,
 ) -> bool:
     """
     A budget priced below the default cost recovery multiplier needs a Dean's
     authorisation as well as the Head of Department's.
     """
-    default_multiplier = calculation_constants.get("full_cost_recovery_multiplier")
+    default_multiplier = general.get("full_cost_recovery_multiplier")
     if default_multiplier is None:
         return False
 
@@ -128,7 +128,7 @@ def calculate_price_summary(
     non_staff_result: dict,
     total_cash_co_contribution: Decimal,
     gst_applicable: bool,
-    calculation_constants: dict,
+    general: dict,
 ) -> dict:
     """
     Calculate price summary
@@ -152,7 +152,7 @@ def calculate_price_summary(
 
     total_price_exc_gst = project_cost
     if gst_applicable:
-        gst_multiplier = calculation_constants["gst_rate"] + Decimal(1)
+        gst_multiplier = general["gst_rate"] + Decimal(1)
         total_price_inc_gst = total_price_exc_gst * gst_multiplier
     else:
         total_price_inc_gst = total_price_exc_gst
