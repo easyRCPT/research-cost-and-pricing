@@ -238,6 +238,17 @@ class RevenueCategory(models.Model):
 # ------------------- Schema for Data Derived From Application -------------
 
 
+def build_account_string(
+    company: str,
+    cost_centre: str,
+    activity: str | None,
+    region: str | None,
+) -> str:
+    if not (activity and region):
+        return ""
+    return f"{company}-{cost_centre}-{activity}-{region}"
+
+
 class Project(models.Model):
     if TYPE_CHECKING:
         id: int
@@ -280,9 +291,12 @@ class Project(models.Model):
     # Account string computed fresh from existing fields
     @property
     def account_string(self):
-        if not (self.activity_id and self.region_id):
-            return ""
-        return f"{self.COMPANY_CODE}-{self.department_id}-{self.activity_id}-{self.region_id}"
+        return build_account_string(
+            self.COMPANY_CODE,
+            self.department_id,
+            self.activity_id,
+            self.region_id,
+        )
 
     def __str__(self):
         return self.title

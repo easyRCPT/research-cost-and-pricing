@@ -48,5 +48,6 @@ export const EMPTY_PROJECT: ProjectInfo = {
   cost_centre: '',
   activity: null,
   region: null,
+  account_string: '',
   additional_information: '',
 }

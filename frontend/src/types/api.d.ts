@@ -178,11 +178,12 @@ export interface components {
          *     * `in_kind_multiplier` - in_kind_multiplier
          *     * `justification` - justification
          *     * `justification_notes` - justification_notes
+         *     * `margin` - margin
          *     * `mode` - mode
          *     * `status` - status
          * @enum {string}
          */
-        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "dean_exemption_reason" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "mode" | "status";
+        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "dean_exemption_reason" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode" | "status";
         BudgetFieldUpdate: {
             value: unknown;
             field: components["schemas"]["BudgetFieldEnum"];
@@ -198,6 +199,8 @@ export interface components {
             cost_multiplier: number;
             /** Format: double */
             in_kind_multiplier: number;
+            /** Format: double */
+            margin: number;
             gst_applicable: boolean;
             /** Format: double */
             cash_co_contribution: number;
@@ -215,6 +218,11 @@ export interface components {
             cost_multiplier: number;
             /** Format: double */
             in_kind_multiplier: number;
+            /**
+             * Format: double
+             * @default 0.3
+             */
+            margin: number;
             /** @default true */
             gst_applicable: boolean;
             /**
@@ -1115,6 +1123,24 @@ export interface components {
             code: "invalid" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
             detail: string;
         };
+        CalculateCreateBudgetInfoMarginErrorComponent: {
+            /**
+             * @description * `budget_info.margin` - budget_info.margin (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "budget_info.margin";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_decimal_places` - max_decimal_places
+             *     * `max_digits` - max_digits
+             *     * `max_string_length` - max_string_length
+             *     * `max_whole_digits` - max_whole_digits
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits" | "null";
+            detail: string;
+        };
         CalculateCreateBudgetInfoModeErrorComponent: {
             /**
              * @description * `budget_info.mode` - budget_info.mode (enum property replaced by openapi-typescript)
@@ -1158,7 +1184,7 @@ export interface components {
             code: "invalid_choice" | "null";
             detail: string;
         };
-        CalculateCreateError: components["schemas"]["CalculateCreateNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoTitleErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoChiefInvestigatorErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoFunderErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoDepartmentErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoFacultyErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoSchemeErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoStartYearErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoStartMonthErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoEndYearErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoEndMonthErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoCompanyErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoCostCentreErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoActivityErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoRegionErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoAdditionalInformationErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoOtherFunderErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoOtherFunderCategoryErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoModeErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoCostMultiplierErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoInKindMultiplierErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoGstApplicableErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoCashCoContributionErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoCommentsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoJustificationErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoJustificationNotesErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeanExemptionReasonErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoStatusErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXNumberErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDescriptionErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDeliverableTypeErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXInvoiceAmountErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDueDateErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDependencyErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXSponsorErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXIdErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXNameRoleErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXEmploymentTypeErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXCategoryErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXClassificationErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXTimeBasisErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXInKindErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearINDEXYearErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearINDEXTimeErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXIdErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXCostGroupErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXExpenseTypeErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXDescriptionErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXInKindErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXAddTenPercentErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXIndirectRateMultiplierErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearINDEXYearErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearINDEXAmountErrorComponent"];
+        CalculateCreateError: components["schemas"]["CalculateCreateNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoTitleErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoChiefInvestigatorErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoFunderErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoDepartmentErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoFacultyErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoSchemeErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoStartYearErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoStartMonthErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoEndYearErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoEndMonthErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoCompanyErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoCostCentreErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoActivityErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoRegionErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoAdditionalInformationErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoOtherFunderErrorComponent"] | components["schemas"]["CalculateCreateProjectInfoOtherFunderCategoryErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoModeErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoCostMultiplierErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoInKindMultiplierErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoMarginErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoGstApplicableErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoCashCoContributionErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoCommentsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoJustificationErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoJustificationNotesErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeanExemptionReasonErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoStatusErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXNumberErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDescriptionErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDeliverableTypeErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXInvoiceAmountErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDueDateErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXDependencyErrorComponent"] | components["schemas"]["CalculateCreateBudgetInfoDeliverablesINDEXSponsorErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXIdErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXNameRoleErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXEmploymentTypeErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXCategoryErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXClassificationErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXTimeBasisErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXInKindErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearINDEXYearErrorComponent"] | components["schemas"]["CalculateCreateStaffLinesINDEXByYearINDEXTimeErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXIdErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXCostGroupErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXExpenseTypeErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXDescriptionErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXInKindErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXAddTenPercentErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXIndirectRateMultiplierErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearINDEXYearErrorComponent"] | components["schemas"]["CalculateCreateNonStaffLinesINDEXByYearINDEXAmountErrorComponent"];
         CalculateCreateErrorResponse400: components["schemas"]["CalculateCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         CalculateCreateNonFieldErrorsErrorComponent: {
             /**
@@ -2280,6 +2306,10 @@ export interface components {
         PayrollTypeEnum: "Fortnight" | "Casual";
         PriceSummary: {
             /** Format: double */
+            margin: number;
+            /** Format: double */
+            margin_amount: number;
+            /** Format: double */
             staff_cost: number;
             /** Format: double */
             non_staff_cost: number;
@@ -2343,6 +2373,7 @@ export interface components {
             cost_centre: string;
             activity: string | null;
             region: string | null;
+            account_string: string;
             additional_information: string;
             other_funder: string;
             other_funder_category: string;
