@@ -300,32 +300,7 @@ def import_on_costs(workbook):
 
         count += 1
 
-    # Third shape: payroll tax is a state tax on the employer's
-    # wage, does not need employee. Keyed on year, with employee_type
-    # left null.
-    for year, rate in rows(workbook, "tbPayrollTax"):
-        if not is_number(year) or rate is None:
-            continue
-
-        OnCostRate.objects.update_or_create(
-            on_cost_type=OnCostRate.OnCostType.PAYROLL_TAX,
-            employment_type=None,
-            year=int(year),
-            defaults={"rate": dec(rate)},
-        )
-
-        count += 1
-
-    # Payroll tax fallback for years the table does not list.
-    # Both columns "null" means "whatever the year, whoever the employee"
-    OnCostRate.objects.update_or_create(
-        on_cost_type=OnCostRate.OnCostType.PAYROLL_TAX,
-        employment_type=None,
-        year=None,
-        defaults={"rate": dec(scalar(workbook, "vl_MaxPayrollTax"))},
-    )
-
-    return count + 1
+    return count
 
 
 def import_non_staff_categories(workbook):

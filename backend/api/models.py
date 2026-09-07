@@ -92,7 +92,9 @@ class SalaryRate(models.Model):
         return f"{self.payroll_type} {self.category} {self.classification}"
 
 
-# TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
+# Payroll tax is not here: it is a state tax on the employer with no
+# employment type, read from the max_payroll_tax constant. If it ever needs a
+# year-based rate it belongs in its own model.
 class OnCostRate(models.Model):
     """
     On-cost percentages from the Excel's lookup tables.
@@ -110,10 +112,6 @@ class OnCostRate(models.Model):
             "superannuation",
             "Superannuation",
         )  # year + employment_type, year falls back to None
-        PAYROLL_TAX = (
-            "payroll_tax",
-            "Payroll Tax",
-        )  # year only, employment_type always None
         WORKCOVER = "workcover", "WorkCover"  # employment_type only, year always None
         LEAVE_LOADING = (
             "leave_loading",

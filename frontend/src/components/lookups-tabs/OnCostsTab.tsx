@@ -8,7 +8,6 @@ const EMPLOYMENT_COLUMNS = ['Continuing', 'Fixed-Term', 'Casual'] as const
 
 const ON_COST_LABELS: Record<OnCostType, string> = {
   superannuation: 'Superannuation',
-  payroll_tax: 'Payroll tax',
   workcover: 'WorkCover',
   leave_loading: 'Leave loading',
   long_service_leave: 'Long service leave',
