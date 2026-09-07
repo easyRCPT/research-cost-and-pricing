@@ -15,7 +15,6 @@ interface EditorScreenContentProps {
   project: ProjectInfo
   onChange: (patch: Partial<ProjectInfo>) => void
   nonStaff: Omit<NonStaffCostsProps, 'lookups'>
-  budgetId: number
 }
 
 export function EditorScreenContent({
@@ -24,7 +23,6 @@ export function EditorScreenContent({
   project,
   onChange,
   nonStaff,
-  budgetId,
 }: EditorScreenContentProps) {
   switch (screen) {
     case 'details':
@@ -36,17 +34,15 @@ export function EditorScreenContent({
         />
       )
     case 'staff':
-      return <StaffCosts budgetId={budgetId} lookups={lookups} />
+      return <StaffCosts lookups={lookups} />
     case 'inkind':
-      return (
-        <InKind budgetId={budgetId} lookups={lookups} nonStaff={nonStaff} />
-      )
+      return <InKind lookups={lookups} nonStaff={nonStaff} />
     case 'price':
-      return <PriceSummary budgetId={budgetId} lookups={lookups} />
+      return <PriceSummary lookups={lookups} />
     case 'budget':
-      return <BudgetForm budgetId={budgetId} lookups={lookups} />
+      return <BudgetForm lookups={lookups} />
     case 'approvals':
-      return <Approvals budgetId={budgetId} lookups={lookups} />
+      return <Approvals lookups={lookups} />
     case 'nonstaff':
       return <NonStaffCosts {...nonStaff} lookups={lookups} />
     default:

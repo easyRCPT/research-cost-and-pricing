@@ -19,7 +19,6 @@ const DASH = '—'
 const or = (value: string) => (value.trim() ? value : DASH)
 
 export interface BudgetFormProps {
-  budgetId: number
   lookups: LookupTables
 }
 
@@ -36,8 +35,8 @@ function KeyValues({ rows }: { rows: [string, string][] }) {
   )
 }
 
-export function BudgetForm({ budgetId, lookups }: BudgetFormProps) {
-  const { data: budget } = useBudget(budgetId)
+export function BudgetForm({ lookups }: BudgetFormProps) {
+  const { data: budget } = useBudget()
 
   const project = budget.project_info
   const info = budget.budget_info

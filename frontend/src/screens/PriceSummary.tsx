@@ -20,13 +20,12 @@ const fullRecoveryBasis = (lookups: LookupTables) =>
   )?.value
 
 export interface PriceSummaryProps {
-  budgetId: number
   lookups: LookupTables
 }
 
-export function PriceSummary({ budgetId, lookups }: PriceSummaryProps) {
-  const { data: budget } = useBudget(budgetId)
-  const updateBudgetField = useUpdateBudgetField(budgetId)
+export function PriceSummary({ lookups }: PriceSummaryProps) {
+  const { data: budget } = useBudget()
+  const updateBudgetField = useUpdateBudgetField()
   const [cashDraft, setCashDraft] = useState<string | null>(null)
 
   const summary = budget.budget_summary.price_summary

@@ -1,11 +1,12 @@
 import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
 import type { EditorScreen } from './Sidebar'
-import { useState } from 'react'
-import { STARTING_ROWS } from '@/lib/constants'
-import { emptyNonStaffLine } from '@/lib/non-staff'
-import { type ProjectInfo, type NonStaffLine } from '@/types'
-import { useBudget, useUpdateProjectFields } from '@/api/budget-lines'
+import { type ProjectInfo } from '@/types'
+import {
+  useBudget,
+  useNonStaffLines,
+  useUpdateProjectFields,
+} from '@/api/budget-lines'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
 import { PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
@@ -18,17 +19,11 @@ interface AppContentProps {
 
 export type AppScreen = EditorScreen | typeof LOOKUP_SCREEN
 
-const DEMO_BUDGET_ID = 1
-
 export function AppContent({ screen, setScreen }: AppContentProps) {
   const { data: lookups } = useLookups()
-  const { data: budget } = useBudget(DEMO_BUDGET_ID)
-  const updateProject = useUpdateProjectFields(DEMO_BUDGET_ID)
-  const [nonStaffLines, setNonStaffLines] = useState<NonStaffLine[]>(() =>
-    Array.from({ length: STARTING_ROWS }, (_, index) =>
-      emptyNonStaffLine(-(index + 1), budget.years),
-    ),
-  )
+  const { data: budget } = useBudget()
+  const updateProject = useUpdateProjectFields()
+  const [nonStaffLines, setNonStaffLines] = useNonStaffLines()
 
   const project = budget.project_info
   const years = budget.years
@@ -66,7 +61,6 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
               years,
               setLines: setNonStaffLines,
             }}
-            budgetId={DEMO_BUDGET_ID}
           />
           <ScreenNav screen={screen} onSelect={setScreen} />
         </>

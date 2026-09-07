@@ -1,102 +1,112 @@
+// TODO: temporary. Point these hooks back at /api/budgets/{id}/ when auth lands.
+
+// The budget lives in the browser (lib/budget-store.ts) and every edit re-POSTs
+// the whole thing to /api/calculate/.
 import {
-  queryOptions,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
+import type { Dispatch, SetStateAction } from 'react'
+
 import { api, ApiError } from '@/lib/api'
-import type { BudgetDetail, StaffLineInput } from '@/types'
+import {
+  type BudgetInput,
+  getBudgetInput,
+  seedMultipliers,
+  setBudgetInput,
+  toCalculateRequest,
+  useBudgetInput,
+} from '@/lib/budget-store'
+import type {
+  BudgetDetail,
+  CalculateStaffLine,
+  NonStaffLine,
+  ProjectInfoInput,
+  StaffLineInput,
+} from '@/types'
+import { useLookups } from './lookups'
 
-export const budgetKey = (budgetId: number) => ['budget', budgetId] as const
+export const budgetKey = ['budget'] as const
 
-export const budgetQuery = (budgetId: number) =>
-  queryOptions({
-    queryKey: budgetKey(budgetId),
-    queryFn: async (): Promise<BudgetDetail> => {
-      const { data, error, response } = await api.GET(
-        '/api/budgets/{budget_id}/',
-        { params: { path: { budget_id: budgetId } } },
-      )
-      if (error) throw new ApiError(response.status, error)
-      return data
-    },
+async function calculate(input: BudgetInput): Promise<BudgetDetail> {
+  const { data, error, response } = await api.POST('/api/calculate/', {
+    body: toCalculateRequest(input),
   })
-
-export function useBudget(budgetId: number) {
-  return useSuspenseQuery(budgetQuery(budgetId))
+  if (error) throw new ApiError(response.status, error)
+  return data
 }
 
+export function useBudget() {
+  // Lookups are cached forever, so this is free after the first screen.
+  const { data: lookups } = useLookups()
+  seedMultipliers(lookups.calculation_constants)
+
+  return useSuspenseQuery({
+    queryKey: budgetKey,
+    queryFn: () => calculate(getBudgetInput()),
+  })
+}
+
+/** Writes the edit locally first, so a failed request never loses what was typed. */
 function useBudgetMutation<TVariables>(
-  budgetId: number,
-  send: (variables: TVariables) => Promise<BudgetDetail | undefined>,
+  apply: (current: BudgetInput, variables: TVariables) => BudgetInput,
 ) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: send,
+    mutationFn: (variables: TVariables) => {
+      const next = apply(getBudgetInput(), variables)
+      setBudgetInput(next)
+      return calculate(next)
+    },
     onSuccess: (budget) => {
-      if (budget) {
-        queryClient.setQueryData(budgetKey(budgetId), budget)
-        return
-      }
-      return queryClient.invalidateQueries({ queryKey: budgetKey(budgetId) })
+      queryClient.setQueryData(budgetKey, budget)
     },
   })
 }
 
-export function useAddStaffLine(budgetId: number) {
-  return useBudgetMutation(budgetId, async (line: StaffLineInput) => {
-    const { data, error, response } = await api.POST(
-      '/api/budgets/{budget_id}/staff-lines/',
-      { params: { path: { budget_id: budgetId } }, body: line },
-    )
-    if (error) throw new ApiError(response.status, error)
-    return data
-  })
+const nextStaffId = (lines: CalculateStaffLine[]) =>
+  Math.max(0, ...lines.map((line) => line.id)) + 1
+
+export function useAddStaffLine() {
+  return useBudgetMutation((current, line: StaffLineInput) => ({
+    ...current,
+    staff_lines: [
+      ...current.staff_lines,
+      {
+        id: nextStaffId(current.staff_lines),
+        name_role: line.name_role,
+        employment_type: line.employment_type,
+        category: line.category,
+        classification: line.classification,
+        time_basis: line.time_basis,
+        in_kind: line.in_kind ?? false,
+        by_year: line.allocations ?? [],
+      },
+    ],
+  }))
 }
 
-export function useRemoveStaffLine(budgetId: number) {
-  return useBudgetMutation(budgetId, async (lineId: number) => {
-    const { data, error, response } = await api.DELETE(
-      '/api/budgets/{budget_id}/staff-lines/{line_id}/',
-      { params: { path: { budget_id: budgetId, line_id: lineId } } },
-    )
-    if (error) throw new ApiError(response.status, error)
-    return data
-  })
+export function useRemoveStaffLine() {
+  return useBudgetMutation((current, lineId: number) => ({
+    ...current,
+    staff_lines: current.staff_lines.filter((line) => line.id !== lineId),
+  }))
 }
 
-export function useUpdateProjectFields(budgetId: number) {
-  return useBudgetMutation(budgetId, async (patch: Record<string, unknown>) => {
-    let latest: BudgetDetail | undefined
-    for (const [field, value] of Object.entries(patch)) {
-      const { data, error, response } = await api.PATCH(
-        '/api/budgets/{budget_id}/',
-        {
-          params: { path: { budget_id: budgetId } },
-          body: { section: 'project', field, value } as never,
-        },
-      )
-      if (error) throw new ApiError(response.status, error)
-      latest = (data as BudgetDetail | undefined) ?? latest
-    }
-    return latest
-  })
+export function useUpdateProjectFields() {
+  return useBudgetMutation((current, patch: Partial<ProjectInfoInput>) => ({
+    ...current,
+    project_info: { ...current.project_info, ...patch },
+  }))
 }
 
-export function useUpdateBudgetField(budgetId: number) {
+export function useUpdateBudgetField() {
   return useBudgetMutation(
-    budgetId,
-    async (update: { field: string; value: unknown }) => {
-      const { data, error, response } = await api.PATCH(
-        '/api/budgets/{budget_id}/',
-        {
-          params: { path: { budget_id: budgetId } },
-          body: { section: 'budget', ...update } as never,
-        },
-      )
-      if (error) throw new ApiError(response.status, error)
-      return data as BudgetDetail | undefined
-    },
+    (current, update: { field: string; value: unknown }) => ({
+      ...current,
+      budget_info: { ...current.budget_info, [update.field]: update.value },
+    }),
   )
 }
 
@@ -107,16 +117,48 @@ interface StaffFieldUpdate {
   year?: number
 }
 
-export function useUpdateStaffField(budgetId: number) {
-  return useBudgetMutation(budgetId, async (update: StaffFieldUpdate) => {
-    const { data, error, response } = await api.PATCH(
-      '/api/budgets/{budget_id}/',
-      {
-        params: { path: { budget_id: budgetId } },
-        body: { section: 'staff', ...update } as never,
-      },
-    )
-    if (error) throw new ApiError(response.status, error)
-    return data as BudgetDetail | undefined
-  })
+function applyStaffField(
+  line: CalculateStaffLine,
+  update: StaffFieldUpdate,
+): CalculateStaffLine {
+  if (update.field !== 'year_value') {
+    return { ...line, [update.field]: update.value }
+  }
+
+  const by_year = (line.by_year ?? []).filter(
+    (entry) => entry.year !== update.year,
+  )
+  return {
+    ...line,
+    by_year: [
+      ...by_year,
+      { year: update.year!, time: update.value as number },
+    ].sort((a, b) => a.year - b.year),
+  }
+}
+
+export function useUpdateStaffField() {
+  return useBudgetMutation((current, update: StaffFieldUpdate) => ({
+    ...current,
+    staff_lines: current.staff_lines.map((line) =>
+      line.id === update.row_id ? applyStaffField(line, update) : line,
+    ),
+  }))
+}
+
+/** Same setState signature as before, but each change now recalculates. */
+export function useNonStaffLines(): [
+  NonStaffLine[],
+  Dispatch<SetStateAction<NonStaffLine[]>>,
+] {
+  const input = useBudgetInput()
+  const mutation = useBudgetMutation(
+    (current, update: SetStateAction<NonStaffLine[]>) => ({
+      ...current,
+      non_staff_lines:
+        typeof update === 'function' ? update(current.non_staff_lines) : update,
+    }),
+  )
+
+  return [input.non_staff_lines, mutation.mutate]
 }

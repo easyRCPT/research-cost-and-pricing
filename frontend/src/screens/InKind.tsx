@@ -22,7 +22,6 @@ const detailOf = (line: StaffLine) =>
     .join(' · ') || '—'
 
 export interface InKindProps {
-  budgetId: number
   lookups: LookupTables
   nonStaff: {
     lines: NonStaffLine[]
@@ -31,9 +30,9 @@ export interface InKindProps {
   }
 }
 
-export function InKind({ budgetId, nonStaff }: InKindProps) {
-  const { data: budget } = useBudget(budgetId)
-  const updateStaffField = useUpdateStaffField(budgetId)
+export function InKind({ nonStaff }: InKindProps) {
+  const { data: budget } = useBudget()
+  const updateStaffField = useUpdateStaffField()
 
   const summary = budget.budget_summary.price_summary
 
