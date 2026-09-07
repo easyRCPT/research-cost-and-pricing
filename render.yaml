@@ -30,7 +30,10 @@ services:
       - key: DJANGO_DEBUG
         value: "False"
       - key: DJANGO_ALLOWED_HOSTS
-        value: rcpt-api.onrender.com
+        # Any *.onrender.com subdomain + local probes. The exact hostname is
+        # only known after Render assigns it, so a leading-dot wildcard is the
+        # reliable target. A disallowed Host is what made /health/ return 400.
+        value: ".onrender.com,localhost,127.0.0.1"
       - key: DJANGO_CORS_ALLOWED_ORIGINS
         value: https://rcpt-web.onrender.com
       # Prompted for during Blueprint setup: paste the Neon pooled URL here.
