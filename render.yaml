@@ -20,8 +20,9 @@ services:
     plan: free
     region: singapore
     buildCommand: uv sync --frozen && uv run python manage.py collectstatic --noinput
-    preDeployCommand: uv run python manage.py migrate && uv run python manage.py seed
-    startCommand: uv run gunicorn config.wsgi:application --workers 2 --timeout 120 --bind 0.0.0.0:$PORT
+    # Free tier has no pre-deploy hook, so migrations + seed run at boot, before
+    # gunicorn accepts connections. Single instance, so no concurrent runs.
+    startCommand: uv run python manage.py migrate && uv run python manage.py seed && uv run gunicorn config.wsgi:application --workers 2 --timeout 120 --bind 0.0.0.0:$PORT
     healthCheckPath: /health/
     envVars:
       - key: DJANGO_SECRET_KEY
