@@ -28,16 +28,12 @@ services:
         generateValue: true
       - key: DJANGO_DEBUG
         value: "False"
+      # Hardcoded, not fromService: a service cannot resolve its own hostname
+      # at creation time, and api <-> web references form a cycle.
       - key: DJANGO_ALLOWED_HOSTS
-        fromService:
-          type: web
-          name: easyrcpt-api
-          envVarKey: RENDER_EXTERNAL_HOSTNAME
+        value: easyrcpt-api.onrender.com
       - key: DJANGO_CORS_ALLOWED_ORIGINS
-        fromService:
-          type: web
-          name: easyrcpt
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://easyrcpt.onrender.com
       # Prompted for during Blueprint setup: paste the Neon pooled URL here.
       - key: DATABASE_URL
         sync: false
@@ -49,7 +45,7 @@ services:
     name: easyrcpt
     runtime: static
     rootDir: frontend
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
     staticPublishPath: dist
     routes:
       - type: rewrite
@@ -57,7 +53,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: easyrcpt-api
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://easyrcpt-api.onrender.com
