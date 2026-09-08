@@ -3,8 +3,7 @@ import { Panel, PartBar } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { TextInput, TextareaInput } from '@/components/ui/text-input'
 import type { LookupTables, Status } from '@/types'
 
 const STATUS_LABEL: Record<Status, string> = {
@@ -94,18 +93,16 @@ export function Approvals({ lookups }: ApprovalsProps) {
           <div className="text-[13.5px] text-muted-foreground">
             Reason for discounting or subsidising the project costs
           </div>
-          <Input
+          <TextInput
             className="mt-2 max-w-[420px]"
             placeholder="Reason for the reduced multiplier"
-            value={justification.value}
-            onChange={(event) => justification.onChange(event.target.value)}
+            {...justification}
           />
-          <Textarea
+          <TextareaInput
             rows={3}
             className="mt-3 max-w-[760px]"
             placeholder="Additional information"
-            value={notes.value}
-            onChange={(event) => notes.onChange(event.target.value)}
+            {...notes}
           />
         </div>
 
@@ -113,11 +110,10 @@ export function Approvals({ lookups }: ApprovalsProps) {
           <div className="text-[13.5px] font-semibold">
             Reason authorisation is not required from a Dean or Dean's delegate:
           </div>
-          <Textarea
+          <TextareaInput
             rows={3}
             className="mt-2 max-w-[760px]"
-            value={exemption.value}
-            onChange={(event) => exemption.onChange(event.target.value)}
+            {...exemption}
           />
         </div>
       </Panel>
