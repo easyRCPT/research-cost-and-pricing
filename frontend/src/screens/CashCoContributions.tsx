@@ -1,10 +1,7 @@
 import { useBudget, useField } from '@/api/budget'
-import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
+import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { NumberInput } from '@/components/ui/number-input'
-import { money } from '@/lib/format/utils'
-
-const amount = (value: number) => <Derived>{money(value)}</Derived>
 
 export function CashCoContributions() {
   const { data: budget } = useBudget()
@@ -44,32 +41,22 @@ export function CashCoContributions() {
           <tbody>
             <LedgerRow
               label="Cash benefit from the price"
-              value={amount(summary.cash_benefit)}
+              value={<Money value={summary.cash_benefit} />}
             />
             <LedgerRow
               tone="sub"
               label="less in-kind contributions (University investment)"
-              value={amount(summary.total_in_kind_contribution)}
+              value={<Money value={summary.total_in_kind_contribution} />}
             />
             <LedgerRow
               tone="sub"
               label="less cash co-contribution"
-              value={amount(summary.total_cash_co_contribution)}
+              value={<Money value={summary.total_cash_co_contribution} />}
             />
             <LedgerRow
               tone="rule"
               label="University position"
-              value={
-                <Derived>
-                  <span
-                    className={
-                      summary.university_position < 0 ? 'text-bad' : 'text-good'
-                    }
-                  >
-                    {money(summary.university_position)}
-                  </span>
-                </Derived>
-              }
+              value={<Money value={summary.university_position} tone="sign" />}
             />
           </tbody>
         </Ledger>

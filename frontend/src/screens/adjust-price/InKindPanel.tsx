@@ -1,10 +1,7 @@
 import { useBudget, useStaffLines, type NonStaffLines } from '@/api/budget'
-import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { costRows } from '@/lib/in-kind'
 import { InKindFlagsTable } from '../inkind/InKindFlagsTable'
-
-const amount = (value: number) => <Derived>{money(value)}</Derived>
 
 interface InKindPanelProps {
   nonStaff: NonStaffLines
@@ -25,16 +22,16 @@ export function InKindPanel({ nonStaff }: InKindPanelProps) {
         <tbody>
           <LedgerRow
             label="In-kind staff costs"
-            value={amount(summary.in_kind_staff_cost)}
+            value={<Money value={summary.in_kind_staff_cost} />}
           />
           <LedgerRow
             label="In-kind non-staff costs"
-            value={amount(summary.in_kind_non_staff_cost)}
+            value={<Money value={summary.in_kind_non_staff_cost} />}
           />
           <LedgerRow
             tone="rule"
             label="Total in-kind (University investment)"
-            value={amount(summary.in_kind_project_cost)}
+            value={<Money value={summary.in_kind_project_cost} />}
           />
         </tbody>
       </Ledger>

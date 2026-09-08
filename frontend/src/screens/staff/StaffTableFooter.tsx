@@ -1,5 +1,4 @@
-import { Derived, FootTd } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { FootTd, Money } from '@/components/shell'
 import type { StaffTotal } from '@/types'
 
 interface StaffTableFooterProps {
@@ -23,7 +22,7 @@ export function StaffTableFooter({
         {years.map((year) => [
           <FootTd key={`${year}-time`} />,
           <FootTd key={`${year}-total`}>
-            <Derived>{money(costFor(year))}</Derived>
+            <Money value={costFor(year)} />
           </FootTd>,
         ])}
         <FootTd />

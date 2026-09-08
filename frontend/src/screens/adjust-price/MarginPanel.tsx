@@ -1,16 +1,13 @@
 import { useBudget, useField } from '@/api/budget'
-import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
+import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
 import { Slider } from '@/components/ui/slider'
-import { money } from '@/lib/format/utils'
 
 const MAX_MARGIN = 100
 
 const asPercent = (fraction: number) => fraction * 100
 const asFraction = (percent: number) =>
   Math.min(MAX_MARGIN, Math.max(0, percent)) / 100
-const amount = (value: number) => <Derived>{money(value)}</Derived>
-
 export function MarginPanel() {
   const { data: budget } = useBudget()
   const margin = useField('margin')
@@ -50,20 +47,20 @@ export function MarginPanel() {
         <tbody>
           <LedgerRow
             label="Project cost (excluding in-kind)"
-            value={amount(summary.project_cost)}
+            value={<Money value={summary.project_cost} />}
           />
           <LedgerRow
             label={`Margin at ${asPercent(budget.budget_info.margin).toFixed(1)}%`}
-            value={amount(summary.margin_amount)}
+            value={<Money value={summary.margin_amount} />}
           />
           <LedgerRow
             tone="rule"
             label="Price excluding GST"
-            value={amount(summary.total_price_exc_gst)}
+            value={<Money value={summary.total_price_exc_gst} />}
           />
           <LedgerRow
             label="Price including GST"
-            value={amount(summary.total_price_inc_gst)}
+            value={<Money value={summary.total_price_inc_gst} />}
           />
         </tbody>
       </Ledger>

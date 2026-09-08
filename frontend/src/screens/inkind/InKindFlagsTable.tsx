@@ -1,4 +1,4 @@
-import { Derived, Grid, Td, Th } from '@/components/shell'
+import { Grid, Money, Td, Th } from '@/components/shell'
 import { Checkbox } from '@/components/ui/checkbox'
 import { money } from '@/lib/format/utils'
 
@@ -36,7 +36,7 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
             <Td className="text-muted-foreground">{row.detail}</Td>
             <Td align="right" className="tabular">
               {row.kind === 'staff' ? (
-                <Derived>{money(row.cost)}</Derived>
+                <Money value={row.cost} />
               ) : (
                 money(row.cost)
               )}

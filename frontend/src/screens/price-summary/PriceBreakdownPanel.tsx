@@ -1,6 +1,6 @@
-import { Ledger, LedgerRow, Panel } from '@/components/shell'
+import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import type { PriceSummary } from '@/types'
-import { DASH, amount, percent } from './format'
+import { DASH, percent } from './format'
 
 interface PriceBreakdownPanelProps {
   summary: PriceSummary
@@ -37,34 +37,34 @@ export function PriceBreakdownPanel({
             <LedgerRow
               label="Staff Costs (excluding in-kind)"
               secondValue={DASH}
-              value={amount(summary.staff_cost)}
+              value={<Money value={summary.staff_cost} />}
             />
             <LedgerRow
               label="Non-Staff Costs (excluding in-kind)"
-              secondValue={amount(summary.non_staff_cost)}
-              value={amount(summary.non_staff_cost)}
+              secondValue={<Money value={summary.non_staff_cost} />}
+              value={<Money value={summary.non_staff_cost} />}
             />
             <LedgerRow
               tone="rule"
               label="Project Cost (excluding in-kind)"
               secondValue={DASH}
-              value={amount(summary.project_cost)}
+              value={<Money value={summary.project_cost} />}
             />
             <LedgerRow
               label="In-kind (University investment) Staff Costs"
               secondValue={DASH}
-              value={amount(summary.in_kind_staff_cost)}
+              value={<Money value={summary.in_kind_staff_cost} />}
             />
             <LedgerRow
               label="In-kind (University investment) Non-Staff Costs"
-              secondValue={amount(summary.in_kind_non_staff_cost)}
-              value={amount(summary.in_kind_non_staff_cost)}
+              secondValue={<Money value={summary.in_kind_non_staff_cost} />}
+              value={<Money value={summary.in_kind_non_staff_cost} />}
             />
             <LedgerRow
               tone="rule"
               label="Total In-kind (University investment) Project Costs"
               secondValue={DASH}
-              value={amount(summary.in_kind_project_cost)}
+              value={<Money value={summary.in_kind_project_cost} />}
             />
             <LedgerRow
               label="Staff Costs % (excluding in-kind)"
@@ -80,17 +80,17 @@ export function PriceBreakdownPanel({
               tone="rule"
               label="Total Project Cost (including in-kind)"
               secondValue={DASH}
-              value={amount(summary.total_project_cost)}
+              value={<Money value={summary.total_project_cost} />}
             />
             <LedgerRow
               label="Total Price to be charged to Funder (Excluding GST)"
               secondValue=""
-              value={amount(summary.total_price_exc_gst)}
+              value={<Money value={summary.total_price_exc_gst} />}
             />
             <LedgerRow
               label="Total Price to be charged to Funder (Including GST)"
               secondValue=""
-              value={amount(summary.total_price_inc_gst)}
+              value={<Money value={summary.total_price_inc_gst} />}
             />
           </tbody>
         </Ledger>

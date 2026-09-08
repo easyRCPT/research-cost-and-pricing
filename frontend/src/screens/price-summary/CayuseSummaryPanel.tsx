@@ -1,7 +1,7 @@
-import { Ledger, LedgerRow, Panel } from '@/components/shell'
+import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import type { PriceSummary } from '@/types'
-import { DASH, amount } from './format'
+import { DASH } from './format'
 
 interface CayuseSummaryPanelProps {
   summary: PriceSummary
@@ -34,15 +34,15 @@ export function CayuseSummaryPanel({
             />
             <LedgerRow
               label="Amount expected to be received by UoM"
-              value={amount(summary.total_price_exc_gst)}
+              value={<Money value={summary.total_price_exc_gst} />}
             />
             <LedgerRow
               label="Total Project Cost to UoM (including in-kind)"
-              value={amount(summary.total_project_cost)}
+              value={<Money value={summary.total_project_cost} />}
             />
             <LedgerRow
               label="Cash co-contributions (university investment)"
-              value={amount(summary.total_cash_co_contribution)}
+              value={<Money value={summary.total_cash_co_contribution} />}
             />
           </tbody>
         </Ledger>
@@ -50,7 +50,7 @@ export function CayuseSummaryPanel({
           <tbody>
             <LedgerRow
               label="Total amount requested for project"
-              value={amount(summary.total_price_inc_gst)}
+              value={<Money value={summary.total_price_inc_gst} />}
             />
             <LedgerRow
               label="Cost recovery multiplier used"
