@@ -145,7 +145,17 @@ export function CellChoice({
       <SelectTrigger className={cn(cellField, 'justify-between')}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent
+        position="popper"
+        align="start"
+        sideOffset={0}
+        className={cn(
+          'max-h-64 w-(--radix-select-trigger-width) min-w-0 rounded-md p-1',
+          'data-[side=bottom]:translate-y-0 data-[side=top]:translate-y-0',
+          // Line the option text up with the trigger text, 8px in from the edge.
+          '[&_[data-slot=select-item]]:pr-6 [&_[data-slot=select-item]]:pl-1',
+        )}
+      >
         {options.map((option) => (
           <SelectItem key={option} value={option}>
             {option}
