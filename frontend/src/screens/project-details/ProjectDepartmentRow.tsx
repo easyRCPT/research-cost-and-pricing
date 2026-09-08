@@ -46,7 +46,7 @@ export function ProjectDepartmentRow({
       label="Department"
       htmlFor="department"
       required
-      hint={`Faculty — ${project.faculty}`}
+      hint={project.faculty === '' ? 'Select Department' : project.faculty}
     >
       <Select value={project.cost_centre} onValueChange={setDepartment}>
         <SelectTrigger className="w-full max-w-lg">

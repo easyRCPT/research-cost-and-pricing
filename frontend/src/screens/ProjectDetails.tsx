@@ -101,7 +101,7 @@ export function ProjectDetails({
       <FieldRow label="Scheme" htmlFor="scheme" hint="Grants only">
         <TextInput
           id="scheme"
-          className="max-w-sm"
+          className="max-w-lg"
           placeholder="e.g. Discovery Projects 2027"
           {...scheme}
         />
