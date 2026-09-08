@@ -1,10 +1,11 @@
 import type {
+  BudgetDetail,
+  CalculateStaffLine,
   EmploymentType,
   SalaryRate,
   SalaryRateMultiplier,
   StaffCategory,
   StaffLine,
-  StaffLineInput,
   TimeBasis,
 } from '@/types'
 
@@ -71,19 +72,43 @@ export const emptyStaffLine = (id: number, years: number[]): StaffLine => ({
   total: 0,
 })
 
-export const isComplete = (line: StaffLine) =>
-  line.name_role.trim() !== '' &&
+/** Rows the engine can rate. The name is echoed back, never priced. */
+export const isRated = (line: StaffLine) =>
   line.employment_type !== '' &&
   line.category !== '' &&
   line.classification !== '' &&
   line.time_basis !== ''
 
-export const toInput = (line: StaffLine): StaffLineInput => ({
+export const toInput = (line: StaffLine): CalculateStaffLine => ({
+  id: line.id,
   name_role: line.name_role,
   employment_type: line.employment_type as EmploymentType,
   category: line.category as StaffCategory,
   classification: line.classification,
   time_basis: line.time_basis as TimeBasis,
   in_kind: line.in_kind,
-  allocations: line.by_year.map(({ year, time }) => ({ year, time })),
+  by_year: line.by_year.map(({ year, time }) => ({ year, time })),
 })
+
+/** Entry columns from the store; rate and cost columns from whichever block priced the row. */
+export const withCosts = (lines: StaffLine[], budget: BudgetDetail) => {
+  const priced = new Map(
+    [...budget.staff_cost.lines, ...budget.staff_in_kind_cost.lines].map(
+      (line) => [line.id, line],
+    ),
+  )
+
+  return lines.map((line) => {
+    const cost = priced.get(line.id)
+    if (!cost) return line
+    return {
+      ...line,
+      rate_2025: cost.rate_2025,
+      total: cost.total,
+      by_year: line.by_year.map((entry) => ({
+        ...entry,
+        cost: costFor(cost, entry.year),
+      })),
+    }
+  })
+}

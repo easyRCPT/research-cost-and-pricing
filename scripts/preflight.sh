@@ -7,7 +7,8 @@
 #
 # Checks, in order: Docker running, backend/.env present, database container up,
 # migrations applied. Anything it can safely fix, it fixes; anything needing a
-# decision, it explains.
+# decision, it explains. Runs under a per-database lock, so two of these
+# starting at once queue rather than collide.
 
 set -e
 
@@ -37,7 +38,45 @@ fi
 #    database starts, because it decides which database that is.
 sh scripts/branch-env.sh
 
-# 4. Database. --wait blocks until the healthcheck passes, so the migrate below
+# 4. One preflight at a time per database.
+#
+#    `make backend` and the frontend's predev both run this script, so starting
+#    both at once puts two `migrate` runs on one database. Both see it as empty,
+#    both begin applying 0001_initial, and the loser dies on a table the winner
+#    has already created — a stack trace about a schema that is in fact fine.
+#
+#    Keyed on the Compose project, so it serialises only the runs that share a
+#    database and another branch's preflight is unaffected. It goes after
+#    branch-env.sh because that is what decides which database this is.
+#
+#    Re-runs the script under the lock rather than wrapping the steps below:
+#    flock holds the lock for exactly as long as the command it is given, and
+#    that command is the rest of this file.
+if [ -z "${PREFLIGHT_LOCKED:-}" ]; then
+	if ! command -v flock >/dev/null 2>&1; then
+		fail "flock is missing. macOS: 'brew install flock'. Linux: it ships with util-linux."
+	fi
+
+	project=$(sed -n 's/^COMPOSE_PROJECT_NAME=//p' .env 2>/dev/null | tail -n 1)
+	[ -n "$project" ] || project=rcpt
+
+	lock_dir="${XDG_CONFIG_HOME:-$HOME/.config}/rcpt/locks"
+	mkdir -p "$lock_dir"
+
+	# Waiting, not failing: the normal case is `make backend` and `pnpm dev`
+	# seconds apart, where the second one wants the first one's result. Five
+	# minutes is far past a cold migrate and seed, so reaching the timeout means
+	# something is stuck rather than slow, and -E tells the two apart.
+	export PREFLIGHT_LOCKED=1
+	status=0
+	flock -w 300 -E 75 "$lock_dir/$project.lock" sh "$repo_root/scripts/preflight.sh" || status=$?
+	if [ "$status" -eq 75 ]; then
+		fail "another preflight has held '$project' for 5 minutes. Look for a stuck 'make backend' or 'pnpm dev'."
+	fi
+	exit "$status"
+fi
+
+# 5. Database. --wait blocks until the healthcheck passes, so the migrate below
 #    cannot race a server still running initdb on first boot.
 #
 #    Run unconditionally rather than only when nothing is running. `up` is
@@ -52,7 +91,7 @@ if ! docker compose up -d --wait db >/dev/null 2>&1; then
 	docker compose up -d --wait db
 fi
 
-# 5. The database is the local one.
+# 6. The database is the local one.
 #
 #    Auto-applying migrations is safe on a disposable container and reckless
 #    anywhere else, and nothing about starting a dev server says which one
@@ -90,7 +129,7 @@ localhost | 127.0.0.1 | ::1) ;;
 	;;
 esac
 
-# 6. The database is not *ahead* of the code.
+# 7. The database is not *ahead* of the code.
 #
 #    The opposite of an unapplied migration, and the one nothing else notices.
 #    django_migrations records a migration whose file is not in this branch —
@@ -152,7 +191,7 @@ if [ -n "$ghosts" ]; then
 	exit 1
 fi
 
-# 7. Migrations, and the seeds that go with them.
+# 8. Migrations, and the seeds that go with them.
 #
 #    `migrate --check` exits non-zero when any migration is unapplied. Applied
 #    rather than reported: migrations only run forward, the database is

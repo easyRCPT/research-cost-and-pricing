@@ -1,9 +1,11 @@
-import { Grid, Td, Th } from '@/components/shell'
+import { Derived, Grid, Td, Th } from '@/components/shell'
 import { Checkbox } from '@/components/ui/checkbox'
 import { money } from '@/lib/format/utils'
 
 export interface CostRow {
   key: string
+  /** Staff costs come from the engine; non-staff costs are sums of what was typed. */
+  kind: 'staff' | 'non-staff'
   label: string
   detail: string
   cost: number
@@ -33,7 +35,11 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
             <Td>{row.label}</Td>
             <Td className="text-muted-foreground">{row.detail}</Td>
             <Td align="right" className="tabular">
-              {money(row.cost)}
+              {row.kind === 'staff' ? (
+                <Derived>{money(row.cost)}</Derived>
+              ) : (
+                money(row.cost)
+              )}
             </Td>
             <Td align="center">
               <Checkbox

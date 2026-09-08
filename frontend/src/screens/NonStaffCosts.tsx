@@ -1,32 +1,20 @@
-import type { LookupTables, NonStaffLine } from '@/types'
+import type { LookupTables } from '@/types'
 import { Panel } from '@/components/shell'
 import { NonStaffTable } from './nonstaff/NonStaffTable'
-import { emptyNonStaffLine } from '@/lib/non-staff'
-import { nextTempId } from '@/lib/utils'
-import type { Dispatch, SetStateAction } from 'react'
+import type { NonStaffLines } from '@/api/budget'
 
-export interface NonStaffCostsProps {
-  lines: NonStaffLine[]
-  years: number[]
-  setLines: Dispatch<SetStateAction<NonStaffLine[]>>
+export interface NonStaffCostsProps extends NonStaffLines {
   lookups: LookupTables
 }
 
 export function NonStaffCosts({
   lines,
   years,
-  setLines,
+  patchLine,
+  addLine,
+  removeLine,
   lookups,
 }: NonStaffCostsProps) {
-  const patchLine = (id: number, patch: Partial<NonStaffLine>) =>
-    setLines((lines) =>
-      lines.map((line) => (line.id === id ? { ...line, ...patch } : line)),
-    )
-  const addLine = () =>
-    setLines((lines) => [...lines, emptyNonStaffLine(nextTempId(lines), years)])
-  const removeLine = (id: number) =>
-    setLines((lines) => lines.filter((line) => line.id !== id))
-
   return (
     <Panel>
       <NonStaffTable

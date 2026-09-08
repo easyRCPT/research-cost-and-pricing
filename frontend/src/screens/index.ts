@@ -7,4 +7,6 @@ export { PriceSummary, type PriceSummaryProps } from './PriceSummary'
 export { AdjustPrice, type AdjustPriceProps } from './AdjustPrice'
 export { CashCoContributions } from './CashCoContributions'
 export { BudgetForm, type BudgetFormProps } from './BudgetForm'
+// TODO: approvals — restore when auth lands.
+// export { Approvals, type ApprovalsProps } from './Approvals'
 export { EmptyStateScreen } from './EmptyStateScreen'

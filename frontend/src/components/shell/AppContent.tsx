@@ -1,15 +1,10 @@
 import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
 import type { EditorScreen } from './Sidebar'
-import { type ProjectInfo } from '@/types'
-import {
-  useBudget,
-  useNonStaffLines,
-  useUpdateProjectFields,
-} from '@/api/budget-lines'
+import { useBudget, useNonStaffLines, useUpdateProject } from '@/api/budget'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
-import { PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
+import { ExportPdfButton, PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
 
 interface AppContentProps {
@@ -22,19 +17,16 @@ export type AppScreen = EditorScreen | typeof LOOKUP_SCREEN
 export function AppContent({ screen, setScreen }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
-  const updateProject = useUpdateProjectFields()
-  const [nonStaffLines, setNonStaffLines] = useNonStaffLines()
+  const updateProject = useUpdateProject()
 
   const project = budget.project_info
   const years = budget.years
+  const nonStaff = useNonStaffLines(years)
 
   const lookupsOpen = screen === LOOKUP_SCREEN
   const pageHeading = lookupsOpen
     ? { title: 'Lookup Tables', subtitle: 'Read-only' }
     : SCREEN_HEADINGS[screen]
-  const patchProject = (patch: Partial<ProjectInfo>) =>
-    updateProject.mutate(patch)
-
   return (
     <AppShell
       topBarRight={<LookupButton open={lookupsOpen} handleClick={setScreen} />}
@@ -46,7 +38,11 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
         />
       }
     >
-      <PageHead title={pageHeading.title} subtitle={pageHeading.subtitle} />
+      <PageHead
+        title={pageHeading.title}
+        subtitle={pageHeading.subtitle}
+        right={screen === 'budget' ? <ExportPdfButton /> : undefined}
+      />
       {lookupsOpen ? (
         <LookupsScreen lookups={lookups} />
       ) : (
@@ -55,12 +51,8 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
             lookups={lookups}
             screen={screen}
             project={project}
-            onChange={patchProject}
-            nonStaff={{
-              lines: nonStaffLines,
-              years,
-              setLines: setNonStaffLines,
-            }}
+            onChange={updateProject}
+            nonStaff={nonStaff}
           />
           <ScreenNav screen={screen} onSelect={setScreen} />
         </>

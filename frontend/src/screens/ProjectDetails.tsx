@@ -11,7 +11,8 @@ import { EXTERNAL_PARTIES, OTHER_FUNDER_CATEGORIES } from '@/lib/constants'
 import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
 import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectDepartmentRow } from './project-details/ProjectDepartmentRow'
-import { DraftInput, DraftTextarea } from './project-details/DraftInput'
+import { TextInput, TextareaInput } from '@/components/ui/text-input'
+import { useProjectField } from '@/api/budget'
 
 interface ProjectDetailsProps {
   project: ProjectInfo
@@ -26,24 +27,21 @@ export function ProjectDetails({
 }: ProjectDetailsProps) {
   const { departments, activities, regions } = lookups
 
+  // Typed fields settle in the store; the selects next to them commit at once.
+  const title = useProjectField('title')
+  const chiefInvestigator = useProjectField('chief_investigator')
+  const otherFunder = useProjectField('other_funder')
+  const scheme = useProjectField('scheme')
+  const additionalInformation = useProjectField('additional_information')
+
   return (
     <Panel>
       <FieldRow label="Project title" htmlFor="title" required>
-        <DraftInput
-          id="title"
-          className="max-w-lg"
-          value={project.title}
-          onCommit={(title) => onChange({ title })}
-        />
+        <TextInput id="title" className="max-w-lg" {...title} />
       </FieldRow>
 
       <FieldRow label="Lead UoM chief investigator" required htmlFor="ci">
-        <DraftInput
-          id="ci"
-          className="max-w-lg"
-          value={project.chief_investigator}
-          onCommit={(chief_investigator) => onChange({ chief_investigator })}
-        />
+        <TextInput id="ci" className="max-w-lg" {...chiefInvestigator} />
       </FieldRow>
 
       <FieldRow label="External party" required>
@@ -85,11 +83,10 @@ export function ProjectDetails({
           </FieldRow>
 
           <FieldRow label="Specify Other Funder" htmlFor="other-funder">
-            <DraftInput
+            <TextInput
               id="other-funder"
               className="max-w-lg"
-              value={project.other_funder}
-              onCommit={(other_funder: string) => onChange({ other_funder })}
+              {...otherFunder}
             />
           </FieldRow>
         </>
@@ -102,12 +99,11 @@ export function ProjectDetails({
       />
 
       <FieldRow label="Scheme" htmlFor="scheme" hint="Grants only">
-        <DraftInput
+        <TextInput
           id="scheme"
           className="max-w-sm"
           placeholder="e.g. Discovery Projects 2027"
-          value={project.scheme}
-          onCommit={(scheme) => onChange({ scheme })}
+          {...scheme}
         />
       </FieldRow>
 
@@ -121,15 +117,12 @@ export function ProjectDetails({
       />
 
       <FieldRow label="Additional information" htmlFor="notes">
-        <DraftTextarea
+        <TextareaInput
           id="notes"
           rows={3}
           className="max-w-lg"
           placeholder="Anything the Research Office should know about this costing"
-          value={project.additional_information}
-          onCommit={(additional_information) =>
-            onChange({ additional_information })
-          }
+          {...additionalInformation}
         />
       </FieldRow>
     </Panel>
