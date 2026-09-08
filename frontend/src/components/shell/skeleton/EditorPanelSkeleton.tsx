@@ -4,7 +4,7 @@ import { Panel } from '../Panel'
 export function EditorPanelSkeleton() {
   return (
     <Panel>
-      <div className="divide-y">
+      <div className="animate-pulse divide-y">
         {Array.from({ length: 8 }, (_, row) => (
           <div
             key={row}

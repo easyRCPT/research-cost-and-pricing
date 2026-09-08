@@ -9,7 +9,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { dash } from '@/lib/format/utils'
+import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 import {
+  allExpenseTypes,
   amountFor,
   costGroups,
   expenseTypesFor,
@@ -36,6 +38,7 @@ export function NonStaffTableBody({
   removeLine,
 }: NonStaffTableBodyProps) {
   const groups = costGroups(categories)
+  const expenseTypes = allExpenseTypes(categories)
 
   function setCostGroup(line: NonStaffLine, cost_group: string) {
     patchLine(line.id, {
@@ -64,9 +67,12 @@ export function NonStaffTableBody({
               <CellChoice
                 value={line.expense_type}
                 options={expenseTypesFor(categories, line.cost_group)}
+                sizeOptions={expenseTypes}
                 placeholder={line.cost_group ? 'Select…' : '—'}
                 disabled={!line.cost_group}
-                onChange={(expense_type) => patchLine(line.id, { expense_type })}
+                onChange={(expense_type) =>
+                  patchLine(line.id, { expense_type })
+                }
               />
             </CellTd>
             <CellTd>
@@ -82,7 +88,10 @@ export function NonStaffTableBody({
               <CellTd key={year}>
                 <CellNumber
                   className="w-28"
+                  prefix="$"
                   min={0}
+                  max={MAX_MONEY}
+                  onOutOfRange={() => toastOutOfRange('Amount', 0, MAX_MONEY)}
                   value={amountFor(line, year)}
                   onChange={(amount) =>
                     patchLine(line.id, {

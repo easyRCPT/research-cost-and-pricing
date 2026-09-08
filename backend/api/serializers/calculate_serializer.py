@@ -8,6 +8,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from ..models import Budget, OnCostRate, Project, SalaryRate, StaffCostLine
+from .staff_time import check_time_against_basis
 
 
 class ProjectInfoInputSerializer(serializers.Serializer):
@@ -126,6 +127,10 @@ class StaffLineInputSerializer(serializers.Serializer):
     in_kind = serializers.BooleanField(default=False)
 
     by_year = StaffYearInputSerializer(many=True, required=False, default=list)
+
+    def validate(self, attrs):
+        check_time_against_basis(attrs["time_basis"], attrs["by_year"])
+        return attrs
 
 
 class NonStaffYearInputSerializer(serializers.Serializer):

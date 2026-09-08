@@ -18,9 +18,10 @@ dependencies = [
 ]
 
 [dependency-groups]
+# Not django-types: it unpacks over the same django-stubs/ directory, so
+# whichever installs last wins and Pyright sees a different set of symbols.
 dev = [
     "django-stubs>=6.1.0",
-    "django-types>=0.24.0",
     "openpyxl>=3.1.5",
 ]
 

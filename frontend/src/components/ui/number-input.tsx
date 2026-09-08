@@ -1,19 +1,29 @@
 import { useState, type ComponentProps } from 'react'
 import { Input } from '@/components/ui/input'
 
+const clamp = (value: number, min?: number, max?: number) => {
+  const floored = min === undefined ? value : Math.max(min, value)
+  return max === undefined ? floored : Math.min(max, floored)
+}
+
 interface NumberInputProps extends Omit<
   ComponentProps<typeof Input>,
-  'value' | 'onChange' | 'min'
+  'value' | 'onChange' | 'min' | 'max'
 > {
   value: number
   onChange: (value: number) => void
   min?: number
+  max?: number
+  /** Called with what was typed when it fell outside min/max and got clamped. */
+  onOutOfRange?: (value: number) => void
 }
 
 export function NumberInput({
   value,
   onChange,
   min,
+  max,
+  onOutOfRange,
   onFocus,
   onBlur,
   ...rest
@@ -25,6 +35,7 @@ export function NumberInput({
       {...rest}
       type="number"
       min={min}
+      max={max}
       value={draft ?? String(value)}
       onFocus={(e) => {
         setDraft(String(value))
@@ -35,7 +46,9 @@ export function NumberInput({
         setDraft(raw)
         const parsed = raw === '' ? 0 : Number(raw)
         if (!Number.isFinite(parsed)) return
-        onChange(min === undefined ? parsed : Math.max(min, parsed))
+        const clamped = clamp(parsed, min, max)
+        if (clamped !== parsed) onOutOfRange?.(parsed)
+        onChange(clamped)
       }}
       onBlur={(e) => {
         setDraft(null)

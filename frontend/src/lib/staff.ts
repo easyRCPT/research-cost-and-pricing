@@ -30,6 +30,11 @@ export const classificationsFor = (
   ),
 ]
 
+/** Every classification in the table, for sizing before a category is picked. */
+export const allClassifications = (rates: readonly SalaryRate[]) => [
+  ...new Set(rates.map((rate) => rate.classification)),
+]
+
 export const timeBasesFor = (
   multipliers: readonly SalaryRateMultiplier[],
   employmentType: string,
@@ -39,6 +44,38 @@ export const timeBasesFor = (
   return employmentType === 'Casual'
     ? bases.filter((basis) => basis === 'Hourly')
     : bases.filter((basis) => basis !== 'Hourly')
+}
+
+/** Every basis in the table, for sizing before an employment type is picked. */
+export const allTimeBases = (multipliers: readonly SalaryRateMultiplier[]) => [
+  ...new Set(multipliers.map((multiplier) => multiplier.time_basis)),
+]
+
+/**
+ * An FTE row is a fraction of one full-time position. Daily and hourly rows count
+ * days and hours, which the workbook leaves open-ended; a full year is as much as
+ * either can mean. Kept in step with the backend's TIME_LIMITS.
+ */
+const TIME_LIMITS: Record<string, { label: string; max: number }> = {
+  FTE: { label: 'FTE', max: 1 },
+  Daily: { label: 'Days', max: 366 },
+  Hourly: { label: 'Hours', max: 366 * 24 },
+}
+
+export const maxTimeFor = (timeBasis: string) => TIME_LIMITS[timeBasis]?.max
+
+/** Names the time column in messages, before a basis is picked too. */
+export const timeLabelFor = (timeBasis: string) =>
+  TIME_LIMITS[timeBasis]?.label ?? 'Time'
+
+/** Re-clamps the entered time after a change of basis. */
+export const clampedByYear = (line: StaffLine, timeBasis: string) => {
+  const max = maxTimeFor(timeBasis)
+  if (max === undefined) return line.by_year
+  return line.by_year.map((entry) => ({
+    ...entry,
+    time: Math.min(max, entry.time),
+  }))
 }
 
 export const timeFor = (line: StaffLine, year: number) =>
@@ -78,6 +115,21 @@ export const isRated = (line: StaffLine) =>
   line.category !== '' &&
   line.classification !== '' &&
   line.time_basis !== ''
+
+/**
+ * The CI's own row, which is the first one. Their name is typed on Project
+ * Details, so the row carries it rather than letting the two drift apart.
+ */
+export const ciLineId = (lines: StaffLine[], chiefInvestigator: string) =>
+  chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null)
+
+/** Puts the CI's name on their row, wherever it was last edited. */
+export const withCiName = (lines: StaffLine[], chiefInvestigator: string) => {
+  const id = ciLineId(lines, chiefInvestigator)
+  if (id === null) return lines
+  const name_role = chiefInvestigator.trim()
+  return lines.map((line) => (line.id === id ? { ...line, name_role } : line))
+}
 
 export const toInput = (line: StaffLine): CalculateStaffLine => ({
   id: line.id,

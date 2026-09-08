@@ -12,6 +12,8 @@ import { emptyStaffLine } from '@/lib/staff'
 export interface BudgetInput {
   project_info: ProjectInfoInput
   budget_info: BudgetInfoInput
+  /** Off leaves the CI's time out of the costing altogether. */
+  ci_costs_included: boolean
   /** Response-shaped: the screens render these rows directly. */
   staff_lines: StaffLine[]
   non_staff_lines: NonStaffLine[]
@@ -54,6 +56,7 @@ export function initialBudget(): BudgetInput {
       status: 'draft',
       deliverables: [],
     },
+    ci_costs_included: true,
     staff_lines: startingRows(emptyStaffLine, years),
     non_staff_lines: startingRows(emptyNonStaffLine, years),
   }

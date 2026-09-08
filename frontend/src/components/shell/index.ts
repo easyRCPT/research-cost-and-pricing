@@ -17,6 +17,7 @@ export { FieldRow } from './FieldRow'
 export { Note } from './Note'
 export { Ledger, LedgerRow } from './Ledger'
 export { Derived } from './Derived'
+export { Money } from './Money'
 export { PartBar } from './PartBar'
 export {
   Grid,

@@ -9,7 +9,7 @@ interface CodeNameGridProps {
 export function CodeNameGrid({ label, rows, className }: CodeNameGridProps) {
   return (
     <Grid className={className}>
-      <thead className="sticky top-0 z-10">
+      <thead>
         <tr>
           <Th>{label}</Th>
           <Th align="right">Code</Th>

@@ -3,6 +3,7 @@ import { AppShell } from '../AppShell'
 import { SidebarSkeleton } from './SidebarSkeleton'
 import { LookupSkeleton } from '@/components/lookups-tabs/LookupSkeleton'
 import { EditorPanelSkeleton } from './EditorPanelSkeleton'
+import { PageHeadSkeleton } from './PageHeadSkeleton'
 import type { EditorScreen } from '../Sidebar'
 
 interface AppSkeletonProps {
@@ -20,15 +21,8 @@ export function AppSkeleton({ screen }: AppSkeletonProps) {
       }
       sidebar={<SidebarSkeleton />}
     >
-      <div
-        role="status"
-        aria-label="Loading application"
-        className="animate-pulse"
-      >
-        <div className="mb-6">
-          <div className="h-7 w-48 rounded bg-muted" />
-          <div className="mt-2 h-4 w-72 max-w-full rounded bg-muted" />
-        </div>
+      <div role="status" aria-label="Loading application">
+        <PageHeadSkeleton action={screen === 'budget'} />
         {screen === LOOKUP_SCREEN ? (
           <LookupSkeleton />
         ) : (
