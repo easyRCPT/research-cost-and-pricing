@@ -218,27 +218,64 @@
   appearance: textfield;
 }
 
-/* Tables scroll in both directions; the bars stay put so it is obvious there is
-   more table off-screen than the border shows. */
-.scroll-persist {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent)
-    var(--muted);
-}
-
+/* Tables scroll in both directions. Styling ::-webkit-scrollbar is what turns
+   off macOS overlay scrollbars, and Chrome ignores those rules the moment
+   scrollbar-width/scrollbar-color are set, so those only run where the
+   pseudo-element does not exist. */
 .scroll-persist::-webkit-scrollbar {
   -webkit-appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
 }
 
 .scroll-persist::-webkit-scrollbar-track,
 .scroll-persist::-webkit-scrollbar-corner {
-  background: var(--muted);
+  background: transparent;
 }
 
+/* The transparent border is inset padding, so the thumb has to clip to it. */
 .scroll-persist::-webkit-scrollbar-thumb {
-  border: 2px solid var(--muted);
+  border: 2px solid transparent;
   border-radius: 9999px;
-  background: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+  background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+  background-clip: padding-box;
+}
+
+.scroll-persist::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+  background-clip: padding-box;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .scroll-persist {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 55%, transparent)
+      transparent;
+  }
+}
+
+/* Radix forces scrollbar-width:none on the select viewport from a style tag
+   inside the portal, and Chrome drops every ::-webkit-scrollbar rule once
+   scrollbar-width is set, so this one has to win on the standard properties.
+   The webkit rules are only reached by browsers that ignore those. */
+.scroll-thin.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--muted-foreground) 45%, transparent)
+    transparent;
+}
+
+.scroll-thin.scroll-thin::-webkit-scrollbar {
+  display: block;
+  width: 8px;
+}
+
+.scroll-thin.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-thin.scroll-thin::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted-foreground) 45%, transparent);
+  background-clip: padding-box;
 }
