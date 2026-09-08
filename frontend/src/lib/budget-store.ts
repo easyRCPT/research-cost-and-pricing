@@ -8,20 +8,21 @@ import type {
   BudgetInfoInput,
   CalculateNonStaffLine,
   CalculateRequest,
-  CalculateStaffLine,
   CalculationConstant,
   NonStaffLine,
   ProjectInfoInput,
+  StaffLine,
 } from '@/types'
 import { EMPTY_PROJECT, STARTING_ROWS } from './constants'
 import { emptyNonStaffLine } from './non-staff'
+import { emptyStaffLine, isRated, toInput } from './staff'
 
 /** The budget as the browser holds it, before the engine has seen it. */
 export interface BudgetInput {
   project_info: ProjectInfoInput
   budget_info: BudgetInfoInput
-  staff_lines: CalculateStaffLine[]
-  /** Response-shaped: the non-staff screens render these rows directly. */
+  /** Response-shaped: the screens render these rows directly. */
+  staff_lines: StaffLine[]
   non_staff_lines: NonStaffLine[]
 }
 
@@ -33,6 +34,14 @@ export const yearsOf = (project: ProjectInfoInput): number[] =>
   Array.from(
     { length: Math.max(0, project.end_year - project.start_year + 1) },
     (_, index) => project.start_year + index,
+  )
+
+const startingRows = <T>(
+  empty: (id: number, years: number[]) => T,
+  years: number[],
+) =>
+  Array.from({ length: STARTING_ROWS }, (_, index) =>
+    empty(-(index + 1), years),
   )
 
 function initialBudget(): BudgetInput {
@@ -54,10 +63,8 @@ function initialBudget(): BudgetInput {
       status: 'draft',
       deliverables: [],
     },
-    staff_lines: [],
-    non_staff_lines: Array.from({ length: STARTING_ROWS }, (_, index) =>
-      emptyNonStaffLine(-(index + 1), years),
-    ),
+    staff_lines: startingRows(emptyStaffLine, years),
+    non_staff_lines: startingRows(emptyNonStaffLine, years),
   }
 }
 
@@ -122,6 +129,6 @@ const toNonStaffInput = (line: NonStaffLine): CalculateNonStaffLine => ({
 export const toCalculateRequest = (input: BudgetInput): CalculateRequest => ({
   project_info: input.project_info,
   budget_info: input.budget_info,
-  staff_lines: input.staff_lines,
+  staff_lines: input.staff_lines.filter(isRated).map(toInput),
   non_staff_lines: input.non_staff_lines.filter(isCosted).map(toNonStaffInput),
 })

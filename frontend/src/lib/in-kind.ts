@@ -1,5 +1,6 @@
-import type { NonStaffLines } from '@/api/budget-lines'
+import type { NonStaffLines, StaffLines } from '@/api/budget-lines'
 import { lineTotal } from '@/lib/non-staff'
+import { withCosts } from '@/lib/staff'
 import type { BudgetDetail, StaffLine } from '@/types'
 import type { CostRow } from '@/screens/inkind/InKindFlagsTable'
 
@@ -10,19 +11,19 @@ const detailOf = (line: StaffLine) =>
 
 export const costRows = (
   budget: BudgetDetail,
+  staff: StaffLines,
   nonStaff: NonStaffLines,
-  toggleStaff: (line: StaffLine, value: boolean) => void,
 ): CostRow[] => [
-  ...[...budget.staff_cost.lines, ...budget.staff_in_kind_cost.lines].map(
-    (line) => ({
+  ...withCosts(staff.lines, budget)
+    .filter((line) => line.name_role || line.category)
+    .map((line) => ({
       key: `staff-${line.id}`,
       label: line.name_role || '(unnamed person)',
       detail: detailOf(line),
       cost: line.total,
       inKind: line.in_kind,
-      toggle: (value: boolean) => toggleStaff(line, value),
-    }),
-  ),
+      toggle: (value: boolean) => staff.patchLine(line.id, { in_kind: value }),
+    })),
   ...nonStaff.lines
     .filter((line) => line.cost_group || line.description)
     .map((line) => ({

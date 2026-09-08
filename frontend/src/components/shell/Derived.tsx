@@ -7,14 +7,14 @@ export function Derived({ children }: { children: ReactNode }) {
   return (
     <span className="relative">
       {children}
-      {calculating} && (
-      <span
-        aria-hidden
-        className="absolute inset-0 animate-in fade-in delay-150 fill-mode-both"
-      >
-        <span className="block h-full w-full animate-pulse rounded bg-muted" />
-      </span>
-      )
+      {calculating && (
+        <span
+          aria-hidden
+          className="absolute inset-0 animate-in fade-in delay-150 fill-mode-both"
+        >
+          <span className="block h-full w-full animate-pulse rounded bg-muted" />
+        </span>
+      )}
     </span>
   )
 }

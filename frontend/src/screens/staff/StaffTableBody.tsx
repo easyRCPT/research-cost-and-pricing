@@ -4,6 +4,7 @@ import {
   CellNumber,
   CellTd,
   CellText,
+  Derived,
   Td,
 } from '@/components/shell'
 import { Button } from '@/components/ui/button'
@@ -107,7 +108,7 @@ export function StaffTableBody({
           <Calc
             className={line.rate_2025 ? undefined : 'text-muted-foreground'}
           >
-            {dash(line.rate_2025)}
+            <Derived>{dash(line.rate_2025)}</Derived>
           </Calc>
           {years.map((year) => [
             <CellTd key={`${year}-time`}>
@@ -128,7 +129,7 @@ export function StaffTableBody({
                 costFor(line, year) ? undefined : 'text-muted-foreground'
               }
             >
-              {dash(costFor(line, year))}
+              <Derived>{dash(costFor(line, year))}</Derived>
             </Calc>,
           ])}
           <Td align="center">

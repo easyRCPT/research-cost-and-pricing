@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import {
   useBudget,
+  useStaffLines,
   useUpdateBudgetField,
-  useUpdateStaffField,
   type NonStaffLines,
 } from '@/api/budget-lines'
 import { Ledger, LedgerRow, Panel } from '@/components/shell'
@@ -23,16 +23,14 @@ export interface AdjustPriceProps {
 export function AdjustPrice({ nonStaff }: AdjustPriceProps) {
   const { data: budget } = useBudget()
   const updateBudgetField = useUpdateBudgetField()
-  const updateStaffField = useUpdateStaffField()
   const [draft, setDraft] = useState<number | null>(null)
 
   const summary = budget.budget_summary.price_summary
   const deanRequired = budget.budget_summary.dean_required
   const percent = draft ?? asPercent(summary.margin)
+  const staff = useStaffLines(budget.years)
 
-  const rows = costRows(budget, nonStaff, (line, value) =>
-    updateStaffField.mutate({ row_id: line.id, field: 'in_kind', value }),
-  )
+  const rows = costRows(budget, staff, nonStaff)
 
   const commit = (next: number) => {
     setDraft(null)

@@ -22,13 +22,13 @@ import {
 } from '@/lib/budget-store'
 import type {
   BudgetDetail,
-  CalculateStaffLine,
   NonStaffLine,
   ProjectInfoInput,
-  StaffLineInput,
+  StaffLine,
 } from '@/types'
 import { useLookups } from './lookups'
 import { emptyNonStaffLine } from '@/lib/non-staff'
+import { emptyStaffLine, isRated } from '@/lib/staff'
 import { nextTempId } from '@/lib/utils'
 
 export const budgetKey = ['budget'] as const
@@ -102,35 +102,6 @@ function useRecalculate<TVariables>(
 export const useCalculating = () =>
   useIsMutating({ mutationKey: calculateKey }) > 0
 
-const nextStaffId = (lines: CalculateStaffLine[]) =>
-  Math.max(0, ...lines.map((line) => line.id)) + 1
-
-export function useAddStaffLine() {
-  return useRecalculate((current, line: StaffLineInput) => ({
-    ...current,
-    staff_lines: [
-      ...current.staff_lines,
-      {
-        id: nextStaffId(current.staff_lines),
-        name_role: line.name_role,
-        employment_type: line.employment_type,
-        category: line.category,
-        classification: line.classification,
-        time_basis: line.time_basis,
-        in_kind: line.in_kind ?? false,
-        by_year: line.allocations ?? [],
-      },
-    ],
-  }))
-}
-
-export function useRemoveStaffLine() {
-  return useRecalculate((current, lineId: number) => ({
-    ...current,
-    staff_lines: current.staff_lines.filter((line) => line.id !== lineId),
-  }))
-}
-
 // What the engine reads. Everything else is echoed back unchanged, so editing
 // it needs no round trip. Department alone is echo-only, but its write carries
 // cost_centre, which is part of the account string.
@@ -153,15 +124,6 @@ const RECALCULATES = {
     'cash_co_contribution',
   ]),
 }
-
-const NON_STAFF_RECALCULATES = new Set([
-  'cost_group',
-  'expense_type',
-  'in_kind',
-  'add_ten_percent',
-  'indirect_rate_multiplier',
-  'by_year',
-])
 
 type PatchSection = keyof typeof RECALCULATES
 
@@ -210,86 +172,70 @@ export function useUpdateBudgetField() {
   }
 }
 
-interface StaffFieldUpdate {
-  row_id: number
-  field: string
-  value: unknown
-  year?: number
+/** One editable list of rows in the store, and what the engine makes of it. */
+interface LineList<T extends { id: number }> {
+  read: (input: BudgetInput) => T[]
+  write: (input: BudgetInput, lines: T[]) => BudgetInput
+  /** Fields the engine reads. by_year is the store's name for the numbers. */
+  recalculates: Set<string>
+  /** Rows the request includes. */
+  priced: (line: T) => boolean
+  empty: (id: number, years: number[]) => T
 }
 
-function applyStaffField(
-  line: CalculateStaffLine,
-  update: StaffFieldUpdate,
-): CalculateStaffLine {
-  if (update.field !== 'year_value') {
-    return { ...line, [update.field]: update.value }
-  }
-
-  const by_year = (line.by_year ?? []).filter(
-    (entry) => entry.year !== update.year,
-  )
-  return {
-    ...line,
-    by_year: [
-      ...by_year,
-      { year: update.year!, time: update.value as number },
-    ].sort((a, b) => a.year - b.year),
-  }
+const STAFF_LINES: LineList<StaffLine> = {
+  read: (input) => input.staff_lines,
+  write: (input, staff_lines) => ({ ...input, staff_lines }),
+  recalculates: new Set([
+    'employment_type',
+    'category',
+    'classification',
+    'time_basis',
+    'in_kind',
+    'by_year',
+  ]),
+  priced: isRated,
+  empty: emptyStaffLine,
 }
 
-export function useUpdateStaffField() {
-  return useRecalculate((current, update: StaffFieldUpdate) => ({
-    ...current,
-    staff_lines: current.staff_lines.map((line) =>
-      line.id === update.row_id ? applyStaffField(line, update) : line,
-    ),
-  }))
+const NON_STAFF_LINES: LineList<NonStaffLine> = {
+  read: (input) => input.non_staff_lines,
+  write: (input, non_staff_lines) => ({ ...input, non_staff_lines }),
+  recalculates: new Set([
+    'cost_group',
+    'expense_type',
+    'in_kind',
+    'add_ten_percent',
+    'indirect_rate_multiplier',
+    'by_year',
+  ]),
+  priced: isCosted,
+  empty: emptyNonStaffLine,
 }
 
-export function useUpdateStaffFields() {
-  return useRecalculate((current, updates: StaffFieldUpdate[]) => ({
-    ...current,
-    staff_lines: current.staff_lines.map((line) =>
-      updates
-        .filter((update) => update.row_id === line.id)
-        .reduce(applyStaffField, line),
-    ),
-  }))
-}
-
-/** Same setState signature as before, but each change now recalculates. */
-export interface NonStaffLines {
-  lines: NonStaffLine[]
+export interface Lines<T> {
+  lines: T[]
   years: number[]
-  patchLine: (id: number, patch: Partial<NonStaffLine>) => void
+  patchLine: (id: number, patch: Partial<T>) => void
   addLine: () => void
   removeLine: (id: number) => void
 }
 
+export type StaffLines = Lines<StaffLine>
+export type NonStaffLines = Lines<NonStaffLine>
+
 type Transform = (current: BudgetInput) => BudgetInput
 
-const replaceLine =
-  (id: number, patch: Partial<NonStaffLine>): Transform =>
-  (current) => ({
-    ...current,
-    non_staff_lines: current.non_staff_lines.map((line) =>
-      line.id === id ? { ...line, ...patch } : line,
-    ),
-  })
-
-const dropLine =
-  (id: number): Transform =>
-  (current) => ({
-    ...current,
-    non_staff_lines: current.non_staff_lines.filter((line) => line.id !== id),
-  })
-
 /**
- * Recalculates only when the engine would see the change. Everything else writes the store and
- * sends nothing.
+ * Recalculates only when the engine would see the change: a field it reads,
+ * on a row that is (or was) in the request. Everything else writes the store
+ * and sends nothing.
  */
-export function useNonStaffLines(years: number[]): NonStaffLines {
-  const lines = useBudgetInput().non_staff_lines
+function useLines<T extends { id: number }>(
+  list: LineList<T>,
+  years: number[],
+): Lines<T> {
+  const lines = list.read(useBudgetInput())
   const recalculate = useRecalculate((current, next: Transform) =>
     next(current),
   )
@@ -298,34 +244,52 @@ export function useNonStaffLines(years: number[]): NonStaffLines {
     if (priced) recalculate.mutate(next)
     else setBudgetInput(next(getBudgetInput()))
   }
+  const stored = (id: number) =>
+    list.read(getBudgetInput()).find((line) => line.id === id)
 
   return {
     lines,
     years,
     patchLine: (id, patch) => {
-      const before = getBudgetInput().non_staff_lines.find(
-        (line) => line.id === id,
-      )
+      const before = stored(id)
       if (!before) return
       const engineField = Object.keys(patch).some((field) =>
-        NON_STAFF_RECALCULATES.has(field),
+        list.recalculates.has(field),
       )
-      const priced = isCosted(before) || isCosted({ ...before, ...patch })
-      write(replaceLine(id, patch), engineField && priced)
+      const priced = list.priced(before) || list.priced({ ...before, ...patch })
+      write(
+        (current) =>
+          list.write(
+            current,
+            list
+              .read(current)
+              .map((line) => (line.id === id ? { ...line, ...patch } : line)),
+          ),
+        engineField && priced,
+      )
     },
     addLine: () => {
       const current = getBudgetInput()
-      setBudgetInput({
-        ...current,
-        non_staff_lines: [
-          ...current.non_staff_lines,
-          emptyNonStaffLine(nextTempId(current.non_staff_lines), years),
-        ],
-      })
+      const rows = list.read(current)
+      setBudgetInput(
+        list.write(current, [...rows, list.empty(nextTempId(rows), years)]),
+      )
     },
     removeLine: (id) => {
-      const line = getBudgetInput().non_staff_lines.find((row) => row.id === id)
-      write(dropLine(id), line !== undefined && isCosted(line))
+      const line = stored(id)
+      write(
+        (current) =>
+          list.write(
+            current,
+            list.read(current).filter((line) => line.id !== id),
+          ),
+        line !== undefined && list.priced(line),
+      )
     },
   }
 }
+
+export const useStaffLines = (years: number[]) => useLines(STAFF_LINES, years)
+
+export const useNonStaffLines = (years: number[]) =>
+  useLines(NON_STAFF_LINES, years)
