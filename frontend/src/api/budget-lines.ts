@@ -135,32 +135,62 @@ function useCommit() {
 export const useBudgetInfo = () => useBudgetInput().budget_info
 
 /**
- * One budget_info field, bound to an input. Typing stays local until it
- * settles, so a keystroke never re-renders the screen it is typed on.
+ * What is typed, held locally until it settles, so a keystroke never
+ * re-renders the screen it is typed on.
  */
+function useDraft<T>(stored: T, save: (value: T) => void, delay: number) {
+  const [draft, setDraft] = useState<T | null>(null)
+
+  const flush = useDebounced((value: T) => {
+    setDraft(null)
+    save(value)
+  }, delay)
+
+  return {
+    value: draft ?? stored,
+    onChange: (value: T) => {
+      setDraft(value)
+      flush(value)
+    },
+  }
+}
+
+/** One budget_info field, bound to an input. */
 export function useField<K extends keyof BudgetInfoInput>(
   field: K,
   delay = 400,
 ) {
   const stored = useBudgetInfo()[field]
   const commit = useCommit()
-  const [draft, setDraft] = useState<BudgetInfoInput[K] | null>(null)
 
-  const flush = useDebounced((value: BudgetInfoInput[K]) => {
-    setDraft(null)
-    commit((budget) => ({
-      ...budget,
-      budget_info: { ...budget.budget_info, [field]: value },
-    }))
-  }, delay)
+  return useDraft(
+    stored,
+    (value: BudgetInfoInput[K]) =>
+      commit((budget) => ({
+        ...budget,
+        budget_info: { ...budget.budget_info, [field]: value },
+      })),
+    delay,
+  )
+}
 
-  return {
-    value: draft ?? stored,
-    onChange: (value: BudgetInfoInput[K]) => {
-      setDraft(value)
-      flush(value)
-    },
-  }
+/** One project_info field, bound to an input. */
+export function useProjectField<K extends keyof ProjectInfoInput>(
+  field: K,
+  delay = 400,
+) {
+  const stored = useBudgetInput().project_info[field]
+  const commit = useCommit()
+
+  return useDraft(
+    stored,
+    (value: ProjectInfoInput[K]) =>
+      commit((budget) => ({
+        ...budget,
+        project_info: { ...budget.project_info, [field]: value },
+      })),
+    delay,
+  )
 }
 
 /** budget_info fields with no input behind them, such as the submit button. */
