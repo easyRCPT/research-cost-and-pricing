@@ -11,6 +11,7 @@ import {
 import type { Dispatch, SetStateAction } from 'react'
 
 import { api, ApiError } from '@/lib/api'
+import { toast } from 'sonner'
 import {
   type BudgetInput,
   getBudgetInput,
@@ -53,6 +54,12 @@ export function useBudget() {
   })
 }
 
+const errorDescription = (error: ApiError) => {
+  const fields = Object.entries(error.fields)
+  if (fields.length === 0) return error.message
+  return fields.map(([field, message]) => `${field}: ${message}`).join('\n')
+}
+
 /** Writes the edit locally first, so a failed request never loses what was typed. */
 function useRecalculate<TVariables>(
   apply: (current: BudgetInput, variables: TVariables) => BudgetInput,
@@ -74,14 +81,17 @@ function useRecalculate<TVariables>(
     // keeps the last good budget, which looks like nothing happened. Say so.
     onError: (error) => {
       if (error instanceof ApiError) {
-        console.error(
-          'calculate rejected the budget:',
-          error.message,
-          error.fields,
-        )
+        // Frontend UI toast errors
+        toast.error('Some of your changes were not applied', {
+          id: 'calculate',
+          description: errorDescription(error),
+        })
+        toast.error('Could not reach the calculator', {
+          id: 'calculate',
+          description: 'Please try again',
+        })
         return
       }
-      console.error('calculate failed:', error)
     },
   })
 }
