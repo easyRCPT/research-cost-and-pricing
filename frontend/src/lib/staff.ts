@@ -42,11 +42,21 @@ export const timeBasesFor = (
 }
 
 /**
- * An FTE row is a fraction of one full-time position, so it caps at 1. Daily and
- * hourly rows count days and hours, which the workbook leaves open-ended.
+ * An FTE row is a fraction of one full-time position. Daily and hourly rows count
+ * days and hours, which the workbook leaves open-ended; a full year is as much as
+ * either can mean. Kept in step with the backend's TIME_LIMITS.
  */
-export const maxTimeFor = (timeBasis: string) =>
-  timeBasis === 'FTE' ? 1 : undefined
+const TIME_LIMITS: Record<string, { label: string; max: number }> = {
+  FTE: { label: 'FTE', max: 1 },
+  Daily: { label: 'Days', max: 366 },
+  Hourly: { label: 'Hours', max: 366 * 24 },
+}
+
+export const maxTimeFor = (timeBasis: string) => TIME_LIMITS[timeBasis]?.max
+
+/** Names the time column in messages, before a basis is picked too. */
+export const timeLabelFor = (timeBasis: string) =>
+  TIME_LIMITS[timeBasis]?.label ?? 'Time'
 
 /** Re-clamps the entered time after a change of basis. */
 export const clampedByYear = (line: StaffLine, timeBasis: string) => {
