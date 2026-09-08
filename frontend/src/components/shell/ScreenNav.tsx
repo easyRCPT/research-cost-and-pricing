@@ -25,7 +25,7 @@ export function ScreenNav({ screen, onSelect }: ScreenNavProps) {
         <Button
           variant="outline"
           size="lg"
-          className="px-5"
+          className="px-5 bg-white hover:bg-white/70"
           onClick={() => onSelect(previous.id)}
         >
           Back
