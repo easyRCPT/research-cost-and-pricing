@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 if TYPE_CHECKING:
@@ -39,7 +40,11 @@ class SalaryRateMultiplier(models.Model):
     # SalaryRate are already hourly rates, not because hourly needs no
     # conversion in general.
     time_basis = models.CharField(max_length=20, primary_key=True)
-    multiplier = models.DecimalField(max_digits=20, decimal_places=18)
+    multiplier = models.DecimalField(
+        max_digits=20,
+        decimal_places=18,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     def __str__(self):
         return f"{self.time_basis} x{self.multiplier}"
@@ -56,7 +61,11 @@ class IncrementCap(models.Model):
 # Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
-    multiplier = models.DecimalField(max_digits=8, decimal_places=6)
+    multiplier = models.DecimalField(
+        max_digits=8,
+        decimal_places=6,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
 
 class SalaryRate(models.Model):
@@ -76,7 +85,11 @@ class SalaryRate(models.Model):
     payroll_type = models.CharField(max_length=20, choices=PayrollType.choices)
     category = models.CharField(max_length=20, choices=Category.choices)
     classification = models.CharField(max_length=20)
-    rate = models.DecimalField(max_digits=12, decimal_places=4)
+    rate = models.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     class Meta:
         constraints = [
@@ -144,6 +157,7 @@ class OnCostRate(models.Model):
     rate = models.DecimalField(
         max_digits=6,
         decimal_places=4,
+        validators=[MinValueValidator(Decimal(0))],
         help_text="Proportion, not percentage. E.g 0.1200 means 12%",
     )
 
@@ -181,7 +195,11 @@ class MinimumCostRecoveryMultiplier(models.Model):
     # this to decide whether a submitted budget gets routed to a Dean.
 
     year = models.PositiveSmallIntegerField(primary_key=True)
-    multiplier = models.DecimalField(max_digits=4, decimal_places=2)
+    multiplier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     def __str__(self):
         return f"{self.year}: {self.multiplier}"
@@ -192,7 +210,10 @@ class CalculationConstant(models.Model):
     # lookup table. Stored as rows rather than Python constants
     name = models.CharField(max_length=50, primary_key=True)
     description = models.CharField(max_length=200, blank=True)
-    value = models.DecimalField(max_digits=12, decimal_places=6)
+    value = models.DecimalField(
+        max_digits=12,
+        decimal_places=6,
+    )
 
     def __str__(self):
         return f"{self.name} = {self.value}"
@@ -268,9 +289,9 @@ class Project(models.Model):
 
     # Dictates potential year allocations for staff
     start_year = models.PositiveSmallIntegerField()
-    start_month = models.PositiveSmallIntegerField()
+    start_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
     end_year = models.PositiveSmallIntegerField()
-    end_month = models.PositiveSmallIntegerField()
+    end_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
 
     activity = models.ForeignKey(
         "Activity", null=True, blank=True, on_delete=models.PROTECT
@@ -338,17 +359,31 @@ class Budget(models.Model):
 
     # Seeded from CalculationConstant when the budget is created, not by a
     # field default, because the current values live in the database.
-    cost_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
-    in_kind_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
+    cost_multiplier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
+    in_kind_multiplier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     margin = models.DecimalField(
-        max_digits=5, decimal_places=4, default=Decimal("0.30")
+        max_digits=5,
+        decimal_places=4,
+        default=Decimal("0.30"),
+        validators=[MinValueValidator(Decimal(0))],
     )
 
     gst_applicable = models.BooleanField(default=True)
 
     cash_co_contribution = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal(0),
+        validators=[MinValueValidator(Decimal(0))],
     )
 
     comments = models.TextField(blank=True, default="")
@@ -378,7 +413,11 @@ class Deliverable(models.Model):
     description = models.CharField(max_length=200)
     deliverable_type = models.ForeignKey("DeliverableType", on_delete=models.PROTECT)
     invoice_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal(0))],
     )
 
     due_date = models.CharField(max_length=100, blank=True)
@@ -443,7 +482,11 @@ class YearAllocation(models.Model):
         "StaffCostLine", related_name="allocations", on_delete=models.CASCADE
     )
     year = models.PositiveSmallIntegerField()
-    time = models.DecimalField(max_digits=8, decimal_places=4)
+    time = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     # If a Staff line disappears, so too should a year allocation.
     # Also, there should not be an allocation sharing the same year
@@ -484,7 +527,11 @@ class NonStaffCostLine(models.Model):
     add_ten_percent = models.BooleanField(default=False)
 
     indirect_rate_multiplier = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
+        max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal(0))],
     )
 
     def __str__(self):
@@ -504,7 +551,11 @@ class YearAmount(models.Model):
     )
 
     year = models.PositiveSmallIntegerField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     # Unique on non_staff_line and year so there isn't another year
     # for a single line
