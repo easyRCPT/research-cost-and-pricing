@@ -8,7 +8,9 @@ export function StaffTableHeader({ years }: StaffTableHeaderProps) {
   return (
     <thead>
       <tr>
-        <Th rowSpan={2}>Name / Role</Th>
+        <Th rowSpan={2} className="w-full">
+          Name / Role
+        </Th>
         <Th rowSpan={2}>Employment Type</Th>
         <Th rowSpan={2}>Category</Th>
         <Th rowSpan={2}>Classification</Th>
