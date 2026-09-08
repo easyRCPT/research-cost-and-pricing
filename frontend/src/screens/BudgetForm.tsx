@@ -52,7 +52,7 @@ export function BudgetForm({ lookups }: BudgetFormProps) {
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex justify-end print:hidden">
         <Button variant="outline" size="lg" onClick={() => window.print()}>
           Export PDF
         </Button>

@@ -19,9 +19,6 @@ export const SECTIONS = [
   },
   {
     label: 'Authorisation',
-    items: [
-      { id: 'budget', label: 'Budget Form' },
-      { id: 'approvals', label: 'Approvals' },
-    ],
+    items: [{ id: 'budget', label: 'Budget Form' }],
   },
 ] satisfies readonly SidebarSection[]

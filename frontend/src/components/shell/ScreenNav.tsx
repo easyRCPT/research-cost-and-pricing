@@ -20,7 +20,7 @@ export function ScreenNav({ screen, onSelect }: ScreenNavProps) {
   const next = index < ORDER.length - 1 ? ORDER[index + 1] : undefined
 
   return (
-    <div className="mt-8 flex justify-end gap-3">
+    <div className="mt-8 flex justify-end gap-3 print:hidden">
       {previous && (
         <Button
           variant="outline"

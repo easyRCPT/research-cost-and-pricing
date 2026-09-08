@@ -27,7 +27,12 @@ export function Grid({
   className?: string
 }) {
   return (
-    <div className={cn('overflow-x-auto rounded-md border', className)}>
+    <div
+      className={cn(
+        'overflow-x-auto rounded-md border print:overflow-visible',
+        className,
+      )}
+    >
       <table className="w-max min-w-full border-collapse text-[13px]">
         {children}
       </table>
