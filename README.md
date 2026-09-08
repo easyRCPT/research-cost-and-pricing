@@ -14,6 +14,7 @@ Main repository for the University of Melbourne Research Costing and Pricing Too
 | Node.js | >= 20 (22+ recommended)                     | [nodejs.org](https://nodejs.org) or `nvm install 22` |
 | pnpm    | >= 10                                       | `corepack enable pnpm`                              |
 | Docker  | any recent version                          | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
+| flock   | any                                         | `brew install flock` (macOS); ships with util-linux on Linux |
 
 The database runs locally in Docker. There is no cloud account to set up, no connection
 string to obtain, and everything works offline. Only Postgres is containerised; the
@@ -267,12 +268,21 @@ checks, in order:
 1. Docker is running.
 2. `backend/.env` exists.
 3. This worktree has its own database allocated (a no-op in the primary checkout).
-4. The database container is up, starting it if not.
-5. `DATABASE_URL` is local, refusing to start if not.
-6. The database is not *ahead* of the branch, refusing to start if it is.
-7. Migrations are applied, applying them if not.
+4. No other preflight is working on this database, waiting if one is.
+5. The database container is up, starting it if not.
+6. `DATABASE_URL` is local, refusing to start if not.
+7. The database is not *ahead* of the branch, refusing to start if it is.
+8. Migrations are applied, applying them if not.
 
-Steps 6 and 7 are the two directions a database can disagree with the code, and they get
+Step 4 is why `make backend` and `pnpm dev` can be started at the same moment. Both run
+this script, and without a lock both would read an empty database and start `migrate`
+against it — the loser then dies part way through `0001_initial`, on a table the winner has
+already created. `flock` holds the lock for as long as the command it wraps, so the script
+simply re-runs itself under it. The key is the Compose project, so only runs that share a
+database queue; other branches carry on. The waiter picks up the winner's result, seeds
+included, and prints nothing.
+
+Steps 7 and 8 are the two directions a database can disagree with the code, and they get
 opposite treatment on purpose.
 
 - Behind (unapplied migrations): applied for you. Migrations only run forward and the local
