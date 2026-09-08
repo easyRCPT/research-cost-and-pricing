@@ -1,5 +1,19 @@
-import { Grid, Panel, Td, Th } from '@/components/shell'
+import { DataTable, TableCard, columnHelper } from '@/components/data-table'
 import type { LookupTables } from '@/types'
+
+type Category = LookupTables['non_staff_cost_categories'][number]
+
+const col = columnHelper<Category>()
+const COLUMNS = col.columns([
+  col.accessor('cost_category', { header: 'Cost group' }),
+  col.accessor('cost_subcategory', { header: 'Expense type' }),
+  col.accessor('ledger_id', {
+    header: 'Ledger ID',
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const byLedgerId = (row: Category) => String(row.ledger_id)
 
 interface ExpensesTabProps {
   categories: LookupTables['non_staff_cost_categories']
@@ -7,27 +21,20 @@ interface ExpensesTabProps {
 
 export function ExpensesTab({ categories }: ExpensesTabProps) {
   return (
-    <Panel title="Non-Staff Expense Types">
-      <Grid>
-        <thead>
-          <tr>
-            <Th>Cost group</Th>
-            <Th>Expense type</Th>
-            <Th align="right">Ledger ID</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((category) => (
-            <tr key={category.ledger_id}>
-              <Td>{category.cost_category}</Td>
-              <Td>{category.cost_subcategory}</Td>
-              <Td align="right" className="tabular">
-                {category.ledger_id}
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Grid>
-    </Panel>
+    <TableCard
+      tables={[
+        {
+          value: 'expenses',
+          title: 'Non-Staff Expense Types',
+          table: (
+            <DataTable
+              columns={COLUMNS}
+              rows={categories}
+              getRowId={byLedgerId}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }

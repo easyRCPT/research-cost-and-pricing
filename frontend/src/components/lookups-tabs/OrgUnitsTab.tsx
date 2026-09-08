@@ -1,5 +1,20 @@
-import { Grid, Panel, Td, Th } from '@/components/shell'
+import { DataTable, TableCard, columnHelper } from '@/components/data-table'
 import type { LookupTables } from '@/types'
+
+type Department = LookupTables['departments'][number]
+
+const col = columnHelper<Department>()
+const COLUMNS = col.columns([
+  col.accessor('name', { header: 'Department' }),
+  col.accessor('code', {
+    header: 'Dept code',
+    meta: { className: 'text-muted-foreground' },
+  }),
+  col.accessor('school', { header: 'School' }),
+  col.accessor('faculty', { header: 'Faculty' }),
+])
+
+const byCode = (row: Department) => row.code
 
 interface OrgUnitsTabProps {
   departments: LookupTables['departments']
@@ -7,30 +22,16 @@ interface OrgUnitsTabProps {
 
 export function OrgUnitsTab({ departments }: OrgUnitsTabProps) {
   return (
-    <Panel
-      title="Org Units"
-      description={`Department, School and Faculty · ${departments.length} rows`}
-    >
-      <Grid className="max-h-140">
-        <thead>
-          <tr>
-            <Th>Department</Th>
-            <Th>Dept code</Th>
-            <Th>School</Th>
-            <Th>Faculty</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {departments.map((department) => (
-            <tr key={department.code}>
-              <Td>{department.name}</Td>
-              <Td className="text-muted-foreground">{department.code}</Td>
-              <Td>{department.school}</Td>
-              <Td>{department.faculty}</Td>
-            </tr>
-          ))}
-        </tbody>
-      </Grid>
-    </Panel>
+    <TableCard
+      tables={[
+        {
+          value: 'orgunits',
+          title: 'Org Units',
+          table: (
+            <DataTable columns={COLUMNS} rows={departments} getRowId={byCode} />
+          ),
+        },
+      ]}
+    />
   )
 }
