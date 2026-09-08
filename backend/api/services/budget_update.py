@@ -18,7 +18,8 @@ from ..models import (
     YearAllocation,
     YearAmount,
 )
-from . import budget_details, staff_time
+from .budget_details import get_budget_details
+from .staff_time_validation import check_time
 
 
 @transaction.atomic
@@ -53,7 +54,7 @@ def update_field(
         raise ValidationError(f"Invalid section: {section}")
 
     if requires_calculation:
-        return budget_details.get_budget_details(budget)
+        return get_budget_details(budget)
 
     return None
 
@@ -278,7 +279,7 @@ def update_year_allocation(
         return
 
     # Validate time value according to time basis
-    staff_time.check_time(line.time_basis, decimal_value)
+    check_time(line.time_basis, decimal_value)
 
     # Get or create instance
     # Model validation
