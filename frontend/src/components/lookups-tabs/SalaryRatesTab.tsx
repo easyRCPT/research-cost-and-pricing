@@ -18,7 +18,7 @@ export function SalaryRatesTab({
         description={`${salaryRates.length} rows. Fortnightly rates are displayed annual; casual rates are displayed hourly.`}
       >
         <Grid className="max-h-[560px]">
-          <thead className="sticky top-0 z-10">
+          <thead>
             <tr>
               <Th>Payroll type</Th>
               <Th>Category</Th>

@@ -18,7 +18,9 @@ const ALIGN: Record<Align, string> = {
   center: 'text-center',
 }
 
-/** Sizes to its content and scrolls rather than squeezing the year columns. */
+/** Sizes to its content and scrolls rather than squeezing the year columns.
+ *  The height cap is what lets the head pin: it makes the grid, not the page,
+ *  the thing that scrolls vertically. */
 export function Grid({
   children,
   className,
@@ -27,13 +29,17 @@ export function Grid({
   className?: string
 }) {
   return (
+    // The cells draw the frame themselves (see grid-table). A border on a box
+    // around them either scrolls away, taking the head's top edge and rounded
+    // corners with it, or sits outside the scrollbars instead of inside them.
     <div
       className={cn(
-        'scroll-persist overflow-scroll rounded-md border print:overflow-visible',
+        'scroll-persist max-h-[70svh] overflow-scroll',
+        'print:max-h-none print:overflow-visible',
         className,
       )}
     >
-      <table className="w-max min-w-full border-collapse text-[13px]">
+      <table className="grid-table w-max min-w-full text-[13px]">
         {children}
       </table>
     </div>
@@ -49,7 +55,7 @@ export function Th({
     <th
       {...rest}
       className={cn(
-        'border-r border-b bg-muted px-1.5 py-1 align-bottom font-semibold whitespace-nowrap last:border-r-0',
+        'border-r border-b bg-muted px-1.5 py-1 align-bottom font-semibold whitespace-nowrap',
         ALIGN[align],
         className,
       )}
@@ -66,7 +72,7 @@ export function Td({
     <td
       {...rest}
       className={cn(
-        'border-r border-b px-2 py-1 align-middle last:border-r-0',
+        'border-r border-b px-2 py-1 align-middle',
         ALIGN[align],
         className,
       )}
@@ -80,7 +86,7 @@ export function Calc({ className, ...rest }: ComponentProps<'td'>) {
     <td
       {...rest}
       className={cn(
-        'tabular border-r border-b bg-muted/40 px-2 py-1 text-right align-middle last:border-r-0',
+        'tabular border-r border-b bg-muted/40 px-2 py-1 text-right align-middle',
         className,
       )}
     />
@@ -92,7 +98,7 @@ export function FootTd({ className, ...rest }: ComponentProps<'td'>) {
     <td
       {...rest}
       className={cn(
-        'tabular border-r bg-muted px-2 py-1.5 text-right font-semibold last:border-r-0',
+        'tabular border-r bg-muted px-2 py-1.5 text-right font-semibold',
         className,
       )}
     />

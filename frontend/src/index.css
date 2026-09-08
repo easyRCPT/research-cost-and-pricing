@@ -145,6 +145,67 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The head pins to the top of the grid while the rows scroll under it.
+   Collapsed borders belong to the table, not the cells, so a sticky head loses
+   its rules the moment it detaches; separate borders stay with each cell. */
+.grid-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.grid-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* The cells own the outer frame. The head carries its own top edge and rounded
+   corners, so it still looks like the top of the table once it has pinned and
+   the rest has scrolled past it. Every cell already draws a right and bottom
+   border, which leaves the top, the left, and the foot to add here.
+
+   The edge rules skip a second head row on purpose: where a head has one, the
+   cells reaching the table's sides span both rows from the first. */
+.grid-table > thead > tr:first-child > * {
+  border-top-width: 1px;
+}
+
+.grid-table > thead > tr:first-child > *:first-child,
+.grid-table > tbody > tr > *:first-child,
+.grid-table > tfoot > tr > *:first-child {
+  border-left-width: 1px;
+}
+
+.grid-table > tfoot > tr:last-child > * {
+  border-bottom-width: 1px;
+}
+
+.grid-table > thead > tr:first-child > *:first-child {
+  border-top-left-radius: var(--radius-md);
+}
+
+.grid-table > thead > tr:first-child > *:last-child {
+  border-top-right-radius: var(--radius-md);
+}
+
+.grid-table > tbody:last-child > tr:last-child > *:first-child,
+.grid-table > tfoot > tr:last-child > *:first-child {
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.grid-table > tbody:last-child > tr:last-child > *:last-child,
+.grid-table > tfoot > tr:last-child > *:last-child {
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Printing has no scroll box to pin to, and a static head repeats itself on
+   every page. */
+@media print {
+  .grid-table thead {
+    position: static;
+  }
+}
+
 /* Spinners eat width the narrow entry columns cannot spare. */
 .no-spin::-webkit-outer-spin-button,
 .no-spin::-webkit-inner-spin-button {
