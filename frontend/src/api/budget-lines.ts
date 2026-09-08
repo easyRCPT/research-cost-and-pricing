@@ -129,60 +129,74 @@ export function useRemoveStaffLine() {
   }))
 }
 
-// The engine reads none of these and nothing is derived from them, so editing
-// one needs no round trip. Duration, department, activity and region are absent
-// deliberately: they change the year columns or the account string.
-const DISPLAY_ONLY_PROJECT_FIELDS = new Set([
-  'title',
-  'chief_investigator',
-  'funder',
-  'other_funder',
-  'other_funder_category',
-  'scheme',
-  'additional_information',
-])
+// What the engine reads. Everything else is echoed back unchanged, so editing
+// it needs no round trip. Department alone is echo-only, but its write carries
+// cost_centre, which is part of the account string.
+const RECALCULATES = {
+  project_info: new Set([
+    'start_year',
+    'start_month',
+    'end_year',
+    'end_month',
+    'company',
+    'cost_centre',
+    'activity',
+    'region',
+  ]),
+  budget_info: new Set([
+    'cost_multiplier',
+    'in_kind_multiplier',
+    'margin',
+    'gst_applicable',
+    'cash_co_contribution',
+  ]),
+}
 
-export function useUpdateProjectFields() {
+type PatchSection = keyof typeof RECALCULATES
+
+const mergeSection = <T extends BudgetInput | BudgetDetail>(
+  current: T,
+  section: PatchSection,
+  patch: object,
+): T => ({ ...current, [section]: { ...current[section], ...patch } })
+
+/**
+ * Recalculates when a patched field is one the engine reads; otherwise writes
+ * the store and the cache now and sends nothing. The silent branch becomes
+ * PATCH /api/budgets/{id}/ when auth lands.
+ */
+function useUpdateSection(section: PatchSection) {
   const queryClient = useQueryClient()
-  const recalculate = useRecalculate(
-    (current, patch: Partial<ProjectInfoInput>) => ({
-      ...current,
-      project_info: { ...current.project_info, ...patch },
-    }),
+  const recalculate = useRecalculate((current, patch: object) =>
+    mergeSection(current, section, patch),
   )
 
-  const mutate = (patch: Partial<ProjectInfoInput>) => {
-    const changed = Object.keys(patch)
-    if (!changed.every((field) => DISPLAY_ONLY_PROJECT_FIELDS.has(field))) {
+  return (patch: object) => {
+    const fields = Object.keys(patch)
+    if (fields.some((field) => RECALCULATES[section].has(field))) {
       recalculate.mutate(patch)
       return
     }
-
-    const current = getBudgetInput()
-    setBudgetInput({
-      ...current,
-      project_info: { ...current.project_info, ...patch },
-    })
+    setBudgetInput(mergeSection(getBudgetInput(), section, patch))
     queryClient.setQueryData(
       budgetKey,
       (budget: BudgetDetail | undefined) =>
-        budget && {
-          ...budget,
-          project_info: { ...budget.project_info, ...patch },
-        },
+        budget && mergeSection(budget, section, patch),
     )
   }
+}
 
-  return { mutate }
+export function useUpdateProjectFields() {
+  const update = useUpdateSection('project_info')
+  return { mutate: (patch: Partial<ProjectInfoInput>) => update(patch) }
 }
 
 export function useUpdateBudgetField() {
-  return useRecalculate(
-    (current, update: { field: string; value: unknown }) => ({
-      ...current,
-      budget_info: { ...current.budget_info, [update.field]: update.value },
-    }),
-  )
+  const update = useUpdateSection('budget_info')
+  return {
+    mutate: ({ field, value }: { field: string; value: unknown }) =>
+      update({ [field]: value }),
+  }
 }
 
 interface StaffFieldUpdate {
