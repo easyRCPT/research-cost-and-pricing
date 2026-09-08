@@ -6,7 +6,7 @@ interface TopBarProps {
 
 export function TopBar({ right }: TopBarProps) {
   return (
-    <header className="sticky top-0 z-50 flex h-15 items-center gap-4 bg-primary px-6 text-primary-foreground">
+    <header className="sticky top-0 z-50 flex h-15 items-center gap-4 bg-primary px-6 text-primary-foreground print:hidden">
       <div>
         <h1 className="text-base leading-tight font-bold">
           Research Costing and Pricing Tool

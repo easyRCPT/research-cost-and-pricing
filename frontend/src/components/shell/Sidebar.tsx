@@ -24,7 +24,7 @@ export function SideBar({ sections, current, onSelect }: SideBarProps) {
   return (
     <nav
       aria-label="Costing sections"
-      className="sticky top-15 h-[calc(100vh-3.75rem)] overflow-y-auto border-r bg-card px-3 py-5"
+      className="sticky top-15 h-[calc(100vh-3.75rem)] overflow-y-auto border-r bg-card px-3 py-5 print:hidden"
     >
       {sections.map((section, sectionIndex) => (
         <div

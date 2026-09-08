@@ -5,7 +5,7 @@ interface PageHeadProps {
 
 export function PageHead({ title, subtitle }: PageHeadProps) {
   return (
-    <div className="mb-6">
+    <div className="mb-6 print:hidden">
       <h2 className="text-[22px] leading-tight font-bold tracking-tight text-primary">
         {title}
       </h2>
