@@ -2,6 +2,7 @@ import { useBudget, useField } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { NumberInput } from '@/components/ui/number-input'
+import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 
 export function CashCoContributions() {
   const { data: budget } = useBudget()
@@ -30,6 +31,10 @@ export function CashCoContributions() {
           <span className="text-[13.5px] text-muted-foreground">$</span>
           <NumberInput
             min={0}
+            max={MAX_MONEY}
+            onOutOfRange={() =>
+              toastOutOfRange('Cash co-contribution', 0, MAX_MONEY)
+            }
             className="tabular h-9 w-[180px] text-right"
             {...cash}
           />

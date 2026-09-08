@@ -1,6 +1,7 @@
 import { useBudget, useField } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
+import { toastOutOfRange } from '@/lib/range'
 import { Slider } from '@/components/ui/slider'
 
 const MAX_MARGIN = 100
@@ -31,6 +32,7 @@ export function MarginPanel() {
         <NumberInput
           min={0}
           max={MAX_MARGIN}
+          onOutOfRange={() => toastOutOfRange('Margin', 0, MAX_MARGIN)}
           className="tabular h-9 w-[90px] text-right"
           value={Number(percent.toFixed(2))}
           onChange={setPercent}

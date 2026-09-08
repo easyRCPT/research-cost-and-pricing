@@ -14,6 +14,8 @@ interface NumberInputProps extends Omit<
   onChange: (value: number) => void
   min?: number
   max?: number
+  /** Called with what was typed when it fell outside min/max and got clamped. */
+  onOutOfRange?: (value: number) => void
 }
 
 export function NumberInput({
@@ -21,6 +23,7 @@ export function NumberInput({
   onChange,
   min,
   max,
+  onOutOfRange,
   onFocus,
   onBlur,
   ...rest
@@ -43,7 +46,9 @@ export function NumberInput({
         setDraft(raw)
         const parsed = raw === '' ? 0 : Number(raw)
         if (!Number.isFinite(parsed)) return
-        onChange(clamp(parsed, min, max))
+        const clamped = clamp(parsed, min, max)
+        if (clamped !== parsed) onOutOfRange?.(parsed)
+        onChange(clamped)
       }}
       onBlur={(e) => {
         setDraft(null)
