@@ -1,4 +1,4 @@
-import { useBudget, useField, useSetBudgetField } from '@/api/budget-lines'
+import { useBudget, useField, useSetBudgetField } from '@/api/budget'
 import { Panel, PartBar } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'

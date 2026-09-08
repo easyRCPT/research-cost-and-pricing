@@ -3,7 +3,7 @@ import {
   useField,
   useStaffLines,
   type NonStaffLines,
-} from '@/api/budget-lines'
+} from '@/api/budget'
 import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
 import { Slider } from '@/components/ui/slider'

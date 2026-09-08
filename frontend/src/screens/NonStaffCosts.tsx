@@ -1,7 +1,7 @@
 import type { LookupTables } from '@/types'
 import { Panel } from '@/components/shell'
 import { NonStaffTable } from './nonstaff/NonStaffTable'
-import type { NonStaffLines } from '@/api/budget-lines'
+import type { NonStaffLines } from '@/api/budget'
 
 export interface NonStaffCostsProps extends NonStaffLines {
   lookups: LookupTables

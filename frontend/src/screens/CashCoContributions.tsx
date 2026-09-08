@@ -1,4 +1,4 @@
-import { useBudget, useField } from '@/api/budget-lines'
+import { useBudget, useField } from '@/api/budget'
 import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { NumberInput } from '@/components/ui/number-input'

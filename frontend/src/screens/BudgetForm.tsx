@@ -1,4 +1,4 @@
-import { useBudget } from '@/api/budget-lines'
+import { useBudget } from '@/api/budget'
 import {
   Grid,
   Ledger,

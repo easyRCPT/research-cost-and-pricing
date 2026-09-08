@@ -1,4 +1,4 @@
-import type { NonStaffLines, StaffLines } from '@/api/budget-lines'
+import type { NonStaffLines, StaffLines } from '@/api/budget'
 import { lineTotal } from '@/lib/non-staff'
 import { withCosts } from '@/lib/staff'
 import type { BudgetDetail, StaffLine } from '@/types'

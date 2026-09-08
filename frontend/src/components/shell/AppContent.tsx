@@ -1,11 +1,7 @@
 import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
 import type { EditorScreen } from './Sidebar'
-import {
-  useBudget,
-  useNonStaffLines,
-  useUpdateProject,
-} from '@/api/budget-lines'
+import { useBudget, useNonStaffLines, useUpdateProject } from '@/api/budget'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
 import { PageHead, SECTIONS, ScreenNav, Sidebar } from '.'

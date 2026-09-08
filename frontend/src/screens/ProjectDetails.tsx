@@ -12,7 +12,7 @@ import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
 import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectDepartmentRow } from './project-details/ProjectDepartmentRow'
 import { TextInput, TextareaInput } from '@/components/ui/text-input'
-import { useProjectField } from '@/api/budget-lines'
+import { useProjectField } from '@/api/budget'
 
 interface ProjectDetailsProps {
   project: ProjectInfo

@@ -1,4 +1,4 @@
-import { useBudget, useStaffLines } from '@/api/budget-lines'
+import { useBudget, useStaffLines } from '@/api/budget'
 import { Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { withCosts } from '@/lib/staff'

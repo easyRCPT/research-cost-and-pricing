@@ -1,4 +1,4 @@
-import { useCalculating } from '@/api/budget-lines'
+import { useCalculating } from '@/api/budget'
 import type { ReactNode } from 'react'
 
 export function Derived({ children }: { children: ReactNode }) {
