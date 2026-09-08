@@ -18,13 +18,7 @@ from ..models import (
     YearAllocation,
     YearAmount,
 )
-from . import budget_details
-
-MAX_VALUE_BY_TIME_BASIS = {
-    "FTE": Decimal(1),
-    "Daily": Decimal(220),
-    "Hourly": Decimal(366 * 24),
-}
+from . import budget_details, staff_time
 
 
 @transaction.atomic
@@ -284,11 +278,7 @@ def update_year_allocation(
         return
 
     # Validate time value according to time basis
-    max_value = MAX_VALUE_BY_TIME_BASIS[line.time_basis]
-    if decimal_value > max_value:
-        raise ValidationError(
-            f"Time value cannot exceed {max_value} for time basis '{line.time_basis}'."
-        )
+    staff_time.check_time(line.time_basis, decimal_value)
 
     # Get or create instance
     # Model validation

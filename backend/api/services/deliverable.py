@@ -5,10 +5,12 @@ from ..models import Budget, Deliverable
 
 @transaction.atomic
 def create(budget: Budget, data: dict) -> None:
-    Deliverable.objects.create(
+    deliverable = Deliverable(
         budget=budget,
         **data,
     )
+    deliverable.full_clean()
+    deliverable.save()
 
 
 @transaction.atomic
