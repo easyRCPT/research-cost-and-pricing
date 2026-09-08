@@ -172,7 +172,11 @@ def update_budget(
 
 
 def update_staff(
-    budget: Budget, row_id: int, field: str, value: object, year: int | None
+    budget: Budget,
+    row_id: int,
+    field: str,
+    value: object,
+    year: int | None,
 ) -> bool:
     try:
         staff_line = budget.staff_lines.get(id=row_id)
@@ -204,14 +208,18 @@ def update_staff(
     if field == "year_value":
         if year is None:
             raise ValidationError("year is required for year_value.")
-        update_year_value(staff_line, year, value)
+        update_year_allocation(staff_line, year, value)
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
 def update_non_staff(
-    budget: Budget, row_id: int, field: str, value: object, year: int | None
+    budget: Budget,
+    row_id: int,
+    field: str,
+    value: object,
+    year: int | None,
 ) -> bool:
     try:
         non_staff_line = budget.non_staff_lines.get(id=row_id)
@@ -254,74 +262,111 @@ def update_non_staff(
     if field == "year_value":
         if year is None:
             raise ValidationError("year is required for year_value.")
-        update_year_value(non_staff_line, year, value)
+        update_year_amount(non_staff_line, year, value)
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
-def update_year_value(
-    line: StaffCostLine | NonStaffCostLine,
+def update_year_allocation(
+    line: StaffCostLine,
     year: int,
     value: object,
 ) -> None:
+    decimal_value = _validate_year_and_convert_value(line, year, value)
+
+    # Delete the year value if it is cleared
+    if decimal_value is None:
+        YearAllocation.objects.filter(
+            staff_line=line,
+            year=year,
+        ).delete()
+        return
+
+    # Validate time value according to time basis
+    max_value = MAX_VALUE_BY_TIME_BASIS[line.time_basis]
+    if decimal_value > max_value:
+        raise ValidationError(
+            f"Time value cannot exceed {max_value} for time basis '{line.time_basis}'."
+        )
+
+    # Get or create instance
+    # Model validation
+    try:
+        allocation = YearAllocation.objects.get(
+            staff_line=line,
+            year=year,
+        )
+    except YearAllocation.DoesNotExist:
+        allocation = YearAllocation(
+            staff_line=line,
+            year=year,
+            time=decimal_value,
+        )
+    else:
+        allocation.time = decimal_value
+
+    allocation.full_clean()
+    allocation.save()
+
+
+def update_year_amount(
+    line: NonStaffCostLine,
+    year: int,
+    value: object,
+) -> None:
+    decimal_value = _validate_year_and_convert_value(line, year, value)
+
+    # Delete the year value if it is cleared
+    if decimal_value is None:
+        YearAmount.objects.filter(
+            non_staff_line=line,
+            year=year,
+        ).delete()
+        return
+
+    # Get or create instance
+    # Model validation
+    try:
+        amount = YearAmount.objects.get(
+            non_staff_line=line,
+            year=year,
+        )
+    except YearAmount.DoesNotExist:
+        amount = YearAmount(
+            non_staff_line=line,
+            year=year,
+            amount=decimal_value,
+        )
+    else:
+        amount.amount = decimal_value
+
+    amount.full_clean()
+    amount.save()
+
+
+def _validate_year_and_convert_value(
+    line: StaffCostLine | NonStaffCostLine,
+    year: int,
+    value: object,
+) -> Decimal | None:
+    # Check in project duration
     project = line.budget.project
 
-    # Check in project duration
     if year < project.start_year or year > project.end_year:
         raise ValidationError(
             f"Year must be between {project.start_year} and {project.end_year}."
         )
 
-    # Delete the year value if it is cleared
+    # Return None to delete the year value
     if value is None:
-        if isinstance(line, StaffCostLine):
-            YearAllocation.objects.filter(
-                staff_line=line,
-                year=year,
-            ).delete()
-        else:
-            YearAmount.objects.filter(
-                non_staff_line=line,
-                year=year,
-            ).delete()
-
-        return
+        return None
 
     # Check valid decimal value
     try:
-        decimal_value = Decimal(str(value))
+        return Decimal(str(value))
     except (InvalidOperation, ValueError, TypeError):
-        raise ValidationError(f"Year '{year}' must be a valid number.")
-
-    validate_year_value(line, decimal_value)
-
-    # Update or create
-    if isinstance(line, StaffCostLine):
-        YearAllocation.objects.update_or_create(
-            staff_line=line,
-            year=year,
-            defaults={"time": decimal_value},
-        )
-    else:
-        YearAmount.objects.update_or_create(
-            non_staff_line=line,
-            year=year,
-            defaults={"amount": decimal_value},
-        )
-
-
-def validate_year_value(
-    line: StaffCostLine | NonStaffCostLine,
-    value: Decimal,
-) -> None:
-    if isinstance(line, StaffCostLine):
-        max_value = MAX_VALUE_BY_TIME_BASIS[line.time_basis]
-
-        if value > max_value:
-            raise ValidationError(
-                f"value must be smaller than {max_value} for time basis '{line.time_basis}'."
-            )
+        raise ValidationError(f"Value for {year} must be a valid number.")
 
 
 def update_deliverable(
