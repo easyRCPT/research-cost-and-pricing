@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useBudget, useUpdateBudgetField } from '@/api/budget-lines'
-import { Ledger, LedgerRow, Panel } from '@/components/shell'
+import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { money } from '@/lib/format/utils'
@@ -9,9 +9,13 @@ import type { LookupTables } from '@/types'
 const DASH = <span className="text-muted-foreground">—</span>
 
 const ratio = (value: number) => `${(value * 100).toFixed(1)}%`
+const amount = (value: number) => <Derived>{money(value)}</Derived>
+const percent = (value: number) => <Derived>{ratio(value)} </Derived>
 
 const signed = (value: number) => (
-  <span className={value < 0 ? 'text-bad' : 'text-good'}>{money(value)}</span>
+  <Derived>
+    <span className={value < 0 ? 'text-bad' : 'text-good'}>{money(value)}</span>
+  </Derived>
 )
 
 const fullRecoveryBasis = (lookups: LookupTables) =>
@@ -66,15 +70,15 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
               />
               <LedgerRow
                 label="Amount expected to be received by UoM"
-                value={money(summary.total_price_exc_gst)}
+                value={amount(summary.total_price_exc_gst)}
               />
               <LedgerRow
                 label="Total Project Cost to UoM (including in-kind)"
-                value={money(summary.total_project_cost)}
+                value={amount(summary.total_project_cost)}
               />
               <LedgerRow
                 label="Cash co-contributions (university investment)"
-                value={money(summary.total_cash_co_contribution)}
+                value={amount(summary.total_cash_co_contribution)}
               />
             </tbody>
           </Ledger>
@@ -82,7 +86,7 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
             <tbody>
               <LedgerRow
                 label="Total amount requested for project"
-                value={money(summary.total_price_inc_gst)}
+                value={amount(summary.total_price_inc_gst)}
               />
               <LedgerRow
                 label="Cost recovery multiplier used"
@@ -120,60 +124,60 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
               <LedgerRow
                 label="Staff Costs (excluding in-kind)"
                 secondValue={DASH}
-                value={money(summary.staff_cost)}
+                value={amount(summary.staff_cost)}
               />
               <LedgerRow
                 label="Non-Staff Costs (excluding in-kind)"
-                secondValue={money(summary.non_staff_cost)}
-                value={money(summary.non_staff_cost)}
+                secondValue={amount(summary.non_staff_cost)}
+                value={amount(summary.non_staff_cost)}
               />
               <LedgerRow
                 tone="rule"
                 label="Project Cost (excluding in-kind)"
                 secondValue={DASH}
-                value={money(summary.project_cost)}
+                value={amount(summary.project_cost)}
               />
               <LedgerRow
                 label="In-kind (University investment) Staff Costs"
                 secondValue={DASH}
-                value={money(summary.in_kind_staff_cost)}
+                value={amount(summary.in_kind_staff_cost)}
               />
               <LedgerRow
                 label="In-kind (University investment) Non-Staff Costs"
-                secondValue={money(summary.in_kind_non_staff_cost)}
-                value={money(summary.in_kind_non_staff_cost)}
+                secondValue={amount(summary.in_kind_non_staff_cost)}
+                value={amount(summary.in_kind_non_staff_cost)}
               />
               <LedgerRow
                 tone="rule"
                 label="Total In-kind (University investment) Project Costs"
                 secondValue={DASH}
-                value={money(summary.in_kind_project_cost)}
+                value={amount(summary.in_kind_project_cost)}
               />
               <LedgerRow
                 label="Staff Costs % (excluding in-kind)"
                 secondValue={DASH}
-                value={ratio(summary.staff_cost_percentage)}
+                value={percent(summary.staff_cost_percentage)}
               />
               <LedgerRow
                 label="Non-Staff Costs % (excluding in-kind)"
                 secondValue={DASH}
-                value={ratio(summary.non_staff_cost_percentage)}
+                value={percent(summary.non_staff_cost_percentage)}
               />
               <LedgerRow
                 tone="rule"
                 label="Total Project Cost (including in-kind)"
                 secondValue={DASH}
-                value={money(summary.total_project_cost)}
+                value={amount(summary.total_project_cost)}
               />
               <LedgerRow
                 label="Total Price to be charged to Funder (Excluding GST)"
                 secondValue=""
-                value={money(summary.total_price_exc_gst)}
+                value={amount(summary.total_price_exc_gst)}
               />
               <LedgerRow
                 label="Total Price to be charged to Funder (Including GST)"
                 secondValue=""
-                value={money(summary.total_price_inc_gst)}
+                value={amount(summary.total_price_inc_gst)}
               />
             </tbody>
           </Ledger>
@@ -193,7 +197,7 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
             />
             <LedgerRow
               label="Total In-kind contribution (University investment)"
-              value={money(summary.total_in_kind_contribution)}
+              value={amount(summary.total_in_kind_contribution)}
             />
             <LedgerRow
               label="Total Cash Co-Contribution (Department, Faculty and Chancellery)"

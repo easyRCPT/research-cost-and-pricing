@@ -15,6 +15,7 @@ export { ScreenNav } from './ScreenNav'
 export { FieldRow } from './FieldRow'
 export { Note } from './Note'
 export { Ledger, LedgerRow } from './Ledger'
+export { Derived } from './Derived'
 export { PartBar } from './PartBar'
 export {
   Grid,

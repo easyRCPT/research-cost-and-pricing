@@ -3,6 +3,7 @@
 // The budget lives in the browser (lib/budget-store.ts) and every edit re-POSTs
 // the whole thing to /api/calculate/.
 import {
+  useIsMutating,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
@@ -28,6 +29,10 @@ import type {
 import { useLookups } from './lookups'
 
 export const budgetKey = ['budget'] as const
+const calculateKey = ['calculate'] as const
+
+/** Replies can land out of order, only newest request writes cache */
+let latestRequest = 0
 
 async function calculate(input: BudgetInput): Promise<BudgetDetail> {
   const { data, error, response } = await api.POST('/api/calculate/', {
@@ -49,18 +54,21 @@ export function useBudget() {
 }
 
 /** Writes the edit locally first, so a failed request never loses what was typed. */
-function useBudgetMutation<TVariables>(
+function useRecalculate<TVariables>(
   apply: (current: BudgetInput, variables: TVariables) => BudgetInput,
 ) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (variables: TVariables) => {
+    mutationKey: calculateKey,
+    mutationFn: async (variables: TVariables) => {
       const next = apply(getBudgetInput(), variables)
       setBudgetInput(next)
-      return calculate(next)
+      const request = ++latestRequest
+      const budget = await calculate(next)
+      return { budget, request }
     },
-    onSuccess: (budget) => {
-      queryClient.setQueryData(budgetKey, budget)
+    onSuccess: ({ budget, request }) => {
+      if (request === latestRequest) queryClient.setQueryData(budgetKey, budget)
     },
     // A rejected edit leaves the store holding what was typed while the cache
     // keeps the last good budget, which looks like nothing happened. Say so.
@@ -78,11 +86,15 @@ function useBudgetMutation<TVariables>(
   })
 }
 
+/** True while any edit is waiting on the engine */
+export const useCalculating = () =>
+  useIsMutating({ mutationKey: calculateKey }) > 0
+
 const nextStaffId = (lines: CalculateStaffLine[]) =>
   Math.max(0, ...lines.map((line) => line.id)) + 1
 
 export function useAddStaffLine() {
-  return useBudgetMutation((current, line: StaffLineInput) => ({
+  return useRecalculate((current, line: StaffLineInput) => ({
     ...current,
     staff_lines: [
       ...current.staff_lines,
@@ -101,7 +113,7 @@ export function useAddStaffLine() {
 }
 
 export function useRemoveStaffLine() {
-  return useBudgetMutation((current, lineId: number) => ({
+  return useRecalculate((current, lineId: number) => ({
     ...current,
     staff_lines: current.staff_lines.filter((line) => line.id !== lineId),
   }))
@@ -122,7 +134,7 @@ const DISPLAY_ONLY_PROJECT_FIELDS = new Set([
 
 export function useUpdateProjectFields() {
   const queryClient = useQueryClient()
-  const recalculate = useBudgetMutation(
+  const recalculate = useRecalculate(
     (current, patch: Partial<ProjectInfoInput>) => ({
       ...current,
       project_info: { ...current.project_info, ...patch },
@@ -155,7 +167,7 @@ export function useUpdateProjectFields() {
 }
 
 export function useUpdateBudgetField() {
-  return useBudgetMutation(
+  return useRecalculate(
     (current, update: { field: string; value: unknown }) => ({
       ...current,
       budget_info: { ...current.budget_info, [update.field]: update.value },
@@ -191,7 +203,7 @@ function applyStaffField(
 }
 
 export function useUpdateStaffField() {
-  return useBudgetMutation((current, update: StaffFieldUpdate) => ({
+  return useRecalculate((current, update: StaffFieldUpdate) => ({
     ...current,
     staff_lines: current.staff_lines.map((line) =>
       line.id === update.row_id ? applyStaffField(line, update) : line,
@@ -200,7 +212,7 @@ export function useUpdateStaffField() {
 }
 
 export function useUpdateStaffFields() {
-  return useBudgetMutation((current, updates: StaffFieldUpdate[]) => ({
+  return useRecalculate((current, updates: StaffFieldUpdate[]) => ({
     ...current,
     staff_lines: current.staff_lines.map((line) =>
       updates
@@ -216,7 +228,7 @@ export function useNonStaffLines(): [
   Dispatch<SetStateAction<NonStaffLine[]>>,
 ] {
   const input = useBudgetInput()
-  const mutation = useBudgetMutation(
+  const mutation = useRecalculate(
     (current, update: SetStateAction<NonStaffLine[]>) => ({
       ...current,
       non_staff_lines:
