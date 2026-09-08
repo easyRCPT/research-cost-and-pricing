@@ -12,6 +12,11 @@ export const expenseTypesFor = (
     .filter((c) => c.cost_category === costGroup)
     .map((c) => c.cost_subcategory)
 
+/** Every expense type in the table, for sizing before a cost group is picked. */
+export const allExpenseTypes = (categories: readonly NonStaffCategory[]) => [
+  ...new Set(categories.map((c) => c.cost_subcategory)),
+]
+
 // TODO: Convert into a flag in lookup table
 const NO_TEN_PERCENT = new Set(['Student Support', 'Shared Grant Payments'])
 

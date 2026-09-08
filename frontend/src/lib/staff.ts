@@ -30,6 +30,11 @@ export const classificationsFor = (
   ),
 ]
 
+/** Every classification in the table, for sizing before a category is picked. */
+export const allClassifications = (rates: readonly SalaryRate[]) => [
+  ...new Set(rates.map((rate) => rate.classification)),
+]
+
 export const timeBasesFor = (
   multipliers: readonly SalaryRateMultiplier[],
   employmentType: string,
@@ -40,6 +45,11 @@ export const timeBasesFor = (
     ? bases.filter((basis) => basis === 'Hourly')
     : bases.filter((basis) => basis !== 'Hourly')
 }
+
+/** Every basis in the table, for sizing before an employment type is picked. */
+export const allTimeBases = (multipliers: readonly SalaryRateMultiplier[]) => [
+  ...new Set(multipliers.map((multiplier) => multiplier.time_basis)),
+]
 
 /**
  * An FTE row is a fraction of one full-time position. Daily and hourly rows count
