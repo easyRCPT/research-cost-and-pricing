@@ -11,8 +11,10 @@ import { Button } from '@/components/ui/button'
 import { dash } from '@/lib/format/utils'
 import {
   EMPLOYMENT_TYPES,
+  clampedByYear,
   classificationsFor,
   costFor,
+  maxTimeFor,
   staffCategories,
   timeBasesFor,
   timeFor,
@@ -60,11 +62,15 @@ export function StaffTableBody({
               placeholder="—"
               onChange={(employment_type) => {
                 const bases = timeBasesFor(multipliers, employment_type)
+                if (bases.includes(line.time_basis)) {
+                  patchLine(line.id, { employment_type })
+                  return
+                }
+                const time_basis = bases[0] ?? line.time_basis
                 patchLine(line.id, {
                   employment_type,
-                  ...(bases.includes(line.time_basis)
-                    ? {}
-                    : { time_basis: bases[0] ?? line.time_basis }),
+                  time_basis,
+                  by_year: clampedByYear(line, time_basis),
                 })
               }}
             />
@@ -102,7 +108,12 @@ export function StaffTableBody({
               options={timeBasesFor(multipliers, line.employment_type)}
               placeholder="—"
               disabled={!line.employment_type}
-              onChange={(time_basis) => patchLine(line.id, { time_basis })}
+              onChange={(time_basis) =>
+                patchLine(line.id, {
+                  time_basis,
+                  by_year: clampedByYear(line, time_basis),
+                })
+              }
             />
           </CellTd>
           <Calc
@@ -115,6 +126,7 @@ export function StaffTableBody({
               <CellNumber
                 className="w-20"
                 min={0}
+                max={maxTimeFor(line.time_basis)}
                 value={timeFor(line, year)}
                 onChange={(time) =>
                   patchLine(line.id, {

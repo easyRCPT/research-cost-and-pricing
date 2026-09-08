@@ -41,6 +41,23 @@ export const timeBasesFor = (
     : bases.filter((basis) => basis !== 'Hourly')
 }
 
+/**
+ * An FTE row is a fraction of one full-time position, so it caps at 1. Daily and
+ * hourly rows count days and hours, which the workbook leaves open-ended.
+ */
+export const maxTimeFor = (timeBasis: string) =>
+  timeBasis === 'FTE' ? 1 : undefined
+
+/** Re-clamps the entered time after a change of basis. */
+export const clampedByYear = (line: StaffLine, timeBasis: string) => {
+  const max = maxTimeFor(timeBasis)
+  if (max === undefined) return line.by_year
+  return line.by_year.map((entry) => ({
+    ...entry,
+    time: Math.min(max, entry.time),
+  }))
+}
+
 export const timeFor = (line: StaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.time ?? 0
 
