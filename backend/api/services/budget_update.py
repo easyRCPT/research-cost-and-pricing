@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+from typing import cast
 
 from django.db import transaction
 from django.db.models import Model
@@ -12,14 +13,18 @@ from ..models import (
     Department,
     NonStaffCostCategory,
     NonStaffCostLine,
-    OnCostRate,
     Region,
-    SalaryRate,
     StaffCostLine,
     YearAllocation,
     YearAmount,
 )
 from . import budget_details
+
+MAX_VALUE_BY_TIME_BASIS = {
+    "FTE": Decimal(1),
+    "Daily": Decimal(220),
+    "Hourly": Decimal(366 * 24),
+}
 
 
 @transaction.atomic
@@ -51,7 +56,7 @@ def update_field(
             raise ValidationError("row_id is required for deliverable.")
         requires_calculation = update_deliverable(budget, row_id, field, value)
     else:
-        raise ValueError(f"Invalid section: {section}")
+        raise ValidationError(f"Invalid section: {section}")
 
     if requires_calculation:
         return budget_details.get_budget_details(budget)
@@ -66,7 +71,7 @@ def update_project(
 ) -> bool:
     project = budget.project
 
-    string_fields = {
+    fields_without_calculation = {
         "title",
         "chief_investigator",
         "funder",
@@ -76,19 +81,19 @@ def update_project(
         "additional_information",
     }
 
-    integer_fields = {
+    fields_requiring_calculation = {
         "start_year",
         "start_month",
         "end_year",
         "end_month",
     }
 
-    if field in string_fields:
-        _set_string_field(project, field, value)
+    if field in fields_without_calculation:
+        _set_field(project, field, value)
         return False
 
-    if field in integer_fields:
-        _set_integer_field(project, field, value)
+    if field in fields_requiring_calculation:
+        _set_field(project, field, value)
         return True
 
     if field == "department":
@@ -138,43 +143,29 @@ def update_budget(
     field: str,
     value: object,
 ) -> bool:
-    string_fields = {
+    fields_without_calculation = {
         "comments",
         "justification",
         "justification_notes",
         "dean_exemption_reason",
+        "status",
     }
 
-    choice_fields = {
-        "mode": Budget.Mode.values,
-        "status": Budget.Status.values,
-    }
-
-    decimal_fields = {
+    fields_requiring_calculation = {
+        "mode",
         "cost_multiplier",
         "in_kind_multiplier",
         "margin",
         "cash_co_contribution",
-    }
-
-    boolean_fields = {
         "gst_applicable",
     }
 
-    if field in string_fields:
-        _set_string_field(budget, field, value)
+    if field in fields_without_calculation:
+        _set_field(budget, field, value)
         return False
 
-    if field in choice_fields:
-        _set_choice_field(budget, field, value, choice_fields[field])
-        return field == "mode"
-
-    if field in decimal_fields:
-        _set_decimal_field(budget, field, value)
-        return True
-
-    if field in boolean_fields:
-        _set_boolean_field(budget, field, value)
+    if field in fields_requiring_calculation:
+        _set_field(budget, field, value)
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -188,31 +179,26 @@ def update_staff(
     except StaffCostLine.DoesNotExist:
         raise ValidationError("Staff cost line not found.")
 
-    string_fields = {
+    staff_line = cast(StaffCostLine, staff_line)
+
+    fields_without_calculation = {
         "name_role",
+    }
+
+    fields_requiring_calculation = {
         "classification",
-    }
-
-    choice_fields = {
-        "employment_type": OnCostRate.EmploymentType.values,
-        "category": SalaryRate.Category.values,
-        "time_basis": StaffCostLine.TimeBasis.values,
-    }
-
-    boolean_fields = {
+        "employment_type",
+        "category",
+        "time_basis",
         "in_kind",
     }
 
-    if field in string_fields:
-        _set_string_field(staff_line, field, value)
-        return field != "name_role"
+    if field in fields_without_calculation:
+        _set_field(staff_line, field, value)
+        return False
 
-    if field in choice_fields:
-        _set_choice_field(staff_line, field, value, choice_fields[field])
-        return True
-
-    if field in boolean_fields:
-        _set_boolean_field(staff_line, field, value)
+    if field in fields_requiring_calculation:
+        _set_field(staff_line, field, value)
         return True
 
     if field == "year_value":
@@ -232,25 +218,24 @@ def update_non_staff(
     except NonStaffCostLine.DoesNotExist:
         raise ValidationError("Non-staff cost line not found.")
 
-    string_fields = {
+    non_staff_line = cast(NonStaffCostLine, non_staff_line)
+
+    fields_without_calculation = {
         "description",
     }
 
-    boolean_fields = {
+    fields_requiring_calculation = {
         "in_kind",
         "add_ten_percent",
+        "indirect_rate_multiplier",
     }
 
-    if field in string_fields:
-        _set_string_field(non_staff_line, field, value)
-        return True
+    if field in fields_without_calculation:
+        _set_field(non_staff_line, field, value)
+        return False
 
-    if field in boolean_fields:
-        _set_boolean_field(non_staff_line, field, value)
-        return True
-
-    if field == "indirect_rate_multiplier":
-        _set_decimal_field(non_staff_line, field, value, allow_null=True)
+    if field in fields_requiring_calculation:
+        _set_field(non_staff_line, field, value)
         return True
 
     if field == "category":
@@ -303,11 +288,13 @@ def update_year_value(
 
         return
 
-    # Check valid value
+    # Check valid decimal value
     try:
         decimal_value = Decimal(str(value))
     except (InvalidOperation, ValueError, TypeError):
         raise ValidationError(f"Year '{year}' must be a valid number.")
+
+    validate_year_value(line, decimal_value)
 
     # Update or create
     if isinstance(line, StaffCostLine):
@@ -324,6 +311,19 @@ def update_year_value(
         )
 
 
+def validate_year_value(
+    line: StaffCostLine | NonStaffCostLine,
+    value: Decimal,
+) -> None:
+    if isinstance(line, StaffCostLine):
+        max_value = MAX_VALUE_BY_TIME_BASIS[line.time_basis]
+
+        if value > max_value:
+            raise ValidationError(
+                f"value must be smaller than {max_value} for time basis '{line.time_basis}'."
+            )
+
+
 def update_deliverable(
     budget: Budget,
     row_id: int,
@@ -335,112 +335,40 @@ def update_deliverable(
     except Deliverable.DoesNotExist:
         raise ValidationError("Deliverable not found.")
 
-    string_fields = {
+    deliverable = cast(Deliverable, deliverable)
+
+    fields_without_calculation = {
+        "number",
         "description",
+        "invoice_amount",
         "due_date",
+        "dependency",
         "sponsor",
     }
 
-    if field in string_fields:
-        _set_string_field(deliverable, field, value)
+    fields_requiring_calculation = set()
+
+    if field in fields_without_calculation:
+        _set_field(deliverable, field, value)
         return False
 
-    if field == "number":
-        _set_integer_field(deliverable, field, value)
-        return False
-
-    if field == "dependency":
-        _set_integer_field(deliverable, field, value, allow_null=True)
-        return False
+    if field in fields_requiring_calculation:
+        _set_field(deliverable, field, value)
+        return True
 
     if field == "deliverable_type":
         if not isinstance(value, str):
             raise ValidationError("Field 'deliverable_type' must be a string.")
 
         try:
-            deliverable_type = DeliverableType.objects.get(pk=value)
+            deliverable.deliverable_type = DeliverableType.objects.get(pk=value)
         except DeliverableType.DoesNotExist:
             raise ValidationError("Invalid deliverable type.")
 
-        _set_field(deliverable, field, deliverable_type)
-        return False
-
-    if field == "invoice_amount":
-        _set_decimal_field(deliverable, field, value, allow_null=True)
+        deliverable.save(update_fields=["deliverable_type"])
         return False
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
-
-
-def _set_string_field(
-    instance: Model,
-    field: str,
-    value: object,
-) -> None:
-    if not isinstance(value, str):
-        raise ValidationError(f"Field '{field}' must be a string.")
-
-    _set_field(instance, field, value)
-
-
-def _set_choice_field(
-    instance: Model,
-    field: str,
-    value: object,
-    choices: list[str],
-) -> None:
-    if not isinstance(value, str):
-        raise ValidationError(f"Field '{field}' must be a string.")
-
-    if value not in choices:
-        raise ValidationError(f"Invalid {field}.")
-
-    _set_field(instance, field, value)
-
-
-def _set_integer_field(
-    instance: Model,
-    field: str,
-    value: object,
-    allow_null: bool = False,
-) -> None:
-    if value is None and allow_null:
-        _set_field(instance, field, value)
-        return
-
-    if not isinstance(value, int):
-        raise ValidationError(f"Field '{field}' must be an integer.")
-
-    _set_field(instance, field, value)
-
-
-def _set_decimal_field(
-    instance: Model,
-    field: str,
-    value: object,
-    allow_null: bool = False,
-) -> None:
-    if value is None and allow_null:
-        _set_field(instance, field, value)
-        return
-
-    try:
-        decimal_value = Decimal(str(value))
-    except (InvalidOperation, ValueError, TypeError):
-        raise ValidationError(f"Field '{field}' must be a valid decimal.")
-
-    _set_field(instance, field, decimal_value)
-
-
-def _set_boolean_field(
-    instance: Model,
-    field: str,
-    value: object,
-) -> None:
-    if not isinstance(value, bool):
-        raise ValidationError(f"Field '{field}' must be a boolean.")
-
-    _set_field(instance, field, value)
 
 
 def _set_field(
@@ -449,4 +377,5 @@ def _set_field(
     value: object,
 ) -> None:
     setattr(instance, field, value)
+    instance.full_clean()
     instance.save(update_fields=[field])

@@ -19,7 +19,10 @@ def create(
 
     model = LOOKUP_TABLES[lookup_table].model
 
-    model.objects.create(**data)
+    # Validate the model before saving
+    instance = model(**data)
+    instance.full_clean()
+    instance.save()
 
     invalidate_lookup_cache()
 
@@ -65,7 +68,7 @@ def _update_instance(
     data: dict,
 ) -> None:
     # Lookup fields are used to identify the row and cannot be updated.
-    immutable_fields = set(lookup) & set(data)
+    immutable_fields = lookup.keys() & data.keys()
 
     if immutable_fields:
         raise ValidationError(
@@ -75,4 +78,5 @@ def _update_instance(
     for field, value in data.items():
         setattr(instance, field, value)
 
+    instance.full_clean()
     instance.save(update_fields=list(data))
