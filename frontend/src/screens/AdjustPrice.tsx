@@ -3,14 +3,13 @@ import {
   useBudget,
   useUpdateBudgetField,
   useUpdateStaffField,
+  type NonStaffLines,
 } from '@/api/budget-lines'
 import { Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { money } from '@/lib/format/utils'
 import { costRows } from '@/lib/in-kind'
-import type { NonStaffLine } from '@/types'
-import type { Dispatch, SetStateAction } from 'react'
 import { InKindFlagsTable } from './inkind/InKindFlagsTable'
 
 const MAX_MARGIN = 100
@@ -18,11 +17,7 @@ const MAX_MARGIN = 100
 const asPercent = (fraction: number) => fraction * 100
 
 export interface AdjustPriceProps {
-  nonStaff: {
-    lines: NonStaffLine[]
-    years: number[]
-    setLines: Dispatch<SetStateAction<NonStaffLine[]>>
-  }
+  nonStaff: NonStaffLines
 }
 
 export function AdjustPrice({ nonStaff }: AdjustPriceProps) {

@@ -23,10 +23,10 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
   const updateProject = useUpdateProjectFields()
-  const [nonStaffLines, setNonStaffLines] = useNonStaffLines()
 
   const project = budget.project_info
   const years = budget.years
+  const nonStaff = useNonStaffLines(years)
 
   const lookupsOpen = screen === LOOKUP_SCREEN
   const pageHeading = lookupsOpen
@@ -56,11 +56,7 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
             screen={screen}
             project={project}
             onChange={patchProject}
-            nonStaff={{
-              lines: nonStaffLines,
-              years,
-              setLines: setNonStaffLines,
-            }}
+            nonStaff={nonStaff}
           />
           <ScreenNav screen={screen} onSelect={setScreen} />
         </>

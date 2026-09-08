@@ -8,13 +8,13 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import type { Dispatch, SetStateAction } from 'react'
 
 import { api, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import {
   type BudgetInput,
   getBudgetInput,
+  isCosted,
   seedMultipliers,
   setBudgetInput,
   toCalculateRequest,
@@ -28,6 +28,8 @@ import type {
   StaffLineInput,
 } from '@/types'
 import { useLookups } from './lookups'
+import { emptyNonStaffLine } from '@/lib/non-staff'
+import { nextTempId } from '@/lib/utils'
 
 export const budgetKey = ['budget'] as const
 const calculateKey = ['calculate'] as const
@@ -152,6 +154,15 @@ const RECALCULATES = {
   ]),
 }
 
+const NON_STAFF_RECALCULATES = new Set([
+  'cost_group',
+  'expense_type',
+  'in_kind',
+  'add_ten_percent',
+  'indirect_rate_multiplier',
+  'by_year',
+])
+
 type PatchSection = keyof typeof RECALCULATES
 
 const mergeSection = <T extends BudgetInput | BudgetDetail>(
@@ -247,18 +258,74 @@ export function useUpdateStaffFields() {
 }
 
 /** Same setState signature as before, but each change now recalculates. */
-export function useNonStaffLines(): [
-  NonStaffLine[],
-  Dispatch<SetStateAction<NonStaffLine[]>>,
-] {
-  const input = useBudgetInput()
-  const mutation = useRecalculate(
-    (current, update: SetStateAction<NonStaffLine[]>) => ({
-      ...current,
-      non_staff_lines:
-        typeof update === 'function' ? update(current.non_staff_lines) : update,
-    }),
+export interface NonStaffLines {
+  lines: NonStaffLine[]
+  years: number[]
+  patchLine: (id: number, patch: Partial<NonStaffLine>) => void
+  addLine: () => void
+  removeLine: (id: number) => void
+}
+
+type Transform = (current: BudgetInput) => BudgetInput
+
+const replaceLine =
+  (id: number, patch: Partial<NonStaffLine>): Transform =>
+  (current) => ({
+    ...current,
+    non_staff_lines: current.non_staff_lines.map((line) =>
+      line.id === id ? { ...line, ...patch } : line,
+    ),
+  })
+
+const dropLine =
+  (id: number): Transform =>
+  (current) => ({
+    ...current,
+    non_staff_lines: current.non_staff_lines.filter((line) => line.id !== id),
+  })
+
+/**
+ * Recalculates only when the engine would see the change. Everything else writes the store and
+ * sends nothing.
+ */
+export function useNonStaffLines(years: number[]): NonStaffLines {
+  const lines = useBudgetInput().non_staff_lines
+  const recalculate = useRecalculate((current, next: Transform) =>
+    next(current),
   )
 
-  return [input.non_staff_lines, mutation.mutate]
+  const write = (next: Transform, priced: boolean) => {
+    if (priced) recalculate.mutate(next)
+    else setBudgetInput(next(getBudgetInput()))
+  }
+
+  return {
+    lines,
+    years,
+    patchLine: (id, patch) => {
+      const before = getBudgetInput().non_staff_lines.find(
+        (line) => line.id === id,
+      )
+      if (!before) return
+      const engineField = Object.keys(patch).some((field) =>
+        NON_STAFF_RECALCULATES.has(field),
+      )
+      const priced = isCosted(before) || isCosted({ ...before, ...patch })
+      write(replaceLine(id, patch), engineField && priced)
+    },
+    addLine: () => {
+      const current = getBudgetInput()
+      setBudgetInput({
+        ...current,
+        non_staff_lines: [
+          ...current.non_staff_lines,
+          emptyNonStaffLine(nextTempId(current.non_staff_lines), years),
+        ],
+      })
+    },
+    removeLine: (id) => {
+      const line = getBudgetInput().non_staff_lines.find((row) => row.id === id)
+      write(dropLine(id), line !== undefined && isCosted(line))
+    },
+  }
 }

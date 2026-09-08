@@ -104,7 +104,7 @@ export function seedMultipliers(constants: readonly CalculationConstant[]) {
   }
 }
 
-const isCosted = (line: NonStaffLine) =>
+export const isCosted = (line: NonStaffLine) =>
   line.cost_group !== '' && line.expense_type !== ''
 
 const toNonStaffInput = (line: NonStaffLine): CalculateNonStaffLine => ({

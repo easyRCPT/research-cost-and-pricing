@@ -1,7 +1,7 @@
+import type { NonStaffLines } from '@/api/budget-lines'
 import { lineTotal } from '@/lib/non-staff'
-import type { BudgetDetail, NonStaffLine, StaffLine } from '@/types'
+import type { BudgetDetail, StaffLine } from '@/types'
 import type { CostRow } from '@/screens/inkind/InKindFlagsTable'
-import type { Dispatch, SetStateAction } from 'react'
 
 const detailOf = (line: StaffLine) =>
   [line.category, line.employment_type, line.classification]
@@ -10,11 +10,7 @@ const detailOf = (line: StaffLine) =>
 
 export const costRows = (
   budget: BudgetDetail,
-  nonStaff: {
-    lines: NonStaffLine[]
-    years: number[]
-    setLines: Dispatch<SetStateAction<NonStaffLine[]>>
-  },
+  nonStaff: NonStaffLines,
   toggleStaff: (line: StaffLine, value: boolean) => void,
 ): CostRow[] => [
   ...[...budget.staff_cost.lines, ...budget.staff_in_kind_cost.lines].map(
@@ -36,10 +32,6 @@ export const costRows = (
       cost: lineTotal(line, nonStaff.years),
       inKind: line.in_kind,
       toggle: (value: boolean) =>
-        nonStaff.setLines((current) =>
-          current.map((row) =>
-            row.id === line.id ? { ...row, in_kind: value } : row,
-          ),
-        ),
+        nonStaff.patchLine(line.id, { in_kind: value }),
     })),
 ]
