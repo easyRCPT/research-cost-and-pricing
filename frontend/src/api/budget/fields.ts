@@ -80,6 +80,21 @@ export function useSetBudgetField() {
     }))
 }
 
+/**
+ * The CI cost toggle. Held next to the budget rather than inside budget_info,
+ * because the engine does not take the flag yet.
+ */
+export function useCiCostsIncluded() {
+  const included = useBudgetInput().ci_costs_included
+  const commit = useCommit()
+
+  return {
+    included,
+    setIncluded: (value: boolean) =>
+      commit((budget) => ({ ...budget, ci_costs_included: value })),
+  }
+}
+
 export function useUpdateProject() {
   const commit = useCommit()
   return (patch: Partial<ProjectInfoInput>) =>

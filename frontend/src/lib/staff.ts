@@ -116,6 +116,21 @@ export const isRated = (line: StaffLine) =>
   line.classification !== '' &&
   line.time_basis !== ''
 
+/**
+ * The CI's own row, which is the first one. Their name is typed on Project
+ * Details, so the row carries it rather than letting the two drift apart.
+ */
+export const ciLineId = (lines: StaffLine[], chiefInvestigator: string) =>
+  chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null)
+
+/** Puts the CI's name on their row, wherever it was last edited. */
+export const withCiName = (lines: StaffLine[], chiefInvestigator: string) => {
+  const id = ciLineId(lines, chiefInvestigator)
+  if (id === null) return lines
+  const name_role = chiefInvestigator.trim()
+  return lines.map((line) => (line.id === id ? { ...line, name_role } : line))
+}
+
 export const toInput = (line: StaffLine): CalculateStaffLine => ({
   id: line.id,
   name_role: line.name_role,
