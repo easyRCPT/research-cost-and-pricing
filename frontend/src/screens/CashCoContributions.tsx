@@ -1,32 +1,16 @@
-import { useState } from 'react'
-import {
-  useBudget,
-  useBudgetInfo,
-  useUpdateBudgetField,
-} from '@/api/budget-lines'
+import { useBudget, useField } from '@/api/budget-lines'
 import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/ui/number-input'
 import { money } from '@/lib/format/utils'
 
 const amount = (value: number) => <Derived>{money(value)}</Derived>
 
 export function CashCoContributions() {
   const { data: budget } = useBudget()
-  const { cash_co_contribution } = useBudgetInfo()
-  const updateBudgetField = useUpdateBudgetField()
-  const [draft, setDraft] = useState<string | null>(null)
+  const cash = useField('cash_co_contribution')
 
   const summary = budget.budget_summary.price_summary
-
-  const commit = () => {
-    if (draft === null) return
-    const value = Math.max(0, Number(draft) || 0)
-    setDraft(null)
-    if (value !== cash_co_contribution) {
-      updateBudgetField.mutate({ field: 'cash_co_contribution', value })
-    }
-  }
 
   return (
     <>
@@ -47,13 +31,10 @@ export function CashCoContributions() {
       >
         <div className="flex items-center gap-2">
           <span className="text-[13.5px] text-muted-foreground">$</span>
-          <Input
-            type="number"
+          <NumberInput
             min={0}
             className="tabular h-9 w-[180px] text-right"
-            value={draft ?? cash_co_contribution}
-            onChange={(event) => setDraft(event.target.value)}
-            onBlur={commit}
+            {...cash}
           />
         </div>
       </Panel>

@@ -1,11 +1,10 @@
 import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
 import type { EditorScreen } from './Sidebar'
-import { type ProjectInfo } from '@/types'
 import {
   useBudget,
   useNonStaffLines,
-  useUpdateProjectFields,
+  useUpdateProject,
 } from '@/api/budget-lines'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
@@ -22,7 +21,7 @@ export type AppScreen = EditorScreen | typeof LOOKUP_SCREEN
 export function AppContent({ screen, setScreen }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
-  const updateProject = useUpdateProjectFields()
+  const updateProject = useUpdateProject()
 
   const project = budget.project_info
   const years = budget.years
@@ -32,9 +31,6 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
   const pageHeading = lookupsOpen
     ? { title: 'Lookup Tables', subtitle: 'Read-only' }
     : SCREEN_HEADINGS[screen]
-  const patchProject = (patch: Partial<ProjectInfo>) =>
-    updateProject.mutate(patch)
-
   return (
     <AppShell
       topBarRight={<LookupButton open={lookupsOpen} handleClick={setScreen} />}
@@ -55,7 +51,7 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
             lookups={lookups}
             screen={screen}
             project={project}
-            onChange={patchProject}
+            onChange={updateProject}
             nonStaff={nonStaff}
           />
           <ScreenNav screen={screen} onSelect={setScreen} />

@@ -1,12 +1,7 @@
-import { useState } from 'react'
-import {
-  useBudget,
-  useBudgetInfo,
-  useUpdateBudgetField,
-} from '@/api/budget-lines'
+import { useBudget, useField } from '@/api/budget-lines'
 import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/ui/number-input'
 import { money } from '@/lib/format/utils'
 import type { LookupTables } from '@/types'
 
@@ -33,22 +28,11 @@ export interface PriceSummaryProps {
 
 export function PriceSummary({ lookups }: PriceSummaryProps) {
   const { data: budget } = useBudget()
-  const { cash_co_contribution } = useBudgetInfo()
-  const updateBudgetField = useUpdateBudgetField()
-  const [cashDraft, setCashDraft] = useState<string | null>(null)
+  const cash = useField('cash_co_contribution')
 
   const summary = budget.budget_summary.price_summary
   const multiplier = budget.budget_info.cost_multiplier
   const basis = fullRecoveryBasis(lookups)
-
-  const commitCash = () => {
-    if (cashDraft === null) return
-    const value = Math.max(0, Number(cashDraft) || 0)
-    setCashDraft(null)
-    if (value !== cash_co_contribution) {
-      updateBudgetField.mutate({ field: 'cash_co_contribution', value })
-    }
-  }
 
   return (
     <>
@@ -207,13 +191,10 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
             <LedgerRow
               label="Total Cash Co-Contribution (Department, Faculty and Chancellery)"
               value={
-                <Input
-                  type="number"
+                <NumberInput
                   min={0}
                   className="tabular ml-auto h-8 w-[130px] text-right"
-                  value={cashDraft ?? cash_co_contribution}
-                  onChange={(event) => setCashDraft(event.target.value)}
-                  onBlur={commitCash}
+                  {...cash}
                 />
               }
             />
