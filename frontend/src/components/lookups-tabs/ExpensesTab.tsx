@@ -1,4 +1,9 @@
-import { DataTable, TableCard, columnHelper } from '@/components/data-table'
+import {
+  DataTable,
+  TableCard,
+  columnHelper,
+  type DataTableFilter,
+} from '@/components/data-table'
 import type { LookupTables } from '@/types'
 
 type Category = LookupTables['non_staff_cost_categories'][number]
@@ -12,6 +17,10 @@ const COLUMNS = col.columns([
     meta: { align: 'right', className: 'tabular' },
   }),
 ])
+
+const FILTERS: DataTableFilter<Category>[] = [
+  { id: 'group', label: 'Cost group', value: (row) => row.cost_category },
+]
 
 const byLedgerId = (row: Category) => String(row.ledger_id)
 
@@ -31,6 +40,9 @@ export function ExpensesTab({ categories }: ExpensesTabProps) {
               columns={COLUMNS}
               rows={categories}
               getRowId={byLedgerId}
+              sortable
+              searchable
+              filters={FILTERS}
             />
           ),
         },

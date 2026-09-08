@@ -14,11 +14,13 @@ const PAGE_SIZES = [10, 20, 50, 100]
 interface DataTablePaginationProps<T extends RowData> {
   table: ReactTable<DataTableFeatures, T>
   total: number
+  unfiltered: number
 }
 
 export function DataTablePagination<T extends RowData>({
   table,
   total,
+  unfiltered,
 }: DataTablePaginationProps<T>) {
   const { pageIndex, pageSize } = table.state.pagination
   const pageCount = table.getPageCount()
@@ -30,6 +32,7 @@ export function DataTablePagination<T extends RowData>({
     <footer className="flex min-h-14 items-center gap-6 px-6 py-3 text-[13px] text-muted-foreground">
       <span className="tabular">
         {paged ? `${first}–${last} of ${total} rows` : `${total} rows`}
+        {total !== unfiltered && ` · filtered from ${unfiltered}`}
       </span>
       {paged && (
         <>

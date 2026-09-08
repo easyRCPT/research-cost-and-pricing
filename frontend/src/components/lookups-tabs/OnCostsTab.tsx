@@ -1,5 +1,10 @@
 import { useMemo } from 'react'
-import { DataTable, TableCard, columnHelper } from '@/components/data-table'
+import {
+  DataTable,
+  TableCard,
+  columnHelper,
+  type DataTableFilter,
+} from '@/components/data-table'
 import type { LookupTables } from '@/types'
 
 type OnCostRate = LookupTables['on_cost_rates'][number]
@@ -60,6 +65,20 @@ const DATED_COLUMNS = dated.columns([
   }),
 ])
 
+const DATED_FILTERS: DataTableFilter<OnCostRate>[] = [
+  { id: 'year', label: 'Year', value: (row) => String(row.year) },
+  {
+    id: 'component',
+    label: 'Component',
+    value: (row) => ON_COST_LABELS[row.on_cost_type],
+  },
+  {
+    id: 'employment',
+    label: 'Employment',
+    value: (row) => row.employment_type || 'All',
+  },
+]
+
 const byComponent = (row: ComponentRow) => row.component
 const byDatedRate = (row: OnCostRate) =>
   `${row.on_cost_type}-${row.employment_type}-${row.year}`
@@ -112,6 +131,9 @@ export function OnCostsTab({ rates }: OnCostsTabProps) {
               columns={DATED_COLUMNS}
               rows={datedRates}
               getRowId={byDatedRate}
+              sortable
+              searchable
+              filters={DATED_FILTERS}
             />
           ),
         },

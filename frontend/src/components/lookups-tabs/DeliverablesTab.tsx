@@ -1,4 +1,9 @@
-import { DataTable, TableCard, columnHelper } from '@/components/data-table'
+import {
+  DataTable,
+  TableCard,
+  columnHelper,
+  type DataTableFilter,
+} from '@/components/data-table'
 import type { LookupTables } from '@/types'
 import { byCode, codeNameColumns } from './code-name-columns'
 
@@ -15,6 +20,10 @@ const REVENUE_COLUMNS = col.columns([
     meta: { align: 'right', className: 'tabular' },
   }),
 ])
+
+const REVENUE_FILTERS: DataTableFilter<RevenueCategory>[] = [
+  { id: 'party', label: 'External party', value: (row) => row.external_party },
+]
 
 const byLedgerId = (row: RevenueCategory) => String(row.budget_ledger_id)
 
@@ -49,6 +58,9 @@ export function DeliverablesTab({
               columns={REVENUE_COLUMNS}
               rows={revenueCategories}
               getRowId={byLedgerId}
+              sortable
+              searchable
+              filters={REVENUE_FILTERS}
             />
           ),
         },
