@@ -8,7 +8,6 @@ export type EditorScreen =
   | 'adjust'
   | 'price'
   | 'budget'
-  | 'approvals'
 
 export interface SidebarSection {
   label?: string

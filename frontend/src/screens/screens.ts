@@ -32,8 +32,4 @@ export const SCREEN_HEADINGS: Record<
     title: 'Budget Form',
     subtitle: 'The costing record prepared for authorisation',
   },
-  approvals: {
-    title: 'Approvals',
-    subtitle: 'Signatures required before the budget form can be submitted',
-  },
 }
