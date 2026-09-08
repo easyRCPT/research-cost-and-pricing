@@ -8,7 +8,7 @@ export function NonStaffTableHeader({ years }: NonStaffTableHeaderProps) {
   return (
     <thead>
       <tr>
-        <Th>Cost group</Th>
+        <Th className="w-72">Cost group</Th>
         <Th>Expense type</Th>
         <Th>Description</Th>
         {years.map((year, i) => (
@@ -19,7 +19,9 @@ export function NonStaffTableHeader({ years }: NonStaffTableHeaderProps) {
         <Th align="right" className="w-28">
           Total (AUD)
         </Th>
-        <Th align="center">Additional 10%</Th>
+        <Th align="center" className="w-24">
+          Additional 10%
+        </Th>
         <Th className="w-8" />
       </tr>
     </thead>

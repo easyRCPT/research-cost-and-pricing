@@ -1,6 +1,5 @@
 import { useBudget } from '@/api/budget'
-import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 
 export function CashCoContributionPanel() {
   const { data: budget } = useBudget()
@@ -17,24 +16,12 @@ export function CashCoContributionPanel() {
         <tbody>
           <LedgerRow
             label="Cash co-contribution (Department, Faculty and Chancellery)"
-            value={
-              <Derived>{money(summary.total_cash_co_contribution)}</Derived>
-            }
+            value={<Money value={summary.total_cash_co_contribution} />}
           />
           <LedgerRow
             tone="rule"
             label="University position"
-            value={
-              <Derived>
-                <span
-                  className={
-                    summary.university_position < 0 ? 'text-bad' : 'text-good'
-                  }
-                >
-                  {money(summary.university_position)}
-                </span>
-              </Derived>
-            }
+            value={<Money value={summary.university_position} tone="sign" />}
           />
         </tbody>
       </Ledger>

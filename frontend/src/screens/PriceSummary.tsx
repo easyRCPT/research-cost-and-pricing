@@ -1,4 +1,4 @@
-import { useBudget, useField } from '@/api/budget'
+import { useBudget } from '@/api/budget'
 import type { LookupTables } from '@/types'
 import { CayuseSummaryPanel } from './price-summary/CayuseSummaryPanel'
 import { PriceBreakdownPanel } from './price-summary/PriceBreakdownPanel'
@@ -15,7 +15,6 @@ export interface PriceSummaryProps {
 
 export function PriceSummary({ lookups }: PriceSummaryProps) {
   const { data: budget } = useBudget()
-  const cash = useField('cash_co_contribution')
 
   const summary = budget.budget_summary.price_summary
   const multiplier = budget.budget_info.cost_multiplier
@@ -28,7 +27,7 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
         multiplier={multiplier}
         basis={fullRecoveryBasis(lookups)}
       />
-      <UniversityPositionPanel summary={summary} cash={cash} />
+      <UniversityPositionPanel summary={summary} />
     </>
   )
 }

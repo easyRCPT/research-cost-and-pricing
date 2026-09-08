@@ -1,6 +1,7 @@
 export { budgetKey, useBudget, useCalculating } from './calculate'
 export {
   useBudgetInfo,
+  useCiCostsIncluded,
   useField,
   useProjectField,
   useSetBudgetField,

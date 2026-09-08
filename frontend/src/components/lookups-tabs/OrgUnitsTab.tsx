@@ -12,7 +12,7 @@ export function OrgUnitsTab({ departments }: OrgUnitsTabProps) {
       description={`Department, School and Faculty · ${departments.length} rows`}
     >
       <Grid className="max-h-140">
-        <thead className="sticky top-0 z-10">
+        <thead>
           <tr>
             <Th>Department</Th>
             <Th>Dept code</Th>

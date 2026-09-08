@@ -2,6 +2,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from ..models import OnCostRate, SalaryRate, StaffCostLine
+from .staff_time import check_time_against_basis
 
 
 class YearAllocationSerializer(serializers.Serializer):
@@ -45,3 +46,7 @@ class StaffLineSerializer(serializers.Serializer):
             years.add(year)
 
         return allocations
+
+    def validate(self, attrs):
+        check_time_against_basis(attrs.get("time_basis"), attrs.get("allocations", []))
+        return attrs

@@ -40,7 +40,7 @@ export function ProjectDurationRow({
   }
 
   return (
-    <FieldRow label="Project duration" required>
+    <FieldRow label="Project duration" required sublabelled>
       <div className="grid max-w-xl grid-cols-2 gap-3 md:grid-cols-4">
         <NumberSelect
           label="Start year"
