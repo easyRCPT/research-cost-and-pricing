@@ -7,6 +7,8 @@ import { PriceSummary } from './PriceSummary'
 import { AdjustPrice } from './AdjustPrice'
 import { CashCoContributions } from './CashCoContributions'
 import { BudgetForm } from './BudgetForm'
+// TODO: approvals — restore when auth lands.
+// import { Approvals } from './Approvals'
 import { EmptyStateScreen } from './EmptyStateScreen'
 
 interface EditorScreenContentProps {
@@ -43,6 +45,9 @@ export function EditorScreenContent({
       return <PriceSummary lookups={lookups} />
     case 'budget':
       return <BudgetForm lookups={lookups} />
+    // TODO: approvals — restore when auth lands.
+    // case 'approvals':
+    //   return <Approvals lookups={lookups} />
     case 'nonstaff':
       return <NonStaffCosts {...nonStaff} lookups={lookups} />
     default:

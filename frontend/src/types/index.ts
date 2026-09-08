@@ -40,6 +40,7 @@ export type TimeBasis = S['TimeBasisEnum']
 
 /** model.py enums  */
 export type Mode = S['ModeEnum']
+export type Status = S['StatusEnum']
 
 // TODO: temporary. Delete when auth lands.
 // Types for the stateless calculator.
