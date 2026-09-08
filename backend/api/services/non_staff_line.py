@@ -8,20 +8,25 @@ from . import budget_details
 def create(budget: Budget, data: dict) -> dict:
     amounts = data.pop("amounts", [])
 
-    non_staff_line = NonStaffCostLine.objects.create(
+    non_staff_line = NonStaffCostLine(
         budget=budget,
         **data,
     )
+    non_staff_line.full_clean()
+    non_staff_line.save()
 
-    YearAmount.objects.bulk_create(
-        [
-            YearAmount(
-                non_staff_line=non_staff_line,
-                **amount,
-            )
-            for amount in amounts
-        ]
-    )
+    year_amounts = [
+        YearAmount(
+            non_staff_line=non_staff_line,
+            **amount,
+        )
+        for amount in amounts
+    ]
+
+    for amount in year_amounts:
+        amount.full_clean()
+
+    YearAmount.objects.bulk_create(year_amounts)
 
     return budget_details.get_budget_details(budget)
 

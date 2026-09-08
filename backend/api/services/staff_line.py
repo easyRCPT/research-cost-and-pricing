@@ -8,20 +8,25 @@ from . import budget_details
 def create(budget: Budget, data: dict) -> dict:
     allocations = data.pop("allocations", [])
 
-    staff_line = StaffCostLine.objects.create(
+    staff_line = StaffCostLine(
         budget=budget,
         **data,
     )
+    staff_line.full_clean()
+    staff_line.save()
 
-    YearAllocation.objects.bulk_create(
-        [
-            YearAllocation(
-                staff_line=staff_line,
-                **allocation,
-            )
-            for allocation in allocations
-        ]
-    )
+    year_allocations = [
+        YearAllocation(
+            staff_line=staff_line,
+            **allocation,
+        )
+        for allocation in allocations
+    ]
+
+    for year_allocation in year_allocations:
+        year_allocation.full_clean()
+
+    YearAllocation.objects.bulk_create(year_allocations)
 
     return budget_details.get_budget_details(budget)
 

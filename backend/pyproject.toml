@@ -25,6 +25,12 @@ dev = [
     "openpyxl>=3.1.5",
 ]
 
-# RUF012 is not suitable for Django model Meta and migration declarations.
+[tool.ruff]
+# Django migrations are generated code and are not linted
+exclude = [
+    "api/migrations",
+]
+
 [tool.ruff.lint]
+# RUF012 is not suitable for Django model Meta declarations.
 ignore = ["RUF012"]

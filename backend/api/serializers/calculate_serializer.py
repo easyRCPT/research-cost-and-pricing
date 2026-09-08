@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from ..models import Budget, OnCostRate, Project, SalaryRate, StaffCostLine
-from .staff_time import check_time_against_basis
+from ..services.staff_time_validation import check_time_against_basis
 
 
 class ProjectInfoInputSerializer(serializers.Serializer):
