@@ -4,7 +4,7 @@ import type { EditorScreen } from './Sidebar'
 import { useBudget, useNonStaffLines, useUpdateProject } from '@/api/budget'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
-import { PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
+import { ExportPdfButton, PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
 
 interface AppContentProps {
@@ -38,7 +38,11 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
         />
       }
     >
-      <PageHead title={pageHeading.title} subtitle={pageHeading.subtitle} />
+      <PageHead
+        title={pageHeading.title}
+        subtitle={pageHeading.subtitle}
+        right={screen === 'budget' ? <ExportPdfButton /> : undefined}
+      />
       {lookupsOpen ? (
         <LookupsScreen lookups={lookups} />
       ) : (
