@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { useBudget, useUpdateBudgetField } from '@/api/budget-lines'
+import {
+  useBudget,
+  useBudgetInfo,
+  useUpdateBudgetField,
+} from '@/api/budget-lines'
 import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -29,6 +33,7 @@ export interface PriceSummaryProps {
 
 export function PriceSummary({ lookups }: PriceSummaryProps) {
   const { data: budget } = useBudget()
+  const { cash_co_contribution } = useBudgetInfo()
   const updateBudgetField = useUpdateBudgetField()
   const [cashDraft, setCashDraft] = useState<string | null>(null)
 
@@ -40,7 +45,7 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
     if (cashDraft === null) return
     const value = Math.max(0, Number(cashDraft) || 0)
     setCashDraft(null)
-    if (value !== summary.total_cash_co_contribution) {
+    if (value !== cash_co_contribution) {
       updateBudgetField.mutate({ field: 'cash_co_contribution', value })
     }
   }
@@ -206,7 +211,7 @@ export function PriceSummary({ lookups }: PriceSummaryProps) {
                   type="number"
                   min={0}
                   className="tabular ml-auto h-8 w-[130px] text-right"
-                  value={cashDraft ?? summary.total_cash_co_contribution}
+                  value={cashDraft ?? cash_co_contribution}
                   onChange={(event) => setCashDraft(event.target.value)}
                   onBlur={commitCash}
                 />

@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { useBudget, useUpdateBudgetField } from '@/api/budget-lines'
+import {
+  useBudget,
+  useBudgetInfo,
+  useUpdateBudgetField,
+} from '@/api/budget-lines'
 import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
@@ -9,6 +13,7 @@ const amount = (value: number) => <Derived>{money(value)}</Derived>
 
 export function CashCoContributions() {
   const { data: budget } = useBudget()
+  const { cash_co_contribution } = useBudgetInfo()
   const updateBudgetField = useUpdateBudgetField()
   const [draft, setDraft] = useState<string | null>(null)
 
@@ -18,7 +23,7 @@ export function CashCoContributions() {
     if (draft === null) return
     const value = Math.max(0, Number(draft) || 0)
     setDraft(null)
-    if (value !== summary.total_cash_co_contribution) {
+    if (value !== cash_co_contribution) {
       updateBudgetField.mutate({ field: 'cash_co_contribution', value })
     }
   }
@@ -46,7 +51,7 @@ export function CashCoContributions() {
             type="number"
             min={0}
             className="tabular h-9 w-[180px] text-right"
-            value={draft ?? summary.total_cash_co_contribution}
+            value={draft ?? cash_co_contribution}
             onChange={(event) => setDraft(event.target.value)}
             onBlur={commit}
           />

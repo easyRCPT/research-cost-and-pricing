@@ -18,6 +18,7 @@ export const costRows = (
     .filter((line) => line.name_role || line.category)
     .map((line) => ({
       key: `staff-${line.id}`,
+      kind: 'staff' as const,
       label: line.name_role || '(unnamed person)',
       detail: detailOf(line),
       cost: line.total,
@@ -28,6 +29,7 @@ export const costRows = (
     .filter((line) => line.cost_group || line.description)
     .map((line) => ({
       key: `non-staff-${line.id}`,
+      kind: 'non-staff' as const,
       label: line.description || line.cost_group || '(untitled cost)',
       detail: line.cost_group || '—',
       cost: lineTotal(line, nonStaff.years),

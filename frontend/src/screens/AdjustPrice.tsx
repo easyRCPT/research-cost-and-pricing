@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import {
   useBudget,
+  useBudgetInfo,
   useStaffLines,
   useUpdateBudgetField,
   type NonStaffLines,
 } from '@/api/budget-lines'
-import { Ledger, LedgerRow, Panel } from '@/components/shell'
+import { Derived, Ledger, LedgerRow, Panel } from '@/components/shell'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { money } from '@/lib/format/utils'
@@ -15,6 +16,7 @@ import { InKindFlagsTable } from './inkind/InKindFlagsTable'
 const MAX_MARGIN = 100
 
 const asPercent = (fraction: number) => fraction * 100
+const amount = (value: number) => <Derived>{money(value)}</Derived>
 
 export interface AdjustPriceProps {
   nonStaff: NonStaffLines
@@ -22,12 +24,13 @@ export interface AdjustPriceProps {
 
 export function AdjustPrice({ nonStaff }: AdjustPriceProps) {
   const { data: budget } = useBudget()
+  const { margin } = useBudgetInfo()
   const updateBudgetField = useUpdateBudgetField()
   const [draft, setDraft] = useState<number | null>(null)
 
   const summary = budget.budget_summary.price_summary
   const deanRequired = budget.budget_summary.dean_required
-  const percent = draft ?? asPercent(summary.margin)
+  const percent = draft ?? asPercent(margin)
   const staff = useStaffLines(budget.years)
 
   const rows = costRows(budget, staff, nonStaff)
@@ -35,7 +38,7 @@ export function AdjustPrice({ nonStaff }: AdjustPriceProps) {
   const commit = (next: number) => {
     setDraft(null)
     const value = Math.min(MAX_MARGIN, Math.max(0, next)) / 100
-    if (value !== summary.margin) {
+    if (value !== margin) {
       updateBudgetField.mutate({ field: 'margin', value })
     }
   }
@@ -49,16 +52,16 @@ export function AdjustPrice({ nonStaff }: AdjustPriceProps) {
           <tbody>
             <LedgerRow
               label="In-kind staff costs"
-              value={money(summary.in_kind_staff_cost)}
+              value={amount(summary.in_kind_staff_cost)}
             />
             <LedgerRow
               label="In-kind non-staff costs"
-              value={money(summary.in_kind_non_staff_cost)}
+              value={amount(summary.in_kind_non_staff_cost)}
             />
             <LedgerRow
               tone="rule"
               label="Total in-kind (University investment)"
-              value={money(summary.in_kind_project_cost)}
+              value={amount(summary.in_kind_project_cost)}
             />
           </tbody>
         </Ledger>
@@ -96,20 +99,20 @@ export function AdjustPrice({ nonStaff }: AdjustPriceProps) {
           <tbody>
             <LedgerRow
               label="Project cost (excluding in-kind)"
-              value={money(summary.project_cost)}
+              value={amount(summary.project_cost)}
             />
             <LedgerRow
-              label={`Margin at ${asPercent(summary.margin).toFixed(1)}%`}
-              value={money(summary.margin_amount)}
+              label={`Margin at ${asPercent(margin).toFixed(1)}%`}
+              value={amount(summary.margin_amount)}
             />
             <LedgerRow
               tone="rule"
               label="Price excluding GST"
-              value={money(summary.total_price_exc_gst)}
+              value={amount(summary.total_price_exc_gst)}
             />
             <LedgerRow
               label="Price including GST"
-              value={money(summary.total_price_inc_gst)}
+              value={amount(summary.total_price_inc_gst)}
             />
           </tbody>
         </Ledger>

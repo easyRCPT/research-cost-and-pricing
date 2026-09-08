@@ -164,6 +164,9 @@ export function useUpdateProjectFields() {
   return { mutate: (patch: Partial<ProjectInfoInput>) => update(patch) }
 }
 
+/** What was typed, ahead of the engine's echo. Inputs fall back to this, not the cache. */
+export const useBudgetInfo = () => useBudgetInput().budget_info
+
 export function useUpdateBudgetField() {
   const update = useUpdateSection('budget_info')
   return {
