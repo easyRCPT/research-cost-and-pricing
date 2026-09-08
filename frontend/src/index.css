@@ -156,3 +156,28 @@
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* Tables scroll in both directions; the bars stay put so it is obvious there is
+   more table off-screen than the border shows. */
+.scroll-persist {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent)
+    var(--muted);
+}
+
+.scroll-persist::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+}
+
+.scroll-persist::-webkit-scrollbar-track,
+.scroll-persist::-webkit-scrollbar-corner {
+  background: var(--muted);
+}
+
+.scroll-persist::-webkit-scrollbar-thumb {
+  border: 2px solid var(--muted);
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+}

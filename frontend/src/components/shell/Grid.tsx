@@ -18,7 +18,7 @@ const ALIGN: Record<Align, string> = {
   center: 'text-center',
 }
 
-/** Sizes to its content and scrolls sideways rather than squeezing the year columns. */
+/** Sizes to its content and scrolls rather than squeezing the year columns. */
 export function Grid({
   children,
   className,
@@ -29,7 +29,7 @@ export function Grid({
   return (
     <div
       className={cn(
-        'overflow-x-auto rounded-md border print:overflow-visible',
+        'scroll-persist overflow-scroll rounded-md border print:overflow-visible',
         className,
       )}
     >
