@@ -406,6 +406,9 @@ class Budget(models.Model):
 
 
 class Deliverable(models.Model):
+    if TYPE_CHECKING:
+        id: int
+
     budget = models.ForeignKey(
         "Budget", related_name="deliverables", on_delete=models.CASCADE
     )
