@@ -5,15 +5,16 @@ on:
   # as well ran the same commit twice at once, and the two runs raced on the
   # shared uv cache — one would type-check against a half-resolved environment.
   push:
-    branches: [main]
+    branches: [dev, main]
   pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  # Superseded runs on a pull request are worth cancelling; main is the branch
-  # people read results from, so let its runs finish.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Superseded runs on a pull request are worth cancelling; dev and main are the
+  # branches people read results from, so let their runs finish.
+  cancel-in-progress: >-
+    ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/main' }}
 
 jobs:
   backend:

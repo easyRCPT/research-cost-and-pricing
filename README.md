@@ -106,7 +106,7 @@ Budget 30–50 MB each, and `make db-prune` deletes the ones whose branch is gon
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs on pull requests and pushes to `main`: **backend** (Postgres
+`.github/workflows/ci.yml` runs on pull requests and pushes to `dev` and `main`: **backend** (Postgres
 18 service container, `uv sync --locked`, drift gates, `migrate`, tests), **backend lint**
 (`ruff check`, `ruff format --check`, `pyright`) and **frontend** (`pnpm lint`, `pnpm
 build`). The two drift gates say the same thing — the source is committed, so the artefact
