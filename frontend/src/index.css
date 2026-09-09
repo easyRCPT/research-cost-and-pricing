@@ -126,6 +126,9 @@
     }
   html {
     @apply font-sans;
+    /* No elastic bounce sideways: scrolling a table past its end used to drag
+       the whole page with it. */
+    overscroll-behavior-x: none;
     }
 }
 /* Status colours. */

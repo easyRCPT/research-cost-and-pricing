@@ -63,7 +63,7 @@ export function DataTable<T extends RowData>({
           onState={setFilterState}
         />
       )}
-      <div className="scroll-persist overflow-x-auto overscroll-x-contain px-6">
+      <div className="scroll-persist overflow-x-auto overscroll-x-none px-6">
         <table className="grid-table w-max min-w-full text-[13px]">
           <thead>
             {table.getHeaderGroups().map((group) => (
