@@ -19,8 +19,8 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
             },
             "numeric_table": {
                 "staff_1": {
-                    2025: Decimal("1"),
-                    2026: Decimal("2"),
+                    2025: Decimal(1),
+                    2026: Decimal(2),
                 },
             },
         }
@@ -33,19 +33,19 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
     def test_merges_staff_input_and_calculation_result(self):
         staff_result_table = {
             "staff_1": {
-                "rate_2025": Decimal("60000"),
+                "rate_2025": Decimal(60000),
                 "results": {
-                    2025: Decimal("1000"),
-                    2026: Decimal("2000"),
+                    2025: Decimal(1000),
+                    2026: Decimal(2000),
                 },
-                "total": Decimal("3000"),
+                "total": Decimal(3000),
             },
             "column_total": {
                 "results": {
-                    2025: Decimal("1000"),
-                    2026: Decimal("2000"),
+                    2025: Decimal(1000),
+                    2026: Decimal(2000),
                 },
-                "total": Decimal("3000"),
+                "total": Decimal(3000),
             },
         }
 
@@ -58,25 +58,25 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
         expected = {
             "staff_1": {
                 "info": {},
-                "rate_2025": Decimal("60000"),
+                "rate_2025": Decimal(60000),
                 "numeric": {
                     2025: {
-                        "input": Decimal("1"),
-                        "result": Decimal("1000"),
+                        "input": Decimal(1),
+                        "result": Decimal(1000),
                     },
                     2026: {
-                        "input": Decimal("2"),
-                        "result": Decimal("2000"),
+                        "input": Decimal(2),
+                        "result": Decimal(2000),
                     },
                 },
-                "total": Decimal("3000"),
+                "total": Decimal(3000),
             },
             "column_total": {
                 "results": {
-                    2025: Decimal("1000"),
-                    2026: Decimal("2000"),
+                    2025: Decimal(1000),
+                    2026: Decimal(2000),
                 },
-                "total": Decimal("3000"),
+                "total": Decimal(3000),
             },
         }
 
@@ -87,26 +87,26 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
             **self.staff_table,
             "numeric_table": {
                 "staff_1": {
-                    2025: Decimal("1"),
+                    2025: Decimal(1),
                 },
             },
         }
 
         staff_result_table = {
             "staff_1": {
-                "rate_2025": Decimal("60000"),
+                "rate_2025": Decimal(60000),
                 "results": {
-                    2025: Decimal("1000"),
-                    2026: Decimal("2000"),
+                    2025: Decimal(1000),
+                    2026: Decimal(2000),
                 },
-                "total": Decimal("3000"),
+                "total": Decimal(3000),
             },
             "column_total": {
                 "results": {
-                    2025: Decimal("1000"),
-                    2026: Decimal("2000"),
+                    2025: Decimal(1000),
+                    2026: Decimal(2000),
                 },
-                "total": Decimal("3000"),
+                "total": Decimal(3000),
             },
         }
 
@@ -124,17 +124,17 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
     def test_missing_calculation_result_year_defaults_to_zero(self):
         staff_result_table = {
             "staff_1": {
-                "rate_2025": Decimal("60000"),
+                "rate_2025": Decimal(60000),
                 "results": {
-                    2025: Decimal("1000"),
+                    2025: Decimal(1000),
                 },
-                "total": Decimal("1000"),
+                "total": Decimal(1000),
             },
             "column_total": {
                 "results": {
-                    2025: Decimal("1000"),
+                    2025: Decimal(1000),
                 },
-                "total": Decimal("1000"),
+                "total": Decimal(1000),
             },
         }
 
@@ -178,25 +178,25 @@ class TestBuildBudgetDetails(SimpleTestCase):
             "staff_result": {
                 "cost_results": {
                     "staff_1": {
-                        "rate_2025": Decimal("60000"),
+                        "rate_2025": Decimal(60000),
                         "results": {
-                            2025: Decimal("1000"),
-                            2026: Decimal("2000"),
+                            2025: Decimal(1000),
+                            2026: Decimal(2000),
                         },
-                        "total": Decimal("3000"),
+                        "total": Decimal(3000),
                     },
                     "column_total": {
                         "results": {
-                            2025: Decimal("1000"),
-                            2026: Decimal("2000"),
+                            2025: Decimal(1000),
+                            2026: Decimal(2000),
                         },
-                        "total": Decimal("3000"),
+                        "total": Decimal(3000),
                     },
                 },
                 "in_kind_cost_results": {
                     "column_total": {
                         "results": {},
-                        "total": Decimal("0"),
+                        "total": Decimal(0),
                     },
                 },
             },
@@ -225,31 +225,31 @@ class TestBuildBudgetDetails(SimpleTestCase):
             "cost_results": {
                 "staff_1": {
                     "info": {},
-                    "rate_2025": Decimal("60000"),
+                    "rate_2025": Decimal(60000),
                     "numeric": {
                         2025: {
                             "input": 0,
-                            "result": Decimal("1000"),
+                            "result": Decimal(1000),
                         },
                         2026: {
                             "input": 0,
-                            "result": Decimal("2000"),
+                            "result": Decimal(2000),
                         },
                     },
-                    "total": Decimal("3000"),
+                    "total": Decimal(3000),
                 },
                 "column_total": {
                     "results": {
-                        2025: Decimal("1000"),
-                        2026: Decimal("2000"),
+                        2025: Decimal(1000),
+                        2026: Decimal(2000),
                     },
-                    "total": Decimal("3000"),
+                    "total": Decimal(3000),
                 },
             },
             "in_kind_cost_results": {
                 "column_total": {
                     "results": {},
-                    "total": Decimal("0"),
+                    "total": Decimal(0),
                 },
             },
         }
