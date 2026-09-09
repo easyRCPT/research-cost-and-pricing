@@ -4,6 +4,16 @@ Same headings, same order, every time — someone who has read one issue then
 knows where to look in all of them. Every kind ends with **Done when**. Skip a
 section only when it would be empty; never pad one out to fill the shape.
 
+Almost nobody reads an issue top to bottom. They scan for the bit they need, so
+the body has to survive scanning:
+
+- **One idea per sentence, wrapped at 80 columns.** A paragraph running past
+  about five lines is holding two ideas and belongs in two sections.
+- **Bold the thing being claimed.** A bullet opening with a **bolded claim** and
+  then explaining it is the house pattern here.
+- **Lead with the screenshot when there is one**, directly under the first
+  heading. See [screenshots.md](screenshots.md).
+
 ## Bug
 
 ```markdown
