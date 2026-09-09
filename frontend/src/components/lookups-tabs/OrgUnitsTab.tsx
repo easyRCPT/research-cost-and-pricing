@@ -20,7 +20,6 @@ const COLUMNS = col.columns([
 ])
 
 const FILTERS: DataTableFilter<Department>[] = [
-  { id: 'department', label: 'Department', value: (row) => row.name },
   { id: 'school', label: 'School', value: (row) => row.school },
   { id: 'faculty', label: 'Faculty', value: (row) => row.faculty },
 ]
