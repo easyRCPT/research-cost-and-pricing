@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import cast
 
 from django.test import SimpleTestCase
 
@@ -101,7 +102,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "column_total": {
                         "results": {
                             2025: Decimal("25000.125"),
-                            2026: Decimal("0"),
+                            2026: Decimal(0),
                             2027: Decimal("12500.456"),
                         },
                         "total": Decimal("37500.581"),
@@ -110,7 +111,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 "in_kind_cost_results": {
                     "column_total": {
                         "results": {},
-                        "total": Decimal("0"),
+                        "total": Decimal(0),
                     },
                 },
             },
@@ -135,7 +136,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "direct_total": {
                         "numeric": {
                             2025: Decimal("1000.125"),
-                            2026: Decimal("0"),
+                            2026: Decimal(0),
                             2027: Decimal("2000.456"),
                         },
                         "total": Decimal("3000.581"),
@@ -143,7 +144,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "indirect_total": {
                         "numeric": {
                             2025: Decimal("100.125"),
-                            2026: Decimal("0"),
+                            2026: Decimal(0),
                             2027: Decimal("200.456"),
                         },
                         "total": Decimal("300.581"),
@@ -151,7 +152,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "column_total": {
                         "numeric": {
                             2025: Decimal("1100.250"),
-                            2026: Decimal("0"),
+                            2026: Decimal(0),
                             2027: Decimal("2200.912"),
                         },
                         "total": Decimal("3301.162"),
@@ -160,15 +161,15 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 "in_kind_cost_results": {
                     "direct_total": {
                         "numeric": {},
-                        "total": Decimal("0"),
+                        "total": Decimal(0),
                     },
                     "indirect_total": {
                         "numeric": {},
-                        "total": Decimal("0"),
+                        "total": Decimal(0),
                     },
                     "column_total": {
                         "numeric": {},
-                        "total": Decimal("0"),
+                        "total": Decimal(0),
                     },
                 },
             },
@@ -179,16 +180,16 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "staff_cost": Decimal("37500.125"),
                     "non_staff_cost": Decimal("3000.456"),
                     "project_cost": Decimal("40500.581"),
-                    "in_kind_staff_cost": Decimal("0"),
-                    "in_kind_non_staff_cost": Decimal("0"),
-                    "in_kind_project_cost": Decimal("0"),
+                    "in_kind_staff_cost": Decimal(0),
+                    "in_kind_non_staff_cost": Decimal(0),
+                    "in_kind_project_cost": Decimal(0),
                     "staff_cost_percentage": Decimal("0.925000"),
                     "non_staff_cost_percentage": Decimal("0.075000"),
                     "total_project_cost": Decimal("40500.581"),
                     "total_price_exc_gst": Decimal("52500.125"),
                     "total_price_inc_gst": Decimal("57750.137"),
                     "cash_benefit": Decimal("1000.125"),
-                    "total_in_kind_contribution": Decimal("0"),
+                    "total_in_kind_contribution": Decimal(0),
                     "total_cash_co_contribution": Decimal("100.00"),
                     "university_position": Decimal("41500.456"),
                 },
@@ -212,25 +213,25 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 "in_kind_costs": {
                     "in_kind_staff_budget": {
                         "category_totals": {},
-                        "cost_before_recovery": Decimal("0"),
-                        "cost_recovery": Decimal("0"),
+                        "cost_before_recovery": Decimal(0),
+                        "cost_recovery": Decimal(0),
                         "cost_recovery_multiplier": Decimal("1.00"),
-                        "total_staff_costs": Decimal("0"),
+                        "total_staff_costs": Decimal(0),
                     },
                     "in_kind_non_staff_budget": {
                         "category_totals": {},
-                        "direct_total": Decimal("0"),
-                        "indirect_cost_recovery": Decimal("0"),
-                        "total_non_staff_costs": Decimal("0"),
+                        "direct_total": Decimal(0),
+                        "indirect_cost_recovery": Decimal(0),
+                        "total_non_staff_costs": Decimal(0),
                     },
-                    "total_in_kind_costs": Decimal("0"),
+                    "total_in_kind_costs": Decimal(0),
                 },
                 "dean_required": False,
             },
         }
 
-    def serialize(self):
-        return BudgetDetailSerializer().to_representation(self.instance)
+    def serialize(self) -> dict:
+        return cast(dict, BudgetDetailSerializer().to_representation(self.instance))
 
     def test_generates_years_from_project_period(self):
         data = self.serialize()

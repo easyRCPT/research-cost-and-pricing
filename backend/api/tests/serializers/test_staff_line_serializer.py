@@ -6,6 +6,8 @@ from django.test import TestCase
 from api.models import Budget, Department, Project, StaffCostLine
 from api.serializers.staff_line_serializer import StaffLineSerializer
 
+from .serializer_utils import get_errors, get_validated_data
+
 
 class StaffLineSerializerTestCase(TestCase):
     def setUp(self):
@@ -61,41 +63,45 @@ class StaffLineSerializerTestCase(TestCase):
     def test_valid_data(self):
         serializer = self.serializer()
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertEqual(
-            serializer.validated_data["name_role"],
+            validated_data["name_role"],
             "Research Assistant",
         )
         self.assertEqual(
-            serializer.validated_data["employment_type"],
+            validated_data["employment_type"],
             "Continuing",
         )
         self.assertEqual(
-            serializer.validated_data["category"],
+            validated_data["category"],
             "Academic",
         )
         self.assertEqual(
-            serializer.validated_data["classification"],
+            validated_data["classification"],
             "Level A",
         )
         self.assertEqual(
-            serializer.validated_data["time_basis"],
+            validated_data["time_basis"],
             StaffCostLine.TimeBasis.FTE,
         )
-        self.assertFalse(serializer.validated_data["in_kind"])
+        self.assertFalse(validated_data["in_kind"])
 
     def test_allocations_are_validated(self):
         serializer = self.serializer()
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertEqual(
-            serializer.validated_data["allocations"][0]["year"],
+            validated_data["allocations"][0]["year"],
             2025,
         )
         self.assertEqual(
-            serializer.validated_data["allocations"][0]["time"],
+            validated_data["allocations"][0]["time"],
             Decimal("0.5000"),
         )
 
@@ -105,8 +111,9 @@ class StaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-        self.assertFalse(serializer.validated_data["in_kind"])
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
+        self.assertFalse(validated_data["in_kind"])
 
     def test_allocations_can_be_omitted(self):
         data = self.valid_data()
@@ -114,8 +121,9 @@ class StaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-        self.assertNotIn("allocations", serializer.validated_data)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
+        self.assertNotIn("allocations", validated_data)
 
     def test_allocation_year_must_be_within_project_period(self):
         data = self.valid_data()
@@ -126,9 +134,9 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("allocations", serializer.errors)
+        self.assertIn("allocations", get_errors(serializer))
         self.assertEqual(
-            str(serializer.errors["allocations"][0]),
+            str(get_errors(serializer)["allocations"][0]),
             "Year must be between 2025 and 2027.",
         )
 
@@ -140,7 +148,7 @@ class StaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_allocation_year_can_be_end_year(self):
         data = self.valid_data()
@@ -150,7 +158,7 @@ class StaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_duplicate_allocation_year_is_rejected(self):
         data = self.valid_data()
@@ -162,9 +170,9 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("allocations", serializer.errors)
+        self.assertIn("allocations", get_errors(serializer))
         self.assertEqual(
-            str(serializer.errors["allocations"][0]),
+            str(get_errors(serializer)["allocations"][0]),
             "Each year can only have one allocation.",
         )
 
@@ -178,10 +186,10 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        self.assertIn("non_field_errors", get_errors(serializer))
         self.assertIn(
             "Time for 2025 cannot exceed 1 for time basis 'FTE'.",
-            str(serializer.errors["non_field_errors"]),
+            str(get_errors(serializer)["non_field_errors"]),
         )
 
     def test_time_at_fte_limit_is_valid(self):
@@ -193,7 +201,7 @@ class StaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_daily_time_must_not_exceed_limit(self):
         data = self.valid_data()
@@ -205,10 +213,10 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        self.assertIn("non_field_errors", get_errors(serializer))
         self.assertIn(
             "Time for 2025 cannot exceed 220 for time basis 'Daily'.",
-            str(serializer.errors["non_field_errors"]),
+            str(get_errors(serializer)["non_field_errors"]),
         )
 
     def test_hourly_time_must_not_exceed_limit(self):
@@ -221,7 +229,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        self.assertIn("non_field_errors", get_errors(serializer))
 
     def test_year_allocation_time_has_at_most_four_decimal_places(self):
         data = self.valid_data()
@@ -232,7 +240,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("allocations", serializer.errors)
+        self.assertIn("allocations", get_errors(serializer))
 
     def test_year_allocation_time_cannot_exceed_max_digits(self):
         data = self.valid_data()
@@ -243,7 +251,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("allocations", serializer.errors)
+        self.assertIn("allocations", get_errors(serializer))
 
     def test_name_role_is_required(self):
         data = self.valid_data()
@@ -252,7 +260,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("name_role", serializer.errors)
+        self.assertIn("name_role", get_errors(serializer))
 
     def test_employment_type_is_required(self):
         data = self.valid_data()
@@ -261,7 +269,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("employment_type", serializer.errors)
+        self.assertIn("employment_type", get_errors(serializer))
 
     def test_category_is_required(self):
         data = self.valid_data()
@@ -270,7 +278,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("category", serializer.errors)
+        self.assertIn("category", get_errors(serializer))
 
     def test_classification_is_required(self):
         data = self.valid_data()
@@ -279,7 +287,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("classification", serializer.errors)
+        self.assertIn("classification", get_errors(serializer))
 
     def test_time_basis_is_required(self):
         data = self.valid_data()
@@ -288,7 +296,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("time_basis", serializer.errors)
+        self.assertIn("time_basis", get_errors(serializer))
 
     def test_invalid_employment_type(self):
         data = self.valid_data()
@@ -297,7 +305,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("employment_type", serializer.errors)
+        self.assertIn("employment_type", get_errors(serializer))
 
     def test_invalid_category(self):
         data = self.valid_data()
@@ -306,7 +314,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("category", serializer.errors)
+        self.assertIn("category", get_errors(serializer))
 
     def test_invalid_time_basis(self):
         data = self.valid_data()
@@ -315,7 +323,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("time_basis", serializer.errors)
+        self.assertIn("time_basis", get_errors(serializer))
 
     def test_classification_cannot_exceed_max_length(self):
         data = self.valid_data()
@@ -324,7 +332,7 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("classification", serializer.errors)
+        self.assertIn("classification", get_errors(serializer))
 
     def test_name_role_cannot_exceed_max_length(self):
         data = self.valid_data()
@@ -333,4 +341,4 @@ class StaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("name_role", serializer.errors)
+        self.assertIn("name_role", get_errors(serializer))

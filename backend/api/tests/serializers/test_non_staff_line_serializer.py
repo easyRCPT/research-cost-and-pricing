@@ -10,6 +10,8 @@ from api.models import (
 )
 from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
 
+from .serializer_utils import get_errors, get_validated_data
+
 
 class NonStaffLineSerializerTestCase(TestCase):
     def setUp(self):
@@ -77,42 +79,46 @@ class NonStaffLineSerializerTestCase(TestCase):
     def test_valid_data(self):
         serializer = self.serializer()
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertEqual(
-            serializer.validated_data["category"],
+            validated_data["category"],
             self.category,
         )
         self.assertEqual(
-            serializer.validated_data["description"],
+            validated_data["description"],
             "Travel expenses",
         )
         self.assertFalse(
-            serializer.validated_data["in_kind"],
+            validated_data["in_kind"],
         )
         self.assertFalse(
-            serializer.validated_data["add_ten_percent"],
+            validated_data["add_ten_percent"],
         )
         self.assertEqual(
-            serializer.validated_data["indirect_rate_multiplier"],
+            validated_data["indirect_rate_multiplier"],
             Decimal("1.00"),
         )
 
     def test_cost_group_and_expense_type_are_replaced_by_category(self):
         serializer = self.serializer()
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertNotIn(
             "cost_group",
-            serializer.validated_data,
+            validated_data,
         )
         self.assertNotIn(
             "expense_type",
-            serializer.validated_data,
+            validated_data,
         )
         self.assertEqual(
-            serializer.validated_data["category"],
+            validated_data["category"],
             self.category,
         )
 
@@ -123,9 +129,9 @@ class NonStaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        self.assertIn("non_field_errors", get_errors(serializer))
         self.assertEqual(
-            str(serializer.errors["non_field_errors"][0]),
+            str(get_errors(serializer)["non_field_errors"][0]),
             "Invalid cost group or expense type.",
         )
 
@@ -137,18 +143,20 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertEqual(
-            serializer.validated_data["category"],
+            validated_data["category"],
             self.category,
         )
         self.assertEqual(
-            serializer.validated_data["in_kind"],
+            validated_data["in_kind"],
             False,
         )
         self.assertEqual(
-            serializer.validated_data["add_ten_percent"],
+            validated_data["add_ten_percent"],
             False,
         )
 
@@ -158,9 +166,10 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["description"],
+            validated_data["description"],
             "",
         )
 
@@ -170,9 +179,10 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertIsNone(
-            serializer.validated_data["indirect_rate_multiplier"],
+            validated_data["indirect_rate_multiplier"],
         )
 
     def test_amounts_can_be_omitted(self):
@@ -181,10 +191,11 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertNotIn(
             "amounts",
-            serializer.validated_data,
+            validated_data,
         )
 
     def test_amount_year_must_be_within_project_period(self):
@@ -199,9 +210,9 @@ class NonStaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("amounts", serializer.errors)
+        self.assertIn("amounts", get_errors(serializer))
         self.assertEqual(
-            str(serializer.errors["amounts"][0]),
+            str(get_errors(serializer)["amounts"][0]),
             "Year must be between 2025 and 2027.",
         )
 
@@ -216,7 +227,7 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_amount_year_can_be_end_year(self):
         data = self.valid_data()
@@ -229,7 +240,7 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_duplicate_amount_year_is_rejected(self):
         data = self.valid_data()
@@ -247,9 +258,9 @@ class NonStaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("amounts", serializer.errors)
+        self.assertIn("amounts", get_errors(serializer))
         self.assertEqual(
-            str(serializer.errors["amounts"][0]),
+            str(get_errors(serializer)["amounts"][0]),
             "Each year can only have one amount.",
         )
 
@@ -272,7 +283,7 @@ class NonStaffLineSerializerTestCase(TestCase):
 
         serializer = self.serializer(data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_year_amount_decimal_places(self):
         data = self.valid_data()
@@ -286,7 +297,7 @@ class NonStaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("amounts", serializer.errors)
+        self.assertIn("amounts", get_errors(serializer))
 
     def test_year_is_required(self):
         data = self.valid_data()
@@ -299,7 +310,7 @@ class NonStaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("amounts", serializer.errors)
+        self.assertIn("amounts", get_errors(serializer))
 
     def test_amount_is_required(self):
         data = self.valid_data()
@@ -312,4 +323,4 @@ class NonStaffLineSerializerTestCase(TestCase):
         serializer = self.serializer(data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("amounts", serializer.errors)
+        self.assertIn("amounts", get_errors(serializer))

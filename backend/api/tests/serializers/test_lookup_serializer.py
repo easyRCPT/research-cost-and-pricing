@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.test import SimpleTestCase
 
 from api.serializers.lookup_serializer import (
@@ -6,6 +8,8 @@ from api.serializers.lookup_serializer import (
     LookupTablesSerializer,
     LookupUpdateSerializer,
 )
+
+from .serializer_utils import get_errors, get_validated_data
 
 
 class LookupSerializersTestCase(SimpleTestCase):
@@ -29,7 +33,7 @@ class LookupSerializersTestCase(SimpleTestCase):
         self.assertEqual(set(LOOKUP_SERIALIZERS), expected)
 
     def test_lookup_tables_serializer_contains_all_tables(self):
-        serializer = LookupTablesSerializer()
+        serializer = cast(LookupTablesSerializer, LookupTablesSerializer())
 
         self.assertEqual(
             set(serializer.fields),
@@ -44,14 +48,11 @@ class LookupSerializersTestCase(SimpleTestCase):
             )
 
     def test_lookup_tables_serializer_serializes_empty_tables(self):
-        data = {
-            name: []
-            for name in LOOKUP_SERIALIZERS
-        }
+        data = {name: [] for name in LOOKUP_SERIALIZERS}
 
         serializer = LookupTablesSerializer(data=data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
 
 class LookupCreateSerializerTestCase(SimpleTestCase):
@@ -67,13 +68,13 @@ class LookupCreateSerializerTestCase(SimpleTestCase):
             }
         )
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_values_is_required(self):
         serializer = LookupCreateSerializer(data={})
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("values", serializer.errors)
+        self.assertIn("values", get_errors(serializer))
 
     def test_values_must_be_a_dict(self):
         serializer = LookupCreateSerializer(
@@ -94,7 +95,7 @@ class LookupUpdateSerializerTestCase(SimpleTestCase):
             }
         )
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
     def test_values_is_optional(self):
         serializer = LookupUpdateSerializer(
@@ -103,9 +104,10 @@ class LookupUpdateSerializerTestCase(SimpleTestCase):
             }
         )
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["values"],
+            validated_data["values"],
             {},
         )
 
@@ -117,7 +119,7 @@ class LookupUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("lookup", serializer.errors)
+        self.assertIn("lookup", get_errors(serializer))
 
     def test_lookup_must_be_a_dict(self):
         serializer = LookupUpdateSerializer(

@@ -5,6 +5,8 @@ from django.test import TestCase
 from api.models import DeliverableType
 from api.serializers.deliverable_serializer import DeliverableSerializer
 
+from .serializer_utils import get_errors, get_validated_data
+
 
 class DeliverableSerializerTestCase(TestCase):
     def setUp(self):
@@ -27,34 +29,36 @@ class DeliverableSerializerTestCase(TestCase):
     def test_valid_data(self):
         serializer = DeliverableSerializer(data=self.valid_data())
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertEqual(
-            serializer.validated_data["number"],
+            validated_data["number"],
             1,
         )
         self.assertEqual(
-            serializer.validated_data["description"],
+            validated_data["description"],
             "Test deliverable",
         )
         self.assertEqual(
-            serializer.validated_data["deliverable_type"],
+            validated_data["deliverable_type"],
             self.deliverable_type,
         )
         self.assertEqual(
-            serializer.validated_data["invoice_amount"],
+            validated_data["invoice_amount"],
             Decimal("1000.00"),
         )
         self.assertEqual(
-            serializer.validated_data["due_date"],
+            validated_data["due_date"],
             "2026-12-31",
         )
         self.assertEqual(
-            serializer.validated_data["dependency"],
+            validated_data["dependency"],
             1,
         )
         self.assertEqual(
-            serializer.validated_data["sponsor"],
+            validated_data["sponsor"],
             "Test Sponsor",
         )
 
@@ -67,23 +71,25 @@ class DeliverableSerializerTestCase(TestCase):
             }
         )
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
 
         self.assertNotIn(
             "invoice_amount",
-            serializer.validated_data,
+            validated_data,
         )
         self.assertNotIn(
             "due_date",
-            serializer.validated_data,
+            validated_data,
         )
         self.assertNotIn(
             "dependency",
-            serializer.validated_data,
+            validated_data,
         )
         self.assertNotIn(
             "sponsor",
-            serializer.validated_data,
+            validated_data,
         )
 
     def test_invoice_amount_can_be_null(self):
@@ -92,9 +98,10 @@ class DeliverableSerializerTestCase(TestCase):
 
         serializer = DeliverableSerializer(data=data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertIsNone(
-            serializer.validated_data["invoice_amount"],
+            validated_data["invoice_amount"],
         )
 
     def test_dependency_can_be_null(self):
@@ -103,9 +110,10 @@ class DeliverableSerializerTestCase(TestCase):
 
         serializer = DeliverableSerializer(data=data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertIsNone(
-            serializer.validated_data["dependency"],
+            validated_data["dependency"],
         )
 
     def test_due_date_can_be_blank(self):
@@ -114,9 +122,10 @@ class DeliverableSerializerTestCase(TestCase):
 
         serializer = DeliverableSerializer(data=data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["due_date"],
+            validated_data["due_date"],
             "",
         )
 
@@ -126,9 +135,10 @@ class DeliverableSerializerTestCase(TestCase):
 
         serializer = DeliverableSerializer(data=data)
 
-        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["sponsor"],
+            validated_data["sponsor"],
             "",
         )
 
@@ -139,7 +149,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("number", serializer.errors)
+        self.assertIn("number", get_errors(serializer))
 
     def test_description_is_required(self):
         data = self.valid_data()
@@ -148,7 +158,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("description", serializer.errors)
+        self.assertIn("description", get_errors(serializer))
 
     def test_deliverable_type_is_required(self):
         data = self.valid_data()
@@ -157,7 +167,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("deliverable_type", serializer.errors)
+        self.assertIn("deliverable_type", get_errors(serializer))
 
     def test_invalid_deliverable_type(self):
         data = self.valid_data()
@@ -166,7 +176,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("deliverable_type", serializer.errors)
+        self.assertIn("deliverable_type", get_errors(serializer))
 
     def test_dependency_must_be_at_least_one(self):
         data = self.valid_data()
@@ -175,7 +185,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("dependency", serializer.errors)
+        self.assertIn("dependency", get_errors(serializer))
 
     def test_invoice_amount_must_have_at_most_two_decimal_places(self):
         data = self.valid_data()
@@ -184,7 +194,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("invoice_amount", serializer.errors)
+        self.assertIn("invoice_amount", get_errors(serializer))
 
     def test_invoice_amount_cannot_exceed_max_digits(self):
         data = self.valid_data()
@@ -193,7 +203,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("invoice_amount", serializer.errors)
+        self.assertIn("invoice_amount", get_errors(serializer))
 
     def test_description_cannot_exceed_max_length(self):
         data = self.valid_data()
@@ -202,7 +212,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("description", serializer.errors)
+        self.assertIn("description", get_errors(serializer))
 
     def test_due_date_cannot_exceed_max_length(self):
         data = self.valid_data()
@@ -211,7 +221,7 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("due_date", serializer.errors)
+        self.assertIn("due_date", get_errors(serializer))
 
     def test_sponsor_cannot_exceed_max_length(self):
         data = self.valid_data()
@@ -220,4 +230,4 @@ class DeliverableSerializerTestCase(TestCase):
         serializer = DeliverableSerializer(data=data)
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("sponsor", serializer.errors)
+        self.assertIn("sponsor", get_errors(serializer))

@@ -14,6 +14,8 @@ from api.serializers.budget_update_serializer import (
     StaffUpdateSerializer,
 )
 
+from .serializer_utils import get_errors, get_validated_data
+
 
 class SectionSerializerTestCase(SimpleTestCase):
     def test_accepts_valid_section(self):
@@ -22,8 +24,9 @@ class SectionSerializerTestCase(SimpleTestCase):
         )
 
         self.assertTrue(serializer.is_valid())
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["section"],
+            validated_data["section"],
             "project",
         )
 
@@ -33,7 +36,7 @@ class SectionSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("section", serializer.errors)
+        self.assertIn("section", get_errors(serializer))
 
 
 class ProjectUpdateSerializerTestCase(SimpleTestCase):
@@ -46,8 +49,9 @@ class ProjectUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertTrue(serializer.is_valid())
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["field"],
+            validated_data["field"],
             "title",
         )
 
@@ -60,7 +64,7 @@ class ProjectUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("field", serializer.errors)
+        self.assertIn("field", get_errors(serializer))
 
     def test_accepts_json_value(self):
         serializer = ProjectUpdateSerializer(
@@ -71,8 +75,9 @@ class ProjectUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertTrue(serializer.is_valid())
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["value"],
+            validated_data["value"],
             2026,
         )
 
@@ -97,7 +102,7 @@ class BudgetFieldUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("field", serializer.errors)
+        self.assertIn("field", get_errors(serializer))
 
 
 class StaffUpdateSerializerTestCase(SimpleTestCase):
@@ -123,8 +128,9 @@ class StaffUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertTrue(serializer.is_valid())
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["year"],
+            validated_data["year"],
             2026,
         )
 
@@ -139,7 +145,7 @@ class StaffUpdateSerializerTestCase(SimpleTestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertEqual(
-            serializer.errors["year"][0],
+            get_errors(serializer)["year"][0],
             "Required with year_value, not allowed otherwise.",
         )
 
@@ -155,7 +161,7 @@ class StaffUpdateSerializerTestCase(SimpleTestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertEqual(
-            serializer.errors["year"][0],
+            get_errors(serializer)["year"][0],
             "Required with year_value, not allowed otherwise.",
         )
 
@@ -169,7 +175,7 @@ class StaffUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("field", serializer.errors)
+        self.assertIn("field", get_errors(serializer))
 
 
 class NonStaffUpdateSerializerTestCase(SimpleTestCase):
@@ -195,8 +201,9 @@ class NonStaffUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertTrue(serializer.is_valid())
+        validated_data = get_validated_data(serializer)
         self.assertEqual(
-            serializer.validated_data["year"],
+            validated_data["year"],
             2026,
         )
 
@@ -211,7 +218,7 @@ class NonStaffUpdateSerializerTestCase(SimpleTestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertEqual(
-            serializer.errors["year"][0],
+            get_errors(serializer)["year"][0],
             "Required with year_value, not allowed otherwise.",
         )
 
@@ -227,7 +234,7 @@ class NonStaffUpdateSerializerTestCase(SimpleTestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertEqual(
-            serializer.errors["year"][0],
+            get_errors(serializer)["year"][0],
             "Required with year_value, not allowed otherwise.",
         )
 
@@ -254,7 +261,7 @@ class DeliverableUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
-        self.assertIn("field", serializer.errors)
+        self.assertIn("field", get_errors(serializer))
 
 
 class FieldConfigurationTestCase(SimpleTestCase):
