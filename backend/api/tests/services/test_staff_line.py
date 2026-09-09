@@ -44,7 +44,7 @@ class StaffLineTestMixin:
             in_kind_multiplier=Decimal("1.0"),
             margin=Decimal("0.30"),
             gst_applicable=True,
-            cash_co_contribution=Decimal("0"),
+            cash_co_contribution=Decimal(0),
         )
 
     def create_staff_line(
@@ -72,9 +72,7 @@ class StaffLineTestMixin:
 
 
 class TestCreate(StaffLineTestMixin, TestCase):
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_creates_staff_line(self, mock_get_budget_details):
         mock_get_budget_details.return_value = {}
 
@@ -128,9 +126,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_called_once_with(budget)
 
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_creates_staff_line_without_allocations(
         self,
         mock_get_budget_details,
@@ -164,9 +160,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_called_once_with(budget)
 
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_uses_default_values(self, mock_get_budget_details):
         mock_get_budget_details.return_value = {}
 
@@ -190,9 +184,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
 
         self.assertFalse(line.in_kind)
 
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_validates_staff_line_before_saving(
         self,
         mock_get_budget_details,
@@ -219,9 +211,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_not_called()
 
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_validates_year_allocation_before_saving(
         self,
         mock_get_budget_details,
@@ -261,9 +251,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
 
 
 class TestDelete(StaffLineTestMixin, TestCase):
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_deletes_staff_line(self, mock_get_budget_details):
         mock_get_budget_details.return_value = {}
 
@@ -283,9 +271,7 @@ class TestDelete(StaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_called_once_with(budget)
 
-    @patch(
-        "api.services.staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_deletes_year_allocations_with_staff_line(
         self,
         mock_get_budget_details,

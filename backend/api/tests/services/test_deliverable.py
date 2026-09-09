@@ -43,7 +43,7 @@ class DeliverableTestMixin:
             in_kind_multiplier=Decimal("1.0"),
             margin=Decimal("0.30"),
             gst_applicable=True,
-            cash_co_contribution=Decimal("0"),
+            cash_co_contribution=Decimal(0),
         )
 
     @staticmethod
@@ -190,6 +190,4 @@ class TestDelete(DeliverableTestMixin, TestCase):
 
         delete(deliverable)
 
-        self.assertFalse(
-            Deliverable.objects.filter(id=deliverable_id).exists()
-        )
+        self.assertFalse(Deliverable.objects.filter(id=deliverable_id).exists())

@@ -45,7 +45,7 @@ class NonStaffLineTestMixin:
             in_kind_multiplier=Decimal("1.0"),
             margin=Decimal("0.30"),
             gst_applicable=True,
-            cash_co_contribution=Decimal("0"),
+            cash_co_contribution=Decimal(0),
         )
 
     @staticmethod
@@ -80,9 +80,7 @@ class NonStaffLineTestMixin:
 
 
 class TestCreate(NonStaffLineTestMixin, TestCase):
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_creates_non_staff_line(self, mock_get_budget_details):
         mock_get_budget_details.return_value = {}
 
@@ -138,9 +136,7 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_called_once_with(budget)
 
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_creates_non_staff_line_without_amounts(
         self,
         mock_get_budget_details,
@@ -172,9 +168,7 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_called_once_with(budget)
 
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_uses_default_values(self, mock_get_budget_details):
         mock_get_budget_details.return_value = {}
 
@@ -198,9 +192,7 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
         self.assertFalse(line.add_ten_percent)
         self.assertIsNone(line.indirect_rate_multiplier)
 
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_validates_non_staff_line_before_saving(
         self,
         mock_get_budget_details,
@@ -224,9 +216,7 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
 
         mock_get_budget_details.assert_not_called()
 
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_validates_year_amount_before_saving(
         self,
         mock_get_budget_details,
@@ -263,9 +253,7 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
 
 
 class TestDelete(NonStaffLineTestMixin, TestCase):
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_deletes_non_staff_line(self, mock_get_budget_details):
         mock_get_budget_details.return_value = {}
 
@@ -284,9 +272,7 @@ class TestDelete(NonStaffLineTestMixin, TestCase):
         self.assertEqual(result, {})
         mock_get_budget_details.assert_called_once_with(budget)
 
-    @patch(
-        "api.services.non_staff_line.budget_details.get_budget_details"
-    )
+    @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_deletes_year_amounts_with_non_staff_line(
         self,
         mock_get_budget_details,
