@@ -83,17 +83,17 @@ class TestGetConstants(SimpleTestCase):
         self.salary_rate_1.payroll_type = "Fortnight"
         self.salary_rate_1.category = "Academic"
         self.salary_rate_1.classification = "Level A.1"
-        self.salary_rate_1.rate = Decimal("60000")
+        self.salary_rate_1.rate = Decimal(60000)
 
         self.salary_rate_2 = Mock(spec=SalaryRate)
         self.salary_rate_2.payroll_type = "Casual"
         self.salary_rate_2.category = "Academic"
         self.salary_rate_2.classification = "RA Grade 1.1"
-        self.salary_rate_2.rate = Decimal("50000")
+        self.salary_rate_2.rate = Decimal(50000)
 
         self.multiplier = Mock(spec=SalaryRateMultiplier)
         self.multiplier.time_basis = "FTE"
-        self.multiplier.multiplier = Decimal("1")
+        self.multiplier.multiplier = Decimal(1)
 
         self.eba = Mock(spec=EbaIncrease)
         self.eba.year = 2026
@@ -113,7 +113,7 @@ class TestGetConstants(SimpleTestCase):
 
         self.constant_1 = Mock(spec=CalculationConstant)
         self.constant_1.name = "max_leave_loading"
-        self.constant_1.value = Decimal("10000")
+        self.constant_1.value = Decimal(10000)
 
         self.constant_2 = Mock(spec=CalculationConstant)
         self.constant_2.name = "max_payroll_tax"
@@ -169,19 +169,19 @@ class TestGetConstants(SimpleTestCase):
                     "Fortnight",
                     "Academic",
                     "Level A.1",
-                ): Decimal("60000"),
+                ): Decimal(60000),
                 (
                     "Casual",
                     "Academic",
                     "RA Grade 1.1",
-                ): Decimal("50000"),
+                ): Decimal(50000),
             },
         )
 
         self.assertEqual(
             result["salary_rate_multiplier"],
             {
-                "FTE": Decimal("1"),
+                "FTE": Decimal(1),
             },
         )
 
@@ -207,7 +207,7 @@ class TestGetConstants(SimpleTestCase):
         self.assertEqual(
             result["constants"],
             {
-                "max_leave_loading": Decimal("10000"),
+                "max_leave_loading": Decimal(10000),
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
                 "gst_rate": Decimal("0.10"),
@@ -289,7 +289,7 @@ class TestGetConstants(SimpleTestCase):
 class TestValidateConstants(SimpleTestCase):
     def test_passes_when_all_required_constants_exist(self):
         constants = {
-            "max_leave_loading": Decimal("10000"),
+            "max_leave_loading": Decimal(10000),
             "max_payroll_tax": Decimal("0.05"),
             "override_uom_oncosts": Decimal("0.01"),
             "gst_rate": Decimal("0.10"),
@@ -299,14 +299,13 @@ class TestValidateConstants(SimpleTestCase):
 
     def test_raises_error_for_missing_constants(self):
         constants = {
-            "max_leave_loading": Decimal("10000"),
+            "max_leave_loading": Decimal(10000),
             "max_payroll_tax": Decimal("0.05"),
         }
 
         with self.assertRaisesRegex(
             KeyError,
-            "Missing required calculation constants: "
-            "gst_rate,override_uom_oncosts",
+            "Missing required calculation constants: gst_rate,override_uom_oncosts",
         ):
             validate_constants(constants)
 

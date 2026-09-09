@@ -7,9 +7,9 @@ from django.test import SimpleTestCase
 from api.models import (
     Activity,
     Budget,
-    Department,
     Deliverable,
     DeliverableType,
+    Department,
     NonStaffCostLine,
     Project,
     Region,
@@ -230,11 +230,11 @@ class TestBuildNonStaffNumericTable(SimpleTestCase):
     def test_builds_non_staff_numeric_table(self):
         amount_1 = Mock(spec=YearAmount)
         amount_1.year = 2025
-        amount_1.amount = Decimal("1000")
+        amount_1.amount = Decimal(1000)
 
         amount_2 = Mock(spec=YearAmount)
         amount_2.year = 2026
-        amount_2.amount = Decimal("2000")
+        amount_2.amount = Decimal(2000)
 
         line = Mock(spec=NonStaffCostLine)
         line.id = 1
@@ -249,8 +249,8 @@ class TestBuildNonStaffNumericTable(SimpleTestCase):
             result,
             {
                 1: {
-                    2025: Decimal("1000"),
-                    2026: Decimal("2000"),
+                    2025: Decimal(1000),
+                    2026: Decimal(2000),
                 }
             },
         )
@@ -279,7 +279,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.deliverable.number = 1
         self.deliverable.description = "Final report"
         self.deliverable.deliverable_type = self.deliverable_type
-        self.deliverable.invoice_amount = Decimal("1000")
+        self.deliverable.invoice_amount = Decimal(1000)
         self.deliverable.due_date = date(2026, 12, 31)
         self.deliverable.dependency = "Project completion"
         self.deliverable.sponsor = "Test Sponsor"
@@ -290,15 +290,13 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.budget.in_kind_multiplier = Decimal("1.0")
         self.budget.margin = Decimal("0.30")
         self.budget.gst_applicable = True
-        self.budget.cash_co_contribution = Decimal("500")
+        self.budget.cash_co_contribution = Decimal(500)
         self.budget.comments = "Comments"
         self.budget.justification = "Justification"
         self.budget.justification_notes = "Notes"
         self.budget.dean_exemption_reason = ""
         self.budget.status = "draft"
-        self.budget.deliverables.all.return_value = [
-            self.deliverable
-        ]
+        self.budget.deliverables.all.return_value = [self.deliverable]
 
     def test_builds_budget_info(self):
         result = build_budget_info(self.budget)
@@ -311,7 +309,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
                 "in_kind_multiplier": Decimal("1.0"),
                 "margin": Decimal("0.30"),
                 "gst_applicable": True,
-                "cash_co_contribution": Decimal("500"),
+                "cash_co_contribution": Decimal(500),
                 "comments": "Comments",
                 "justification": "Justification",
                 "justification_notes": "Notes",
@@ -322,7 +320,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
                         "number": 1,
                         "description": "Final report",
                         "deliverable_type": "Report",
-                        "invoice_amount": Decimal("1000"),
+                        "invoice_amount": Decimal(1000),
                         "due_date": date(2026, 12, 31),
                         "dependency": "Project completion",
                         "sponsor": "Test Sponsor",
@@ -387,18 +385,10 @@ class TestLoadBudgetData(SimpleTestCase):
         result = load_budget_data(budget)
 
         mock_build_project_info.assert_called_once_with(project)
-        mock_build_staff_info_table.assert_called_once_with(
-            [staff_line]
-        )
-        mock_build_staff_numeric_table.assert_called_once_with(
-            [staff_line]
-        )
-        mock_build_non_staff_info_table.assert_called_once_with(
-            [non_staff_line]
-        )
-        mock_build_non_staff_numeric_table.assert_called_once_with(
-            [non_staff_line]
-        )
+        mock_build_staff_info_table.assert_called_once_with([staff_line])
+        mock_build_staff_numeric_table.assert_called_once_with([staff_line])
+        mock_build_non_staff_info_table.assert_called_once_with([non_staff_line])
+        mock_build_non_staff_numeric_table.assert_called_once_with([non_staff_line])
         mock_build_budget_info.assert_called_once_with(budget)
 
         self.assertEqual(
