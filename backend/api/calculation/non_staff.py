@@ -150,4 +150,8 @@ def find_indirect_rate_multiplier(
 ) -> Decimal:
     """A blank rate means no indirect recovery, so it reads as 1."""
     multiplier = info_data.get("indirect_rate_multiplier")
-    return Decimal(1) if multiplier is None else multiplier
+    cost_group = info_data["cost_group"]
+    if cost_group not in EXCLUDED_COST_GROUPS and multiplier is not None:
+        return multiplier
+    else:
+        return Decimal(1)
