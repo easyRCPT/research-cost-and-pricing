@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
@@ -8,6 +9,7 @@ from api.calculation.pricing import (
     calculate_non_staff_budget,
     calculate_price_summary,
     calculate_staff_budget,
+    pricing,
 )
 
 
@@ -410,3 +412,86 @@ class TestCalculateBudgetSummary(SimpleTestCase):
             Decimal(500),
         )
         self.assertTrue(result["dean_required"])
+
+
+class TestPricing(SimpleTestCase):
+    def setUp(self):
+        self.constants = {
+            "constants": {},
+        }
+        self.project_duration = {
+            "start_year": 2025,
+            "start_month": 1,
+            "end_year": 2026,
+            "end_month": 12,
+        }
+        self.staff_table = {
+            "info_table": {},
+            "numeric_table": {},
+        }
+        self.non_staff_table = {}
+        self.budget_info = {
+            "cost_multiplier": Decimal("1.2"),
+            "in_kind_multiplier": Decimal(1),
+            "cash_co_contribution": Decimal(100),
+        }
+
+    @patch("api.calculation.pricing.calculate_budget_summary")
+    @patch("api.calculation.non_staff.calculate_non_staff_table")
+    @patch("api.calculation.staff.calculate_staff_table")
+    def test_pricing(
+        self,
+        mock_staff,
+        mock_non_staff,
+        mock_budget_summary,
+    ):
+        staff_result = {"staff": "result"}
+        non_staff_result = {"non_staff": "result"}
+        budget_summary = {"summary": "result"}
+
+        mock_staff.return_value = staff_result
+        mock_non_staff.return_value = non_staff_result
+        mock_budget_summary.return_value = budget_summary
+
+        result = pricing(
+            self.constants,
+            self.project_duration,
+            self.staff_table,
+            self.non_staff_table,
+            self.budget_info,
+        )
+
+        mock_staff.assert_called_once_with(
+            self.staff_table,
+            self.constants,
+            2025,
+            1,
+            2026,
+            12,
+            Decimal("1.2"),
+            Decimal(1),
+        )
+
+        mock_non_staff.assert_called_once_with(
+            self.non_staff_table,
+            2025,
+            2026,
+        )
+
+        mock_budget_summary.assert_called_once_with(
+            self.staff_table["info_table"],
+            staff_result,
+            non_staff_result,
+            self.budget_info,
+            Decimal(100),
+            self.constants["constants"],
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "staff_result": staff_result,
+                "non_staff_result": non_staff_result,
+                "budget_summary": budget_summary,
+            },
+        )
