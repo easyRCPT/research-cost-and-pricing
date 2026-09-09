@@ -1,6 +1,9 @@
-import { Panel } from '@/components/shell'
+import { DataTable, TableCard } from '@/components/data-table'
 import type { LookupTables } from '@/types'
-import { CodeNameGrid } from './CodeNameGrid'
+import { byCode, codeNameColumns } from './code-name-columns'
+
+const ACTIVITY_COLUMNS = codeNameColumns('Activity')
+const REGION_COLUMNS = codeNameColumns('Region')
 
 interface AttributesTabProps {
   activities: LookupTables['activities']
@@ -9,13 +12,31 @@ interface AttributesTabProps {
 
 export function AttributesTab({ activities, regions }: AttributesTabProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Panel title="Activities">
-        <CodeNameGrid label="Activity" rows={activities} />
-      </Panel>
-      <Panel title="Regions">
-        <CodeNameGrid label="Region" rows={regions} className="max-h-[560px]" />
-      </Panel>
-    </div>
+    <TableCard
+      tables={[
+        {
+          value: 'activities',
+          title: 'Activities',
+          table: (
+            <DataTable
+              columns={ACTIVITY_COLUMNS}
+              rows={activities}
+              getRowId={byCode}
+            />
+          ),
+        },
+        {
+          value: 'regions',
+          title: 'Regions',
+          table: (
+            <DataTable
+              columns={REGION_COLUMNS}
+              rows={regions}
+              getRowId={byCode}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }

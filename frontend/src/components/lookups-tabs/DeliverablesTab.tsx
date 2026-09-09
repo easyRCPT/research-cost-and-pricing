@@ -1,6 +1,31 @@
-import { Grid, Panel, Td, Th } from '@/components/shell'
+import {
+  DataTable,
+  TableCard,
+  columnHelper,
+  type DataTableFilter,
+} from '@/components/data-table'
 import type { LookupTables } from '@/types'
-import { CodeNameGrid } from './CodeNameGrid'
+import { byCode, codeNameColumns } from './code-name-columns'
+
+type RevenueCategory = LookupTables['revenue_categories'][number]
+
+const DELIVERABLE_COLUMNS = codeNameColumns('Deliverable')
+
+const col = columnHelper<RevenueCategory>()
+const REVENUE_COLUMNS = col.columns([
+  col.accessor('external_party', { header: 'External party' }),
+  col.accessor('description', { header: 'Description' }),
+  col.accessor('budget_ledger_id', {
+    header: 'Ledger ID',
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const REVENUE_FILTERS: DataTableFilter<RevenueCategory>[] = [
+  { id: 'party', label: 'External party', value: (row) => row.external_party },
+]
+
+const byLedgerId = (row: RevenueCategory) => String(row.budget_ledger_id)
 
 interface DeliverablesTabProps {
   deliverableTypes: LookupTables['deliverable_types']
@@ -12,32 +37,34 @@ export function DeliverablesTab({
   revenueCategories,
 }: DeliverablesTabProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Panel title="Deliverable types">
-        <CodeNameGrid label="Deliverable" rows={deliverableTypes} />
-      </Panel>
-      <Panel title="Revenue categories">
-        <Grid>
-          <thead>
-            <tr>
-              <Th>External party</Th>
-              <Th>Description</Th>
-              <Th align="right">Ledger ID</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {revenueCategories.map((category) => (
-              <tr key={category.budget_ledger_id}>
-                <Td>{category.external_party}</Td>
-                <Td>{category.description}</Td>
-                <Td align="right" className="tabular">
-                  {category.budget_ledger_id}
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </Grid>
-      </Panel>
-    </div>
+    <TableCard
+      tables={[
+        {
+          value: 'deliverables',
+          title: 'Deliverable types',
+          table: (
+            <DataTable
+              columns={DELIVERABLE_COLUMNS}
+              rows={deliverableTypes}
+              getRowId={byCode}
+            />
+          ),
+        },
+        {
+          value: 'revenue',
+          title: 'Revenue categories',
+          table: (
+            <DataTable
+              columns={REVENUE_COLUMNS}
+              rows={revenueCategories}
+              getRowId={byLedgerId}
+              sortable
+              searchable
+              filters={REVENUE_FILTERS}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }

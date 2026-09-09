@@ -34,7 +34,7 @@ export function Grid({
     // corners with it, or sits outside the scrollbars instead of inside them.
     <div
       className={cn(
-        'scroll-persist max-h-[70svh] overflow-scroll',
+        'scroll-persist max-h-[70svh] overflow-scroll overscroll-x-none',
         'print:max-h-none print:overflow-visible',
         className,
       )}

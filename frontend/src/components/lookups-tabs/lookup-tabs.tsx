@@ -29,6 +29,7 @@ export const LOOKUP_TABS = [
     render: (lookups) => (
       <SalaryRatesTab
         salaryRates={lookups.salary_rates}
+        incrementCaps={lookups.increment_caps}
         multipliers={lookups.salary_rate_multipliers}
       />
     ),
@@ -36,12 +37,7 @@ export const LOOKUP_TABS = [
   {
     value: 'eba',
     title: 'EBA Increases',
-    render: (lookups) => (
-      <EbaTab
-        increases={lookups.eba_increases}
-        incrementCaps={lookups.increment_caps}
-      />
-    ),
+    render: (lookups) => <EbaTab increases={lookups.eba_increases} />,
   },
   {
     value: 'oncosts',

@@ -4,7 +4,8 @@ import * as React from "react"
 import { Select as SelectPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
+import { ScrollIndicator, useScrollOverflow } from "@/components/ui/scroll-indicator"
+import { ChevronDownIcon, CheckIcon } from "lucide-react"
 
 function Select({
   ...props
@@ -65,32 +66,7 @@ function SelectContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  const viewportRef = React.useRef<HTMLDivElement>(null)
-  const [overflow, setOverflow] = React.useState({ top: false, bottom: false })
-
-  const syncOverflow = React.useCallback(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-    const top = viewport.scrollTop > 1
-    const bottom =
-      viewport.scrollTop + viewport.clientHeight < viewport.scrollHeight - 1
-    setOverflow((current) =>
-      current.top === top && current.bottom === bottom
-        ? current
-        : { top, bottom }
-    )
-  }, [])
-
-  // Radix scrolls to the selected item as it opens, so measure once mounted.
-  React.useEffect(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-    syncOverflow()
-    const observer = new ResizeObserver(syncOverflow)
-    observer.observe(viewport)
-    if (viewport.firstElementChild) observer.observe(viewport.firstElementChild)
-    return () => observer.disconnect()
-  }, [syncOverflow])
+  const { ref: viewportRef, overflow, sync } = useScrollOverflow<HTMLDivElement>()
 
   return (
     <SelectPrimitive.Portal>
@@ -104,16 +80,16 @@ function SelectContent({
         sideOffset={sideOffset}
         {...props}
       >
-        <SelectScrollIndicator side="top" visible={overflow.top} />
+        <ScrollIndicator side="top" visible={overflow.top} />
         <SelectPrimitive.Viewport
           ref={viewportRef}
-          onScroll={syncOverflow}
+          onScroll={sync}
           data-position={position}
           className="scroll-thin p-1 data-[position=popper]:min-h-(--radix-select-trigger-height) data-[position=popper]:w-full"
         >
           {children}
         </SelectPrimitive.Viewport>
-        <SelectScrollIndicator side="bottom" visible={overflow.bottom} />
+        <ScrollIndicator side="bottom" visible={overflow.bottom} />
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   )
@@ -166,34 +142,6 @@ function SelectSeparator({
       className={cn("pointer-events-none -mx-1 my-1 h-px bg-border", className)}
       {...props}
     />
-  )
-}
-
-/** Fades a chevron over the top or bottom edge while the list scrolls further that way. */
-function SelectScrollIndicator({
-  side,
-  visible,
-}: {
-  side: "top" | "bottom"
-  visible: boolean
-}) {
-  const Icon = side === "top" ? ChevronUpIcon : ChevronDownIcon
-  return (
-    <div
-      aria-hidden
-      data-slot={`select-scroll-${side}-indicator`}
-      data-visible={visible}
-      // Overlaid rather than in flow, so the rows don't shift when it appears,
-      // and stopping short of the right edge keeps it off the scrollbar.
-      className={cn(
-        "pointer-events-none absolute right-3 left-0 z-10 flex h-7 items-center justify-center text-muted-foreground opacity-0 transition-opacity duration-150 data-[visible=true]:opacity-100",
-        side === "top"
-          ? "top-0 rounded-t-lg bg-linear-to-b from-popover from-65% to-transparent"
-          : "bottom-0 rounded-b-lg bg-linear-to-t from-popover from-65% to-transparent"
-      )}
-    >
-      <Icon className="size-4" />
-    </div>
   )
 }
 

@@ -1,10 +1,17 @@
-import { Grid, Panel, Td, Th } from '@/components/shell'
+import { useMemo } from 'react'
+import {
+  DataTable,
+  TableCard,
+  columnHelper,
+  type DataTableFilter,
+} from '@/components/data-table'
 import type { LookupTables } from '@/types'
 
 type OnCostRate = LookupTables['on_cost_rates'][number]
 type OnCostType = OnCostRate['on_cost_type']
 
 const EMPLOYMENT_COLUMNS = ['Continuing', 'Fixed-Term', 'Casual'] as const
+type Employment = (typeof EMPLOYMENT_COLUMNS)[number]
 
 const ON_COST_LABELS: Record<OnCostType, string> = {
   superannuation: 'Superannuation',
@@ -18,76 +25,119 @@ const ON_COST_LABELS: Record<OnCostType, string> = {
 const percentage = (value: number | undefined) =>
   value === undefined ? '—' : `${(value * 100).toFixed(2)}%`
 
+/** One standing on-cost component with its rate per employment type. */
+interface ComponentRow {
+  component: OnCostType
+  rates: Partial<Record<Employment, number>>
+}
+
+const component = columnHelper<ComponentRow>()
+const COMPONENT_COLUMNS = component.columns([
+  component.accessor('component', {
+    header: 'Component',
+    cell: ({ getValue }) => ON_COST_LABELS[getValue()],
+  }),
+  ...EMPLOYMENT_COLUMNS.map((employment) =>
+    component.accessor((row) => row.rates[employment], {
+      id: employment,
+      header: employment,
+      cell: ({ getValue }) => percentage(getValue()),
+      meta: { align: 'right', className: 'tabular' },
+    }),
+  ),
+])
+
+const dated = columnHelper<OnCostRate>()
+const DATED_COLUMNS = dated.columns([
+  dated.accessor('year', { header: 'Year', meta: { className: 'tabular' } }),
+  dated.accessor('on_cost_type', {
+    header: 'Component',
+    cell: ({ getValue }) => ON_COST_LABELS[getValue()],
+  }),
+  dated.accessor('employment_type', {
+    header: 'Employment',
+    cell: ({ getValue }) => getValue() || 'All',
+  }),
+  dated.accessor('rate', {
+    header: 'Rate',
+    cell: ({ getValue }) => percentage(getValue()),
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const DATED_FILTERS: DataTableFilter<OnCostRate>[] = [
+  { id: 'year', label: 'Year', value: (row) => String(row.year) },
+  {
+    id: 'component',
+    label: 'Component',
+    value: (row) => ON_COST_LABELS[row.on_cost_type],
+  },
+  {
+    id: 'employment',
+    label: 'Employment',
+    value: (row) => row.employment_type || 'All',
+  },
+]
+
+const byComponent = (row: ComponentRow) => row.component
+const byDatedRate = (row: OnCostRate) =>
+  `${row.on_cost_type}-${row.employment_type}-${row.year}`
+
+function toComponentRows(rates: OnCostRate[]): ComponentRow[] {
+  const standing = rates.filter((rate) => rate.year == null)
+  return (Object.keys(ON_COST_LABELS) as OnCostType[]).map((component) => {
+    const row: ComponentRow = { component, rates: {} }
+    for (const employment of EMPLOYMENT_COLUMNS) {
+      row.rates[employment] = standing.find(
+        (rate) =>
+          rate.on_cost_type === component &&
+          (!rate.employment_type || rate.employment_type === employment),
+      )?.rate
+    }
+    return row
+  })
+}
+
 interface OnCostsTabProps {
   rates: LookupTables['on_cost_rates']
 }
 
 export function OnCostsTab({ rates }: OnCostsTabProps) {
-  const standing = rates.filter((rate) => rate.year == null)
-  const dated = rates.filter((rate) => rate.year != null)
-
-  const getRate = (component: OnCostType, employment: string) =>
-    standing.find(
-      (rate) =>
-        rate.on_cost_type === component &&
-        (!rate.employment_type || rate.employment_type === employment),
-    )?.rate
+  const components = useMemo(() => toComponentRows(rates), [rates])
+  const datedRates = useMemo(
+    () => rates.filter((rate) => rate.year != null),
+    [rates],
+  )
 
   return (
-    <div className="space-y-4">
-      <Panel title="On-cost components">
-        <Grid>
-          <thead>
-            <tr>
-              <Th>Component</Th>
-              {EMPLOYMENT_COLUMNS.map((employment) => (
-                <Th key={employment} align="right">
-                  {employment}
-                </Th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(Object.keys(ON_COST_LABELS) as OnCostType[]).map((component) => (
-              <tr key={component}>
-                <Td>{ON_COST_LABELS[component]}</Td>
-                {EMPLOYMENT_COLUMNS.map((employment) => (
-                  <Td key={employment} align="right" className="tabular">
-                    {percentage(getRate(component, employment))}
-                  </Td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </Grid>
-      </Panel>
-
-      <Panel title="Dated rates">
-        <Grid>
-          <thead>
-            <tr>
-              <Th>Year</Th>
-              <Th>Component</Th>
-              <Th>Employment</Th>
-              <Th align="right">Rate</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {dated.map((rate) => (
-              <tr
-                key={`${rate.on_cost_type}-${rate.employment_type}-${rate.year}`}
-              >
-                <Td className="tabular">{rate.year}</Td>
-                <Td>{ON_COST_LABELS[rate.on_cost_type]}</Td>
-                <Td>{rate.employment_type || 'All'}</Td>
-                <Td align="right" className="tabular">
-                  {percentage(rate.rate)}
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </Grid>
-      </Panel>
-    </div>
+    <TableCard
+      tables={[
+        {
+          value: 'components',
+          title: 'On-cost components',
+          table: (
+            <DataTable
+              columns={COMPONENT_COLUMNS}
+              rows={components}
+              getRowId={byComponent}
+            />
+          ),
+        },
+        {
+          value: 'dated',
+          title: 'Dated rates',
+          table: (
+            <DataTable
+              columns={DATED_COLUMNS}
+              rows={datedRates}
+              getRowId={byDatedRate}
+              sortable
+              searchable
+              filters={DATED_FILTERS}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }

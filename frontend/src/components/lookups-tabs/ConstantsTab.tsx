@@ -1,17 +1,40 @@
-import { Grid, Note, Panel, Td, Th } from '@/components/shell'
+import { DataTable, TableCard, columnHelper } from '@/components/data-table'
 import { money } from '@/lib/format/utils'
 import type { LookupTables } from '@/types'
 
-const percentage = (value: number | undefined) =>
-  value === undefined ? '—' : `${(value * 100).toFixed(2)}%`
+type Constant = LookupTables['calculation_constants'][number]
+type Recovery = LookupTables['minimum_cost_recovery_multipliers'][number]
+
+const percentage = (value: number) => `${(value * 100).toFixed(2)}%`
 
 const CONSTANT_FORMAT: Record<string, (value: number) => string> = {
   gst_rate: percentage,
   max_leave_loading: money,
 }
 
-const formatConstant = (name: string, value: number) =>
-  (CONSTANT_FORMAT[name] ?? String)(value)
+const constant = columnHelper<Constant>()
+const CONSTANT_COLUMNS = constant.columns([
+  constant.accessor('description', { header: 'Constant' }),
+  constant.accessor('value', {
+    header: 'Value',
+    cell: ({ row, getValue }) =>
+      (CONSTANT_FORMAT[row.original.name] ?? String)(getValue()),
+    meta: { align: 'right', className: 'w-[180px] tabular' },
+  }),
+])
+
+const recovery = columnHelper<Recovery>()
+const RECOVERY_COLUMNS = recovery.columns([
+  recovery.accessor('year', { header: 'Year', meta: { className: 'tabular' } }),
+  recovery.accessor('multiplier', {
+    header: 'Multiplier',
+    cell: ({ getValue }) => getValue().toFixed(4),
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const byName = (row: Constant) => row.name
+const byYear = (row: Recovery) => String(row.year)
 
 interface ConstantsTabProps {
   data: LookupTables
@@ -19,57 +42,31 @@ interface ConstantsTabProps {
 
 export function ConstantsTab({ data }: ConstantsTabProps) {
   return (
-    <div className="space-y-4">
-      <Panel title="All constants">
-        <Grid>
-          <thead>
-            <tr>
-              <Th>Constant</Th>
-              <Th align="right" className="w-[180px]">
-                Value
-              </Th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.calculation_constants.map((constant) => (
-              <tr key={constant.name}>
-                <Td>{constant.description}</Td>
-                <Td align="right" className="tabular">
-                  {formatConstant(constant.name, constant.value)}
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </Grid>
-      </Panel>
-
-      <Panel
-        title="Minimum cost recovery by year"
-        description="Overrides the fixed multiplier for the years listed."
-      >
-        {data.minimum_cost_recovery_multipliers.length === 0 ? (
-          <Note>No rows seeded yet.</Note>
-        ) : (
-          <Grid>
-            <thead>
-              <tr>
-                <Th>Year</Th>
-                <Th align="right">Multiplier</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.minimum_cost_recovery_multipliers.map((row) => (
-                <tr key={row.year}>
-                  <Td className="tabular">{row.year}</Td>
-                  <Td align="right" className="tabular">
-                    {row.multiplier.toFixed(4)}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Grid>
-        )}
-      </Panel>
-    </div>
+    <TableCard
+      tables={[
+        {
+          value: 'constants',
+          title: 'All constants',
+          table: (
+            <DataTable
+              columns={CONSTANT_COLUMNS}
+              rows={data.calculation_constants}
+              getRowId={byName}
+            />
+          ),
+        },
+        {
+          value: 'recovery',
+          title: 'Minimum cost recovery by year',
+          table: (
+            <DataTable
+              columns={RECOVERY_COLUMNS}
+              rows={data.minimum_cost_recovery_multipliers}
+              getRowId={byYear}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }
