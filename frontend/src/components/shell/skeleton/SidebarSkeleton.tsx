@@ -2,7 +2,7 @@ export function SidebarSkeleton() {
   return (
     <nav
       aria-hidden="true"
-      className="sticky top-15 h-[calc(100vh-3.75rem)] border-r bg-card px-3 py-5"
+      className="hidden md:block sticky top-15 h-[calc(100vh-3.75rem)] border-r bg-card px-3 py-5"
     >
       <div className="animate-pulse space-y-6">
         {[1, 3, 2, 1].map((rows, group) => (

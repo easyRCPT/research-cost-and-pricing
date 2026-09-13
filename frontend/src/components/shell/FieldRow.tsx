@@ -30,7 +30,7 @@ export function FieldRow({
           sublabelled ? 'md:pt-7' : 'md:pt-2',
         )}
       >
-        <div className="w-full flex justify-end">
+        <div className="w-full flex md:justify-end">
           <span>
             {label}
             {required && <span className="text-destructive"> *</span>}
