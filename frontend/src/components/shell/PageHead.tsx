@@ -8,7 +8,7 @@ interface PageHeadProps {
 
 export function PageHead({ title, subtitle, right }: PageHeadProps) {
   return (
-    <div className="mb-6 flex items-center gap-4 print:hidden">
+    <div className="mb-6 flex flex-wrap items-center gap-4 print:hidden">
       <div>
         <h2 className="text-[22px] leading-tight font-bold tracking-tight text-primary">
           {title}
