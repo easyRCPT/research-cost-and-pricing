@@ -43,7 +43,7 @@ export function DataTableToolbar<T extends RowData>({
 
   return (
     <div className="flex flex-col gap-2 px-6 pb-4">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
         {filters.map((filter) => (
           <DataTableFilterMenu
             key={filter.id}
@@ -54,16 +54,16 @@ export function DataTableToolbar<T extends RowData>({
             onSet={(values) => onState({ ...state, [filter.id]: values })}
           />
         ))}
-        {searchable && (
-          <Input
-            type="search"
-            placeholder="Search"
-            value={search}
-            onChange={(event) => onSearch(event.target.value)}
-            className="ml-auto h-7 w-56 bg-card text-[13px]"
-          />
-        )}
       </div>
+      {searchable && (
+        <Input
+          type="search"
+          placeholder="Search"
+          value={search}
+          onChange={(event) => onSearch(event.target.value)}
+          className="h-7 w-56 bg-card text-[13px]"
+        />
+      )}
       {active.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           {active.map(({ filter, values }) => (

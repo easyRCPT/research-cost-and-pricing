@@ -26,7 +26,7 @@ export function TableCard({ tables }: { tables: TableCardTable[] }) {
 
   return (
     <Tabs defaultValue={tables[0].value} className={`${SHELL} gap-0`}>
-      <header className="flex min-h-14 items-center px-6 pt-1">
+      <header className="flex min-h-14 items-center px-6 pt-1 overflow-x-auto">
         <TabsList variant="line" className="gap-5">
           {tables.map((table) => (
             <TabsTrigger
