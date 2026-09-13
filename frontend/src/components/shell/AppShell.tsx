@@ -13,7 +13,7 @@ export function AppShell({ topBarRight, sidebar, children }: AppShellProps) {
       <TopBar right={topBarRight} />
       <div className="grid md:grid-cols-[236px_minmax(0,1fr)] print:grid-cols-1">
         {sidebar}
-        <main className="w-full max-w-7xl px-8 py-7 pb-24 print:max-w-none print:px-0 print:py-0">
+        <main className="w-full min-w-0 max-w-7xl px-8 py-7 pb-24 print:max-w-none print:px-0 print:py-0">
           {children}
         </main>
       </div>
