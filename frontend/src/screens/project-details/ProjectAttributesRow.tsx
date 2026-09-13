@@ -24,10 +24,7 @@ export function ProjectAttributesRow({
 }: ProjectAttributesRowProps) {
   return (
     <FieldRow label="Project attributes" sublabelled>
-      {/* The codes size to themselves; the pickers take a width instead of a
-          share, so neither stretches to fill the row. Region is the widest
-          because its names are — the longest one still fits on one line. */}
-      <div className="grid max-w-180 grid-cols-2 gap-3 rounded-md bg-muted/60 px-4 py-3 md:w-fit md:grid-cols-[auto_auto_9.5rem_18rem] md:gap-5">
+      <div className="grid max-w-180 grid-cols-2 gap-3 rounded-md bg-muted/60 px-4 py-3 md:grid-cols-4">
         <Attribute label="Company" value={project.company} />
         <Attribute label="Cost centre" value={project.cost_centre || null} />
         {/* Activity Picker */}
