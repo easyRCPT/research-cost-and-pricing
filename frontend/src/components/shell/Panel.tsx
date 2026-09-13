@@ -37,7 +37,7 @@ export function Panel({
   children,
 }: PanelProps) {
   const shell = cn(
-    'rounded-lg border bg-card px-6 py-6 text-card-foreground',
+    'rounded-lg border bg-card px-4 py-4 text-card-foreground md:px-6 md:py-6',
     className,
   )
 

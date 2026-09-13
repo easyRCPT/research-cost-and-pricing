@@ -4,7 +4,14 @@ import type { EditorScreen } from './Sidebar'
 import { useBudget, useNonStaffLines, useUpdateProject } from '@/api/budget'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
-import { ExportPdfButton, PageHead, SECTIONS, ScreenNav, Sidebar } from '.'
+import {
+  ExportPdfButton,
+  MobileNav,
+  PageHead,
+  SECTIONS,
+  ScreenNav,
+  Sidebar,
+} from '.'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
 
 interface AppContentProps {
@@ -32,6 +39,13 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
       topBarRight={<LookupButton open={lookupsOpen} handleClick={setScreen} />}
       sidebar={
         <Sidebar
+          sections={SECTIONS}
+          current={lookupsOpen ? null : screen}
+          onSelect={setScreen}
+        />
+      }
+      mobileNav={
+        <MobileNav
           sections={SECTIONS}
           current={lookupsOpen ? null : screen}
           onSelect={setScreen}

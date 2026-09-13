@@ -49,14 +49,14 @@ export function DataTablePagination<T extends RowData>({
   const slot = { minWidth: `${String(pageCount).length + 1}ch` }
 
   return (
-    <footer className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 px-6 py-3 text-[13px] text-muted-foreground">
+    <footer className="grid min-h-14 items-center gap-3 px-6 py-3 text-[13px] text-muted-foreground md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-6">
       <span className="tabular">
         {paged ? `Showing ${first}–${last} of ${total} rows` : `${total} rows`}
         {total !== unfiltered && ` · filtered from ${unfiltered}`}
       </span>
       {paged && (
         <>
-          <nav aria-label="Pagination" className="flex items-center gap-1">
+          <nav aria-label="Pagination" className="flex flex-wrap items-center gap-1">
             <Button
               variant="ghost"
               size="sm"

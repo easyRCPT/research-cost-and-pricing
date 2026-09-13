@@ -28,7 +28,7 @@ export function DataTableFilterMenu({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="bg-card font-normal">
+        <Button variant="outline" size="sm" className="bg-card px-1.5! font-normal">
           {label}
           <ChevronDownIcon
             data-icon="inline-end"

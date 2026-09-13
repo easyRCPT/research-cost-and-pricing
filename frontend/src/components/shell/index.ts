@@ -11,6 +11,7 @@ export {
   type SidebarSection,
 } from './Sidebar'
 export { TopBar } from './TopBar'
+export { MobileNav } from './MobileNav'
 export { SECTIONS } from './sections'
 export { ScreenNav } from './ScreenNav'
 export { FieldRow } from './FieldRow'
