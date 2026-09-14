@@ -49,12 +49,17 @@
 }
 
 :root {
+<<<<<<< HEAD
     --background: oklch(1 0 0);
+=======
+    --background: oklch(0.95815 0.00011 271.152);
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
+<<<<<<< HEAD
     --primary: oklch(0.205 0 0);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
@@ -67,12 +72,30 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
+=======
+    --primary: oklch(0.25069 0.08767 263.371);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.95571 0.00266 286.349);
+    --muted-foreground: oklch(0.50062 0.02156 258.372);
+    --accent: oklch(0.97343 0.00143 285.217);
+    --accent-foreground: oklch(0.25069 0.08767 263.371);
+    --destructive: oklch(0.48213 0.15299 27.027);
+    --border: oklch(0.9005 0.00713 268.543);
+    --input: oklch(0.90051 0.00724 268.587);
+    --ring: oklch(0.32528 0.10931 262.021);
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
+<<<<<<< HEAD
     --radius: 0.625rem;
+=======
+    --radius: 0.5rem;
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -81,6 +104,7 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+<<<<<<< HEAD
 }
 
 .dark {
@@ -165,6 +189,136 @@
   font-variant-numeric: tabular-nums;
 }
 
+=======
+}
+
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  html {
+    @apply font-sans;
+    /* No elastic bounce sideways: scrolling a table past its end used to drag
+       the whole page with it. */
+    overscroll-behavior-x: none;
+    }
+}
+/* Status colours. */
+@theme {
+  --color-warn: oklch(40.672% 0.07895 90.101);
+  --color-warn-bg: oklch(96.518% 0.04258 95.492);
+  --color-warn-line: oklch(88.392% 0.0755 95.123);
+  --color-good: oklch(47.833% 0.09751 164.851);
+  --color-good-bg: oklch(94.602% 0.01682 168.493);
+  --color-bad: oklch(48.213% 0.15299 27.027);
+  --color-bad-bg: oklch(94.781% 0.01986 25.173);
+  --color-inkind: oklch(46.039% 0.09919 293.239);
+  --color-inkind-bg: oklch(94.315% 0.01764 296.627);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The head pins to the top of the grid while the rows scroll under it.
+   Collapsed borders belong to the table, not the cells, so a sticky head loses
+   its rules the moment it detaches; separate borders stay with each cell. */
+.grid-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.grid-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* The cells own the outer frame. The head carries its own top edge and rounded
+   corners, so it still looks like the top of the table once it has pinned and
+   the rest has scrolled past it. Every cell already draws a right and bottom
+   border, which leaves the top, the left, and the foot to add here.
+
+   The edge rules skip a second head row on purpose: where a head has one, the
+   cells reaching the table's sides span both rows from the first. */
+.grid-table > thead > tr:first-child > * {
+  border-top-width: 1px;
+}
+
+.grid-table > thead > tr:first-child > *:first-child,
+.grid-table > tbody > tr > *:first-child,
+.grid-table > tfoot > tr > *:first-child {
+  border-left-width: 1px;
+}
+
+.grid-table > tfoot > tr:last-child > * {
+  border-bottom-width: 1px;
+}
+
+.grid-table > thead > tr:first-child > *:first-child {
+  border-top-left-radius: var(--radius-md);
+}
+
+.grid-table > thead > tr:first-child > *:last-child {
+  border-top-right-radius: var(--radius-md);
+}
+
+.grid-table > tbody:last-child > tr:last-child > *:first-child,
+.grid-table > tfoot > tr:last-child > *:first-child {
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.grid-table > tbody:last-child > tr:last-child > *:last-child,
+.grid-table > tfoot > tr:last-child > *:last-child {
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Printing has no scroll box to pin to, and a static head repeats itself on
+   every page. */
+@media print {
+  .grid-table thead {
+    position: static;
+  }
+}
+
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
 /* Spinners eat width the narrow entry columns cannot spare. */
 .no-spin::-webkit-outer-spin-button,
 .no-spin::-webkit-inner-spin-button {
@@ -175,4 +329,69 @@
 .no-spin {
   -moz-appearance: textfield;
   appearance: textfield;
+<<<<<<< HEAD
+=======
+}
+
+/* Tables scroll in both directions. Styling ::-webkit-scrollbar is what turns
+   off macOS overlay scrollbars, and Chrome ignores those rules the moment
+   scrollbar-width/scrollbar-color are set, so those only run where the
+   pseudo-element does not exist. */
+.scroll-persist::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 11px;
+  height: 11px;
+}
+
+.scroll-persist::-webkit-scrollbar-track,
+.scroll-persist::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* The transparent border is inset padding, so the thumb has to clip to it. */
+.scroll-persist::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+  background-clip: padding-box;
+}
+
+.scroll-persist::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+  background-clip: padding-box;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .scroll-persist {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 55%, transparent)
+      transparent;
+  }
+}
+
+/* Radix forces scrollbar-width:none on the select viewport from a style tag
+   inside the portal, and Chrome drops every ::-webkit-scrollbar rule once
+   scrollbar-width is set, so this one has to win on the standard properties.
+   The webkit rules are only reached by browsers that ignore those. */
+.scroll-thin.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--muted-foreground) 45%, transparent)
+    transparent;
+}
+
+.scroll-thin.scroll-thin::-webkit-scrollbar {
+  display: block;
+  width: 8px;
+}
+
+.scroll-thin.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-thin.scroll-thin::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted-foreground) 45%, transparent);
+  background-clip: padding-box;
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
 }

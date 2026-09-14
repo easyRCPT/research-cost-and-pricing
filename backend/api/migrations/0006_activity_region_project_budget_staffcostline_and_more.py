@@ -6,83 +6,230 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0005_alter_salaryratemultiplier_multiplier'),
+        ("api", "0005_alter_salaryratemultiplier_multiplier"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Activity',
+            name="Activity",
             fields=[
-                ('code', models.CharField(max_length=10, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=50)),
+                (
+                    "code",
+                    models.CharField(max_length=10, primary_key=True, serialize=False),
+                ),
+                ("name", models.CharField(max_length=50)),
             ],
         ),
         migrations.CreateModel(
-            name='Region',
+            name="Region",
             fields=[
-                ('code', models.CharField(max_length=10, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=100)),
+                (
+                    "code",
+                    models.CharField(max_length=10, primary_key=True, serialize=False),
+                ),
+                ("name", models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('chief_investigator', models.CharField(blank=True, max_length=100)),
-                ('funder', models.CharField(max_length=100)),
-                ('scheme', models.CharField(blank=True, max_length=200)),
-                ('start_year', models.PositiveSmallIntegerField()),
-                ('start_month', models.PositiveSmallIntegerField()),
-                ('end_year', models.PositiveSmallIntegerField()),
-                ('end_month', models.PositiveSmallIntegerField()),
-                ('additional_information', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('activity', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='api.activity')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='api.department')),
-                ('region', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='api.region')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("chief_investigator", models.CharField(blank=True, max_length=100)),
+                ("funder", models.CharField(max_length=100)),
+                ("scheme", models.CharField(blank=True, max_length=200)),
+                ("start_year", models.PositiveSmallIntegerField()),
+                ("start_month", models.PositiveSmallIntegerField()),
+                ("end_year", models.PositiveSmallIntegerField()),
+                ("end_month", models.PositiveSmallIntegerField()),
+                ("additional_information", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "activity",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="api.activity",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="api.department"
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="api.region",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Budget',
+            name="Budget",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mode', models.CharField(choices=[('simple', 'Simple'), ('full', 'Full')], default='full', max_length=10)),
-                ('cost_multiplier', models.DecimalField(decimal_places=2, max_digits=4)),
-                ('in_kind_multiplier', models.DecimalField(decimal_places=2, max_digits=4)),
-                ('gst_applicable', models.BooleanField(default=True)),
-                ('status', models.CharField(choices=[('draft', 'Draft'), ('submitted', 'Submitted'), ('hod_review', 'Head of Department review'), ('dean_review', 'Dean review'), ('approved', 'Approved'), ('withdrawn', 'Withdrawn')], default='draft', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='budgets', to='api.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "mode",
+                    models.CharField(
+                        choices=[("simple", "Simple"), ("full", "Full")],
+                        default="full",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "cost_multiplier",
+                    models.DecimalField(decimal_places=2, max_digits=4),
+                ),
+                (
+                    "in_kind_multiplier",
+                    models.DecimalField(decimal_places=2, max_digits=4),
+                ),
+                ("gst_applicable", models.BooleanField(default=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Draft"),
+                            ("submitted", "Submitted"),
+                            ("hod_review", "Head of Department review"),
+                            ("dean_review", "Dean review"),
+                            ("approved", "Approved"),
+                            ("withdrawn", "Withdrawn"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="budgets",
+                        to="api.project",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='StaffCostLine',
+            name="StaffCostLine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name_role', models.CharField(max_length=100)),
-                ('employment_type', models.CharField(choices=[('Continuing', 'Continuing'), ('Fixed-Term', 'Fixed-Term'), ('Casual', 'Casual')], max_length=20)),
-                ('category', models.CharField(choices=[('Academic', 'Academic'), ('Professional', 'Professional')], max_length=20)),
-                ('classification', models.CharField(max_length=20)),
-                ('time_basis', models.CharField(choices=[('FTE', 'FTE'), ('Daily', 'Daily'), ('Hourly', 'Hourly')], max_length=10)),
-                ('in_kind', models.BooleanField(default=False)),
-                ('budget', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='staff_lines', to='api.budget')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name_role", models.CharField(max_length=100)),
+                (
+                    "employment_type",
+                    models.CharField(
+                        choices=[
+                            ("Continuing", "Continuing"),
+                            ("Fixed-Term", "Fixed-Term"),
+                            ("Casual", "Casual"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("Academic", "Academic"),
+                            ("Professional", "Professional"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("classification", models.CharField(max_length=20)),
+                (
+                    "time_basis",
+                    models.CharField(
+                        choices=[
+                            ("FTE", "FTE"),
+                            ("Daily", "Daily"),
+                            ("Hourly", "Hourly"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("in_kind", models.BooleanField(default=False)),
+                (
+                    "budget",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="staff_lines",
+                        to="api.budget",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='YearAllocation',
+            name="YearAllocation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.PositiveSmallIntegerField()),
-                ('time', models.DecimalField(decimal_places=4, max_digits=8)),
-                ('staff_line', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='allocations', to='api.staffcostline')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("year", models.PositiveSmallIntegerField()),
+                ("time", models.DecimalField(decimal_places=4, max_digits=8)),
+                (
+                    "staff_line",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="allocations",
+                        to="api.staffcostline",
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('staff_line', 'year'), name='unique_year_allocation')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("staff_line", "year"), name="unique_year_allocation"
+                    )
+                ],
             },
         ),
     ]

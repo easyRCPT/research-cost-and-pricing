@@ -3967,46 +3967,6 @@
   }
 },
 {
-  "model": "api.oncostrate",
-  "pk": 34,
-  "fields": {
-    "on_cost_type": "payroll_tax",
-    "employment_type": null,
-    "year": 2023,
-    "rate": "0.0585"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 35,
-  "fields": {
-    "on_cost_type": "payroll_tax",
-    "employment_type": null,
-    "year": 2024,
-    "rate": "0.0585"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 36,
-  "fields": {
-    "on_cost_type": "payroll_tax",
-    "employment_type": null,
-    "year": 2025,
-    "rate": "0.0585"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 37,
-  "fields": {
-    "on_cost_type": "payroll_tax",
-    "employment_type": null,
-    "year": null,
-    "rate": "0.0585"
-  }
-},
-{
   "model": "api.ebaincrease",
   "pk": 2025,
   "fields": {
@@ -4775,6 +4735,22 @@
   "fields": {
     "description": "Leave loading is capped at this many dollars per year",
     "value": "1611.300000"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "max_payroll_tax",
+  "fields": {
+    "description": "Maximum payroll tax rate",
+    "value": "0.058500"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "override_uom_oncosts",
+  "fields": {
+    "description": "Override multiplier for UoM on-costs",
+    "value": "0.000000"
   }
 },
 {

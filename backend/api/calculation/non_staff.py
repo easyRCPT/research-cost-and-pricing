@@ -1,12 +1,18 @@
 from decimal import Decimal
-from typing import Dict
+
+# Cost groups that should not apply additional direct rate and indirect rate
+EXCLUDED_COST_GROUPS = {
+    "contingency",
+    "student_support",
+    "shared_grant_payments",
+}
 
 
 def calculate_non_staff_table(
-    table_data: Dict,
+    table_data: dict,
     start_year: int,
     end_year: int,
-) -> Dict:
+) -> dict:
     """
     Calculate the non staff cost (in kind or not)
     Input format: {'info_table': {}, 'numeric_table': {}}
@@ -25,57 +31,54 @@ def calculate_non_staff_table(
     non_staff_costs = {}
     in_kind_non_staff_costs = {}
 
-    for row_id, info in table_data['info_table'].items():
-        numeric = table_data['numeric_table'][row_id]
+    for row_id, info in table_data["info_table"].items():
+        numeric = table_data["numeric_table"][row_id]
         row_result = calculate_non_staff_row(info, numeric, start_year, end_year)
-        if info.get('in_kind', False):
+        if info.get("in_kind", False):
             in_kind_non_staff_costs[row_id] = row_result
         else:
             non_staff_costs[row_id] = row_result
 
     # Column calculation for direct cost, indirect cost and total cost
     non_staff_costs = calculate_non_staff_column(non_staff_costs, start_year, end_year)
-    in_kind_non_staff_costs = calculate_non_staff_column(in_kind_non_staff_costs, start_year, end_year)
+    in_kind_non_staff_costs = calculate_non_staff_column(
+        in_kind_non_staff_costs, start_year, end_year
+    )
 
     return {
-        'cost_results': non_staff_costs,
-        'in_kind_cost_results': in_kind_non_staff_costs,
+        "cost_results": non_staff_costs,
+        "in_kind_cost_results": in_kind_non_staff_costs,
     }
 
 
 def calculate_non_staff_row(
-    info_data: Dict,
-    num_data: Dict,
+    info_data: dict,
+    num_data: dict,
     start_year: int,
     end_year: int,
-) -> Dict:
+) -> dict:
     """
     Calculate non staff cost line item
     Return input with row total and direct total.
     Not consider indirect cost rate multiplier
     """
-    total = sum(
-        num_data.get(year) or 0
-        for year in range(start_year, end_year + 1)
-    )
+    total = sum(num_data.get(year) or 0 for year in range(start_year, end_year + 1))
 
-    has_additional_direct_rate = info_data.get('add_ten_percent', False)
-    indirect_rate_multiplier = info_data.get('indirect_rate_multiplier', Decimal('1'))
-    direct_total = total * find_direct_rate_multiplier(has_additional_direct_rate, indirect_rate_multiplier)
+    direct_total = total * find_direct_rate_multiplier(info_data)
 
     return {
-        'info': info_data,
-        'numeric': num_data,
-        'total': total,
-        'direct_total': direct_total,
+        "info": info_data,
+        "numeric": num_data,
+        "total": total,
+        "direct_total": direct_total,
     }
 
 
 def calculate_non_staff_column(
-    data: Dict,
+    data: dict,
     start_year: int,
     end_year: int,
-) -> Dict:
+) -> dict:
     """
     Calculate direct and indirect non-staff cost
     Add results into input data dictionary
@@ -89,46 +92,66 @@ def calculate_non_staff_column(
         total = 0
 
         for row in data.values():
-            value = row['numeric'].get(year) or 0
-
-            has_additional_direct_rate = row['info'].get('add_ten_percent', 0)
-            indirect_rate_multiplier = row['info'].get('indirect_rate_multiplier', 1)
+            value = row["numeric"].get(year) or 0
 
             # direct rate
-            value *= find_direct_rate_multiplier(has_additional_direct_rate, indirect_rate_multiplier)
+            value *= find_direct_rate_multiplier(row["info"])
             direct += value
+
             # indirect rate
+            indirect_rate_multiplier = find_indirect_rate_multiplier(row["info"])
+            if row["info"]["cost_group"] in EXCLUDED_COST_GROUPS:
+                indirect_rate_multiplier = 1
             total += value * indirect_rate_multiplier
 
         direct_total[year] = direct
         indirect_total[year] = total - direct
         column_total[year] = total
 
-    data['direct_total'] = {
-        'numeric': direct_total,
-        'total': sum(direct_total.values()),
+    data["direct_total"] = {
+        "numeric": direct_total,
+        "total": sum(direct_total.values()),
     }
-    data['indirect_total'] = {
-        'numeric': indirect_total,
-        'total': sum(indirect_total.values()),
+    data["indirect_total"] = {
+        "numeric": indirect_total,
+        "total": sum(indirect_total.values()),
     }
-    data['column_total'] = {
-        'numeric': column_total,
-        'total': sum(column_total.values()),
+    data["column_total"] = {
+        "numeric": column_total,
+        "total": sum(column_total.values()),
     }
 
     return data
 
 
 def find_direct_rate_multiplier(
-    has_additional_direct_rate: bool,
-    indirect_rate_multiplier: Decimal,
-):
+    info_data: dict,
+) -> Decimal:
     """
     Find direct rate multiplier according to selected additional direct rate and input indirect rate
     If add_ten_percent and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
     """
-    if has_additional_direct_rate and indirect_rate_multiplier <= 1:
-        return 1.1
+    has_additional_direct_rate = info_data.get("add_ten_percent", False)
+    indirect_rate_multiplier = find_indirect_rate_multiplier(info_data)
+    cost_group = info_data["cost_group"]
+
+    if (
+        cost_group not in EXCLUDED_COST_GROUPS
+        and has_additional_direct_rate
+        and indirect_rate_multiplier <= 1
+    ):
+        return Decimal("1.1")
     else:
-        return 1
+        return Decimal(1)
+
+
+def find_indirect_rate_multiplier(
+    info_data: dict,
+) -> Decimal:
+    """A blank rate means no indirect recovery, so it reads as 1."""
+    multiplier = info_data.get("indirect_rate_multiplier")
+    cost_group = info_data["cost_group"]
+    if cost_group not in EXCLUDED_COST_GROUPS and multiplier is not None:
+        return multiplier
+    else:
+        return Decimal(1)

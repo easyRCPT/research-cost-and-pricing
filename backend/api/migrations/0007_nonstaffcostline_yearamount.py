@@ -5,33 +5,71 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0006_activity_region_project_budget_staffcostline_and_more'),
+        ("api", "0006_activity_region_project_budget_staffcostline_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='NonStaffCostLine',
+            name="NonStaffCostLine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.CharField(blank=True, max_length=200)),
-                ('in_kind', models.BooleanField(default=False)),
-                ('add_ten_percent', models.BooleanField(default=False)),
-                ('indirect_rate_multiplier', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True)),
-                ('budget', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='non_staff_lines', to='api.budget')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("description", models.CharField(blank=True, max_length=200)),
+                ("in_kind", models.BooleanField(default=False)),
+                ("add_ten_percent", models.BooleanField(default=False)),
+                (
+                    "indirect_rate_multiplier",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True
+                    ),
+                ),
+                (
+                    "budget",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="non_staff_lines",
+                        to="api.budget",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='YearAmount',
+            name="YearAmount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.PositiveSmallIntegerField()),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('non_staff_line', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='amounts', to='api.nonstaffcostline')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("year", models.PositiveSmallIntegerField()),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "non_staff_line",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="amounts",
+                        to="api.nonstaffcostline",
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('non_staff_line', 'year'), name='unique_year_amount')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("non_staff_line", "year"), name="unique_year_amount"
+                    )
+                ],
             },
         ),
     ]

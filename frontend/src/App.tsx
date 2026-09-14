@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SideRail, TopBar, type RailSection } from "@/components/shell"
@@ -134,6 +135,30 @@ export default function App() {
         </div>
       </div>
     </ProjectProvider>
+=======
+import { Suspense, useState } from 'react'
+import { AppContent, type AppScreen } from '@/components/shell/AppContent'
+import { QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { AppErrorState, AppSkeleton } from './components/shell'
+
+function App() {
+  const [screen, setScreen] = useState<AppScreen>('details')
+
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={(props) => <AppErrorState {...props} />}
+        >
+          <Suspense fallback={<AppSkeleton screen={screen} />}>
+            <AppContent screen={screen} setScreen={setScreen} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
   )
 }
 

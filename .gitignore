@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 db.sqlite3
+backend/staticfiles/
 node_modules/
 dist/
 .env
@@ -10,3 +11,9 @@ dist/
 .DS_Store
 *.vscode
 .vscode/
+
+.claude/*
+# Claude Code only discovers skills at .claude/skills, but the skills
+# themselves live in .agents/ so every agent tool finds them. What is
+# committed is the symlink, not a second copy.
+!.claude/skills

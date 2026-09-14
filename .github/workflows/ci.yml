@@ -1,15 +1,20 @@
 name: CI
 
 on:
+  # A feature branch is covered by its pull_request run. Listening to every push
+  # as well ran the same commit twice at once, and the two runs raced on the
+  # shared uv cache — one would type-check against a half-resolved environment.
   push:
+    branches: [dev, main]
   pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  # Superseded pushes on a feature branch are worth cancelling; main is the
-  # branch people read results from, so let its runs finish.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Superseded runs on a pull request are worth cancelling; dev and main are the
+  # branches people read results from, so let their runs finish.
+  cancel-in-progress: >-
+    ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/main' }}
 
 jobs:
   backend:
@@ -64,6 +69,22 @@ jobs:
         working-directory: backend
         run: uv sync --locked
 
+      # The type drift gate below needs openapi-typescript, which lives in the
+      # frontend's node_modules. Same pins as the frontend job.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
       # The Django analogue of a schema-freshness gate: models are the source,
       # migrations are the artefact, and an uncommitted migration is a broken
       # deploy waiting to happen.
@@ -72,6 +93,16 @@ jobs:
         run: |
           uv run python manage.py makemigrations --check --dry-run || {
             echo "::error::Models changed but no migration was committed. Run 'make makemigrations' and commit the result."
+            exit 1
+          }
+
+      # Serializers are the source, api.d.ts is the artefact.
+      - name: API type drift gate
+        run: |
+          (cd backend && uv run python manage.py spectacular --file ../frontend/schema.yml)
+          (cd frontend && pnpm gen:api)
+          git diff --exit-code frontend/src/types/api.d.ts || {
+            echo "::error::Serializers changed but frontend/src/types/api.d.ts was not regenerated. Run 'make gen-api' and commit the result."
             exit 1
           }
 
@@ -93,7 +124,7 @@ jobs:
         run: uv run python manage.py check --deploy
 
   backend-lint:
-    name: Backend (lint, type-check)
+    name: Backend (lint, type-check, tests)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

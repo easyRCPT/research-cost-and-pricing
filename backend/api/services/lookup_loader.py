@@ -1,139 +1,193 @@
-from typing import Dict
+from typing import cast
+
 from django.core.cache import cache
-from ..models import SalaryRate, SalaryRateMultiplier, EbaIncrease, OnCostRate, CalculationConstant, Department, \
-    NonStaffCostCategory, Activity, Region, DeliverableType, RevenueCategory
+from django.db import models
+from django.db.models import QuerySet
 
-CACHE_KEY = 'lookup_constants_dict'
+from ..models import (
+    Activity,
+    CalculationConstant,
+    DeliverableType,
+    Department,
+    EbaIncrease,
+    IncrementCap,
+    MinimumCostRecoveryMultiplier,
+    NonStaffCostCategory,
+    OnCostRate,
+    Region,
+    RevenueCategory,
+    SalaryRate,
+    SalaryRateMultiplier,
+)
+
+CACHE_KEY = "lookup_models"
+CONSTANTS_CACHE_KEY = "lookup_constants"
+CACHE_TIMEOUT = 3600
+
+REQUIRED_CONSTANTS = {
+    "max_leave_loading",
+    "max_payroll_tax",
+    "override_uom_oncosts",
+    "gst_rate",
+}
 
 
-def get_lookup_tables() -> Dict:
+class LookupTable(models.TextChoices):
+    DEPARTMENTS = "departments"
+    SALARY_RATES = "salary_rates"
+    SALARY_RATE_MULTIPLIERS = "salary_rate_multipliers"
+    INCREMENT_CAPS = "increment_caps"
+    EBA_INCREASES = "eba_increases"
+    ON_COST_RATES = "on_cost_rates"
+    NON_STAFF_COST_CATEGORIES = "non_staff_cost_categories"
+    MINIMUM_COST_RECOVERY_MULTIPLIERS = "minimum_cost_recovery_multipliers"
+    CALCULATION_CONSTANTS = "calculation_constants"
+    ACTIVITIES = "activities"
+    REGIONS = "regions"
+    DELIVERABLE_TYPES = "deliverable_types"
+    REVENUE_CATEGORIES = "revenue_categories"
+
+
+# Every table's rows, in a stable order. The keys are the response's keys.
+LOOKUP_TABLES: dict[LookupTable, QuerySet] = {
+    LookupTable.DEPARTMENTS: Department.objects.order_by("code"),
+    LookupTable.SALARY_RATES: SalaryRate.objects.order_by(
+        "payroll_type", "category", "classification"
+    ),
+    LookupTable.SALARY_RATE_MULTIPLIERS: SalaryRateMultiplier.objects.order_by(
+        "time_basis"
+    ),
+    LookupTable.INCREMENT_CAPS: IncrementCap.objects.order_by("level"),
+    LookupTable.EBA_INCREASES: EbaIncrease.objects.order_by("year"),
+    LookupTable.ON_COST_RATES: OnCostRate.objects.order_by(
+        "on_cost_type", "employment_type", "year"
+    ),
+    LookupTable.NON_STAFF_COST_CATEGORIES: NonStaffCostCategory.objects.order_by(
+        "cost_category", "cost_subcategory"
+    ),
+    LookupTable.MINIMUM_COST_RECOVERY_MULTIPLIERS: (
+        MinimumCostRecoveryMultiplier.objects.order_by("year")
+    ),
+    LookupTable.CALCULATION_CONSTANTS: CalculationConstant.objects.order_by("name"),
+    LookupTable.ACTIVITIES: Activity.objects.order_by("code"),
+    LookupTable.REGIONS: Region.objects.order_by("code"),
+    LookupTable.DELIVERABLE_TYPES: DeliverableType.objects.order_by("code"),
+    LookupTable.REVENUE_CATEGORIES: RevenueCategory.objects.order_by(
+        "budget_ledger_id"
+    ),
+}
+
+
+def get_lookup_tables() -> dict[str, list[models.Model]]:
     """
-    Public data access interface with table formatting.
-    Used for displaying lookup tables.
+    Return all lookup table rows keyed by table name.
+    Results are cached for CACHE_TIMEOUT seconds.
     """
-    lookup_tables = get_constants()
-    salary_rate = lookup_tables['salary_rate']
+    tables = cache.get(CACHE_KEY)
+    if tables is None:
+        # .all() clones the module-level queryset; evaluating it directly would pin
+        # the first result set to the module for the life of the process.
+        tables = {
+            table.value: list(queryset.all())
+            for table, queryset in LOOKUP_TABLES.items()
+        }
+        cache.set(CACHE_KEY, tables, CACHE_TIMEOUT)
+    return tables
 
-    return {
-        **lookup_tables,
-        'salary_rate': {
-            f"{row_id[0]}_{row_id[1]}_{row_id[2]}": {
-                'payroll_type': row_id[0],
-                'category': row_id[1],
-                'classification': row_id[2],
-                'rate': rate
-            }
-            for row_id, rate in salary_rate.items()
-        },
+
+def get_constants() -> dict:
+    """
+    Get lookup tables from cache and convert them into calculation dictionaries.
+    The converted result is cached for CACHE_TIMEOUT seconds.
+    """
+    constants = cache.get(CONSTANTS_CACHE_KEY)
+
+    if constants is not None:
+        return constants
+
+    tables = get_lookup_tables()
+
+    # get_lookup_tables() returns generic Model types,
+    # but the type of each table is fixed by LOOKUP_TABLES.
+    salary_rates = cast(
+        list[SalaryRate],
+        tables["salary_rates"],
+    )
+    salary_rate = {
+        (
+            row.payroll_type,
+            row.category,
+            row.classification,
+        ): row.rate
+        for row in salary_rates
     }
 
-
-def get_constants():
-    """
-    Public data access interface with caching.
-    Used for calculation.
-    """
-    constants = cache.get(CACHE_KEY)
-    if constants is None:
-        constants = load_lookup_dict()
-        cache.set(CACHE_KEY, constants, 3600)  # cache for one hour
-    return constants
-
-
-def load_lookup_dict() -> Dict:
-    """
-    Load lookup tables from database, and convert them into plain python dictionaries.
-    This function is executed only once when the cache is invalidated.
-    """
-
-    # Convert the query results from each lookup table into a dictionary.
-    salary_rate_data = {
-        (item['payroll_type'], item['category'], item['classification']): item['rate']
-        for item in SalaryRate.objects.values('payroll_type', 'category', 'classification', 'rate')
+    salary_rate_multipliers = cast(
+        list[SalaryRateMultiplier],
+        tables["salary_rate_multipliers"],
+    )
+    salary_rate_multiplier = {
+        row.time_basis: row.multiplier for row in salary_rate_multipliers
     }
 
-    salary_rate_multiplier_data = {
-        item['time_basis']: item['multiplier']
-        for item in SalaryRateMultiplier.objects.values('time_basis', 'multiplier')
-    }
+    eba_increases = cast(
+        list[EbaIncrease],
+        tables["eba_increases"],
+    )
+    eba_multiplier = {row.year: row.multiplier for row in eba_increases}
 
-    eba_multiplier = {
-        item['year']: item['multiplier']
-        for item in EbaIncrease.objects.values('year', 'multiplier')
-    }
-
+    on_cost_rates = cast(
+        list[OnCostRate],
+        tables["on_cost_rates"],
+    )
     on_cost_components = {}
-    for item in OnCostRate.objects.values('on_cost_type', 'employment_type', 'rate'):
-        on_cost_components.setdefault(item['employment_type'], {})[item['on_cost_type']] = item['rate']
 
-    constants = {
-        item['name']: item['value']
-        for item in CalculationConstant.objects.values('name', 'value')
+    # Structure: employment_type -> year -> on_cost_type -> rate
+    for row in on_cost_rates:
+        on_cost_components.setdefault(row.on_cost_type, {}).setdefault(
+            row.employment_type, {}
+        )[row.year] = row.rate
+
+    # Check that each on-cost type has a default rate
+    for on_cost_type, employment_rates in on_cost_components.items():
+        for employment_type, year_rates in employment_rates.items():
+            if None not in year_rates:
+                raise ValueError(
+                    f"Missing default rate for {on_cost_type} and {employment_type}"
+                )
+
+    calculation_constants = cast(
+        list[CalculationConstant],
+        tables["calculation_constants"],
+    )
+    constants = {row.name: row.value for row in calculation_constants}
+
+    validate_constants(constants)
+
+    result = {
+        "salary_rate": salary_rate,
+        "salary_rate_multiplier": salary_rate_multiplier,
+        "eba": eba_multiplier,
+        "on_cost_components": on_cost_components,
+        "constants": constants,
     }
 
-    departments = {
-        item['code']: {
-            'name': item['name'],
-            'school': item['school'],
-            'school_code': item['school_code'],
-            'faculty': item['faculty'],
-            'faculty_code': item['faculty_code'],
-            'budget_unit': item['budget_unit'],
-        }
-        for item in Department.objects.values(
-            'code', 'name', 'school', 'school_code', 'faculty', 'faculty_code', 'budget_unit'
+    cache.set(CONSTANTS_CACHE_KEY, result, CACHE_TIMEOUT)
+
+    return result
+
+
+def validate_constants(constants: dict) -> None:
+    missing = REQUIRED_CONSTANTS - constants.keys()
+    if missing:
+        raise KeyError(
+            f"Missing required calculation constants: {','.join(sorted(missing))}"
         )
-    }
-
-    non_staff_cost_categories = {
-        item['ledger_id']: {
-            'cost_category': item['cost_category'],
-            'cost_subcategory': item['cost_subcategory'],
-        }
-        for item in NonStaffCostCategory.objects.values('ledger_id', 'cost_category', 'cost_subcategory')
-    }
-
-    activities = {
-        item['code']: item['name']
-        for item in Activity.objects.values('code', 'name')
-    }
-
-    regions = {
-        item['code']: item['name']
-        for item in Region.objects.values('code', 'name')
-    }
-
-    deliverable_types = {
-        item['code']: item['name']
-        for item in DeliverableType.objects.values('code', 'name')
-    }
-
-    revenue_categories = {
-        item['budget_ledger_id']: {
-            'external_party': item['external_party'],
-            'description': item['description'],
-        }
-        for item in RevenueCategory.objects.values('budget_ledger_id', 'external_party', 'description')
-    }
-
-    # Store all lookup dictionaries into a single dictionary.
-    return {
-        'salary_rate': salary_rate_data,
-        'salary_rate_multiplier': salary_rate_multiplier_data,
-        'eba': eba_multiplier,
-        'on_cost_components': on_cost_components,
-        'constants': constants,
-        'departments': departments,
-        'non_staff_cost_categories': non_staff_cost_categories,
-        'activities': activities,
-        'regions': regions,
-        'deliverable_types': deliverable_types,
-        'revenue_categories': revenue_categories,
-    }
 
 
-def invalidate_lookup_cache():
+def invalidate_lookup_cache() -> None:
     """
     Refresh the cache after an administrator modifies Lookup table data.
     """
     cache.delete(CACHE_KEY)
+    cache.delete(CONSTANTS_CACHE_KEY)

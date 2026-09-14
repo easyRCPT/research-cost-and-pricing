@@ -1,0 +1,82 @@
+name: Task
+description: A concrete piece of work — build it, change it, or clean it up.
+title: "[task] "
+labels: ["task", "status: needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        A task is small enough that someone can open the file and start. If it
+        still needs breaking down first, file it as a **feature** instead.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs doing
+      description: One or two sentences. Say the change, not the background.
+      placeholder: Replace the negative client-side line ids with a UUID plus a position field.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      multiple: true
+      options:
+        - frontend (React SPA)
+        - backend (Django API)
+        - infra (CI, Render, Neon, Docker, Makefile)
+    validations:
+      required: true
+
+  - type: input
+    id: parent
+    attributes:
+      label: Parent feature
+      description: The issue this is a piece of, if there is one. Just the number.
+      placeholder: "#12"
+    validations:
+      required: false
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where in the code
+      description: >
+        Files, directories, or the endpoint. Guesses are fine — a wrong pointer
+        still saves whoever picks this up a search.
+      placeholder: |
+        frontend/src/features/pricing/AdjustPriceSection.tsx
+        backend/api/serializers.py
+    validations:
+      required: false
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: How anyone can tell this is finished. Write it as a checklist.
+      value: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: Constraints, prior attempts, links, screenshots.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: agent
+    attributes:
+      label: Agent readiness
+      options:
+        - label: >
+            The file paths and the "done when" list above are concrete enough that
+            a Claude Code agent could start on this without asking a question.
+          required: false

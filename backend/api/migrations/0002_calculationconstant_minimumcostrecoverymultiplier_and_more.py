@@ -4,33 +4,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0001_initial'),
+        ("api", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CalculationConstant',
+            name="CalculationConstant",
             fields=[
-                ('name', models.CharField(max_length=50, primary_key=True, serialize=False)),
-                ('description', models.CharField(blank=True, max_length=200)),
-                ('value', models.DecimalField(decimal_places=6, max_digits=12)),
+                (
+                    "name",
+                    models.CharField(max_length=50, primary_key=True, serialize=False),
+                ),
+                ("description", models.CharField(blank=True, max_length=200)),
+                ("value", models.DecimalField(decimal_places=6, max_digits=12)),
             ],
         ),
         migrations.CreateModel(
-            name='MinimumCostRecoveryMultiplier',
+            name="MinimumCostRecoveryMultiplier",
             fields=[
-                ('year', models.PositiveSmallIntegerField(primary_key=True, serialize=False)),
-                ('multiplier', models.DecimalField(decimal_places=2, max_digits=4)),
+                (
+                    "year",
+                    models.PositiveSmallIntegerField(primary_key=True, serialize=False),
+                ),
+                ("multiplier", models.DecimalField(decimal_places=2, max_digits=4)),
             ],
         ),
         migrations.CreateModel(
-            name='NonStaffCostCategory',
+            name="NonStaffCostCategory",
             fields=[
-                ('ledger_id', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('cost_category', models.CharField(max_length=100)),
-                ('cost_subcategory', models.CharField(max_length=150)),
+                (
+                    "ledger_id",
+                    models.PositiveIntegerField(primary_key=True, serialize=False),
+                ),
+                ("cost_category", models.CharField(max_length=100)),
+                ("cost_subcategory", models.CharField(max_length=150)),
             ],
         ),
     ]

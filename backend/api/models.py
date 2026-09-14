@@ -1,11 +1,16 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings 
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
-# Create your models here.
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
-#------------------- Schema for Lookup table data -------------
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
+
+
+# ------------------- Schema for Lookup table data -------------
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
@@ -18,11 +23,16 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
+
 class User(AbstractUser):
     department = models.ForeignKey(
         # models.PROTECT prevents a department from being deleted if it has users
-        "Department", null=True, blank=True, on_delete=models.PROTECT
+        "Department",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
     )
+
 
 class SalaryRateMultiplier(models.Model):
     # tSalaryRateMultiplier. Converts a stored rate to the entered time basis:
@@ -30,7 +40,11 @@ class SalaryRateMultiplier(models.Model):
     # SalaryRate are already hourly rates, not because hourly needs no
     # conversion in general.
     time_basis = models.CharField(max_length=20, primary_key=True)
-    multiplier = models.DecimalField(max_digits=20, decimal_places=18)
+    multiplier = models.DecimalField(
+        max_digits=20,
+        decimal_places=18,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     def __str__(self):
         return f"{self.time_basis} x{self.multiplier}"
@@ -42,11 +56,17 @@ class IncrementCap(models.Model):
     level = models.CharField(max_length=20, primary_key=True)
     max_steps = models.PositiveSmallIntegerField()
 
+
 # TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
 # Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField(primary_key=True)
-    multiplier = models.DecimalField(max_digits=8, decimal_places=6)
+    multiplier = models.DecimalField(
+        max_digits=8,
+        decimal_places=6,
+        validators=[MinValueValidator(Decimal(0))],
+    )
+
 
 class SalaryRate(models.Model):
     """
@@ -62,10 +82,14 @@ class SalaryRate(models.Model):
         ACADEMIC = "Academic", "Academic"
         PROFESSIONAL = "Professional", "Professional"
 
-    payroll_type = models.CharField(max_length = 20, choices = PayrollType.choices)
+    payroll_type = models.CharField(max_length=20, choices=PayrollType.choices)
     category = models.CharField(max_length=20, choices=Category.choices)
     classification = models.CharField(max_length=20)
-    rate = models.DecimalField(max_digits=12,decimal_places=4)
+    rate = models.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     class Meta:
         constraints = [
@@ -80,23 +104,44 @@ class SalaryRate(models.Model):
     def __str__(self):
         return f"{self.payroll_type} {self.category} {self.classification}"
 
-# TODO: Remove 'payroll_tax' and 'year'. Store payroll tax rate in constants if fixed, otherwise use separate model.
+
+# Payroll tax is not here: it is a state tax on the employer with no
+# employment type, read from the max_payroll_tax constant. If it ever needs a
+# year-based rate it belongs in its own model.
 class OnCostRate(models.Model):
     """
-    On-cost percentages from the excel's lookup tables.
+    On-cost percentages from the Excel's lookup tables.
 
     employment_type and year are both nullable; which one applies
     (or neither) depends on on_cost_type.
     """
 
+    if TYPE_CHECKING:
+
+        def get_on_cost_type_display(self) -> str: ...
+
     class OnCostType(models.TextChoices):
-        SUPERANNUATION = "superannuation", "Superannuation" # year + employment_type, year falls back to None
-        PAYROLL_TAX = "payroll_tax", "Payroll Tax" #year only, employment_type always None
-        WORKCOVER = "workcover", "WorkCover" # employment_type only, year always None
-        LEAVE_LOADING = "leave_loading", "Leave Loading" # employment_type only, year always None
-        LONG_SERVICE_LEAVE = "long_service_leave", "Long Service Leave"  # employment_type only; year always None
-        PARENTAL_LEAVE = "parental_leave", "Parental Leave"  # employment_type only; year always None
-        ANNUAL_LEAVE_PROVISION = "annual_leave_provision", "Annual Leave Provision"  # employment_type only; year always None
+        SUPERANNUATION = (
+            "superannuation",
+            "Superannuation",
+        )  # year + employment_type, year falls back to None
+        WORKCOVER = "workcover", "WorkCover"  # employment_type only, year always None
+        LEAVE_LOADING = (
+            "leave_loading",
+            "Leave Loading",
+        )  # employment_type only, year always None
+        LONG_SERVICE_LEAVE = (
+            "long_service_leave",
+            "Long Service Leave",
+        )  # employment_type only; year always None
+        PARENTAL_LEAVE = (
+            "parental_leave",
+            "Parental Leave",
+        )  # employment_type only; year always None
+        ANNUAL_LEAVE_PROVISION = (
+            "annual_leave_provision",
+            "Annual Leave Provision",
+        )  # employment_type only; year always None
 
     class EmploymentType(models.TextChoices):
         CONTINUING = "Continuing", "Continuing"
@@ -107,18 +152,20 @@ class OnCostRate(models.Model):
     employment_type = models.CharField(
         max_length=20, choices=EmploymentType.choices, null=True, blank=True
     )
-    year = models.PositiveSmallIntegerField(null=True,blank=True)
+    year = models.PositiveSmallIntegerField(null=True, blank=True)
 
     rate = models.DecimalField(
-        max_digits=6, decimal_places=4,
-        help_text="Proportion, not percentage. E.g 0.1200 means 12%"
+        max_digits=6,
+        decimal_places=4,
+        validators=[MinValueValidator(Decimal(0))],
+        help_text="Proportion, not percentage. E.g 0.1200 means 12%",
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields = ["on_cost_type", "employment_type", "year"],
-                name= "unique_on_cost_rate",
+                fields=["on_cost_type", "employment_type", "year"],
+                name="unique_on_cost_rate",
                 nulls_distinct=False,
             )
         ]
@@ -127,7 +174,7 @@ class OnCostRate(models.Model):
         scope = self.year if self.year is not None else "all years"
         return f"{self.get_on_cost_type_display()} - {self.employment_type or 'any'} ({scope})"
 
-# TODO: Check if there is a contingency category when import. eg. (some ledger id like 0000, contingency, contingency)
+
 class NonStaffCostCategory(models.Model):
     # The expense types a non-staff cost line can be booked against. Each one
     # carries the finance ledger ID that ends up on the budget form, which is
@@ -139,6 +186,7 @@ class NonStaffCostCategory(models.Model):
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
 
+
 # TODO: Consider whether this should be stored as a calculation constant
 # Calculation engine uses multiplier stored in Budget not this
 class MinimumCostRecoveryMultiplier(models.Model):
@@ -147,7 +195,11 @@ class MinimumCostRecoveryMultiplier(models.Model):
     # this to decide whether a submitted budget gets routed to a Dean.
 
     year = models.PositiveSmallIntegerField(primary_key=True)
-    multiplier = models.DecimalField(max_digits=4, decimal_places=2)
+    multiplier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     def __str__(self):
         return f"{self.year}: {self.multiplier}"
@@ -158,10 +210,14 @@ class CalculationConstant(models.Model):
     # lookup table. Stored as rows rather than Python constants
     name = models.CharField(max_length=50, primary_key=True)
     description = models.CharField(max_length=200, blank=True)
-    value = models.DecimalField(max_digits=12, decimal_places=6)
+    value = models.DecimalField(
+        max_digits=12,
+        decimal_places=6,
+    )
 
     def __str__(self):
         return f"{self.name} = {self.value}"
+
 
 class Activity(models.Model):
     code = models.CharField(max_length=10, primary_key=True)
@@ -178,12 +234,14 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
+
 class DeliverableType(models.Model):
     code = models.CharField(max_length=10, primary_key=True)
-    name = models.CharField(max_length = 100)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
+
 
 class RevenueCategory(models.Model):
     budget_ledger_id = models.PositiveIntegerField(primary_key=True)
@@ -193,11 +251,31 @@ class RevenueCategory(models.Model):
     def __str__(self):
         return f"{self.description} ({self.budget_ledger_id})"
 
+
 # TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
 
-#------------------- Schema for Data Derived From Application -------------
+# ------------------- Schema for Data Derived From Application -------------
+
+
+def build_account_string(
+    company: str,
+    cost_centre: str,
+    activity: str | None,
+    region: str | None,
+) -> str:
+    if not (activity and region):
+        return ""
+    return f"{company}-{cost_centre}-{activity}-{region}"
+
 
 class Project(models.Model):
+    if TYPE_CHECKING:
+        id: int
+        department_id: str
+        activity_id: str | None
+        region_id: str | None
+        budgets: RelatedManager["Budget"]
+
     COMPANY_CODE = "C001"
 
     # Store the central data
@@ -205,13 +283,15 @@ class Project(models.Model):
     department = models.ForeignKey("Department", on_delete=models.PROTECT)
     chief_investigator = models.CharField(max_length=100, blank=True)
     funder = models.CharField(max_length=100)
+    other_funder = models.CharField(max_length=200, blank=True, default="")
+    other_funder_category = models.CharField(max_length=100, blank=True, default="")
     scheme = models.CharField(max_length=200, blank=True)
 
     # Dictates potential year allocations for staff
     start_year = models.PositiveSmallIntegerField()
-    start_month = models.PositiveSmallIntegerField()
+    start_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
     end_year = models.PositiveSmallIntegerField()
-    end_month = models.PositiveSmallIntegerField()
+    end_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
 
     activity = models.ForeignKey(
         "Activity", null=True, blank=True, on_delete=models.PROTECT
@@ -230,23 +310,30 @@ class Project(models.Model):
     # Account string computed fresh from existing fields
     @property
     def account_string(self):
-        if not (self.activity_id and self.region_id):
-            return ""
-        return "-".join(
-            (self.COMPANY_CODE, self.department_id, self.activity_id, self.region_id)
+        return build_account_string(
+            self.COMPANY_CODE,
+            self.department_id,
+            self.activity_id,
+            self.region_id,
         )
 
     def __str__(self):
         return self.title
 
 
+# TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
     # attempt, a revision after a rejection, a variant for a different funder,
     # which is the thing the workbook cannot do, since one file is one budget.
     #
     # The multipliers are stored per budget rather than read from
-    # CalculationConstant at calculation time. 
+    # CalculationConstant at calculation time.
+
+    if TYPE_CHECKING:
+
+        def get_status_display(self) -> str: ...
+
     class Mode(models.TextChoices):
         SIMPLE = "simple", "Simple"
         FULL = "full", "Full"
@@ -259,6 +346,12 @@ class Budget(models.Model):
         APPROVED = "approved", "Approved"
         WITHDRAWN = "withdrawn", "Withdrawn"
 
+    if TYPE_CHECKING:
+        id: int
+        deliverables: RelatedManager["Deliverable"]
+        staff_lines: RelatedManager["StaffCostLine"]
+        non_staff_lines: RelatedManager["NonStaffCostLine"]
+
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE
     )
@@ -266,15 +359,38 @@ class Budget(models.Model):
 
     # Seeded from CalculationConstant when the budget is created, not by a
     # field default, because the current values live in the database.
-    cost_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
-    in_kind_multiplier = models.DecimalField(max_digits=4, decimal_places=2)
+    cost_multiplier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
+    in_kind_multiplier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
+
+    margin = models.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+        default=Decimal("0.30"),
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     gst_applicable = models.BooleanField(default=True)
 
-    cash_co_contribution = models.DecimalField(max_digits=12, decimal_places=2,
-                                               default=Decimal("0.00"))
+    cash_co_contribution = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal(0),
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     comments = models.TextField(blank=True, default="")
+
+    justification = models.CharField(max_length=200, blank=True, default="")
+    justification_notes = models.TextField(blank=True, default="")
+    dean_exemption_reason = models.TextField(blank=True, default="")
 
     # Plain CharField rather than whatever it will be when
     # authentication comes in
@@ -288,14 +404,23 @@ class Budget(models.Model):
     def __str__(self):
         return f"{self.project} ({self.get_status_display()})"
 
+
 class Deliverable(models.Model):
-    budget = models.ForeignKey("Budget", related_name="deliverables",
-                               on_delete=models.CASCADE)
+    if TYPE_CHECKING:
+        id: int
+
+    budget = models.ForeignKey(
+        "Budget", related_name="deliverables", on_delete=models.CASCADE
+    )
     number = models.PositiveSmallIntegerField()
     description = models.CharField(max_length=200)
     deliverable_type = models.ForeignKey("DeliverableType", on_delete=models.PROTECT)
     invoice_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal(0))],
     )
 
     due_date = models.CharField(max_length=100, blank=True)
@@ -305,7 +430,7 @@ class Deliverable(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["budget","number"], name="unique_deliverable_number"
+                fields=["budget", "number"], name="unique_deliverable_number"
             )
         ]
 
@@ -326,6 +451,10 @@ class StaffCostLine(models.Model):
         FTE = "FTE", "FTE"
         DAILY = "Daily", "Daily"
         HOURLY = "Hourly", "Hourly"
+
+    if TYPE_CHECKING:
+        id: int
+        allocations: RelatedManager["YearAllocation"]
 
     budget = models.ForeignKey(
         "Budget", related_name="staff_lines", on_delete=models.CASCADE
@@ -356,7 +485,11 @@ class YearAllocation(models.Model):
         "StaffCostLine", related_name="allocations", on_delete=models.CASCADE
     )
     year = models.PositiveSmallIntegerField()
-    time = models.DecimalField(max_digits=8, decimal_places=4)
+    time = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     # If a Staff line disappears, so too should a year allocation.
     # Also, there should not be an allocation sharing the same year
@@ -371,15 +504,21 @@ class YearAllocation(models.Model):
     def __str__(self):
         return f"{self.staff_line} {self.year}: {self.time}"
 
+
 class NonStaffCostLine(models.Model):
     """
     A non-salary cost on a budget: equipment, travel etc.
     Amounts live in YearAmount, one row per project year.
     """
 
+    if TYPE_CHECKING:
+        id: int
+        amounts: RelatedManager["YearAmount"]
+
     # Carries reference data, FK allows that data to be connected
-    budget = models.ForeignKey("Budget", related_name="non_staff_lines",
-                               on_delete=models.CASCADE)
+    budget = models.ForeignKey(
+        "Budget", related_name="non_staff_lines", on_delete=models.CASCADE
+    )
 
     category = models.ForeignKey("NonStaffCostCategory", on_delete=models.PROTECT)
 
@@ -391,15 +530,20 @@ class NonStaffCostLine(models.Model):
     add_ten_percent = models.BooleanField(default=False)
 
     indirect_rate_multiplier = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True 
+        max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal(0))],
     )
 
     def __str__(self):
         return f"{self.category} - {self.description}"
 
+
 class YearAmount(models.Model):
     """
-    What a non-staff line costs in one project year. 
+    What a non-staff line costs in one project year.
     Holds actual cost directly, compared to Year Allocation which
     holds time.
     """
@@ -410,7 +554,11 @@ class YearAmount(models.Model):
     )
 
     year = models.PositiveSmallIntegerField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))],
+    )
 
     # Unique on non_staff_line and year so there isn't another year
     # for a single line
@@ -423,7 +571,3 @@ class YearAmount(models.Model):
 
     def __str__(self):
         return f"{self.non_staff_line} {self.year}: {self.amount}"
-
-
-    
-

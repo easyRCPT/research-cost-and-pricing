@@ -1,0 +1,73 @@
+name: Bug
+description: Something is not working as intended.
+title: "[bug] "
+labels: ["bug", "status: needs triage"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: The wrong behaviour, in one or two sentences. Observed only — the cause goes further down.
+      placeholder: The Adjust Price subtotal keeps the old margin until the page is reloaded.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      multiple: true
+      options:
+        - frontend (React SPA)
+        - backend (Django API)
+        - infra (CI, Render, Neon, Docker, Makefile)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where you saw it
+      multiple: true
+      options:
+        - Local dev
+        - Render (deployed)
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where in the code
+      description: >
+        Files, directories, or the API endpoint. Guesses are fine — a wrong
+        pointer still saves whoever picks this up a search. Put the diagnosis
+        here, not under "What happens".
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Errors, logs or screenshots
+      description: Paste the console error, the traceback, or a screenshot.
+    validations:
+      required: false

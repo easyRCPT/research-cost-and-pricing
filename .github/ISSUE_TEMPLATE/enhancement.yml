@@ -1,0 +1,58 @@
+name: Enhancement
+description: It works as intended, but it should be better. UI and UX polish.
+title: "[enhancement] "
+labels: ["enhancement", "priority: low", "status: needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        If it is **not** doing what it was built to do — a control nobody can see,
+        a number that comes out wrong — that is a bug, not an enhancement. File it
+        as a bug so it gets the priority it deserves.
+
+  - type: textarea
+    id: now
+    attributes:
+      label: What it looks like now
+      description: Say what is unsatisfying, not just that it is.
+      placeholder: Lookup table rows are tall enough that only six fit on screen, so filtering means scrolling twice.
+    validations:
+      required: true
+
+  - type: textarea
+    id: better
+    attributes:
+      label: What would be better
+      description: Rough is fine. Screenshots and sketches help more than paragraphs.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      multiple: true
+      options:
+        - frontend (React SPA)
+        - backend (Django API)
+        - infra (CI, Render, Neon, Docker, Makefile)
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where in the code
+    validations:
+      required: false
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: What has to be true before this ships. A checklist.
+      value: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: false
