@@ -1,0 +1,168 @@
+"""Regenerate src/lib/lookups.ts from the RCPT workbook.
+
+    pip install openpyxl
+    python3 scripts/extract-lookups.py path/to/Research-Costing-and-Pricing-Tool-v4.4.1.xlsm
+
+Cell references below are the workbook's named ranges on the 'Lookup Tables' sheet.
+"""
+import openpyxl, json, os, sys, warnings
+warnings.filterwarnings("ignore")
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
+    "~/Downloads/Research-Costing-and-Pricing-Tool-v4.4.1 (6).xlsm")
+OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src/lib/lookups.ts")
+wb=openpyxl.load_workbook(SRC, data_only=True)
+lt=wb["Lookup Tables"]
+def cells(ref):
+    return [[("" if c.value is None else (c.value.strip() if isinstance(c.value,str) else c.value)) for c in r]
+            for r in lt[ref]]
+def col(ref):
+    return [r[0] for r in cells(ref) if r[0] != ""]
+def pairs(ref):
+    return [r for r in cells(ref) if r[0] != ""]
+
+org      = [r for r in cells("AC4:AH207") if r[0] != ""]
+expenses = [r for r in cells("H132:J149") if r[0] != ""]
+regions  = pairs("O11:P40")
+acts     = pairs("O4:P5")
+research = col("R5:R7")
+justify  = col("R60:R66")
+deliv    = pairs("O51:P60")
+curr     = col("U36:U56")
+revenue  = [r for r in cells("AN4:AP12") if r[0] != ""]
+eba      = [r for r in cells("H4:I22") if r[0] != ""]
+minmult  = [r for r in cells("L29:M35") if r[0] != ""]
+maxstep  = [r for r in cells("L10:M25") if r[0] != ""]
+
+def s(v): return json.dumps(str(v))
+L=[]
+w=L.append
+w("/**")
+w(" * Reference data lifted from the workbook — 'Lookup Tables' sheet of")
+w(" * Research-Costing-and-Pricing-Tool-v4.4.1.xlsm. Regenerate rather than hand-edit.")
+w(" */")
+w("")
+w("export interface OrgUnit {")
+w("  department: string")
+w("  deptCode: string")
+w("  school: string")
+w("  schoolCode: string")
+w("  faculty: string")
+w("  facultyCode: string")
+w("}")
+w("")
+w("/** tb_Org_Units — the Department dropdown, and what each department resolves to. */")
+w("export const ORG_UNITS: OrgUnit[] = [")
+for d,dc,sch,sc,fac,fc in org:
+    w(f"  {{ department: {s(d)}, deptCode: {s(dc)}, school: {s(sch)}, schoolCode: {s(sc)}, faculty: {s(fac)}, facultyCode: {s(fc)} }},")
+w("]")
+w("")
+w("export const DEPARTMENTS = ORG_UNITS.map((u) => u.department)")
+w("")
+w("export const ORG_UNIT_BY_DEPARTMENT: Record<string, OrgUnit> = Object.fromEntries(")
+w("  ORG_UNITS.map((u) => [u.department, u]),")
+w(")")
+w("")
+w("export const FACULTIES = [...new Set(ORG_UNITS.map((u) => u.faculty))].sort()")
+w("")
+w("/** Company is fixed in the workbook; the rest of the account string is looked up. */")
+w('export const COMPANY_CODE = "C001"')
+w("")
+w("export const ACTIVITY_CODES: Record<string, string> = {")
+for n,c in acts: w(f"  {s(n)}: {s(c)},")
+w("}")
+w("")
+w("export const ACTIVITIES = Object.keys(ACTIVITY_CODES)")
+w("")
+w("export const REGION_CODES: Record<string, string> = {")
+for n,c in regions: w(f"  {s(n)}: {s(c)},")
+w("}")
+w("")
+w("export const REGIONS = Object.keys(REGION_CODES)")
+w("")
+w("/** vl_project_attribute_string — company-costcentre-activity-region. */")
+w("export function accountString(department: string, activity: string, region: string) {")
+w("  const unit = ORG_UNIT_BY_DEPARTMENT[department]")
+w('  if (!unit) return ""')
+w("  return [COMPANY_CODE, unit.deptCode, ACTIVITY_CODES[activity] ?? \"\", REGION_CODES[region] ?? \"\"].join(\"-\")")
+w("}")
+w("")
+w("export interface NonStaffExpense {")
+w("  category: string")
+w("  expense: string")
+w("  ledgerId: string")
+w("}")
+w("")
+w("/** vl_nonstaff_costs_subcategory — cost category, its expense types, and ledger IDs. */")
+w("export const NON_STAFF_EXPENSES: NonStaffExpense[] = [")
+for cat,sub,led in expenses:
+    w(f"  {{ category: {s(cat)}, expense: {s(sub)}, ledgerId: {s(int(led) if isinstance(led,float) else led)} }},")
+w("]")
+w("")
+w("export const COST_CATEGORIES = [...new Set(NON_STAFF_EXPENSES.map((e) => e.category))]")
+w("")
+w("export const expensesFor = (category: string) =>")
+w("  NON_STAFF_EXPENSES.filter((e) => e.category === category).map((e) => e.expense)")
+w("")
+w("export const ledgerIdFor = (category: string, expense: string) =>")
+w("  NON_STAFF_EXPENSES.find((e) => e.category === category && e.expense === expense)?.ledgerId ?? \"\"")
+w("")
+w("/** dResearchType. Category 1 grants are exempt from the Dean's authorisation trigger. */")
+w("export const RESEARCH_TYPES = [")
+for v in research: w(f"  {s(v)},")
+w("]")
+w("")
+w("/** Justification_Options — reason for discounting or subsidising the project costs. */")
+w("export const JUSTIFICATION_OPTIONS = [")
+for v in justify: w(f"  {s(v)},")
+w("]")
+w("")
+w("/** dDeliverableType — the workbook stores the code and shows the name. */")
+w("export const DELIVERABLE_TYPES: { code: string; label: string }[] = [")
+for c,n in deliv: w(f"  {{ code: {s(c)}, label: {s(n)} }},")
+w("]")
+w("")
+w("/** dCurrency. */")
+w("export const CURRENCIES = [")
+for v in curr: w(f"  {s(v)},")
+w("]")
+w("")
+w("export interface RevenueCategory {")
+w("  party: string")
+w("  description: string")
+w("  ledgerId: string")
+w("}")
+w("")
+w("/** lookup_revenue_categories — external party and the income ledger it books to. */")
+w("export const REVENUE_CATEGORIES: RevenueCategory[] = [")
+for party,desc,led in revenue:
+    w(f"  {{ party: {s(party)}, description: {s(desc)}, ledgerId: {s(int(led) if isinstance(led,float) else led)} }},")
+w("]")
+w("")
+w("export const EXTERNAL_PARTIES = [...new Set(REVENUE_CATEGORIES.map((r) => r.party))]")
+w("")
+w("/** The sub-categories that apply when the external party is 'Other'. */")
+w("export const OTHER_PARTY_CATEGORIES = REVENUE_CATEGORIES.filter((r) => r.party === \"Other\").map(")
+w("  (r) => r.description,")
+w(")")
+w("")
+w("/** tEBA — annual EBA increase by year. Salaries escalate by these compounded. */")
+w("export const EBA_INCREASE: Record<number, number> = {")
+for y,inc in eba:
+    if inc == "": inc = 0
+    w(f"  {int(y)}: {inc},")
+w("}")
+w("")
+w("export const YEARS = Object.keys(EBA_INCREASE).map(Number)")
+w("")
+w("/** tcostmultiplier — minimum cost recovery multiplier by project start year. */")
+w("export const MIN_MULTIPLIER_BY_YEAR: Record<number, number> = {")
+for y,m in minmult: w(f"  {int(y)}: {m},")
+w("}")
+w("")
+w("/** tSalaryMax — top step within each classification family. */")
+w("export const SALARY_MAX_STEP: Record<string, number> = {")
+for fam,mx in maxstep: w(f"  {s(fam)}: {int(mx)},")
+w("}")
+w("")
+open(OUT,"w").write("\n".join(L))
+print(f"wrote {OUT}: {len(L)} lines, {len(org)} departments, {len(expenses)} expense types")

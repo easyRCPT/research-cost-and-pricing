@@ -1,19 +1,36 @@
 {
+<<<<<<< HEAD
+  "name": "rcpt-app",
+=======
   "name": "easyrcpt-app",
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "sh ../scripts/preflight.sh",
     "dev": "vite",
     "build": "tsc -b && vite build",
+<<<<<<< HEAD
+    "lint": "oxlint",
+    "preview": "vite preview"
+=======
     "lint": "eslint .",
     "preview": "vite preview",
     "gen:api": "openapi-typescript schema.yml -o src/types/api.d.ts"
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/source-sans-3": "^5.3.0",
+<<<<<<< HEAD
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.31.0",
+    "radix-ui": "^1.6.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "shadcn": "^4.18.0",
+=======
     "@tanstack/react-query": "5.102.8",
     "@tanstack/react-query-devtools": "5.102.8",
     "@tanstack/react-table": "9.2.4",
@@ -28,25 +45,32 @@
     "react-error-boundary": "^6.1.5",
     "shadcn": "^4.19.0",
     "sonner": "^2.0.8",
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
     "tailwind-merge": "^3.6.0",
     "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
+<<<<<<< HEAD
+=======
     "@eslint/js": "^10.0.1",
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+<<<<<<< HEAD
+    "oxlint": "^1.75.0",
+=======
     "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
     "openapi-typescript": "^7.13.0",
     "prettier": "3.9.6",
+>>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.65.0",
     "vite": "^8.2.0"
   }
 }
