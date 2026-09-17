@@ -1,19 +1,12 @@
-<<<<<<< HEAD
-=======
 "use client"
 
->>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
 import * as React from "react"
 import { Tooltip as TooltipPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
 function TooltipProvider({
-<<<<<<< HEAD
-  delayDuration = 200,
-=======
   delayDuration = 0,
->>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
@@ -25,17 +18,6 @@ function TooltipProvider({
   )
 }
 
-<<<<<<< HEAD
-function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  )
-}
-
-function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-=======
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
@@ -45,7 +27,6 @@ function Tooltip({
 function TooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
->>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
@@ -61,29 +42,17 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-<<<<<<< HEAD
-          "z-50 w-fit max-w-[260px] rounded-md bg-navy px-2.5 py-1.5 text-[12.5px] leading-snug text-white",
-=======
           "z-50 w-fit max-w-[260px] rounded-md bg-primary px-2.5 py-1.5 text-[12.5px] leading-snug text-primary-foreground",
->>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
           "data-[state=delayed-open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=delayed-open]:fade-in-0",
           className,
         )}
         {...props}
       >
         {children}
-<<<<<<< HEAD
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_1px)] rotate-45 rounded-[2px] bg-navy fill-navy" />
-=======
         <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_1px)] rotate-45 rounded-[2px] bg-primary fill-primary" />
->>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )
 }
 
-<<<<<<< HEAD
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
-=======
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger }
->>>>>>> 4eb84e5c8850ab27879eaab5e00ca663493ef244
