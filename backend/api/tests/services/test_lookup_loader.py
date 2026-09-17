@@ -127,6 +127,14 @@ class TestGetConstants(SimpleTestCase):
         self.constant_4.name = "gst_rate"
         self.constant_4.value = Decimal("0.10")
 
+        self.constant_5 = Mock(spec=CalculationConstant)
+        self.constant_5.name = "default_margin"
+        self.constant_5.value = Decimal("0.30")
+
+        self.constant_6 = Mock(spec=CalculationConstant)
+        self.constant_6.name = "minimum_margin"
+        self.constant_6.value = Decimal("0.00")
+
     def _build_tables(self):
         return {
             "salary_rates": [
@@ -148,6 +156,8 @@ class TestGetConstants(SimpleTestCase):
                 self.constant_2,
                 self.constant_3,
                 self.constant_4,
+                self.constant_5,
+                self.constant_6,
             ],
         }
 
@@ -211,6 +221,8 @@ class TestGetConstants(SimpleTestCase):
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
                 "gst_rate": Decimal("0.10"),
+                "default_margin": Decimal("0.30"),
+                "minimum_margin": Decimal("0.00"),
             },
         )
 
@@ -275,6 +287,8 @@ class TestGetConstants(SimpleTestCase):
             self.constant_1,
             self.constant_2,
             self.constant_3,
+            self.constant_5,
+            self.constant_6,
         ]
 
         mock_get_tables.return_value = tables
@@ -293,6 +307,8 @@ class TestValidateConstants(SimpleTestCase):
             "max_payroll_tax": Decimal("0.05"),
             "override_uom_oncosts": Decimal("0.01"),
             "gst_rate": Decimal("0.10"),
+            "default_margin": Decimal("0.30"),
+            "minimum_margin": Decimal("0.00"),
         }
 
         validate_constants(constants)
@@ -305,7 +321,8 @@ class TestValidateConstants(SimpleTestCase):
 
         with self.assertRaisesRegex(
             KeyError,
-            "Missing required calculation constants: gst_rate,override_uom_oncosts",
+            "Missing required calculation constants: "
+            "default_margin,gst_rate,minimum_margin,override_uom_oncosts",
         ):
             validate_constants(constants)
 

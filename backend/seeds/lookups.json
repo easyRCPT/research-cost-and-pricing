@@ -4707,6 +4707,14 @@
 },
 {
   "model": "api.calculationconstant",
+  "pk": "default_margin",
+  "fields": {
+    "description": "The margin a new budget starts at. Editable per budget.",
+    "value": "0.300000"
+  }
+},
+{
+  "model": "api.calculationconstant",
   "pk": "full_cost_recovery_multiplier",
   "fields": {
     "description": "Default cost recovery multiplier",
@@ -4743,6 +4751,14 @@
   "fields": {
     "description": "Maximum payroll tax rate",
     "value": "0.058500"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": "minimum_margin",
+  "fields": {
+    "description": "A budget priced below this margin needs the Dean as well as the HoD.",
+    "value": "0.300000"
   }
 },
 {

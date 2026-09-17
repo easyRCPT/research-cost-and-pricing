@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from api.models import Budget, Department, Project
-from api.services.project import multiplier_defaults
+from api.services.project import budget_defaults
 
 TITLE = "Demo Project"
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         budget = project.budgets.order_by("id").first()
         if budget is None:
-            budget = Budget.objects.create(project=project, **multiplier_defaults())
+            budget = Budget.objects.create(project=project, **budget_defaults())
 
         self.stdout.write(
             self.style.SUCCESS(f"Budget {budget.id} on project {project.id} ready.")

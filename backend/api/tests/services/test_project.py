@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from api.models import Budget, CalculationConstant, Department, Project, User
 from api.services import budget_update
-from api.services.project import create, list_projects, multiplier_defaults
+from api.services.project import budget_defaults, create, list_projects
 
 
 class ProjectTestMixin:
@@ -56,6 +56,7 @@ class ProjectTestMixin:
             project=project,
             cost_multiplier=Decimal("1.70"),
             in_kind_multiplier=Decimal("1.70"),
+            margin=Decimal("0.30"),
             **overrides,
         )
 
@@ -152,9 +153,11 @@ class TestDecimalFields(ProjectTestMixin, TestCase):
         self.assertEqual(self.budget.margin, Decimal("0.35"))
 
     def test_a_multiplier_that_has_no_exact_float(self):
-        self.update("cost_multiplier", 1.15)
+        # in_kind_multiplier rather than cost_multiplier: the cost multiplier
+        # is not writable over HTTP, and this is about the decimal conversion.
+        self.update("in_kind_multiplier", 1.15)
 
-        self.assertEqual(self.budget.cost_multiplier, Decimal("1.15"))
+        self.assertEqual(self.budget.in_kind_multiplier, Decimal("1.15"))
 
     def test_a_whole_number_still_saves(self):
         self.update("cash_co_contribution", 5000)
@@ -167,7 +170,7 @@ class TestDecimalFields(ProjectTestMixin, TestCase):
         self.assertEqual(self.budget.comments, "Priced for the pilot only")
 
 
-class TestMultiplierDefaults(ProjectTestMixin, TestCase):
+class TestBudgetDefaults(ProjectTestMixin, TestCase):
     def test_reads_the_constants(self):
         CalculationConstant.objects.create(
             name="full_cost_recovery_multiplier", value=Decimal("1.90")
@@ -175,21 +178,25 @@ class TestMultiplierDefaults(ProjectTestMixin, TestCase):
         CalculationConstant.objects.create(
             name="in_kind_multiplier", value=Decimal("1.25")
         )
+        CalculationConstant.objects.create(name="default_margin", value=Decimal("0.25"))
 
         self.assertEqual(
-            multiplier_defaults(),
+            budget_defaults(),
             {
                 "cost_multiplier": Decimal("1.90"),
                 "in_kind_multiplier": Decimal("1.25"),
+                # Four decimal places, not the multipliers' two.
+                "margin": Decimal("0.2500"),
             },
         )
 
     def test_falls_back_when_a_constant_is_missing(self):
         self.assertEqual(
-            multiplier_defaults(),
+            budget_defaults(),
             {
                 "cost_multiplier": Decimal("1.70"),
                 "in_kind_multiplier": Decimal("1.70"),
+                "margin": Decimal("0.3000"),
             },
         )
 
@@ -215,6 +222,14 @@ class TestCreate(ProjectTestMixin, TestCase):
         budget = Project.objects.get(pk=row["id"]).budgets.get()
 
         self.assertEqual(budget.cost_multiplier, Decimal("1.90"))
+
+    def test_seeds_the_budget_margin_from_the_constant(self):
+        CalculationConstant.objects.create(name="default_margin", value=Decimal("0.25"))
+
+        row = create(self.project_data(), None)
+        budget = Project.objects.get(pk=row["id"]).budgets.get()
+
+        self.assertEqual(budget.margin, Decimal("0.2500"))
 
     def test_records_the_author_when_there_is_one(self):
         user = User.objects.create_user(username="researcher")

@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from . import non_staff, staff
 
-DEFAULT_MARGIN = Decimal("0.30")
-
 
 def pricing(
     constants: dict,
@@ -116,8 +114,15 @@ def calculate_dean_required(
     general: dict,
 ) -> bool:
     """
-    A budget priced below the default cost recovery multiplier needs a Dean's
-    authorisation as well as the Head of Department's.
+    A budget priced below the default cost recovery multiplier, or below the
+    margin floor, needs a Dean's authorisation as well as the Head of
+    Department's.
+
+    The floor is minimum_margin, not default_margin: what a budget starts at
+    and what it may not go below without a Dean are two different decisions,
+    and pricing at less than the default is the ordinary case a Head of
+    Department signs off. Both are rows, so moving either is a lookup edit
+    rather than a deploy.
     """
     default_multiplier = general.get("full_cost_recovery_multiplier")
     if default_multiplier is not None and (
@@ -125,9 +130,11 @@ def calculate_dean_required(
     ):
         return True
 
-    default_margin = general.get("default_margin", DEFAULT_MARGIN)
+    minimum_margin = general.get("minimum_margin")
+    if minimum_margin is None:
+        return False
 
-    return budget_info["margin"] < default_margin
+    return budget_info["margin"] < minimum_margin
 
 
 def calculate_price_summary(

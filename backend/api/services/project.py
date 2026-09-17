@@ -6,23 +6,34 @@ from django.db.models.functions import Greatest
 
 from ..models import Budget, CalculationConstant, Project
 
-# What a budget's multipliers start at. The live values are rows, not Python
+# What a budget's numbers start at. The live values are rows, not Python
 # constants, so they are read at creation time and then frozen on the budget.
-MULTIPLIER_FALLBACKS = {
-    "cost_multiplier": ("full_cost_recovery_multiplier", Decimal("1.70")),
-    "in_kind_multiplier": ("in_kind_multiplier", Decimal("1.70")),
+#
+# Margin is here for the same reason the multipliers are: what a new budget
+# starts at is a decision someone makes in the lookup editor, not one compiled
+# into the model as a field default.
+#
+# Each carries the step it is stored at, because constants are kept at six
+# decimal places and the budget's own columns are narrower -- a multiplier
+# holds two, a margin four, so a raw 1.900000 is a digit too wide to save.
+BUDGET_DEFAULTS = {
+    "cost_multiplier": (
+        "full_cost_recovery_multiplier",
+        Decimal("1.70"),
+        Decimal("0.01"),
+    ),
+    "in_kind_multiplier": ("in_kind_multiplier", Decimal("1.70"), Decimal("0.01")),
+    "margin": ("default_margin", Decimal("0.30"), Decimal("0.0001")),
 }
 
 
-def multiplier_defaults() -> dict[str, Decimal]:
-    # Constants are stored at six decimal places and a multiplier field holds
-    # two, so a raw 1.900000 is one digit too wide to save.
+def budget_defaults() -> dict[str, Decimal]:
     values = dict(CalculationConstant.objects.values_list("name", "value"))
     return {
         field: Decimal(values.get(name, fallback)).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
+            step, rounding=ROUND_HALF_UP
         )
-        for field, (name, fallback) in MULTIPLIER_FALLBACKS.items()
+        for field, (name, fallback, step) in BUDGET_DEFAULTS.items()
     }
 
 
@@ -103,7 +114,7 @@ def create(data: dict, user) -> dict:
     project.full_clean()
     project.save()
 
-    budget = Budget(project=project, **multiplier_defaults())
+    budget = Budget(project=project, **budget_defaults())
     budget.full_clean()
     budget.save()
 

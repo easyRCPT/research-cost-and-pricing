@@ -116,6 +116,7 @@ class ModelValidationTestCase(TestCase):
             project=project,
             cost_multiplier=Decimal("1.70"),
             in_kind_multiplier=Decimal("1.70"),
+            margin=Decimal("0.30"),
         )
         self.url = reverse("budget-detail", args=[self.budget.id])
 
