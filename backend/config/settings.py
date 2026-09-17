@@ -153,8 +153,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
-    # Wraps drf-standardized-errors so model validation reads as a 400.
-    "EXCEPTION_HANDLER": "api.exceptions.exception_handler",
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+}
+
+# The handler stays drf-standardized-errors' own -- its schema generator checks
+# for it by identity, and a replacement drops every error response from the
+# schema. Ours subclasses it instead, so model validation reads as a 400.
+DRF_STANDARDIZED_ERRORS = {
+    "EXCEPTION_HANDLER_CLASS": "api.exceptions.ExceptionHandler",
 }
 
 SPECTACULAR_SETTINGS = {
