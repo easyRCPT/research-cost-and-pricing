@@ -119,6 +119,10 @@ def build_budget_info(budget: Budget) -> dict:
         "status": budget.status,
         "deliverables": [
             {
+                # The row id, so an edit can name the row it is editing. The
+                # number is what a reader quotes; it is not stable under a
+                # delete, so it is not an identifier.
+                "id": deliverable.id,
                 "number": deliverable.number,
                 "description": deliverable.description,
                 "deliverable_type": deliverable.deliverable_type.name,
@@ -127,6 +131,9 @@ def build_budget_info(budget: Budget) -> dict:
                 "dependency": deliverable.dependency,
                 "sponsor": deliverable.sponsor,
             }
-            for deliverable in budget.deliverables.all()
+            # Ordered: Postgres returns rows in whatever order it likes, and a
+            # numbered list that reshuffles on reload is worse than an unsorted
+            # one. See #93 for the same fix on the cost lines.
+            for deliverable in budget.deliverables.order_by("number")
         ],
     }

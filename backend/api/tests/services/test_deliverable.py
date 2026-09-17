@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -79,7 +80,10 @@ class DeliverableTestMixin:
 
 
 class TestCreate(DeliverableTestMixin, TestCase):
-    def test_creates_deliverable(self):
+    @patch("api.services.deliverable.budget_details.get_budget_details")
+    def test_creates_deliverable(self, mock_get_budget_details):
+        mock_get_budget_details.return_value = {}
+
         budget = self.create_budget()
         deliverable_type = self.create_deliverable_type()
 
@@ -159,7 +163,12 @@ class TestCreate(DeliverableTestMixin, TestCase):
             1,
         )
 
-    def test_creates_deliverable_with_optional_fields_empty(self):
+    @patch("api.services.deliverable.budget_details.get_budget_details")
+    def test_creates_deliverable_with_optional_fields_empty(
+        self, mock_get_budget_details
+    ):
+        mock_get_budget_details.return_value = {}
+
         budget = self.create_budget()
         deliverable_type = self.create_deliverable_type()
 
@@ -183,8 +192,49 @@ class TestCreate(DeliverableTestMixin, TestCase):
         self.assertEqual(deliverable.sponsor, "")
 
 
+class TestReturnsTheRepricedBudget(DeliverableTestMixin, TestCase):
+    """
+    Both routes answer with the whole budget, as the staff and non-staff line
+    routes do. The browser replaces its cache with the reply, so a create has
+    to come back carrying the new row -- and its id, which is the only way the
+    next edit can name it.
+    """
+
+    @patch("api.services.deliverable.budget_details.get_budget_details")
+    def test_create_returns_the_budget(self, mock_get_budget_details):
+        mock_get_budget_details.return_value = {"budget_info": {}}
+
+        budget = self.create_budget()
+        deliverable_type = DeliverableType.objects.create(code="REP", name="Report")
+
+        result = create(
+            budget,
+            {
+                "number": 1,
+                "description": "Final report",
+                "deliverable_type": deliverable_type,
+            },
+        )
+
+        self.assertEqual(result, {"budget_info": {}})
+        mock_get_budget_details.assert_called_once_with(budget)
+
+    @patch("api.services.deliverable.budget_details.get_budget_details")
+    def test_delete_returns_the_budget(self, mock_get_budget_details):
+        mock_get_budget_details.return_value = {"budget_info": {}}
+
+        deliverable = self.create_deliverable()
+
+        result = delete(deliverable)
+
+        self.assertEqual(result, {"budget_info": {}})
+
+
 class TestDelete(DeliverableTestMixin, TestCase):
-    def test_deletes_deliverable(self):
+    @patch("api.services.deliverable.budget_details.get_budget_details")
+    def test_deletes_deliverable(self, mock_get_budget_details):
+        mock_get_budget_details.return_value = {}
+
         deliverable = self.create_deliverable()
         deliverable_id = deliverable.id
 

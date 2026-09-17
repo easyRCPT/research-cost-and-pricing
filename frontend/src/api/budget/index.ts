@@ -12,3 +12,4 @@ export {
 } from './fields'
 export { useNonStaffLines, useStaffLines } from './lines'
 export type { Lines, NonStaffLines, StaffLines } from './lines'
+export { useDeliverables, type Deliverables } from './deliverables'
