@@ -232,7 +232,7 @@ class TestUpdateProject(SimpleTestCase):
         self.assertFalse(result)
         self.assertEqual(self.project.title, "New Title")
         self.project.full_clean.assert_called_once()
-        self.project.save.assert_called_once_with(update_fields=["title"])
+        self.project.save.assert_called_once_with(update_fields=["title", "updated_at"])
 
     def test_updates_calculation_field(self):
         result = budget_update.update_project(
@@ -244,7 +244,9 @@ class TestUpdateProject(SimpleTestCase):
         self.assertTrue(result)
         self.assertEqual(self.project.start_year, 2026)
         self.project.full_clean.assert_called_once()
-        self.project.save.assert_called_once_with(update_fields=["start_year"])
+        self.project.save.assert_called_once_with(
+            update_fields=["start_year", "updated_at"]
+        )
 
     @patch("api.services.budget_update.Department.objects.get")
     def test_updates_department(self, mock_get):
@@ -260,7 +262,9 @@ class TestUpdateProject(SimpleTestCase):
         self.assertFalse(result)
         mock_get.assert_called_once_with(pk="SCI")
         self.assertIs(self.project.department, department)
-        self.project.save.assert_called_once_with(update_fields=["department"])
+        self.project.save.assert_called_once_with(
+            update_fields=["department", "updated_at"]
+        )
 
     @patch("api.services.budget_update.Department.objects.get")
     def test_rejects_invalid_department(self, mock_get):
@@ -300,7 +304,9 @@ class TestUpdateProject(SimpleTestCase):
 
         self.assertFalse(result)
         self.assertIs(self.project.activity, activity)
-        self.project.save.assert_called_once_with(update_fields=["activity"])
+        self.project.save.assert_called_once_with(
+            update_fields=["activity", "updated_at"]
+        )
 
     def test_clears_activity(self):
         result = budget_update.update_project(
@@ -311,7 +317,9 @@ class TestUpdateProject(SimpleTestCase):
 
         self.assertFalse(result)
         self.assertIsNone(self.project.activity)
-        self.project.save.assert_called_once_with(update_fields=["activity"])
+        self.project.save.assert_called_once_with(
+            update_fields=["activity", "updated_at"]
+        )
 
     @patch("api.services.budget_update.Region.objects.get")
     def test_updates_region(self, mock_get):
@@ -326,7 +334,9 @@ class TestUpdateProject(SimpleTestCase):
 
         self.assertFalse(result)
         self.assertIs(self.project.region, region)
-        self.project.save.assert_called_once_with(update_fields=["region"])
+        self.project.save.assert_called_once_with(
+            update_fields=["region", "updated_at"]
+        )
 
     def test_rejects_invalid_project_field(self):
         with self.assertRaisesMessage(
@@ -357,7 +367,9 @@ class TestUpdateBudget(SimpleTestCase):
             "Updated comments",
         )
         self.budget.full_clean.assert_called_once()
-        self.budget.save.assert_called_once_with(update_fields=["comments"])
+        self.budget.save.assert_called_once_with(
+            update_fields=["comments", "updated_at"]
+        )
 
     def test_updates_calculation_field(self):
         result = budget_update.update_budget(
@@ -372,7 +384,7 @@ class TestUpdateBudget(SimpleTestCase):
             Decimal("0.25"),
         )
         self.budget.full_clean.assert_called_once()
-        self.budget.save.assert_called_once_with(update_fields=["margin"])
+        self.budget.save.assert_called_once_with(update_fields=["margin", "updated_at"])
 
     def test_rejects_invalid_field(self):
         with self.assertRaisesMessage(

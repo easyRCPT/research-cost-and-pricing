@@ -1,16 +1,10 @@
-from decimal import Decimal
-
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from api.models import Budget, CalculationConstant, Department, Project
+from api.models import Budget, Department, Project
+from api.services.project import multiplier_defaults
 
 TITLE = "Demo Project"
-
-
-def constant(name: str, fallback: Decimal) -> Decimal:
-    row = CalculationConstant.objects.filter(name=name).first()
-    return row.value if row else fallback
 
 
 class Command(BaseCommand):
@@ -41,13 +35,7 @@ class Command(BaseCommand):
 
         budget = project.budgets.order_by("id").first()
         if budget is None:
-            budget = Budget.objects.create(
-                project=project,
-                cost_multiplier=constant(
-                    "full_cost_recovery_multiplier", Decimal("1.70")
-                ),
-                in_kind_multiplier=constant("in_kind_multiplier", Decimal("1.70")),
-            )
+            budget = Budget.objects.create(project=project, **multiplier_defaults())
 
         self.stdout.write(
             self.style.SUCCESS(f"Budget {budget.id} on project {project.id} ready.")

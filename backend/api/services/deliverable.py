@@ -11,8 +11,11 @@ def create(budget: Budget, data: dict) -> None:
     )
     deliverable.full_clean()
     deliverable.save()
+    budget.touch()
 
 
 @transaction.atomic
 def delete(deliverable: Deliverable) -> None:
+    budget = deliverable.budget
     deliverable.delete()
+    budget.touch()

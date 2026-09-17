@@ -153,7 +153,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
-    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    # Wraps drf-standardized-errors so model validation reads as a 400.
+    "EXCEPTION_HANDLER": "api.exceptions.exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {

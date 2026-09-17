@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -309,3 +310,29 @@ class TestDelete(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_called_once_with(budget)
+
+
+class TestTouchesTheBudget(StaffLineTestMixin, TestCase):
+    @patch("api.services.staff_line.budget_details.get_budget_details")
+    def test_creating_a_line_marks_the_budget_edited(self, mock_get_budget_details):
+        mock_get_budget_details.return_value = {}
+
+        budget = self.create_budget()
+        Budget.objects.filter(pk=budget.pk).update(
+            updated_at=datetime(2020, 1, 1, tzinfo=UTC)
+        )
+
+        create(
+            budget,
+            {
+                "name_role": "Research Assistant",
+                "employment_type": "Continuing",
+                "category": "Academic",
+                "classification": "Level A",
+                "time_basis": StaffCostLine.TimeBasis.FTE,
+                "in_kind": False,
+            },
+        )
+
+        budget.refresh_from_db()
+        self.assertGreater(budget.updated_at, datetime(2020, 1, 1, tzinfo=UTC))

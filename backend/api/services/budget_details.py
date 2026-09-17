@@ -1,3 +1,5 @@
+from decimal import ROUND_HALF_UP, Decimal
+
 from ..calculation import pricing
 from ..models import Budget
 from . import data_loader, lookup_loader
@@ -8,16 +10,38 @@ def get_budget_details(budget: Budget) -> dict:
     Get project details from database.
     Calculate cost and price result.
     """
-    return build_budget_details(
+    details = build_budget_details(
         lookup_loader.get_constants(),
         data_loader.load_budget_data(budget),
     )
+    store_price(budget, details)
+    return details
+
+
+def store_price(budget: Budget, details: dict) -> None:
+    """
+    Keep Budget.total_price_exc_gst in step with what the engine just returned,
+    so the projects list can read a price without pricing every project.
+
+    Every route that changes a priced field comes through here, and so does a
+    plain GET, which makes a row that somehow fell behind heal on next read.
+    The write is skipped when the number has not moved, so reads stay
+    read-only in the ordinary case. updated_at is left out of update_fields
+    deliberately: syncing a price is not an edit to the budget.
+    """
+    price = details["budget_summary"]["price_summary"]["total_price_exc_gst"]
+    price = Decimal(price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    if budget.total_price_exc_gst == price:
+        return
+
+    budget.total_price_exc_gst = price
+    budget.save(update_fields=["total_price_exc_gst"])
 
 
 def build_budget_details(constants: dict, budget_data: dict) -> dict:
     """
     Run the engine over one budget's inputs and shape the response.
-    Split out so services/calculate.py can feed it without a database row.
     """
     # Calculation
     calculation_result = pricing.pricing(

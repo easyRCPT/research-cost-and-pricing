@@ -2,21 +2,14 @@ from django.urls import path
 
 from .views import (
     BudgetDetailView,
-    CalculateView,
     DeliverableView,
     LookupView,
     NonStaffLineView,
+    ProjectView,
     StaffLineView,
 )
 
 urlpatterns = [
-    # TODO: temporary. Stateless calculator — see CalculateView. Delete this
-    # route when auth lands and the frontend goes back to the budget routes.
-    path(
-        "calculate/",
-        CalculateView.as_view(http_method_names=["post"]),
-        name="calculate",
-    ),
     # Lookups
     path(
         "lookups/",
@@ -27,6 +20,12 @@ urlpatterns = [
         "lookups/<table>/",
         LookupView.as_view(http_method_names=["post", "patch"]),
         name="lookup-table",
+    ),
+    # Projects
+    path(
+        "projects/",
+        ProjectView.as_view(http_method_names=["get", "post"]),
+        name="projects",
     ),
     # Budget
     path(
