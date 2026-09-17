@@ -1,12 +1,9 @@
 import type {
   BudgetDetail,
-  CalculateStaffLine,
   EmploymentType,
   SalaryRate,
   SalaryRateMultiplier,
-  StaffCategory,
   StaffLine,
-  TimeBasis,
 } from '@/types'
 
 export const EMPLOYMENT_TYPES: readonly EmploymentType[] = [
@@ -131,18 +128,7 @@ export const withCiName = (lines: StaffLine[], chiefInvestigator: string) => {
   return lines.map((line) => (line.id === id ? { ...line, name_role } : line))
 }
 
-export const toInput = (line: StaffLine): CalculateStaffLine => ({
-  id: line.id,
-  name_role: line.name_role,
-  employment_type: line.employment_type as EmploymentType,
-  category: line.category as StaffCategory,
-  classification: line.classification,
-  time_basis: line.time_basis as TimeBasis,
-  in_kind: line.in_kind,
-  by_year: line.by_year.map(({ year, time }) => ({ year, time })),
-})
-
-/** Entry columns from the store; rate and cost columns from whichever block priced the row. */
+/** Rate and cost columns from whichever block priced the row. */
 export const withCosts = (lines: StaffLine[], budget: BudgetDetail) => {
   const priced = new Map(
     [...budget.staff_cost.lines, ...budget.staff_in_kind_cost.lines].map(

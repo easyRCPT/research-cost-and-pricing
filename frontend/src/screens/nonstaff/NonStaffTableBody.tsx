@@ -79,9 +79,7 @@ export function NonStaffTableBody({
               <CellText
                 className="min-w-52"
                 value={line.description}
-                onChange={(e) =>
-                  patchLine(line.id, { description: e.target.value })
-                }
+                onChange={(description) => patchLine(line.id, { description })}
               />
             </CellTd>
             {years.map((year) => (

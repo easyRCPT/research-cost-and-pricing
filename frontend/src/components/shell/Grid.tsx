@@ -1,4 +1,5 @@
-import type { ComponentProps, ReactNode } from 'react'
+import { useState, type ComponentProps, type ReactNode } from 'react'
+import { useSettled } from '@/lib/use-settled'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { NumberInput } from '@/components/ui/number-input'
@@ -116,8 +117,54 @@ export function CellTd({ className, ...rest }: ComponentProps<typeof Td>) {
 }
 
 /** Free text holds sentences, so it takes the widest default. */
-export function CellText({ className, ...rest }: ComponentProps<typeof Input>) {
-  return <Input {...rest} className={cn(cellField, 'min-w-44', className)} />
+/**
+ * How long a cell holds what is typed before it is saved.
+ *
+ * A name or a description is never priced, so there is nothing to see until
+ * typing stops and no reason to write once per character. A time or an amount
+ * moves every figure below it, so it goes almost at once and the totals keep
+ * up with the typing; writes that overlap are collapsed in api/budget/write.
+ */
+const TEXT_SETTLE_MS = 350
+const NUMBER_SETTLE_MS = 150
+
+type CellTextProps = Omit<
+  ComponentProps<typeof Input>,
+  'value' | 'onChange'
+> & {
+  value: string
+  /** Absent on a read-only cell, such as the CI's name. */
+  onChange?: (value: string) => void
+}
+
+export function CellText({
+  className,
+  value,
+  onChange,
+  onBlur,
+  ...rest
+}: CellTextProps) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const { change, flush } = useSettled<string>((settled) => {
+    setDraft(null)
+    onChange?.(settled)
+  }, TEXT_SETTLE_MS)
+
+  return (
+    <Input
+      {...rest}
+      className={cn(cellField, 'min-w-44', className)}
+      value={draft ?? value}
+      onChange={(event) => {
+        setDraft(event.target.value)
+        change(event.target.value)
+      }}
+      onBlur={(event) => {
+        flush()
+        onBlur?.(event)
+      }}
+    />
+  )
 }
 
 /** Numbers only ever need room for a few digits. A `prefix` such as `$` sits
@@ -125,11 +172,21 @@ export function CellText({ className, ...rest }: ComponentProps<typeof Input>) {
 export function CellNumber({
   className,
   prefix,
+  onChange,
+  onBlur,
   ...rest
 }: ComponentProps<typeof NumberInput> & { prefix?: string }) {
+  // NumberInput already holds what is being typed, so only the saving settles.
+  const { change, flush } = useSettled<number>(onChange, NUMBER_SETTLE_MS)
+
   const field = (
     <NumberInput
       {...rest}
+      onChange={change}
+      onBlur={(event) => {
+        flush()
+        onBlur?.(event)
+      }}
       className={cn(
         cellField,
         'no-spin tabular w-20 text-right',

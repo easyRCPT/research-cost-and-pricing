@@ -22,6 +22,10 @@ interface DataTableProps<T extends RowData> {
   sortable?: boolean
   searchable?: boolean
   filters?: DataTableFilter<T>[]
+  /** Shown when there is nothing to list at all, rather than nothing matching. */
+  emptyMessage?: string
+  /** Drops the side padding, for a table that draws its own frame. */
+  flush?: boolean
 }
 
 export function DataTable<T extends RowData>({
@@ -32,6 +36,8 @@ export function DataTable<T extends RowData>({
   sortable = false,
   searchable = false,
   filters = NO_FILTERS,
+  emptyMessage = 'No rows seeded yet.',
+  flush = false,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('')
   const [filterState, setFilterState] = useState<FilterState>({})
@@ -53,17 +59,24 @@ export function DataTable<T extends RowData>({
   return (
     <>
       {(searchable || filters.length > 0) && (
-        <DataTableToolbar
-          rows={rows}
-          filters={filters}
-          searchable={searchable}
-          search={search}
-          onSearch={setSearch}
-          state={filterState}
-          onState={setFilterState}
-        />
+        <div className={cn(flush && 'pt-4')}>
+          <DataTableToolbar
+            rows={rows}
+            filters={filters}
+            searchable={searchable}
+            search={search}
+            onSearch={setSearch}
+            state={filterState}
+            onState={setFilterState}
+          />
+        </div>
       )}
-      <div className="scroll-persist overflow-x-auto overscroll-x-none px-6">
+      <div
+        className={cn(
+          'scroll-persist overflow-x-auto overscroll-x-none',
+          !flush && 'px-6',
+        )}
+      >
         <table className="grid-table w-max min-w-full text-[13px]">
           <thead>
             {table.getHeaderGroups().map((group) => (
@@ -111,7 +124,7 @@ export function DataTable<T extends RowData>({
                   colSpan={columns.length}
                   className="py-6 text-center text-muted-foreground"
                 >
-                  {rows.length === 0 ? 'No rows seeded yet.' : 'No rows match.'}
+                  {rows.length === 0 ? emptyMessage : 'No rows match.'}
                 </Td>
               </tr>
             )}

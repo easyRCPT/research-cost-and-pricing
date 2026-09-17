@@ -13,15 +13,18 @@ import {
   Sidebar,
 } from '.'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
+import { BackToProjectsButton } from './BackToProjectsButton'
 
 interface AppContentProps {
   screen: AppScreen
   setScreen: (screen: AppScreen) => void
+  /** Back out of the costing flow, to the projects list. */
+  onLeave: () => void
 }
 
 export type AppScreen = EditorScreen | typeof LOOKUP_SCREEN
 
-export function AppContent({ screen, setScreen }: AppContentProps) {
+export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
   const updateProject = useUpdateProject()
@@ -36,7 +39,12 @@ export function AppContent({ screen, setScreen }: AppContentProps) {
     : SCREEN_HEADINGS[screen]
   return (
     <AppShell
-      topBarRight={<LookupButton open={lookupsOpen} handleClick={setScreen} />}
+      topBarRight={
+        <>
+          <BackToProjectsButton onClick={onLeave} />
+          <LookupButton open={lookupsOpen} handleClick={setScreen} />
+        </>
+      }
       sidebar={
         <Sidebar
           sections={SECTIONS}

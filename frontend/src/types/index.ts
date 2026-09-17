@@ -10,8 +10,13 @@ export type Department = S['Department']
 export type SalaryRate = S['SalaryRate']
 export type SalaryRateMultiplier = S['SalaryRateMultiplier']
 
+// Projects
+export type ProjectRow = S['ProjectRow']
+export type ProjectCreate = S['ProjectCreate']
+
 // Project Details
 export type ProjectInfo = S['ProjectInfo']
+export type BudgetInfo = S['BudgetInfo']
 export type Activity = S['Activity']
 export type Region = S['Region']
 
@@ -42,11 +47,11 @@ export type TimeBasis = S['TimeBasisEnum']
 export type Mode = S['ModeEnum']
 export type Status = S['StatusEnum']
 
-// TODO: temporary. Delete when auth lands.
-// Types for the stateless calculator.
-export type CalculateRequest = S['CalculateRequest']
-export type CalculateStaffLine = S['CalculateStaffLine']
-export type CalculateNonStaffLine = S['CalculateNonStaffLine']
-export type ProjectInfoInput = S['ProjectInfoInput']
-export type BudgetInfoInput = S['BudgetInfoInput']
+/**
+ * What an edit may set. The same shapes the response carries: a screen binds
+ * an input to a field it read, and sends that field back.
+ */
+export type ProjectInfoInput = ProjectInfo
+export type BudgetInfoInput = BudgetInfo
+
 export type CalculationConstant = S['CalculationConstant']

@@ -86,9 +86,7 @@ export function StaffTableBody({
               ) : (
                 <CellText
                   value={line.name_role}
-                  onChange={(e) =>
-                    patchLine(line.id, { name_role: e.target.value })
-                  }
+                  onChange={(name_role) => patchLine(line.id, { name_role })}
                 />
               )}
             </CellTd>
