@@ -1,7 +1,8 @@
 from decimal import Decimal, InvalidOperation
 from typing import cast
 
-from django.db import transaction
+from django.core.exceptions import FieldDoesNotExist
+from django.db import models, transaction
 from django.db.models import Model
 from rest_framework.exceptions import ValidationError
 
@@ -99,7 +100,7 @@ def update_project(
         except Department.DoesNotExist:
             raise ValidationError("Invalid department.")
 
-        project.save(update_fields=["department"])
+        _save(project, ["department"])
         return False
 
     if field == "activity":
@@ -113,7 +114,7 @@ def update_project(
             except Activity.DoesNotExist:
                 raise ValidationError("Invalid activity.")
 
-        project.save(update_fields=["activity"])
+        _save(project, ["activity"])
         return False
 
     if field == "region":
@@ -127,7 +128,7 @@ def update_project(
             except Region.DoesNotExist:
                 raise ValidationError("Invalid region.")
 
-        project.save(update_fields=["region"])
+        _save(project, ["region"])
         return False
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -251,7 +252,7 @@ def update_non_staff(
             raise ValidationError("Invalid category.")
 
         non_staff_line.category = category
-        non_staff_line.save(update_fields=["category"])
+        _save(non_staff_line, ["category"])
         return True
 
     if field == "year_value":
@@ -401,7 +402,7 @@ def update_deliverable(
         except DeliverableType.DoesNotExist:
             raise ValidationError("Invalid deliverable type.")
 
-        deliverable.save(update_fields=["deliverable_type"])
+        _save(deliverable, ["deliverable_type"])
         return False
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -412,6 +413,46 @@ def _set_field(
     field: str,
     value: object,
 ) -> None:
-    setattr(instance, field, value)
+    setattr(instance, field, _as_decimal(instance, field, value))
     instance.full_clean()
-    instance.save(update_fields=[field])
+    _save(instance, [field])
+
+
+def _as_decimal(instance: Model, field: str, value: object) -> object:
+    """
+    Convert a JSON number bound for a DecimalField through its string form.
+
+    A float is not exactly the number that was typed: a margin of 0.35 arrives
+    as 0.34999999999999997779553950749686919152736663818359375, which
+    full_clean rejects for having more decimal places than the field allows.
+    str() gives back what the user actually entered. Year values already take
+    this route -- see _validate_year_and_convert_value.
+    """
+    if not isinstance(value, float):
+        return value
+
+    try:
+        model_field = instance._meta.get_field(field)
+    except FieldDoesNotExist:
+        return value
+
+    if not isinstance(model_field, models.DecimalField):
+        return value
+
+    try:
+        return Decimal(str(value))
+    except InvalidOperation:
+        return value
+
+
+def _save(instance: Model, fields: list[str]) -> None:
+    """
+    Save the named fields, and the row's edit time with them.
+
+    auto_now is skipped for any field left out of update_fields, so a partial
+    save would otherwise leave updated_at reading as the creation time no
+    matter how much the row had changed.
+    """
+    if hasattr(instance, "updated_at"):
+        fields = [*fields, "updated_at"]
+    instance.save(update_fields=fields)

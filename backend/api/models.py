@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
@@ -257,6 +258,16 @@ class RevenueCategory(models.Model):
 # ------------------- Schema for Data Derived From Application -------------
 
 
+REFERENCE_PREFIX = "RCP"
+
+
+def build_reference(year: int, project_id: int) -> str:
+    # Human-readable handle for a project, allocated once at creation. The
+    # project id makes it unique without a counter table or a race; the year
+    # is what makes it readable to someone quoting it back to us.
+    return f"{REFERENCE_PREFIX}-{year}-{project_id:04d}"
+
+
 def build_account_string(
     company: str,
     cost_centre: str,
@@ -279,10 +290,14 @@ class Project(models.Model):
     COMPANY_CODE = "C001"
 
     # Store the central data
-    title = models.CharField(max_length=200)
+    # Blank while a draft is being written: clearing the title to retype it
+    # must not be an error. Completeness belongs at submission, not on the row.
+    title = models.CharField(max_length=200, blank=True)
     department = models.ForeignKey("Department", on_delete=models.PROTECT)
     chief_investigator = models.CharField(max_length=100, blank=True)
-    funder = models.CharField(max_length=100)
+    # Blank until Project Details names one: a project is created with only a
+    # title and a department, so that costing can start straight away.
+    funder = models.CharField(max_length=100, blank=True)
     other_funder = models.CharField(max_length=200, blank=True, default="")
     other_funder_category = models.CharField(max_length=100, blank=True, default="")
     scheme = models.CharField(max_length=200, blank=True)
@@ -305,7 +320,24 @@ class Project(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
     )
+
+    # Null only between the insert and the second write in save() below, which
+    # is why this is nullable rather than blank: two blank strings would
+    # collide on the unique constraint, two NULLs do not.
+    reference = models.CharField(max_length=20, unique=True, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Allocated here rather than in the service so that every path that
+        # makes a project -- the API, the demo command, tests, the admin --
+        # gets one.
+        creating = self._state.adding
+        super().save(*args, **kwargs)
+        if creating and not self.reference:
+            self.reference = build_reference(self.created_at.year, self.pk)
+            super().save(update_fields=["reference"])
 
     # Account string computed fresh from existing fields
     @property
@@ -370,6 +402,10 @@ class Budget(models.Model):
         validators=[MinValueValidator(Decimal(0))],
     )
 
+    # A markup on cost, not a margin on price: the profit margin the project
+    # earns over what it costs. Price = project_cost * (1 + margin), so the
+    # default 0.30 prices a $100k project at $130k, not at $142,857. Settled
+    # with RIC; the workbook's Summary of Price agrees.
     margin = models.DecimalField(
         max_digits=5,
         decimal_places=4,
@@ -398,8 +434,29 @@ class Budget(models.Model):
         max_length=20, choices=Status.choices, default=Status.DRAFT
     )
 
+    # The engine's headline number, kept on the row so a list of projects is
+    # one query rather than one pricing run per project. Written by
+    # services/budget_details.py, which every path that changes a priced field
+    # already goes through.
+    total_price_exc_gst = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal(0),
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def touch(self) -> None:
+        """
+        Mark the budget as edited.
+
+        A budget's own columns do not change when a cost line is added or
+        removed, so auto_now never fires for the edits people make most. The
+        queryset update is deliberate: it writes the one column without
+        touching anything else the caller holds in memory.
+        """
+        Budget.objects.filter(pk=self.pk).update(updated_at=timezone.now())
 
     def __str__(self):
         return f"{self.project} ({self.get_status_display()})"

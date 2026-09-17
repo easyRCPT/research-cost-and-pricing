@@ -8,6 +8,7 @@ from api.services.budget_details import (
     build_budget_details,
     get_budget_details,
     merge_staff_table_with_result,
+    store_price,
 )
 
 
@@ -265,6 +266,10 @@ class TestBuildBudgetDetails(SimpleTestCase):
         self.assertEqual(result, expected)
 
 
+def details_with_price(price: Decimal) -> dict:
+    return {"budget_summary": {"price_summary": {"total_price_exc_gst": price}}}
+
+
 class TestGetBudgetDetails(SimpleTestCase):
     @patch("api.services.budget_details.build_budget_details")
     @patch("api.services.budget_details.data_loader.load_budget_data")
@@ -276,9 +281,10 @@ class TestGetBudgetDetails(SimpleTestCase):
         mock_build_budget_details,
     ):
         budget = Mock(spec=Budget)
+        budget.total_price_exc_gst = Decimal("0.00")
         constants = {}
         budget_data = {}
-        expected = {"result": "test"}
+        expected = details_with_price(Decimal("1234.5678"))
 
         mock_get_constants.return_value = constants
         mock_load_budget_data.return_value = budget_data
@@ -294,3 +300,25 @@ class TestGetBudgetDetails(SimpleTestCase):
         )
 
         self.assertEqual(result, expected)
+
+
+class TestStorePrice(SimpleTestCase):
+    def test_stores_the_rounded_price(self):
+        budget = Mock(spec=Budget)
+        budget.total_price_exc_gst = Decimal("0.00")
+
+        store_price(budget, details_with_price(Decimal("1234.5678")))
+
+        self.assertEqual(budget.total_price_exc_gst, Decimal("1234.57"))
+        budget.save.assert_called_once_with(
+            update_fields=["total_price_exc_gst"],
+        )
+
+    def test_does_not_write_when_the_price_has_not_moved(self):
+        # A plain GET runs the engine too. It should not write on every read.
+        budget = Mock(spec=Budget)
+        budget.total_price_exc_gst = Decimal("1234.57")
+
+        store_price(budget, details_with_price(Decimal("1234.5678")))
+
+        budget.save.assert_not_called()

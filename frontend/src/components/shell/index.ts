@@ -1,5 +1,6 @@
 export { AppShell } from './AppShell'
 export { AppSkeleton } from './skeleton/AppSkeleton'
+export { ProjectsSkeleton } from './skeleton/ProjectsSkeleton'
 export { AppErrorState } from './AppErrorState'
 
 export { PageHead } from './PageHead'
@@ -11,6 +12,7 @@ export {
   type SidebarSection,
 } from './Sidebar'
 export { TopBar } from './TopBar'
+export { BackToProjectsButton } from './BackToProjectsButton'
 export { MobileNav } from './MobileNav'
 export { SECTIONS } from './sections'
 export { ScreenNav } from './ScreenNav'

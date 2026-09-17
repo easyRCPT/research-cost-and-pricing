@@ -28,11 +28,15 @@ def create(budget: Budget, data: dict) -> dict:
 
     YearAmount.objects.bulk_create(year_amounts)
 
+    budget.touch()
+
     return budget_details.get_budget_details(budget)
 
 
 @transaction.atomic
 def delete(budget: Budget, line: NonStaffCostLine) -> dict:
     line.delete()
+
+    budget.touch()
 
     return budget_details.get_budget_details(budget)

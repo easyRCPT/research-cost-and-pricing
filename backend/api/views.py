@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,7 +16,6 @@ from .serializers.budget_update_serializer import (
     BudgetUpdateSchema,
     SectionSerializer,
 )
-from .serializers.calculate_serializer import CalculateRequestSerializer
 from .serializers.deliverable_serializer import DeliverableSerializer
 from .serializers.lookup_serializer import (
     LOOKUP_SERIALIZERS,
@@ -24,17 +24,48 @@ from .serializers.lookup_serializer import (
     LookupUpdateSerializer,
 )
 from .serializers.non_staff_line_serializer import NonStaffLineSerializer
+from .serializers.project_serializer import (
+    ProjectCreateSerializer,
+    ProjectRowSerializer,
+)
 from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
     budget_details,
     budget_update,
-    calculate,
     deliverable,
     lookup_loader,
     lookup_update,
     non_staff_line,
+    project,
     staff_line,
 )
+
+
+class ProjectView(APIView):
+    """
+    The list of projects, and the way to start one.
+
+    Open to anyone for now. When authentication lands this is where
+    IsAuthenticated goes; who may see which project is decided one level down,
+    in services/project.visible_projects.
+    """
+
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses=ProjectRowSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        rows = project.list_projects(request.user)
+        return Response(ProjectRowSerializer(rows, many=True).data)
+
+    @extend_schema(
+        request=ProjectCreateSerializer,
+        responses={201: ProjectRowSerializer},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = ProjectCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        row = project.create(cast(dict, serializer.validated_data), request.user)
+        return Response(ProjectRowSerializer(row).data, status=status.HTTP_201_CREATED)
 
 
 class BudgetDetailView(APIView):
@@ -81,7 +112,9 @@ class StaffLineView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
-    @extend_schema(responses=BudgetDetailSerializer)
+    # Spelled with the status code: a bare `responses=` on a delete is
+    # documented as 204 No Content, which this one is not.
+    @extend_schema(responses={200: BudgetDetailSerializer})
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
@@ -191,21 +224,3 @@ class LookupView(APIView):
             data=cast(dict, validated_data["values"]),
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# TODO: temporary. Delete this view when auth lands and the frontend goes back
-# to GET/PATCH /api/budgets/{id}/.
-class CalculateView(APIView):
-    """Calculate a whole budget from the request body. Nothing is saved."""
-
-    @extend_schema(
-        request=CalculateRequestSerializer,
-        responses={200: BudgetDetailSerializer},
-    )
-    def post(self, request: Request) -> Response:
-        serializer = CalculateRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        result = calculate.calculate(cast(dict, serializer.validated_data))
-
-        return Response(BudgetDetailSerializer(result).data, status=status.HTTP_200_OK)

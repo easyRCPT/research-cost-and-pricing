@@ -1,4 +1,5 @@
 export { ProjectDetails } from './ProjectDetails'
+export { ProjectsScreen } from './projects'
 export { SCREEN_HEADINGS } from './screens'
 export { LookupsScreen } from './LookupsScreen'
 export { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'

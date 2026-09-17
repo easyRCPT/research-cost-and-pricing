@@ -33,7 +33,24 @@ export function ProjectDepartmentRow({
   departments,
   onChange,
 }: ProjectDepartmentRowProps) {
-  const grouped = useMemo(() => byFaculty(departments), [departments])
+  // A long option list is built once, not on every render. There are several
+  // hundred departments here and they do not change while the page is open, so
+  // building them inline would rebuild every element each time this row
+  // renders. Worth doing for any select with more than a handful of options.
+  const options = useMemo(
+    () =>
+      byFaculty(departments).map(([faculty, rows]) => (
+        <SelectGroup key={faculty}>
+          <SelectLabel>{faculty}</SelectLabel>
+          {rows.map((d) => (
+            <SelectItem key={d.code} value={d.code}>
+              {d.name}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      )),
+    [departments],
+  )
 
   function setDepartment(code: string) {
     const d = departments.find((d) => d.code === code)
@@ -52,18 +69,7 @@ export function ProjectDepartmentRow({
         <SelectTrigger className="w-full max-w-lg">
           <SelectValue placeholder="Select a department" />
         </SelectTrigger>
-        <SelectContent>
-          {grouped.map(([faculty, rows]) => (
-            <SelectGroup key={faculty}>
-              <SelectLabel>{faculty}</SelectLabel>
-              {rows.map((d) => (
-                <SelectItem key={d.code} value={d.code}>
-                  {d.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          ))}
-        </SelectContent>
+        <SelectContent>{options}</SelectContent>
       </Select>
     </FieldRow>
   )

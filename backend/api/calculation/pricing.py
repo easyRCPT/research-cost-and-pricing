@@ -158,6 +158,7 @@ def calculate_price_summary(
 
     total_project_cost = project_cost + in_kind_project_cost
 
+    # Markup on cost, not margin on price -- see Budget.margin.
     margin_amount = project_cost * margin
     total_price_exc_gst = project_cost + margin_amount
     if gst_applicable:
