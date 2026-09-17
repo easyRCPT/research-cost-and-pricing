@@ -33,7 +33,7 @@ export function BudgetForm({ lookups }: BudgetFormProps) {
         nonStaffBudget={budget.budget_summary.non_staff_budget}
         lookups={lookups}
       />
-      <DeliverablesSection deliverables={info.deliverables} />
+      <DeliverablesSection />
     </Panel>
   )
 }

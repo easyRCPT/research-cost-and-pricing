@@ -59,6 +59,7 @@ class ProjectInfoSerializer(serializers.Serializer):
 
 
 class DeliverableResultSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     number = serializers.IntegerField()
     description = serializers.CharField()
     deliverable_type = serializers.CharField()

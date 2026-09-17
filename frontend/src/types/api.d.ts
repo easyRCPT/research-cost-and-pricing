@@ -887,6 +887,7 @@ export interface components {
          */
         DeliverableFieldEnum: "deliverable_type" | "dependency" | "description" | "due_date" | "invoice_amount" | "number" | "sponsor";
         DeliverableResult: {
+            id: number;
             number: number;
             description: string;
             deliverable_type: string;
@@ -1972,12 +1973,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description No response body */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetDetail"];
+                };
             };
             400: {
                 headers: {
@@ -2049,12 +2051,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetDetail"];
+                };
             };
             400: {
                 headers: {

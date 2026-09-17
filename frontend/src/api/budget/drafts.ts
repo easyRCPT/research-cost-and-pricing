@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-import type { NonStaffLine, StaffLine } from '@/types'
+import type { Deliverable, NonStaffLine, StaffLine } from '@/types'
 import { useBudgetId } from './context'
 
 /**
@@ -11,13 +11,17 @@ import { useBudgetId } from './context'
  * employment type, category, classification and time basis, and the model
  * refuses to store one without them — so a row lives here until it is complete
  * enough to save, and moves to the server the moment it is.
+ *
+ * A deliverable is the same problem with a smaller condition: it needs a
+ * description and a type before the model will hold it.
  */
 export interface Drafts {
   staff: StaffLine[]
   non_staff: NonStaffLine[]
+  deliverable: Deliverable[]
 }
 
-const EMPTY: Drafts = { staff: [], non_staff: [] }
+const EMPTY: Drafts = { staff: [], non_staff: [], deliverable: [] }
 
 const byBudget = new Map<number, Drafts>()
 const listeners = new Set<() => void>()

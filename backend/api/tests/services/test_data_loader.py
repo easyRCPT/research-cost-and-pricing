@@ -276,6 +276,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.deliverable_type.name = "Report"
 
         self.deliverable = Mock(spec=Deliverable)
+        self.deliverable.id = 7
         self.deliverable.number = 1
         self.deliverable.description = "Final report"
         self.deliverable.deliverable_type = self.deliverable_type
@@ -296,7 +297,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.budget.justification_notes = "Notes"
         self.budget.dean_exemption_reason = ""
         self.budget.status = "draft"
-        self.budget.deliverables.all.return_value = [self.deliverable]
+        self.budget.deliverables.order_by.return_value = [self.deliverable]
 
     def test_builds_budget_info(self):
         result = build_budget_info(self.budget)
@@ -317,6 +318,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
                 "status": "draft",
                 "deliverables": [
                     {
+                        "id": 7,
                         "number": 1,
                         "description": "Final report",
                         "deliverable_type": "Report",
@@ -329,8 +331,15 @@ class TestBuildBudgetInfo(SimpleTestCase):
             },
         )
 
+    def test_reads_the_deliverables_in_number_order(self):
+        build_budget_info(self.budget)
+
+        # Unordered, Postgres may hand back a numbered list reshuffled, and a
+        # reload would silently renumber what someone is reading.
+        self.budget.deliverables.order_by.assert_called_once_with("number")
+
     def test_handles_no_deliverables(self):
-        self.budget.deliverables.all.return_value = []
+        self.budget.deliverables.order_by.return_value = []
 
         result = build_budget_info(self.budget)
 

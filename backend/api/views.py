@@ -162,25 +162,37 @@ class NonStaffLineView(APIView):
 
 
 class DeliverableView(APIView):
-    @extend_schema(request=DeliverableSerializer, responses={201: None})
+    @extend_schema(
+        request=DeliverableSerializer, responses={201: BudgetDetailSerializer}
+    )
     def post(self, request: Request, budget_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
         serializer = DeliverableSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        deliverable.create(budget, cast(dict, serializer.validated_data))
-        return Response(status=status.HTTP_201_CREATED)
+        result = deliverable.create(budget, cast(dict, serializer.validated_data))
+        result_serializer = BudgetDetailSerializer(result)
+        return Response(
+            result_serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
-    @extend_schema(responses={204: None})
+    # Spelled with the status code: a bare `responses=` on a delete is
+    # documented as 204 No Content, which this one is not.
+    @extend_schema(responses={200: BudgetDetailSerializer})
     def delete(self, request: Request, budget_id: int, deliverable_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
         # Check that the deliverable belongs to the budget
         item = get_object_or_404(Deliverable, id=deliverable_id, budget=budget)
 
-        deliverable.delete(item)
+        result = deliverable.delete(item)
+        result_serializer = BudgetDetailSerializer(result)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            result_serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class LookupView(APIView):
