@@ -282,7 +282,6 @@ def build_account_string(
 class Project(models.Model):
     if TYPE_CHECKING:
         id: int
-        reference: str
         department_id: str
         activity_id: str | None
         region_id: str | None

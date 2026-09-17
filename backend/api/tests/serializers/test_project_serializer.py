@@ -8,7 +8,7 @@ from api.serializers.project_serializer import (
     ProjectRowSerializer,
 )
 
-from .serializer_utils import get_errors, get_validated_data
+from .serializer_utils import get_data, get_errors, get_validated_data
 
 
 class ProjectCreateSerializerTestCase(TestCase):
@@ -111,14 +111,16 @@ class ProjectRowSerializerTestCase(TestCase):
         }
 
     def test_rounds_the_price_to_cents(self):
-        data = ProjectRowSerializer(self.row()).data
+        data = get_data(ProjectRowSerializer(self.row()))
 
         self.assertEqual(data["total_price_exc_gst"], Decimal("1234.57"))
 
     def test_a_project_with_no_budget(self):
-        data = ProjectRowSerializer(
-            self.row(budget_id=None, status=None, budget_count=0),
-        ).data
+        data = get_data(
+            ProjectRowSerializer(
+                self.row(budget_id=None, status=None, budget_count=0),
+            )
+        )
 
         self.assertIsNone(data["budget_id"])
         self.assertIsNone(data["status"])
