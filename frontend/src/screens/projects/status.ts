@@ -7,5 +7,6 @@ export const STATUS_LABELS: Record<Status, string> = {
   hod_review: 'Head of Department review',
   dean_review: 'Dean review',
   approved: 'Approved',
+  rejected: 'Rejected',
   withdrawn: 'Withdrawn',
 }

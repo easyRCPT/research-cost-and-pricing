@@ -1754,10 +1754,11 @@ export interface components {
          *     * `hod_review` - Head of Department review
          *     * `dean_review` - Dean review
          *     * `approved` - Approved
+         *     * `rejected` - Rejected
          *     * `withdrawn` - Withdrawn
          * @enum {string}
          */
-        StatusEnum: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "withdrawn";
+        StatusEnum: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn";
         /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily

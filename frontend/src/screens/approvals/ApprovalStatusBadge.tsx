@@ -7,6 +7,7 @@ const STATUS_LABEL: Record<Status, string> = {
   hod_review: 'Awaiting Head of Department',
   dean_review: 'Awaiting Dean',
   approved: 'Approved',
+  rejected: 'Rejected',
   withdrawn: 'Withdrawn',
 }
 
