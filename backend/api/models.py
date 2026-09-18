@@ -409,7 +409,6 @@ class Budget(models.Model):
     margin = models.DecimalField(
         max_digits=5,
         decimal_places=4,
-        default=Decimal("0.30"),
         validators=[MinValueValidator(Decimal(0))],
     )
 

@@ -149,7 +149,6 @@ def update_budget(
 
     fields_requiring_calculation = {
         "mode",
-        "cost_multiplier",
         "in_kind_multiplier",
         "margin",
         "cash_co_contribution",
@@ -163,6 +162,17 @@ def update_budget(
     if field in fields_requiring_calculation:
         _set_field(budget, field, value)
         return True
+
+    # Said in its own words rather than as the generic refusal below, because
+    # this one is a rule rather than a typo: the multiplier is copied onto the
+    # budget from full_cost_recovery_multiplier at creation, and it is what
+    # decides whether the budget needs a Dean. Editable per budget, it would be
+    # a second door into both the price and the approval route.
+    if field == "cost_multiplier":
+        raise ValidationError(
+            "The cost multiplier is fixed at the University's full cost "
+            "recovery rate and is not editable per budget."
+        )
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
 

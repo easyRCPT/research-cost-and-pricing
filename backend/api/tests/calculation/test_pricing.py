@@ -21,7 +21,7 @@ class TestCalculateDeanRequired(SimpleTestCase):
         }
         general = {
             "full_cost_recovery_multiplier": Decimal(1),
-            "default_margin": Decimal("0.3"),
+            "minimum_margin": Decimal(0),
         }
 
         result = calculate_dean_required(budget_info, general)
@@ -35,43 +35,72 @@ class TestCalculateDeanRequired(SimpleTestCase):
         }
         general = {
             "full_cost_recovery_multiplier": Decimal(1),
-            "default_margin": Decimal("0.3"),
+            "minimum_margin": Decimal(0),
         }
 
         result = calculate_dean_required(budget_info, general)
 
         self.assertFalse(result)
 
-    def test_requires_dean_when_margin_is_below_default(self):
+    def test_requires_dean_when_margin_is_below_the_floor(self):
+        # A negative margin is a price below cost, which is the case the floor
+        # exists to route to a Dean.
         budget_info = {
             "cost_multiplier": Decimal(1),
-            "margin": Decimal("0.2"),
+            "margin": Decimal("-0.1"),
         }
         general = {
             "full_cost_recovery_multiplier": Decimal(1),
-            "default_margin": Decimal("0.3"),
+            "minimum_margin": Decimal(0),
         }
 
         result = calculate_dean_required(budget_info, general)
 
         self.assertTrue(result)
 
-    def test_uses_default_margin_when_not_configured(self):
+    def test_does_not_require_dean_when_margin_is_exactly_the_floor(self):
         budget_info = {
             "cost_multiplier": Decimal(1),
-            "margin": Decimal("0.29"),
+            "margin": Decimal(0),
         }
         general = {
             "full_cost_recovery_multiplier": Decimal(1),
+            "minimum_margin": Decimal(0),
         }
 
         result = calculate_dean_required(budget_info, general)
 
-        self.assertTrue(result)
+        self.assertFalse(result)
 
-    def test_does_not_require_dean_when_no_default_multiplier_and_margin_is_sufficient(
-        self,
-    ):
+    def test_a_margin_below_the_default_is_not_by_itself_a_dean_matter(self):
+        # Pricing under the starting margin is the ordinary case a Head of
+        # Department signs off; only the floor sends it further.
+        budget_info = {
+            "cost_multiplier": Decimal(1),
+            "margin": Decimal("0.05"),
+        }
+        general = {
+            "full_cost_recovery_multiplier": Decimal(1),
+            "default_margin": Decimal("0.30"),
+            "minimum_margin": Decimal(0),
+        }
+
+        result = calculate_dean_required(budget_info, general)
+
+        self.assertFalse(result)
+
+    def test_no_floor_configured_means_no_dean_on_margin_grounds(self):
+        budget_info = {
+            "cost_multiplier": Decimal(1),
+            "margin": Decimal("-0.5"),
+        }
+        general = {"full_cost_recovery_multiplier": Decimal(1)}
+
+        result = calculate_dean_required(budget_info, general)
+
+        self.assertFalse(result)
+
+    def test_does_not_require_dean_when_nothing_is_configured(self):
         budget_info = {
             "cost_multiplier": Decimal(1),
             "margin": Decimal("0.30"),
@@ -383,7 +412,9 @@ class TestCalculateBudgetSummary(SimpleTestCase):
         general = {
             "gst_rate": Decimal("0.10"),
             "full_cost_recovery_multiplier": Decimal(1),
-            "default_margin": Decimal("0.30"),
+            # A floor above this budget's margin, so dean_required is carried
+            # through to the summary rather than being incidentally false.
+            "minimum_margin": Decimal("0.25"),
         }
 
         result = calculate_budget_summary(

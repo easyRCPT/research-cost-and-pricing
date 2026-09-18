@@ -29,6 +29,8 @@ REQUIRED_CONSTANTS = {
     "max_payroll_tax",
     "override_uom_oncosts",
     "gst_rate",
+    "default_margin",
+    "minimum_margin",
 }
 
 

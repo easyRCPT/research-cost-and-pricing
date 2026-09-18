@@ -386,6 +386,24 @@ class TestUpdateBudget(SimpleTestCase):
         self.budget.full_clean.assert_called_once()
         self.budget.save.assert_called_once_with(update_fields=["margin", "updated_at"])
 
+    def test_refuses_the_cost_multiplier_and_says_why(self):
+        # Not a typo but a rule: the multiplier is the University's full cost
+        # recovery rate, copied onto the budget at creation, and it decides
+        # whether the budget needs a Dean. The message has to be sayable in
+        # the UI, so it is not the generic refusal.
+        with self.assertRaisesMessage(
+            ValidationError,
+            "The cost multiplier is fixed at the University's full cost "
+            "recovery rate and is not editable per budget.",
+        ):
+            budget_update.update_budget(
+                self.budget,
+                "cost_multiplier",
+                "1.00",
+            )
+
+        self.budget.save.assert_not_called()
+
     def test_rejects_invalid_field(self):
         with self.assertRaisesMessage(
             ValidationError,

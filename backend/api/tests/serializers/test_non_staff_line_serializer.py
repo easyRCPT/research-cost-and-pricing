@@ -38,6 +38,7 @@ class NonStaffLineSerializerTestCase(TestCase):
             project=self.project,
             cost_multiplier=Decimal("1.00"),
             in_kind_multiplier=Decimal("1.00"),
+            margin=Decimal("0.30"),
         )
 
         self.category = NonStaffCostCategory.objects.create(
