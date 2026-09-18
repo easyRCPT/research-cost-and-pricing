@@ -194,6 +194,14 @@ export function StaffTableBody({
                 <Derived>{dash(excluded ? 0 : costFor(line, year))}</Derived>
               </Calc>,
             ])}
+            <Calc
+              className={cn(
+                !excluded && line.total ? undefined : 'text-muted-foreground',
+                excluded && 'line-through',
+              )}
+            >
+              <Derived>{dash(excluded ? 0 : line.total)}</Derived>
+            </Calc>
             <Td align="center">
               <Button
                 variant="ghost"
