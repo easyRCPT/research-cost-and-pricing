@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 
 from ..models import (
     Activity,
+    Budget,
     CalculationConstant,
     DeliverableType,
     Department,
@@ -177,6 +178,22 @@ def get_constants() -> dict:
     cache.set(CONSTANTS_CACHE_KEY, result, CACHE_TIMEOUT)
 
     return result
+
+
+def constants_for(budget: Budget) -> dict:
+    """
+    The lookup state one budget prices against.
+
+    The live rates, for now. This is the single place lookup versioning goes:
+    once a budget pins the version it was authorised against, a draft still
+    reads live and an authorised budget reads its own version -- and only this
+    function changes, rather than a version being threaded through the engine.
+
+    Every repricing path reaches the engine through budget_details, so this is
+    the only caller there needs to be.
+    """
+    del budget
+    return get_constants()
 
 
 def validate_constants(constants: dict) -> None:

@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 from django.test import SimpleTestCase
 
 from api.models import (
+    Budget,
     CalculationConstant,
     EbaIncrease,
     OnCostRate,
@@ -15,6 +16,7 @@ from api.services.lookup_loader import (
     CACHE_KEY,
     CACHE_TIMEOUT,
     CONSTANTS_CACHE_KEY,
+    constants_for,
     get_constants,
     get_lookup_tables,
     invalidate_lookup_cache,
@@ -298,6 +300,23 @@ class TestGetConstants(SimpleTestCase):
             "Missing required calculation constants: gst_rate",
         ):
             get_constants()
+
+
+class TestConstantsFor(SimpleTestCase):
+    """
+    The seam lookup versioning lands on. A budget prices against the live
+    rates today; when a budget can pin the version it was authorised against,
+    only this function changes.
+    """
+
+    @patch("api.services.lookup_loader.get_constants")
+    def test_prices_against_the_live_constants(self, mock_get_constants):
+        mock_get_constants.return_value = {"constants": {"gst_rate": Decimal("0.10")}}
+
+        result = constants_for(Mock(spec=Budget))
+
+        self.assertEqual(result, {"constants": {"gst_rate": Decimal("0.10")}})
+        mock_get_constants.assert_called_once_with()
 
 
 class TestValidateConstants(SimpleTestCase):
