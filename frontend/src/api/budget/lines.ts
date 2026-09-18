@@ -77,6 +77,15 @@ function coalesceKey(
 // Saving and removing whole rows
 // ------------------------------------------------------------------
 
+/**
+ * Draft rows with a create already in flight.
+ *
+ * A draft stays on screen until the server has it, so the next keystroke finds
+ * it still there and would post it a second time. One create per draft row.
+ */
+const creating = new Set<string>()
+const inFlight = (budgetId: number, draftId: number) => `${budgetId}:${draftId}`
+
 function useLineMutations() {
   const budgetId = useBudgetId()
   const queryClient = useQueryClient()
@@ -90,10 +99,20 @@ function useLineMutations() {
 
   const save = (detail: BudgetDetail) => queryClient.setQueryData(key, detail)
 
+  /** Drops the draft the reply is for, then stores the budget that came back. */
+  const settleDraft = (which: 'staff' | 'non_staff') => (draftId: number) => {
+    creating.delete(inFlight(budgetId, draftId))
+    const drafts = getDrafts(budgetId)
+    setDrafts(budgetId, {
+      ...drafts,
+      [which]: drafts[which].filter((row) => row.id !== draftId),
+    })
+  }
+
   const createStaff = useMutation({
     mutationKey: writeKey,
     scope,
-    mutationFn: async (body: StaffLineInput) => {
+    mutationFn: async ({ body }: { draftId: number; body: StaffLineInput }) => {
       const { data, error, response } = await api.POST(
         '/api/budgets/{budget_id}/staff-lines/',
         { params: { path: { budget_id: budgetId } }, body },
@@ -101,8 +120,17 @@ function useLineMutations() {
       if (error) throw new ApiError(response.status, error)
       return data
     },
-    onSuccess: save,
-    onError,
+    // The draft goes only now, once the row exists on the server.
+    onSuccess: (detail, { draftId }) => {
+      settleDraft('staff')(draftId)
+      save(detail)
+    },
+    // It stays put on a refusal, holding what was typed, so the row can be
+    // corrected rather than disappearing as it is filled in.
+    onError: (error, { draftId }) => {
+      creating.delete(inFlight(budgetId, draftId))
+      onError(error)
+    },
   })
 
   const deleteStaff = useMutation({
@@ -125,7 +153,12 @@ function useLineMutations() {
   const createNonStaff = useMutation({
     mutationKey: writeKey,
     scope,
-    mutationFn: async (body: NonStaffLineInput) => {
+    mutationFn: async ({
+      body,
+    }: {
+      draftId: number
+      body: NonStaffLineInput
+    }) => {
       const { data, error, response } = await api.POST(
         '/api/budgets/{budget_id}/non-staff-lines/',
         { params: { path: { budget_id: budgetId } }, body },
@@ -133,8 +166,14 @@ function useLineMutations() {
       if (error) throw new ApiError(response.status, error)
       return data
     },
-    onSuccess: save,
-    onError,
+    onSuccess: (detail, { draftId }) => {
+      settleDraft('non_staff')(draftId)
+      save(detail)
+    },
+    onError: (error, { draftId }) => {
+      creating.delete(inFlight(budgetId, draftId))
+      onError(error)
+    },
   })
 
   const deleteNonStaff = useMutation({
@@ -287,9 +326,21 @@ export function useStaffLines(years: number[]): StaffLines {
         const next = { ...current, ...patch }
 
         // Complete enough for the engine to rate: it belongs to the server now.
+        //
+        // The row stays in the draft layer until the reply lands. Dropping it
+        // here meant a line the server refused -- over the time cap, a value
+        // the serializer would not take -- was gone from both places at once:
+        // removed from drafts, never saved, and the toast talking about a row
+        // that was no longer on screen.
         if (isRated(next)) {
-          writeDrafts(getDrafts(budgetId).staff.filter((row) => row.id !== id))
-          createStaff.mutate(toStaffInput(next))
+          writeDrafts(
+            getDrafts(budgetId).staff.map((row) => (row.id === id ? next : row)),
+          )
+          const key = inFlight(budgetId, id)
+          if (!creating.has(key)) {
+            creating.add(key)
+            createStaff.mutate({ draftId: id, body: toStaffInput(next) })
+          }
           return
         }
 
@@ -436,11 +487,18 @@ export function useNonStaffLines(years: number[]): NonStaffLines {
         if (!current) return
         const next = { ...current, ...patch }
 
+        // Kept until the server has it, for the same reason as a staff row.
         if (isCosted(next)) {
           writeDrafts(
-            getDrafts(budgetId).non_staff.filter((row) => row.id !== id),
+            getDrafts(budgetId).non_staff.map((row) =>
+              row.id === id ? next : row,
+            ),
           )
-          createNonStaff.mutate(toNonStaffInput(next))
+          const key = inFlight(budgetId, id)
+          if (!creating.has(key)) {
+            creating.add(key)
+            createNonStaff.mutate({ draftId: id, body: toNonStaffInput(next) })
+          }
           return
         }
 
