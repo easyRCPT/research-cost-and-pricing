@@ -5,6 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { BudgetProvider } from '@/api/budget'
 import {
   AppErrorState,
+  AppShell,
   AppSkeleton,
   ProjectsSkeleton,
 } from './components/shell'
@@ -46,7 +47,12 @@ function App() {
             }
           >
             {view.name === 'projects' ? (
-              <ProjectsScreen onOpen={open} />
+              // In the shell, without a sidebar: the branding band belongs on
+              // every screen, and ProjectsSkeleton already renders one -- so
+              // outside it the band flashed away as the list arrived.
+              <AppShell>
+                <ProjectsScreen onOpen={open} />
+              </AppShell>
             ) : (
               <BudgetProvider budgetId={view.budgetId}>
                 <AppContent

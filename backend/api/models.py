@@ -376,6 +376,7 @@ class Budget(models.Model):
         HOD_REVIEW = "hod_review", "Head of Department review"
         DEAN_REVIEW = "dean_review", "Dean review"
         APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
         WITHDRAWN = "withdrawn", "Withdrawn"
 
     if TYPE_CHECKING:
@@ -383,6 +384,7 @@ class Budget(models.Model):
         deliverables: RelatedManager["Deliverable"]
         staff_lines: RelatedManager["StaffCostLine"]
         non_staff_lines: RelatedManager["NonStaffCostLine"]
+        approval_steps: RelatedManager["ApprovalStep"]
 
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE
@@ -459,6 +461,84 @@ class Budget(models.Model):
 
     def __str__(self):
         return f"{self.project} ({self.get_status_display()})"
+
+
+class ApprovalStep(models.Model):
+    # One review a budget has to pass. Created in pairs at submit: a department
+    # step that is always required, and a faculty step that is marked
+    # not_required when no dean trigger fired, so the history reads straight
+    # either way rather than going quiet when no Dean was needed.
+    #
+    # There is no signature field, and there should not be one. The
+    # authenticated login, the decision and the timestamp are the evidence;
+    # nothing drawn, typed or uploaded is collected.
+
+    if TYPE_CHECKING:
+        id: int
+
+        def get_level_display(self) -> str: ...
+
+        def get_status_display(self) -> str: ...
+
+    class Level(models.TextChoices):
+        DEPARTMENT = "department", "Head of Department"
+        FACULTY = "faculty", "Dean"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        NOT_REQUIRED = "not_required", "Not required"
+
+    budget = models.ForeignKey(
+        "Budget", related_name="approval_steps", on_delete=models.CASCADE
+    )
+    level = models.CharField(max_length=20, choices=Level.choices)
+    required = models.BooleanField()
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
+
+    # PROTECT rather than SET_NULL, deliberately unlike AuditLog.actor: accounts
+    # are deactivated rather than deleted, and a decision that loses its decider
+    # stops being evidence. An audit log has to survive anything; an approval
+    # has to refuse it.
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    comment = models.TextField(blank=True, default="")
+
+    class Meta:
+        # Spelled with string literals rather than Status.APPROVED: a nested
+        # Meta cannot see names in the class body around it.
+        constraints = [
+            # Two steps at one level are two answers to one question, with
+            # nothing to say which one counted.
+            models.UniqueConstraint(
+                fields=["budget", "level"],
+                name="unique_approval_step_per_level",
+            ),
+            # An approval nobody signed for is worth nothing at audit.
+            models.CheckConstraint(
+                condition=~models.Q(status__in=["approved", "rejected"])
+                | models.Q(decided_by__isnull=False, decided_at__isnull=False),
+                name="decided_approval_step_names_its_decider",
+            ),
+            # The mirror: a time on an undecided step means nothing and will be
+            # read as though it meant something.
+            models.CheckConstraint(
+                condition=~models.Q(status__in=["pending", "not_required"])
+                | models.Q(decided_by__isnull=True, decided_at__isnull=True),
+                name="undecided_approval_step_names_nobody",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_level_display()} ({self.get_status_display()})"
 
 
 class Deliverable(models.Model):
