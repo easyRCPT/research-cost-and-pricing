@@ -11,7 +11,7 @@ def get_budget_details(budget: Budget) -> dict:
     Calculate cost and price result.
     """
     details = build_budget_details(
-        lookup_loader.get_constants(),
+        lookup_loader.constants_for(budget),
         data_loader.load_budget_data(budget),
     )
     store_price(budget, details)
