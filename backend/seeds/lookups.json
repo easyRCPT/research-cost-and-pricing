@@ -4768,13 +4768,5 @@
     "description": "Override multiplier for UoM on-costs",
     "value": "0.000000"
   }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "working_days_per_year",
-  "fields": {
-    "description": "Weekdays in a year. Used only for the annual leave deduction.",
-    "value": "260.892000"
-  }
 }
 ]
