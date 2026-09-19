@@ -247,6 +247,9 @@ export function CellChoice({
           aria-hidden
           className={cn(
             'invisible block h-0 pr-8 pl-2 whitespace-nowrap',
+            // The sizers reserve the column's widest value. On paper nothing
+            // is going to be picked, so the cell can be as wide as it reads.
+            'print:hidden',
             choiceMaxWidth,
           )}
         >
@@ -260,6 +263,8 @@ export function CellChoice({
             cellField,
             choiceValue,
             'absolute inset-0 justify-between',
+            // Back into flow once the sizers are gone, and without the chevron.
+            'print:static print:inset-auto print:[&>svg]:hidden',
           )}
         >
           <SelectValue placeholder={placeholder} />
