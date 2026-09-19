@@ -84,17 +84,81 @@ async function patch(
   return response.status === 204 ? null : (data as BudgetDetail)
 }
 
+/**
+ * The fields of the PATCH envelope itself, rather than of the budget.
+ *
+ * A complaint about `field` or `row_id` is about the request this app built,
+ * not about anything the reader typed, so its name is not worth showing them.
+ */
+const ENVELOPE = new Set(['section', 'field', 'value', 'row_id', 'year'])
+
+/** chief_investigator -> "Chief investigator". The API names a field in the
+ *  model's words; a reader should see it in their own. */
+const asLabel = (attr: string) =>
+  attr.replace(/_/g, ' ').replace(/^./, (first) => first.toUpperCase())
+
 const describe = (error: unknown) => {
   if (!(error instanceof ApiError)) return null
   const fields = Object.entries(error.fields)
   if (fields.length === 0) return error.message
-  return fields.map(([field, message]) => `${field}: ${message}`).join('\n')
+  return fields
+    .map(([attr, message]) =>
+      ENVELOPE.has(attr) ? message : `${asLabel(attr)}: ${message}`,
+    )
+    .join('\n')
 }
 
-export function reportWriteError(error: unknown) {
+/**
+ * The row a command was aimed at, named as the table names it.
+ *
+ * Read from the budget the screen is showing, because the server answers with
+ * a row id and the reader has never seen one.
+ */
+export function rowLabel(
+  budget: BudgetDetail | undefined,
+  command: Command | undefined,
+): string | undefined {
+  if (!budget || !command || !('row_id' in command)) return undefined
+  const id = command.row_id
+
+  if (command.section === 'staff') {
+    const line = [
+      ...budget.staff_cost.lines,
+      ...budget.staff_in_kind_cost.lines,
+    ].find((row) => row.id === id)
+    return line?.name_role?.trim() || 'A staff row'
+  }
+
+  if (command.section === 'non_staff') {
+    const line = [
+      ...budget.non_staff_cost.lines,
+      ...budget.non_staff_in_kind_cost.lines,
+    ].find((row) => row.id === id)
+    return line?.description?.trim() || line?.expense_type || 'A non-staff row'
+  }
+
+  if (command.section === 'deliverable') {
+    const row = budget.budget_info.deliverables.find((item) => item.id === id)
+    return row?.description?.trim() || `Deliverable ${row?.number ?? ''}`.trim()
+  }
+
+  return undefined
+}
+
+/**
+ * Says what was refused, and where it was.
+ *
+ * `where` is the row as it reads on screen -- a person's name, a description --
+ * because a reader has no way to find "row_id 14", and the server has no way
+ * to know what the row is called.
+ */
+export function reportWriteError(error: unknown, where?: string) {
   const description = describe(error)
+  const title = where
+    ? `${where}: some of your changes were not saved`
+    : 'Some of your changes were not saved'
   if (description) {
-    toast.error('Some of your changes were not saved', {
+    toast.error(title, {
       id: 'budget-write',
       description,
     })
@@ -141,8 +205,9 @@ export function useEdit() {
       if (detail === null || issued !== writeCounter) return
       queryClient.setQueryData(key, echo(detail))
     },
-    onError: (error) => {
-      reportWriteError(error)
+    onError: (error, { commands }) => {
+      const budget = queryClient.getQueryData<BudgetDetail>(key)
+      reportWriteError(error, rowLabel(budget, commands[0]))
       // The cache is holding an optimistic echo that the server rejected.
       queryClient.invalidateQueries({ queryKey: key })
     },

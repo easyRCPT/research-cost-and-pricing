@@ -92,8 +92,8 @@ function useLineMutations() {
   const key = budgetKey(budgetId)
   const scope = writeScope(budgetId)
 
-  const onError = (error: unknown) => {
-    reportWriteError(error)
+  const onError = (error: unknown, where?: string) => {
+    reportWriteError(error, where)
     queryClient.invalidateQueries({ queryKey: key })
   }
 
@@ -129,7 +129,8 @@ function useLineMutations() {
     // corrected rather than disappearing as it is filled in.
     onError: (error, { draftId }) => {
       creating.delete(inFlight(budgetId, draftId))
-      onError(error)
+      const row = getDrafts(budgetId).staff.find((line) => line.id === draftId)
+      onError(error, row?.name_role?.trim() || 'A staff row')
     },
   })
 
@@ -147,7 +148,9 @@ function useLineMutations() {
       return data
     },
     onSuccess: save,
-    onError,
+    // Wrapped: the mutation calls its handler with the line id, and the second
+    // argument here is the row's name.
+    onError: (error) => onError(error),
   })
 
   const createNonStaff = useMutation({
@@ -172,7 +175,13 @@ function useLineMutations() {
     },
     onError: (error, { draftId }) => {
       creating.delete(inFlight(budgetId, draftId))
-      onError(error)
+      const row = getDrafts(budgetId).non_staff.find(
+        (line) => line.id === draftId,
+      )
+      onError(
+        error,
+        row?.description?.trim() || row?.expense_type || 'A non-staff row',
+      )
     },
   })
 
@@ -190,7 +199,9 @@ function useLineMutations() {
       return data
     },
     onSuccess: save,
-    onError,
+    // Wrapped: the mutation calls its handler with the line id, and the second
+    // argument here is the row's name.
+    onError: (error) => onError(error),
   })
 
   return { createStaff, deleteStaff, createNonStaff, deleteNonStaff }

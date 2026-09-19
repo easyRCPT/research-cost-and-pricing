@@ -64,8 +64,8 @@ export function useDeliverables(): Deliverables {
   const key = budgetKey(budgetId)
   const scope = writeScope(budgetId)
 
-  const onError = (error: unknown) => {
-    reportWriteError(error)
+  const onError = (error: unknown, where?: string) => {
+    reportWriteError(error, where)
     queryClient.invalidateQueries({ queryKey: key })
   }
 
@@ -89,7 +89,8 @@ export function useDeliverables(): Deliverables {
       return data
     },
     onSuccess: save,
-    onError,
+    onError: (error, row) =>
+      onError(error, row.description.trim() || `Deliverable ${row.number}`),
   })
 
   const deleteRow = useMutation({
@@ -108,7 +109,9 @@ export function useDeliverables(): Deliverables {
       return data
     },
     onSuccess: save,
-    onError,
+    // Wrapped: the mutation calls its handler with the line id, and the second
+    // argument here is the row's name.
+    onError: (error) => onError(error),
   })
 
   const saved = budget.budget_info.deliverables
