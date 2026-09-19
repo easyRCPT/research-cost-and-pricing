@@ -1,10 +1,8 @@
 import { useState, type ComponentProps } from 'react'
 import { Input } from '@/components/ui/input'
 
-const clamp = (value: number, min?: number, max?: number) => {
-  const floored = min === undefined ? value : Math.max(min, value)
-  return max === undefined ? floored : Math.min(max, floored)
-}
+const outside = (value: number, min?: number, max?: number) =>
+  (min !== undefined && value < min) || (max !== undefined && value > max)
 
 interface NumberInputProps extends Omit<
   ComponentProps<typeof Input>,
@@ -14,7 +12,7 @@ interface NumberInputProps extends Omit<
   onChange: (value: number) => void
   min?: number
   max?: number
-  /** Called with what was typed when it fell outside min/max and got clamped. */
+  /** Called with what was typed when it fell outside min/max. */
   onOutOfRange?: (value: number) => void
 }
 
@@ -41,17 +39,25 @@ export function NumberInput({
         setDraft(String(value))
         onFocus?.(e)
       }}
+      aria-invalid={draft !== null && outside(Number(draft), min, max)}
       onChange={(e) => {
         const raw = e.target.value
         setDraft(raw)
         const parsed = raw === '' ? 0 : Number(raw)
         if (!Number.isFinite(parsed)) return
-        const clamped = clamp(parsed, min, max)
-        if (clamped !== parsed) onOutOfRange?.(parsed)
-        onChange(clamped)
+        // Out of range is reported and marked, never rewritten: replacing what
+        // someone typed with the cap loses the number before they have read
+        // why it was refused.
+        if (outside(parsed, min, max)) {
+          onOutOfRange?.(parsed)
+          return
+        }
+        onChange(parsed)
       }}
       onBlur={(e) => {
-        setDraft(null)
+        // An out-of-range entry stays on screen. Anything else goes back to
+        // showing the stored value.
+        if (!outside(Number(draft ?? value), min, max)) setDraft(null)
         onBlur?.(e)
       }}
     />
