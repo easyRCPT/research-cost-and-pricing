@@ -12,6 +12,7 @@ import {
 } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import { useDeliverables } from '@/api/budget'
+import { isDraft } from '@/api/budget/drafts'
 import { useLookups } from '@/api/lookups'
 import { typeNames } from '@/lib/deliverables'
 import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
@@ -40,18 +41,18 @@ export function DeliverablesSection() {
             <Th align="right">Invoice Amount</Th>
             <Th>Due Date</Th>
             <Th>Dependency Sponsor</Th>
-            <Th className="w-10" />
+            <Th className="w-10 print:hidden" />
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className={isDraft(row.id) ? 'print:hidden' : undefined}>
               <Td align="center" className="text-muted-foreground">
                 {row.number}
               </Td>
               <CellTd>
                 <CellText
-                  className="min-w-56"
+                  className="min-w-56 print:min-w-0"
                   value={row.description}
                   onChange={(description) => patchRow(row.id, { description })}
                 />
@@ -68,7 +69,7 @@ export function DeliverablesSection() {
               </CellTd>
               <CellTd>
                 <CellNumber
-                  className="w-28"
+                  className="w-28 print:w-auto"
                   prefix="$"
                   min={0}
                   max={MAX_MONEY}
@@ -83,7 +84,7 @@ export function DeliverablesSection() {
               </CellTd>
               <CellTd>
                 <CellText
-                  className="min-w-28"
+                  className="min-w-28 print:min-w-0"
                   placeholder="dd/mm/yyyy"
                   value={row.due_date}
                   onChange={(due_date) => patchRow(row.id, { due_date })}
@@ -91,12 +92,12 @@ export function DeliverablesSection() {
               </CellTd>
               <CellTd>
                 <CellText
-                  className="min-w-40"
+                  className="min-w-40 print:min-w-0"
                   value={row.sponsor}
                   onChange={(sponsor) => patchRow(row.id, { sponsor })}
                 />
               </CellTd>
-              <Td align="center">
+              <Td align="center" className="print:hidden">
                 <Button
                   variant="ghost"
                   size="icon-xs"
@@ -111,7 +112,12 @@ export function DeliverablesSection() {
           ))}
         </tbody>
       </Grid>
-      <Button variant="outline" size="sm" className="mt-3" onClick={addRow}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="mt-3 print:hidden"
+        onClick={addRow}
+      >
         <Plus /> Add deliverable
       </Button>
     </>

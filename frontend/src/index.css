@@ -203,9 +203,37 @@
 
 /* Printing has no scroll box to pin to, and a static head repeats itself on
    every page. */
+/* A defined page, so the document does not depend on the print dialog. */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
 @media print {
   .grid-table thead {
     position: static;
+    /* Repeat the column headings on every page a table runs onto. */
+    display: table-header-group;
+  }
+
+  /* A row split across a page boundary is unreadable on both halves. */
+  .grid-table tr {
+    break-inside: avoid;
+  }
+
+  /* The React Query devtools are dev-only and never reach the bundle, but
+     they float over a print preview and make it untrustworthy while working
+     on one. */
+  .tsqd-parent-container {
+    display: none !important;
+  }
+
+  /* Entry fields are for typing into. On paper they are just the value. */
+  .grid-table input,
+  .grid-table button[role='combobox'] {
+    border: 0;
+    background: transparent;
+    padding-left: 0;
   }
 }
 
