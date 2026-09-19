@@ -17,6 +17,11 @@ from ..models import (
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
+    # Faculty is a table now. It is still echoed as the two strings it used to
+    # be, so the org units tab and the department picker read the same shape.
+    faculty = serializers.CharField(source="faculty.name", read_only=True)
+    faculty_code = serializers.CharField(source="faculty.code", read_only=True)
+
     class Meta:
         model = Department
         fields = [

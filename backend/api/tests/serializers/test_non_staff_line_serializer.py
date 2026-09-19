@@ -5,6 +5,7 @@ from django.test import TestCase
 from api.models import (
     Budget,
     Department,
+    Faculty,
     NonStaffCostCategory,
     Project,
 )
@@ -20,8 +21,9 @@ class NonStaffLineSerializerTestCase(TestCase):
             name="Science",
             school="Science School",
             school_code="SCI",
-            faculty="Science Faculty",
-            faculty_code="SCI",
+            faculty=Faculty.objects.get_or_create(
+                code="SCI", defaults={"name": "Science Faculty"}
+            )[0],
         )
 
         self.project = Project.objects.create(

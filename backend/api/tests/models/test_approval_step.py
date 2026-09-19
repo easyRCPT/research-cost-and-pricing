@@ -4,7 +4,14 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.utils import timezone
 
-from api.models import ApprovalStep, Budget, Department, Project, User
+from api.models import (
+    ApprovalStep,
+    Budget,
+    Department,
+    Faculty,
+    Project,
+    User,
+)
 
 
 class ApprovalStepTestMixin:
@@ -12,14 +19,16 @@ class ApprovalStepTestMixin:
     def create_department() -> Department:
         # get_or_create: some tests need two budgets, and they share a
         # department rather than inventing a second one.
+        faculty, _ = Faculty.objects.get_or_create(
+            code="SCI", defaults={"name": "Science Faculty"}
+        )
         department, _ = Department.objects.get_or_create(
             code="SCI",
             defaults={
                 "name": "Science",
                 "school": "Science School",
                 "school_code": "SCI",
-                "faculty": "Science Faculty",
-                "faculty_code": "SCI",
+                "faculty": faculty,
             },
         )
         return department

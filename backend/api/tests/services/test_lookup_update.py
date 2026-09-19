@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError
 
 from api.models import (
     Department,
+    Faculty,
     LookupConfiguration,
     LookupVersion,
     SalaryRate,
@@ -17,12 +18,17 @@ from api.services.lookup_update import create, update
 
 class LookupUpdateTestMixin:
     @staticmethod
+    def create_faculty(code: str = "SCI", name: str = "Science Faculty") -> Faculty:
+        faculty, _ = Faculty.objects.get_or_create(code=code, defaults={"name": name})
+        return faculty
+
+    @classmethod
     def create_department(
+        cls,
         code: str = "SCI",
         name: str = "Science",
         school: str = "Science School",
         school_code: str = "SCI",
-        faculty: str = "Science Faculty",
         faculty_code: str = "SCI",
     ) -> Department:
         return Department.objects.create(
@@ -30,21 +36,21 @@ class LookupUpdateTestMixin:
             name=name,
             school=school,
             school_code=school_code,
-            faculty=faculty,
-            faculty_code=faculty_code,
+            faculty=cls.create_faculty(code=faculty_code),
         )
 
 
 class TestCreate(TestCase, LookupUpdateTestMixin):
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_creates_lookup_row(self, mock_invalidate_cache):
+        # A department names its faculty by code; the row has to exist first.
+        self.create_faculty()
         data = {
             "code": "SCI",
             "name": "Science",
             "school": "Science School",
             "school_code": "SCI",
-            "faculty": "Science Faculty",
-            "faculty_code": "SCI",
+            "faculty_id": "SCI",
         }
 
         create("departments", data)
@@ -54,20 +60,20 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
         self.assertEqual(department.name, "Science")
         self.assertEqual(department.school, "Science School")
         self.assertEqual(department.school_code, "SCI")
-        self.assertEqual(department.faculty, "Science Faculty")
-        self.assertEqual(department.faculty_code, "SCI")
+        self.assertEqual(department.faculty.code, "SCI")
+        self.assertEqual(department.faculty.name, "Science Faculty")
 
         mock_invalidate_cache.assert_called_once()
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_validates_data_before_saving(self, mock_invalidate_cache):
+        self.create_faculty()
         data = {
             "code": "SCI",
             "name": "",
             "school": "Science School",
             "school_code": "SCI",
-            "faculty": "Science Faculty",
-            "faculty_code": "SCI",
+            "faculty_id": "SCI",
         }
 
         with self.assertRaises(DjangoValidationError):

@@ -10,6 +10,7 @@ from api.models import (
     Deliverable,
     DeliverableType,
     Department,
+    Faculty,
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
@@ -29,8 +30,9 @@ class BudgetUpdateTestMixin:
             name="Science",
             school="Science School",
             school_code="SCI",
-            faculty="Science Faculty",
-            faculty_code="SCI",
+            faculty=Faculty.objects.get_or_create(
+                code="SCI", defaults={"name": "Science Faculty"}
+            )[0],
         )
 
     def create_project(self):
