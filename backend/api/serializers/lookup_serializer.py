@@ -7,7 +7,6 @@ from ..models import (
     Department,
     EbaIncrease,
     IncrementCap,
-    MinimumCostRecoveryMultiplier,
     NonStaffCostCategory,
     OnCostRate,
     Region,
@@ -67,12 +66,6 @@ class NonStaffCostCategorySerializer(serializers.ModelSerializer):
         fields = ["ledger_id", "cost_category", "cost_subcategory"]
 
 
-class MinimumCostRecoveryMultiplierSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MinimumCostRecoveryMultiplier
-        fields = ["year", "multiplier"]
-
-
 class CalculationConstantSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalculationConstant
@@ -111,7 +104,6 @@ LOOKUP_SERIALIZERS = {
     "eba_increases": EbaIncreaseSerializer,
     "on_cost_rates": OnCostRateSerializer,
     "non_staff_cost_categories": NonStaffCostCategorySerializer,
-    "minimum_cost_recovery_multipliers": MinimumCostRecoveryMultiplierSerializer,
     "calculation_constants": CalculationConstantSerializer,
     "activities": ActivitySerializer,
     "regions": RegionSerializer,

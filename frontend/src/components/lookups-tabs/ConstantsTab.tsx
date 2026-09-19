@@ -3,7 +3,6 @@ import { money } from '@/lib/format/utils'
 import type { LookupTables } from '@/types'
 
 type Constant = LookupTables['calculation_constants'][number]
-type Recovery = LookupTables['minimum_cost_recovery_multipliers'][number]
 
 const percentage = (value: number) => `${(value * 100).toFixed(2)}%`
 
@@ -23,23 +22,18 @@ const CONSTANT_COLUMNS = constant.columns([
   }),
 ])
 
-const recovery = columnHelper<Recovery>()
-const RECOVERY_COLUMNS = recovery.columns([
-  recovery.accessor('year', { header: 'Year', meta: { className: 'tabular' } }),
-  recovery.accessor('multiplier', {
-    header: 'Multiplier',
-    cell: ({ getValue }) => getValue().toFixed(4),
-    meta: { align: 'right', className: 'tabular' },
-  }),
-])
-
 const byName = (row: Constant) => row.name
-const byYear = (row: Recovery) => String(row.year)
 
 interface ConstantsTabProps {
   data: LookupTables
 }
 
+/**
+ * The "Minimum cost recovery by year" table is gone with its model: it was
+ * served over /api/lookups/, had no rows in any environment, and nothing read
+ * it. The dean rule reads the full_cost_recovery_multiplier constant, which is
+ * in the table above.
+ */
 export function ConstantsTab({ data }: ConstantsTabProps) {
   return (
     <TableCard
@@ -52,17 +46,6 @@ export function ConstantsTab({ data }: ConstantsTabProps) {
               columns={CONSTANT_COLUMNS}
               rows={data.calculation_constants}
               getRowId={byName}
-            />
-          ),
-        },
-        {
-          value: 'recovery',
-          title: 'Minimum cost recovery by year',
-          table: (
-            <DataTable
-              columns={RECOVERY_COLUMNS}
-              rows={data.minimum_cost_recovery_multipliers}
-              getRowId={byYear}
             />
           ),
         },

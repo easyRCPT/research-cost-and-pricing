@@ -1,5 +1,22 @@
 [
 {
+  "model": "api.lookupversion",
+  "pk": 1,
+  "fields": {
+    "created_at": "2026-09-19T09:47:39.601Z",
+    "updated_at": "2026-09-19T09:47:39.601Z",
+    "updated_by": null
+  }
+},
+{
+  "model": "api.lookupconfiguration",
+  "pk": 1,
+  "fields": {
+    "current_version": 1,
+    "referenced": false
+  }
+},
+{
   "model": "api.department",
   "pk": "CCH_H1_5_01",
   "fields": {
@@ -2202,7 +2219,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "RA Grade 1.1",
-    "rate": "79677.3000"
+    "rate": "79677.3000",
+    "version": 1
   }
 },
 {
@@ -2212,7 +2230,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "RA Grade 1.2",
-    "rate": "82274.2200"
+    "rate": "82274.2200",
+    "version": 1
   }
 },
 {
@@ -2222,7 +2241,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "RA Grade 1.3",
-    "rate": "87266.1000"
+    "rate": "87266.1000",
+    "version": 1
   }
 },
 {
@@ -2232,7 +2252,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.1",
-    "rate": "87266.1000"
+    "rate": "87266.1000",
+    "version": 1
   }
 },
 {
@@ -2242,7 +2263,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.2",
-    "rate": "92242.6800"
+    "rate": "92242.6800",
+    "version": 1
   }
 },
 {
@@ -2252,7 +2274,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.3",
-    "rate": "97233.5400"
+    "rate": "97233.5400",
+    "version": 1
   }
 },
 {
@@ -2262,7 +2285,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.4",
-    "rate": "102218.2800"
+    "rate": "102218.2800",
+    "version": 1
   }
 },
 {
@@ -2272,7 +2296,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.5",
-    "rate": "106272.7800"
+    "rate": "106272.7800",
+    "version": 1
   }
 },
 {
@@ -2282,7 +2307,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.6",
-    "rate": "110319.1200"
+    "rate": "110319.1200",
+    "version": 1
   }
 },
 {
@@ -2292,7 +2318,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.7",
-    "rate": "114366.4800"
+    "rate": "114366.4800",
+    "version": 1
   }
 },
 {
@@ -2302,7 +2329,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.8",
-    "rate": "118415.8800"
+    "rate": "118415.8800",
+    "version": 1
   }
 },
 {
@@ -2312,7 +2340,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.1",
-    "rate": "124656.2400"
+    "rate": "124656.2400",
+    "version": 1
   }
 },
 {
@@ -2322,7 +2351,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.2",
-    "rate": "129326.8200"
+    "rate": "129326.8200",
+    "version": 1
   }
 },
 {
@@ -2332,7 +2362,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.3",
-    "rate": "134000.4600"
+    "rate": "134000.4600",
+    "version": 1
   }
 },
 {
@@ -2342,7 +2373,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.4",
-    "rate": "138673.0800"
+    "rate": "138673.0800",
+    "version": 1
   }
 },
 {
@@ -2352,7 +2384,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.5",
-    "rate": "143351.8200"
+    "rate": "143351.8200",
+    "version": 1
   }
 },
 {
@@ -2362,7 +2395,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.6",
-    "rate": "148023.4200"
+    "rate": "148023.4200",
+    "version": 1
   }
 },
 {
@@ -2372,7 +2406,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.1",
-    "rate": "152695.0200"
+    "rate": "152695.0200",
+    "version": 1
   }
 },
 {
@@ -2382,7 +2417,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.2",
-    "rate": "157378.8600"
+    "rate": "157378.8600",
+    "version": 1
   }
 },
 {
@@ -2392,7 +2428,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.3",
-    "rate": "162045.3600"
+    "rate": "162045.3600",
+    "version": 1
   }
 },
 {
@@ -2402,7 +2439,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.4",
-    "rate": "166712.8800"
+    "rate": "166712.8800",
+    "version": 1
   }
 },
 {
@@ -2412,7 +2450,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.5",
-    "rate": "171385.5000"
+    "rate": "171385.5000",
+    "version": 1
   }
 },
 {
@@ -2422,7 +2461,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.6",
-    "rate": "176065.2600"
+    "rate": "176065.2600",
+    "version": 1
   }
 },
 {
@@ -2432,7 +2472,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.1",
-    "rate": "183859.0800"
+    "rate": "183859.0800",
+    "version": 1
   }
 },
 {
@@ -2442,7 +2483,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.2",
-    "rate": "190088.2200"
+    "rate": "190088.2200",
+    "version": 1
   }
 },
 {
@@ -2452,7 +2494,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.3",
-    "rate": "196315.3200"
+    "rate": "196315.3200",
+    "version": 1
   }
 },
 {
@@ -2462,7 +2505,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.4",
-    "rate": "202555.6800"
+    "rate": "202555.6800",
+    "version": 1
   }
 },
 {
@@ -2472,7 +2516,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level E.1",
-    "rate": "236823.6000"
+    "rate": "236823.6000",
+    "version": 1
   }
 },
 {
@@ -2482,7 +2527,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 1.1",
-    "rate": "61274.4600"
+    "rate": "61274.4600",
+    "version": 1
   }
 },
 {
@@ -2492,7 +2538,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 1.2",
-    "rate": "62509.6800"
+    "rate": "62509.6800",
+    "version": 1
   }
 },
 {
@@ -2502,7 +2549,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 1.3",
-    "rate": "63751.0200"
+    "rate": "63751.0200",
+    "version": 1
   }
 },
 {
@@ -2512,7 +2560,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 2.1",
-    "rate": "66492.7800"
+    "rate": "66492.7800",
+    "version": 1
   }
 },
 {
@@ -2522,7 +2571,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 2.2",
-    "rate": "67823.8800"
+    "rate": "67823.8800",
+    "version": 1
   }
 },
 {
@@ -2532,7 +2582,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 2.3",
-    "rate": "69181.5000"
+    "rate": "69181.5000",
+    "version": 1
   }
 },
 {
@@ -2542,7 +2593,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.1",
-    "rate": "69553.8000"
+    "rate": "69553.8000",
+    "version": 1
   }
 },
 {
@@ -2552,7 +2604,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.2",
-    "rate": "70948.1400"
+    "rate": "70948.1400",
+    "version": 1
   }
 },
 {
@@ -2562,7 +2615,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.3",
-    "rate": "72361.8600"
+    "rate": "72361.8600",
+    "version": 1
   }
 },
 {
@@ -2572,7 +2626,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.4",
-    "rate": "73810.2600"
+    "rate": "73810.2600",
+    "version": 1
   }
 },
 {
@@ -2582,7 +2637,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.5",
-    "rate": "75290.2800"
+    "rate": "75290.2800",
+    "version": 1
   }
 },
 {
@@ -2592,7 +2648,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.6",
-    "rate": "76794.7800"
+    "rate": "76794.7800",
+    "version": 1
   }
 },
 {
@@ -2602,7 +2659,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.1",
-    "rate": "80400.4800"
+    "rate": "80400.4800",
+    "version": 1
   }
 },
 {
@@ -2612,7 +2670,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.2",
-    "rate": "82011.0600"
+    "rate": "82011.0600",
+    "version": 1
   }
 },
 {
@@ -2622,7 +2681,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.3",
-    "rate": "83652.2400"
+    "rate": "83652.2400",
+    "version": 1
   }
 },
 {
@@ -2632,7 +2692,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.4",
-    "rate": "85328.1000"
+    "rate": "85328.1000",
+    "version": 1
   }
 },
 {
@@ -2642,7 +2703,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.1",
-    "rate": "86942.7600"
+    "rate": "86942.7600",
+    "version": 1
   }
 },
 {
@@ -2652,7 +2714,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.2",
-    "rate": "88677.7800"
+    "rate": "88677.7800",
+    "version": 1
   }
 },
 {
@@ -2662,7 +2725,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.3",
-    "rate": "90448.5000"
+    "rate": "90448.5000",
+    "version": 1
   }
 },
 {
@@ -2672,7 +2736,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.4",
-    "rate": "92259.0000"
+    "rate": "92259.0000",
+    "version": 1
   }
 },
 {
@@ -2682,7 +2747,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.5",
-    "rate": "94102.1400"
+    "rate": "94102.1400",
+    "version": 1
   }
 },
 {
@@ -2692,7 +2758,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.6",
-    "rate": "95992.2000"
+    "rate": "95992.2000",
+    "version": 1
   }
 },
 {
@@ -2702,7 +2769,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.7",
-    "rate": "97904.7000"
+    "rate": "97904.7000",
+    "version": 1
   }
 },
 {
@@ -2712,7 +2780,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.8",
-    "rate": "99864.1200"
+    "rate": "99864.1200",
+    "version": 1
   }
 },
 {
@@ -2722,7 +2791,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.1",
-    "rate": "100847.4000"
+    "rate": "100847.4000",
+    "version": 1
   }
 },
 {
@@ -2732,7 +2802,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.2",
-    "rate": "102869.0400"
+    "rate": "102869.0400",
+    "version": 1
   }
 },
 {
@@ -2742,7 +2813,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.3",
-    "rate": "104917.2000"
+    "rate": "104917.2000",
+    "version": 1
   }
 },
 {
@@ -2752,7 +2824,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.4",
-    "rate": "107019.4200"
+    "rate": "107019.4200",
+    "version": 1
   }
 },
 {
@@ -2762,7 +2835,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.5",
-    "rate": "109163.4600"
+    "rate": "109163.4600",
+    "version": 1
   }
 },
 {
@@ -2772,7 +2846,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.1",
-    "rate": "111274.8600"
+    "rate": "111274.8600",
+    "version": 1
   }
 },
 {
@@ -2782,7 +2857,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.2",
-    "rate": "113505.6000"
+    "rate": "113505.6000",
+    "version": 1
   }
 },
 {
@@ -2792,7 +2868,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.3",
-    "rate": "115772.0400"
+    "rate": "115772.0400",
+    "version": 1
   }
 },
 {
@@ -2802,7 +2879,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.4",
-    "rate": "118086.4200"
+    "rate": "118086.4200",
+    "version": 1
   }
 },
 {
@@ -2812,7 +2890,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.5",
-    "rate": "120452.8200"
+    "rate": "120452.8200",
+    "version": 1
   }
 },
 {
@@ -2822,7 +2901,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.1",
-    "rate": "125190.7200"
+    "rate": "125190.7200",
+    "version": 1
   }
 },
 {
@@ -2832,7 +2912,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.2",
-    "rate": "127690.7400"
+    "rate": "127690.7400",
+    "version": 1
   }
 },
 {
@@ -2842,7 +2923,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.3",
-    "rate": "130241.7600"
+    "rate": "130241.7600",
+    "version": 1
   }
 },
 {
@@ -2852,7 +2934,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.4",
-    "rate": "132848.8800"
+    "rate": "132848.8800",
+    "version": 1
   }
 },
 {
@@ -2862,7 +2945,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.5",
-    "rate": "135503.9400"
+    "rate": "135503.9400",
+    "version": 1
   }
 },
 {
@@ -2872,7 +2956,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 9.1",
-    "rate": "146048.7000"
+    "rate": "146048.7000",
+    "version": 1
   }
 },
 {
@@ -2882,7 +2967,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 9.2",
-    "rate": "148963.8600"
+    "rate": "148963.8600",
+    "version": 1
   }
 },
 {
@@ -2892,7 +2978,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 9.3",
-    "rate": "151951.4400"
+    "rate": "151951.4400",
+    "version": 1
   }
 },
 {
@@ -2902,7 +2989,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 10",
-    "rate": "156480.2400"
+    "rate": "156480.2400",
+    "version": 1
   }
 },
 {
@@ -2912,7 +3000,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 1.1",
-    "rate": "39.8208"
+    "rate": "39.8208",
+    "version": 1
   }
 },
 {
@@ -2922,7 +3011,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 1.2",
-    "rate": "40.6266"
+    "rate": "40.6266",
+    "version": 1
   }
 },
 {
@@ -2932,7 +3022,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 1.3",
-    "rate": "41.4324"
+    "rate": "41.4324",
+    "version": 1
   }
 },
 {
@@ -2942,7 +3033,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 2.1",
-    "rate": "43.2174"
+    "rate": "43.2174",
+    "version": 1
   }
 },
 {
@@ -2952,7 +3044,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 2.2",
-    "rate": "44.0844"
+    "rate": "44.0844",
+    "version": 1
   }
 },
 {
@@ -2962,7 +3055,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 2.3",
-    "rate": "44.9616"
+    "rate": "44.9616",
+    "version": 1
   }
 },
 {
@@ -2972,7 +3066,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.1",
-    "rate": "45.2064"
+    "rate": "45.2064",
+    "version": 1
   }
 },
 {
@@ -2982,7 +3077,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.2",
-    "rate": "46.1040"
+    "rate": "46.1040",
+    "version": 1
   }
 },
 {
@@ -2992,7 +3088,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.3",
-    "rate": "47.0220"
+    "rate": "47.0220",
+    "version": 1
   }
 },
 {
@@ -3002,7 +3099,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.4",
-    "rate": "47.9706"
+    "rate": "47.9706",
+    "version": 1
   }
 },
 {
@@ -3012,7 +3110,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.5",
-    "rate": "48.9294"
+    "rate": "48.9294",
+    "version": 1
   }
 },
 {
@@ -3022,7 +3121,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.6",
-    "rate": "49.9086"
+    "rate": "49.9086",
+    "version": 1
   }
 },
 {
@@ -3032,7 +3132,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.1",
-    "rate": "52.2444"
+    "rate": "52.2444",
+    "version": 1
   }
 },
 {
@@ -3042,7 +3143,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.2",
-    "rate": "53.2848"
+    "rate": "53.2848",
+    "version": 1
   }
 },
 {
@@ -3052,7 +3154,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.3",
-    "rate": "54.3558"
+    "rate": "54.3558",
+    "version": 1
   }
 },
 {
@@ -3062,7 +3165,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.4",
-    "rate": "55.4370"
+    "rate": "55.4370",
+    "version": 1
   }
 },
 {
@@ -3072,7 +3176,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.1",
-    "rate": "56.4978"
+    "rate": "56.4978",
+    "version": 1
   }
 },
 {
@@ -3082,7 +3187,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.2",
-    "rate": "57.6198"
+    "rate": "57.6198",
+    "version": 1
   }
 },
 {
@@ -3092,7 +3198,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.3",
-    "rate": "58.7724"
+    "rate": "58.7724",
+    "version": 1
   }
 },
 {
@@ -3102,7 +3209,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.4",
-    "rate": "59.9556"
+    "rate": "59.9556",
+    "version": 1
   }
 },
 {
@@ -3112,7 +3220,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.5",
-    "rate": "61.1490"
+    "rate": "61.1490",
+    "version": 1
   }
 },
 {
@@ -3122,7 +3231,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.6",
-    "rate": "62.3730"
+    "rate": "62.3730",
+    "version": 1
   }
 },
 {
@@ -3132,7 +3242,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.7",
-    "rate": "63.6174"
+    "rate": "63.6174",
+    "version": 1
   }
 },
 {
@@ -3142,7 +3253,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.8",
-    "rate": "64.8924"
+    "rate": "64.8924",
+    "version": 1
   }
 },
 {
@@ -3152,7 +3264,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.1",
-    "rate": "65.5248"
+    "rate": "65.5248",
+    "version": 1
   }
 },
 {
@@ -3162,7 +3275,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.2",
-    "rate": "66.8406"
+    "rate": "66.8406",
+    "version": 1
   }
 },
 {
@@ -3172,7 +3286,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.3",
-    "rate": "68.1768"
+    "rate": "68.1768",
+    "version": 1
   }
 },
 {
@@ -3182,7 +3297,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.4",
-    "rate": "69.5436"
+    "rate": "69.5436",
+    "version": 1
   }
 },
 {
@@ -3192,7 +3308,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.5",
-    "rate": "70.9308"
+    "rate": "70.9308",
+    "version": 1
   }
 },
 {
@@ -3202,7 +3319,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.1",
-    "rate": "72.3078"
+    "rate": "72.3078",
+    "version": 1
   }
 },
 {
@@ -3212,7 +3330,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.2",
-    "rate": "73.7460"
+    "rate": "73.7460",
+    "version": 1
   }
 },
 {
@@ -3222,7 +3341,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.3",
-    "rate": "75.2250"
+    "rate": "75.2250",
+    "version": 1
   }
 },
 {
@@ -3232,7 +3352,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.4",
-    "rate": "76.7346"
+    "rate": "76.7346",
+    "version": 1
   }
 },
 {
@@ -3242,7 +3363,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.5",
-    "rate": "78.2646"
+    "rate": "78.2646",
+    "version": 1
   }
 },
 {
@@ -3252,7 +3374,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.1",
-    "rate": "81.3450"
+    "rate": "81.3450",
+    "version": 1
   }
 },
 {
@@ -3262,7 +3385,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.2",
-    "rate": "82.9668"
+    "rate": "82.9668",
+    "version": 1
   }
 },
 {
@@ -3272,7 +3396,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.3",
-    "rate": "84.6294"
+    "rate": "84.6294",
+    "version": 1
   }
 },
 {
@@ -3282,7 +3407,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.4",
-    "rate": "86.3226"
+    "rate": "86.3226",
+    "version": 1
   }
 },
 {
@@ -3292,7 +3418,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.5",
-    "rate": "88.0464"
+    "rate": "88.0464",
+    "version": 1
   }
 },
 {
@@ -3302,7 +3429,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 9.1",
-    "rate": "94.9008"
+    "rate": "94.9008",
+    "version": 1
   }
 },
 {
@@ -3312,7 +3440,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 9.2",
-    "rate": "96.7878"
+    "rate": "96.7878",
+    "version": 1
   }
 },
 {
@@ -3322,7 +3451,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 9.3",
-    "rate": "98.7258"
+    "rate": "98.7258",
+    "version": 1
   }
 },
 {
@@ -3332,7 +3462,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 10",
-    "rate": "101.6736"
+    "rate": "101.6736",
+    "version": 1
   }
 },
 {
@@ -3342,7 +3473,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "RA Grade 1.1",
-    "rate": "51.7854"
+    "rate": "51.7854",
+    "version": 1
   }
 },
 {
@@ -3352,7 +3484,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "RA Grade 1.2",
-    "rate": "53.4684"
+    "rate": "53.4684",
+    "version": 1
   }
 },
 {
@@ -3362,7 +3495,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "RA Grade 1.3",
-    "rate": "56.7018"
+    "rate": "56.7018",
+    "version": 1
   }
 },
 {
@@ -3372,7 +3506,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.1",
-    "rate": "56.7018"
+    "rate": "56.7018",
+    "version": 1
   }
 },
 {
@@ -3382,7 +3517,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.2",
-    "rate": "59.9454"
+    "rate": "59.9454",
+    "version": 1
   }
 },
 {
@@ -3392,7 +3528,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.3",
-    "rate": "63.1788"
+    "rate": "63.1788",
+    "version": 1
   }
 },
 {
@@ -3402,7 +3539,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.4",
-    "rate": "66.4224"
+    "rate": "66.4224",
+    "version": 1
   }
 },
 {
@@ -3412,7 +3550,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.5",
-    "rate": "69.0540"
+    "rate": "69.0540",
+    "version": 1
   }
 },
 {
@@ -3422,7 +3561,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.6",
-    "rate": "71.6856"
+    "rate": "71.6856",
+    "version": 1
   }
 },
 {
@@ -3432,7 +3572,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.7",
-    "rate": "74.3070"
+    "rate": "74.3070",
+    "version": 1
   }
 },
 {
@@ -3442,7 +3583,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.8",
-    "rate": "76.9386"
+    "rate": "76.9386",
+    "version": 1
   }
 },
 {
@@ -3452,7 +3594,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.1",
-    "rate": "80.9880"
+    "rate": "80.9880",
+    "version": 1
   }
 },
 {
@@ -3462,7 +3605,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.2",
-    "rate": "84.0276"
+    "rate": "84.0276",
+    "version": 1
   }
 },
 {
@@ -3472,7 +3616,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.3",
-    "rate": "87.0774"
+    "rate": "87.0774",
+    "version": 1
   }
 },
 {
@@ -3482,7 +3627,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.4",
-    "rate": "90.1068"
+    "rate": "90.1068",
+    "version": 1
   }
 },
 {
@@ -3492,7 +3638,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.5",
-    "rate": "93.1464"
+    "rate": "93.1464",
+    "version": 1
   }
 },
 {
@@ -3502,7 +3649,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.6",
-    "rate": "96.1758"
+    "rate": "96.1758",
+    "version": 1
   }
 },
 {
@@ -3512,7 +3660,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.1",
-    "rate": "99.2154"
+    "rate": "99.2154",
+    "version": 1
   }
 },
 {
@@ -3522,7 +3671,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.2",
-    "rate": "102.2550"
+    "rate": "102.2550",
+    "version": 1
   }
 },
 {
@@ -3532,7 +3682,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.3",
-    "rate": "105.2946"
+    "rate": "105.2946",
+    "version": 1
   }
 },
 {
@@ -3542,7 +3693,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.4",
-    "rate": "108.3240"
+    "rate": "108.3240",
+    "version": 1
   }
 },
 {
@@ -3552,7 +3704,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.5",
-    "rate": "111.3636"
+    "rate": "111.3636",
+    "version": 1
   }
 },
 {
@@ -3562,7 +3715,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.6",
-    "rate": "114.3930"
+    "rate": "114.3930",
+    "version": 1
   }
 },
 {
@@ -3572,7 +3726,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.1",
-    "rate": "119.4624"
+    "rate": "119.4624",
+    "version": 1
   }
 },
 {
@@ -3582,7 +3737,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.2",
-    "rate": "123.5118"
+    "rate": "123.5118",
+    "version": 1
   }
 },
 {
@@ -3592,7 +3748,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.3",
-    "rate": "127.5510"
+    "rate": "127.5510",
+    "version": 1
   }
 },
 {
@@ -3602,7 +3759,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.4",
-    "rate": "131.6106"
+    "rate": "131.6106",
+    "version": 1
   }
 },
 {
@@ -3612,491 +3770,35 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level E.1",
-    "rate": "153.8670"
+    "rate": "153.8670",
+    "version": 1
   }
 },
 {
   "model": "api.salaryratemultiplier",
-  "pk": "Daily",
-  "fields": {
-    "multiplier": "0.004545454545454545"
-  }
-},
-{
-  "model": "api.salaryratemultiplier",
-  "pk": "FTE",
-  "fields": {
-    "multiplier": "1.000000000000000000"
-  }
-},
-{
-  "model": "api.salaryratemultiplier",
-  "pk": "Hourly",
-  "fields": {
-    "multiplier": "1.000000000000000000"
-  }
-},
-{
-  "model": "api.oncostrate",
   "pk": 1,
   "fields": {
-    "on_cost_type": "leave_loading",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0134"
+    "time_basis": "FTE",
+    "multiplier": "1.000000000000000000",
+    "version": 1
   }
 },
 {
-  "model": "api.oncostrate",
+  "model": "api.salaryratemultiplier",
   "pk": 2,
   "fields": {
-    "on_cost_type": "leave_loading",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0134"
+    "time_basis": "Daily",
+    "multiplier": "0.004545454545454545",
+    "version": 1
   }
 },
 {
-  "model": "api.oncostrate",
+  "model": "api.salaryratemultiplier",
   "pk": 3,
   "fields": {
-    "on_cost_type": "leave_loading",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 4,
-  "fields": {
-    "on_cost_type": "workcover",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 5,
-  "fields": {
-    "on_cost_type": "workcover",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 6,
-  "fields": {
-    "on_cost_type": "workcover",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 7,
-  "fields": {
-    "on_cost_type": "long_service_leave",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 8,
-  "fields": {
-    "on_cost_type": "long_service_leave",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 9,
-  "fields": {
-    "on_cost_type": "long_service_leave",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 10,
-  "fields": {
-    "on_cost_type": "parental_leave",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0100"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 11,
-  "fields": {
-    "on_cost_type": "parental_leave",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0100"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 12,
-  "fields": {
-    "on_cost_type": "parental_leave",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 13,
-  "fields": {
-    "on_cost_type": "annual_leave_provision",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.1200"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 14,
-  "fields": {
-    "on_cost_type": "annual_leave_provision",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.1200"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 15,
-  "fields": {
-    "on_cost_type": "annual_leave_provision",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 16,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2021,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 17,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2021,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 18,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2021,
-    "rate": "0.0950"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 19,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2022,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 20,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2022,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 21,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2022,
-    "rate": "0.1000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 22,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2023,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 23,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2023,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 24,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2023,
-    "rate": "0.1050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 25,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2024,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 26,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2024,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 27,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2024,
-    "rate": "0.1100"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 28,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2025,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 29,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2025,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 30,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2025,
-    "rate": "0.1150"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 31,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 32,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 33,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.1200"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2025,
-  "fields": {
-    "multiplier": "1.000000"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2026,
-  "fields": {
-    "multiplier": "1.030000"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2027,
-  "fields": {
-    "multiplier": "1.060900"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2028,
-  "fields": {
-    "multiplier": "1.092727"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2029,
-  "fields": {
-    "multiplier": "1.125509"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2030,
-  "fields": {
-    "multiplier": "1.159274"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2031,
-  "fields": {
-    "multiplier": "1.194052"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2032,
-  "fields": {
-    "multiplier": "1.229874"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2033,
-  "fields": {
-    "multiplier": "1.266770"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2034,
-  "fields": {
-    "multiplier": "1.304773"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2035,
-  "fields": {
-    "multiplier": "1.343916"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2036,
-  "fields": {
-    "multiplier": "1.384234"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2037,
-  "fields": {
-    "multiplier": "1.425761"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2038,
-  "fields": {
-    "multiplier": "1.468534"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2039,
-  "fields": {
-    "multiplier": "1.512590"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2040,
-  "fields": {
-    "multiplier": "1.557967"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2041,
-  "fields": {
-    "multiplier": "1.604706"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2042,
-  "fields": {
-    "multiplier": "1.652848"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2043,
-  "fields": {
-    "multiplier": "1.702433"
+    "time_basis": "Hourly",
+    "multiplier": "1.000000000000000000",
+    "version": 1
   }
 },
 {
@@ -4209,6 +3911,548 @@
   "pk": "UOM 9",
   "fields": {
     "max_steps": 3
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 1,
+  "fields": {
+    "year": 2025,
+    "multiplier": "1.000000",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 2,
+  "fields": {
+    "year": 2026,
+    "multiplier": "1.030000",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 3,
+  "fields": {
+    "year": 2027,
+    "multiplier": "1.060900",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 4,
+  "fields": {
+    "year": 2028,
+    "multiplier": "1.092727",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 5,
+  "fields": {
+    "year": 2029,
+    "multiplier": "1.125509",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 6,
+  "fields": {
+    "year": 2030,
+    "multiplier": "1.159274",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 7,
+  "fields": {
+    "year": 2031,
+    "multiplier": "1.194052",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 8,
+  "fields": {
+    "year": 2032,
+    "multiplier": "1.229874",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 9,
+  "fields": {
+    "year": 2033,
+    "multiplier": "1.266770",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 10,
+  "fields": {
+    "year": 2034,
+    "multiplier": "1.304773",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 11,
+  "fields": {
+    "year": 2035,
+    "multiplier": "1.343916",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 12,
+  "fields": {
+    "year": 2036,
+    "multiplier": "1.384234",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 13,
+  "fields": {
+    "year": 2037,
+    "multiplier": "1.425761",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 14,
+  "fields": {
+    "year": 2038,
+    "multiplier": "1.468534",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 15,
+  "fields": {
+    "year": 2039,
+    "multiplier": "1.512590",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 16,
+  "fields": {
+    "year": 2040,
+    "multiplier": "1.557967",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 17,
+  "fields": {
+    "year": 2041,
+    "multiplier": "1.604706",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 18,
+  "fields": {
+    "year": 2042,
+    "multiplier": "1.652848",
+    "version": 1
+  }
+},
+{
+  "model": "api.ebaincrease",
+  "pk": 19,
+  "fields": {
+    "year": 2043,
+    "multiplier": "1.702433",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 1,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0134",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 2,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0134",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 3,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 4,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 5,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 6,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 7,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 8,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 9,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 10,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0100",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 11,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0100",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 12,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 13,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.1200",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 14,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.1200",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 15,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 16,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2021,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 17,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2021,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 18,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2021,
+    "rate": "0.0950",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 19,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2022,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 20,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2022,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 21,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2022,
+    "rate": "0.1000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 22,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2023,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 23,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2023,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 24,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2023,
+    "rate": "0.1050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 25,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2024,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 26,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2024,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 27,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2024,
+    "rate": "0.1100",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 28,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2025,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 29,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2025,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 30,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2025,
+    "rate": "0.1150",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 31,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 32,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 33,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.1200",
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 0,
+  "fields": {
+    "cost_category": "Contingency",
+    "cost_subcategory": "Contingency"
   }
 },
 {
@@ -4353,6 +4597,86 @@
   "fields": {
     "cost_category": "Travel and entertainment",
     "cost_subcategory": "Entertainment"
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 1,
+  "fields": {
+    "name": "max_leave_loading",
+    "description": "Leave loading is capped at this many dollars per year",
+    "value": "1611.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 2,
+  "fields": {
+    "name": "full_cost_recovery_multiplier",
+    "description": "Default cost recovery multiplier",
+    "value": "1.700000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 3,
+  "fields": {
+    "name": "max_payroll_tax",
+    "description": "Maximum payroll tax rate",
+    "value": "0.058500",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 4,
+  "fields": {
+    "name": "override_uom_oncosts",
+    "description": "Override multiplier for UoM on-costs",
+    "value": "0.000000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 5,
+  "fields": {
+    "name": "in_kind_multiplier",
+    "description": "Matches full cost recovery.",
+    "value": "1.700000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 6,
+  "fields": {
+    "name": "gst_rate",
+    "description": "Goods and Services Tax Amount",
+    "value": "0.100000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 7,
+  "fields": {
+    "name": "default_margin",
+    "description": "The margin a new budget starts at. Editable per budget.",
+    "value": "0.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 8,
+  "fields": {
+    "name": "minimum_margin",
+    "description": "A budget priced below this margin needs the Dean as well as the HoD.",
+    "value": "0.300000",
+    "version": 1
   }
 },
 {
@@ -4703,70 +5027,6 @@
   "fields": {
     "external_party": "Other",
     "description": "Consultancies and Contracts"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "default_margin",
-  "fields": {
-    "description": "The margin a new budget starts at. Editable per budget.",
-    "value": "0.300000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "full_cost_recovery_multiplier",
-  "fields": {
-    "description": "Default cost recovery multiplier",
-    "value": "1.700000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "gst_rate",
-  "fields": {
-    "description": "Goods and Services Tax Amount",
-    "value": "0.100000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "in_kind_multiplier",
-  "fields": {
-    "description": "Matches full cost recovery.",
-    "value": "1.700000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "max_leave_loading",
-  "fields": {
-    "description": "Leave loading is capped at this many dollars per year",
-    "value": "1611.300000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "max_payroll_tax",
-  "fields": {
-    "description": "Maximum payroll tax rate",
-    "value": "0.058500"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "minimum_margin",
-  "fields": {
-    "description": "A budget priced below this margin needs the Dean as well as the HoD.",
-    "value": "0.300000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "override_uom_oncosts",
-  "fields": {
-    "description": "Override multiplier for UoM on-costs",
-    "value": "0.000000"
   }
 }
 ]

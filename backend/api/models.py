@@ -12,6 +12,35 @@ if TYPE_CHECKING:
 
 
 # ------------------- Schema for Lookup table data -------------
+class LookupVersion(models.Model):
+    if TYPE_CHECKING:
+        id: int
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # TODO: replace with admin, initial version don't have editor
+    updated_by = models.ForeignKey(
+        "User",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+
+
+class LookupConfiguration(models.Model):
+    if TYPE_CHECKING:
+        current_version_id: int
+    # Singleton
+    id = models.IntegerField(primary_key=True, default=1, editable=False)
+    current_version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+    # Whether current version is referenced by authorised budget.
+    # Determines whether a new version should be created when updating current version.
+    referenced = models.BooleanField(default=False)
+
+
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
@@ -40,12 +69,28 @@ class SalaryRateMultiplier(models.Model):
     # FTE 1, Daily 1/220, Hourly 1. Hourly is 1 because Casual rows in
     # SalaryRate are already hourly rates, not because hourly needs no
     # conversion in general.
-    time_basis = models.CharField(max_length=20, primary_key=True)
+    if TYPE_CHECKING:
+        id: int
+
+    time_basis = models.CharField(max_length=20)
     multiplier = models.DecimalField(
         max_digits=20,
         decimal_places=18,
         validators=[MinValueValidator(Decimal(0))],
     )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["time_basis", "version"],
+                name="unique_salary_rate_multiplier",
+            )
+        ]
 
     def __str__(self):
         return f"{self.time_basis} x{self.multiplier}"
@@ -61,18 +106,34 @@ class IncrementCap(models.Model):
 # TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
 # Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
-    year = models.PositiveSmallIntegerField(primary_key=True)
+    year = models.PositiveSmallIntegerField()
     multiplier = models.DecimalField(
         max_digits=8,
         decimal_places=6,
         validators=[MinValueValidator(Decimal(0))],
     )
 
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["year", "version"],
+                name="unique_eba",
+            )
+        ]
+
 
 class SalaryRate(models.Model):
     """
     Base rates from the RCPT workbook's tSalaryRate table.
     """
+
+    if TYPE_CHECKING:
+        id: int
 
     class PayrollType(models.TextChoices):
         # MEMBER = value, label
@@ -92,12 +153,17 @@ class SalaryRate(models.Model):
         validators=[MinValueValidator(Decimal(0))],
     )
 
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
     class Meta:
         constraints = [
             # Mirrors workbook's CONCATENATE(payroll_type, category, classification)
             # lookup key, without storing a duplicate concatenated string column.
             models.UniqueConstraint(
-                fields=["payroll_type", "category", "classification"],
+                fields=["payroll_type", "category", "classification", "version"],
                 name="unique_salary_rate",
             )
         ]
@@ -162,10 +228,15 @@ class OnCostRate(models.Model):
         help_text="Proportion, not percentage. E.g 0.1200 means 12%",
     )
 
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["on_cost_type", "employment_type", "year"],
+                fields=["on_cost_type", "employment_type", "year", "version"],
                 name="unique_on_cost_rate",
                 nulls_distinct=False,
             )
@@ -188,33 +259,28 @@ class NonStaffCostCategory(models.Model):
         return f"{self.cost_subcategory} ({self.ledger_id})"
 
 
-# TODO: Consider whether this should be stored as a calculation constant
-# Calculation engine uses multiplier stored in Budget not this
-class MinimumCostRecoveryMultiplier(models.Model):
-    # The lowest cost recovery multiplier a budget can use before it needs
-    # Dean sign-off as well as Head of Department. The approval workflow reads
-    # this to decide whether a submitted budget gets routed to a Dean.
-
-    year = models.PositiveSmallIntegerField(primary_key=True)
-    multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        validators=[MinValueValidator(Decimal(0))],
-    )
-
-    def __str__(self):
-        return f"{self.year}: {self.multiplier}"
-
-
 class CalculationConstant(models.Model):
     # Standalone numbers the costing engine needs that don't belong to any
     # lookup table. Stored as rows rather than Python constants
-    name = models.CharField(max_length=50, primary_key=True)
+    name = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
     value = models.DecimalField(
         max_digits=12,
         decimal_places=6,
     )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "version"],
+                name="unique_calculation_constant",
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} = {self.value}"
@@ -381,10 +447,22 @@ class Budget(models.Model):
 
     if TYPE_CHECKING:
         id: int
+        lookup_version_id: int | None
         deliverables: RelatedManager["Deliverable"]
         staff_lines: RelatedManager["StaffCostLine"]
         non_staff_lines: RelatedManager["NonStaffCostLine"]
         approval_steps: RelatedManager["ApprovalStep"]
+
+    # Null while the budget is a draft, which is what makes it price against
+    # the live rates: an unauthorised budget is meant to pick up lookup changes
+    # made after it was created. It is stamped with the current version at
+    # submit, and from then on the budget is frozen against that one.
+    lookup_version = models.ForeignKey(
+        "LookupVersion",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
 
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE

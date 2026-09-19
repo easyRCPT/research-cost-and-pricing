@@ -5,6 +5,7 @@ from django.db.models import Max, Prefetch
 from django.db.models.functions import Greatest
 
 from ..models import Budget, CalculationConstant, Project
+from . import lookup_loader
 
 # What a budget's numbers start at. The live values are rows, not Python
 # constants, so they are read at creation time and then frozen on the budget.
@@ -28,7 +29,14 @@ BUDGET_DEFAULTS = {
 
 
 def budget_defaults() -> dict[str, Decimal]:
-    values = dict(CalculationConstant.objects.values_list("name", "value"))
+    # Filtered to the current version: a name exists once per version, so
+    # reading them all would collapse several versions into one dict and take
+    # whichever row happened to come last.
+    values = dict(
+        CalculationConstant.objects.filter(
+            version_id=lookup_loader.current_version_id()
+        ).values_list("name", "value")
+    )
     return {
         field: Decimal(values.get(name, fallback)).quantize(
             step, rounding=ROUND_HALF_UP

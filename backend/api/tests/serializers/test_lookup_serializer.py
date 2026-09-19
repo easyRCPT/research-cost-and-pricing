@@ -22,7 +22,6 @@ class LookupSerializersTestCase(SimpleTestCase):
             "eba_increases",
             "on_cost_rates",
             "non_staff_cost_categories",
-            "minimum_cost_recovery_multipliers",
             "calculation_constants",
             "activities",
             "regions",

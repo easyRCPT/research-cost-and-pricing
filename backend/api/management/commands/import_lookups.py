@@ -26,6 +26,8 @@ from api.models import (
     Department,
     EbaIncrease,
     IncrementCap,
+    LookupConfiguration,
+    LookupVersion,
     NonStaffCostCategory,
     OnCostRate,
     Region,
@@ -156,7 +158,7 @@ def import_departments(workbook):
     return count
 
 
-def import_salary_rates(workbook):
+def import_salary_rates(workbook, version):
     """
     Imports every salary rate, covering academic
     and professional staff at each clssification, split by
@@ -176,6 +178,7 @@ def import_salary_rates(workbook):
 
         # Store the salary rates
         SalaryRate.objects.update_or_create(
+            version=version,
             payroll_type=payroll_type,
             category=category,
             classification=classification,
@@ -209,7 +212,7 @@ def import_increment_caps(workbook):
     return count
 
 
-def import_eba_increases(workbook):
+def import_eba_increases(workbook, version):
     """
     Salary inflation by calendar year, as a compounding multipler.
     """
@@ -226,7 +229,9 @@ def import_eba_increases(workbook):
             continue
         # Store EBA Rates
         EbaIncrease.objects.update_or_create(
-            year=int(year), defaults={"multiplier": dec(multiplier)}
+            version=version,
+            year=int(year),
+            defaults={"multiplier": dec(multiplier)},
         )
 
         count += 1
@@ -234,7 +239,7 @@ def import_eba_increases(workbook):
     return count
 
 
-def import_on_costs(workbook):
+def import_on_costs(workbook, version):
     """
     The employment costs added on top of salary:
     supperannuation, WorkCover, and the other leave provisions.
@@ -256,6 +261,7 @@ def import_on_costs(workbook):
 
             # Store flat oncosts
             OnCostRate.objects.update_or_create(
+                version=version,
                 on_cost_type=on_cost_type,
                 employment_type=employment_type,
                 year=None,
@@ -274,6 +280,7 @@ def import_on_costs(workbook):
             continue
 
         OnCostRate.objects.update_or_create(
+            version=version,
             on_cost_type=OnCostRate.OnCostType.SUPERANNUATION,
             employment_type=employment_type,
             year=int(year),
@@ -288,6 +295,7 @@ def import_on_costs(workbook):
             continue
 
         OnCostRate.objects.update_or_create(
+            version=version,
             on_cost_type=OnCostRate.OnCostType.SUPERANNUATION,
             employment_type=employment_type,
             year=None,
@@ -346,13 +354,7 @@ def import_non_staff_categories(workbook):
     return count
 
 
-# Saved for sprint 2 (?), currently 2.2 on notebook
-# Client said that the cost recovery multiplier (1.7)
-# should not be changed
-# def import_minimum_multipliers(workbook):
-
-
-def import_salary_rate_multipliers(workbook):
+def import_salary_rate_multipliers(workbook, version):
     # Converts a stored rate to the entered time basis.
     # FTE 1, Daily 1/220, Hourly 1.
     count = 0
@@ -361,7 +363,9 @@ def import_salary_rate_multipliers(workbook):
             continue
 
         SalaryRateMultiplier.objects.update_or_create(
-            time_basis=time_basis, defaults={"multiplier": dec(multiplier)}
+            version=version,
+            time_basis=time_basis,
+            defaults={"multiplier": dec(multiplier)},
         )
 
         count += 1
@@ -369,12 +373,13 @@ def import_salary_rate_multipliers(workbook):
     return count
 
 
-def import_constants(workbook):
+def import_constants(workbook, version):
     # Numbers that belong to no table. Leave loading cap,
     # working day count, default multiplier
 
     for name, (defined_name, description) in CONSTANTS.items():
         CalculationConstant.objects.update_or_create(
+            version=version,
             name=name,
             defaults={
                 "value": dec(scalar(workbook, defined_name)),
@@ -385,7 +390,9 @@ def import_constants(workbook):
     # Import literal constants
     for name, (value, description) in LITERAL_CONSTANTS.items():
         CalculationConstant.objects.update_or_create(
-            name=name, defaults={"value": value, "description": description}
+            version=version,
+            name=name,
+            defaults={"value": value, "description": description},
         )
 
     return len(CONSTANTS) + len(LITERAL_CONSTANTS)
@@ -454,6 +461,21 @@ def import_revenue_categories(workbook):
     return count
 
 
+def get_or_create_current_version() -> LookupVersion:
+    config = LookupConfiguration.objects.first()
+
+    if config:
+        return config.current_version
+
+    version = LookupVersion.objects.create()
+
+    LookupConfiguration.objects.create(
+        current_version=version,
+    )
+
+    return version
+
+
 class Command(BaseCommand):
     help = "Import lookup tables from the RCPT workbook (idempotent; safe to re-run)."
 
@@ -478,29 +500,39 @@ class Command(BaseCommand):
         # as none
         workbook = load_workbook(path, data_only=True, keep_vba=False)
 
-        importers = (
+        unversioned_importers = (
             ("departments", import_departments),
-            ("salary rates", import_salary_rates),
             ("increment caps", import_increment_caps),
-            ("EBA increases", import_eba_increases),
-            ("on-cost rates", import_on_costs),
             ("non-staff categories", import_non_staff_categories),
-            # ("minimum multipliers", import_minimum_multipliers),
-            ("salary rate multipliers", import_salary_rate_multipliers),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
             ("revenue categories", import_revenue_categories),
+        )
+
+        versioned_importers = (
+            ("salary rates", import_salary_rates),
+            ("EBA increases", import_eba_increases),
+            ("on-cost rates", import_on_costs),
+            ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
         )
 
         # One transaction, a failure halfway leaves no partial lookup
         # tables
         with transaction.atomic():
-            for label, importer in importers:
+            version = get_or_create_current_version()
+
+            for label, importer in unversioned_importers:
                 self.stdout.write(f"  {label} ... ", ending="")
                 self.stdout.flush()
                 count = importer(workbook)
+                self.stdout.write(self.style.SUCCESS(str(count)))
+
+            for label, importer in versioned_importers:
+                self.stdout.write(f"  {label} ... ", ending="")
+                self.stdout.flush()
+                count = importer(workbook, version)
                 self.stdout.write(self.style.SUCCESS(str(count)))
 
         self.stdout.write(self.style.SUCCESS("Lookup tables imported."))
