@@ -49,13 +49,20 @@ export const allTimeBases = (multipliers: readonly SalaryRateMultiplier[]) => [
 ]
 
 /**
- * An FTE row is a fraction of one full-time position. Daily and hourly rows count
- * days and hours, which the workbook leaves open-ended; a full year is as much as
- * either can mean. Kept in step with the backend's TIME_LIMITS.
+ * An FTE row is a fraction of one full-time position.
+ *
+ * A Daily row stops at 220, which is not a calendar figure: the Salary Rate
+ * Multiplier holds 1/220 for Daily, and that is what turns a daily rate into
+ * an annual salary, so 220 days is a full year on a Daily row by
+ * construction. Hourly has no such number -- its multiplier is 1 because
+ * Casual rates are already hourly -- so a full calendar year is as much as it
+ * can mean.
+ *
+ * Kept in step with the backend's TIME_LIMITS, which validates the same caps.
  */
 const TIME_LIMITS: Record<string, { label: string; max: number }> = {
   FTE: { label: 'FTE', max: 1 },
-  Daily: { label: 'Days', max: 366 },
+  Daily: { label: 'Days', max: 220 },
   Hourly: { label: 'Hours', max: 366 * 24 },
 }
 

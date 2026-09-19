@@ -55,10 +55,6 @@ CONSTANTS = {
         "vl_Max_Leave_Loading",
         "Leave loading is capped at this many dollars per year",
     ),
-    "working_days_per_year": (
-        "vl_working_days_per_year",
-        "Weekdays in a year. Used only for the annual leave deduction.",
-    ),
     "full_cost_recovery_multiplier": (
         "dfullrecovery",
         "Default cost recovery multiplier",
