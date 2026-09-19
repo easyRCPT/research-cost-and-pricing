@@ -12,6 +12,28 @@ if TYPE_CHECKING:
 
 
 # ------------------- Schema for Lookup table data -------------
+class LookupVersion(models.Model):
+    if TYPE_CHECKING:
+        id: int
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # TODO: replace with admin, initial version don't have editor
+    updated_by = models.ForeignKey(
+        "User",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+
+
+class LookupConfiguration(models.Model):
+    current_version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
@@ -47,6 +69,11 @@ class SalaryRateMultiplier(models.Model):
         validators=[MinValueValidator(Decimal(0))],
     )
 
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
     def __str__(self):
         return f"{self.time_basis} x{self.multiplier}"
 
@@ -66,6 +93,11 @@ class EbaIncrease(models.Model):
         max_digits=8,
         decimal_places=6,
         validators=[MinValueValidator(Decimal(0))],
+    )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
     )
 
 
@@ -90,6 +122,11 @@ class SalaryRate(models.Model):
         max_digits=12,
         decimal_places=4,
         validators=[MinValueValidator(Decimal(0))],
+    )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
     )
 
     class Meta:
@@ -162,6 +199,11 @@ class OnCostRate(models.Model):
         help_text="Proportion, not percentage. E.g 0.1200 means 12%",
     )
 
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -188,24 +230,6 @@ class NonStaffCostCategory(models.Model):
         return f"{self.cost_subcategory} ({self.ledger_id})"
 
 
-# TODO: Consider whether this should be stored as a calculation constant
-# Calculation engine uses multiplier stored in Budget not this
-class MinimumCostRecoveryMultiplier(models.Model):
-    # The lowest cost recovery multiplier a budget can use before it needs
-    # Dean sign-off as well as Head of Department. The approval workflow reads
-    # this to decide whether a submitted budget gets routed to a Dean.
-
-    year = models.PositiveSmallIntegerField(primary_key=True)
-    multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        validators=[MinValueValidator(Decimal(0))],
-    )
-
-    def __str__(self):
-        return f"{self.year}: {self.multiplier}"
-
-
 class CalculationConstant(models.Model):
     # Standalone numbers the costing engine needs that don't belong to any
     # lookup table. Stored as rows rather than Python constants
@@ -214,6 +238,11 @@ class CalculationConstant(models.Model):
     value = models.DecimalField(
         max_digits=12,
         decimal_places=6,
+    )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
     )
 
     def __str__(self):

@@ -12,7 +12,6 @@ from ..models import (
     Department,
     EbaIncrease,
     IncrementCap,
-    MinimumCostRecoveryMultiplier,
     NonStaffCostCategory,
     OnCostRate,
     Region,
@@ -67,9 +66,6 @@ LOOKUP_TABLES: dict[LookupTable, QuerySet] = {
     ),
     LookupTable.NON_STAFF_COST_CATEGORIES: NonStaffCostCategory.objects.order_by(
         "cost_category", "cost_subcategory"
-    ),
-    LookupTable.MINIMUM_COST_RECOVERY_MULTIPLIERS: (
-        MinimumCostRecoveryMultiplier.objects.order_by("year")
     ),
     LookupTable.CALCULATION_CONSTANTS: CalculationConstant.objects.order_by("name"),
     LookupTable.ACTIVITIES: Activity.objects.order_by("code"),
