@@ -223,12 +223,39 @@ const toStaffInput = (line: StaffLine): StaffLineInput => ({
     .map(({ year, time }) => ({ year, time })),
 })
 
+/**
+ * The typed value over the priced one.
+ *
+ * A patch carries what someone entered, which no round trip can echo back
+ * faster than they typed it. It does not carry money. `withTime` rebuilds the
+ * whole by_year array to change one year's time, and the costs it copies
+ * across are the ones from before the edit -- so spreading the patch whole
+ * would put the cost of the old time beside the new one, and leave it there.
+ *
+ * Time comes from the patch; every computed figure stays as the reply left it.
+ */
+const withEnteredTime = (
+  line: StaffLine,
+  patch: Partial<StaffLine>,
+): StaffLine => {
+  const merged = { ...line, ...patch }
+  if (!patch.by_year) return merged
+
+  return {
+    ...merged,
+    by_year: line.by_year.map((priced) => {
+      const entered = patch.by_year?.find((year) => year.year === priced.year)
+      return entered ? { ...priced, time: entered.time } : priced
+    }),
+  }
+}
+
 /** The row as it is shown, patched in place wherever the reply put it. */
 const echoStaffLine =
   (id: number, patch: Partial<StaffLine>) =>
   (budget: BudgetDetail): BudgetDetail => {
     const apply = (lines: StaffLine[]) =>
-      lines.map((line) => (line.id === id ? { ...line, ...patch } : line))
+      lines.map((line) => (line.id === id ? withEnteredTime(line, patch) : line))
 
     return {
       ...budget,

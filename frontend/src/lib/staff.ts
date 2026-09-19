@@ -81,6 +81,13 @@ export const timeFor = (line: StaffLine, year: number) =>
 export const costFor = (line: StaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.cost ?? 0
 
+/**
+ * The by_year array with one year's time changed.
+ *
+ * The costs are copied across unchanged because only the engine can price a
+ * new time. Nothing should read them: the optimistic echo takes the time from
+ * here and the money from the server's reply. See withEnteredTime.
+ */
 export const withTime = (
   line: StaffLine,
   years: number[],
