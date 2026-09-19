@@ -1,21 +1,22 @@
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from api.models import (
     Budget,
     CalculationConstant,
     EbaIncrease,
+    LookupConfiguration,
+    LookupVersion,
     OnCostRate,
     SalaryRate,
     SalaryRateMultiplier,
 )
 from api.services import lookup_loader
 from api.services.lookup_loader import (
-    CACHE_KEY,
     CACHE_TIMEOUT,
-    CONSTANTS_CACHE_KEY,
+    MODELS_CACHE_KEY,
     constants_for,
     get_constants,
     get_lookup_tables,
@@ -24,38 +25,164 @@ from api.services.lookup_loader import (
 )
 
 
-class TestGetLookupTables(SimpleTestCase):
-    @patch("api.services.lookup_loader.cache.set")
-    @patch("api.services.lookup_loader.LOOKUP_TABLES")
-    def test_loads_lookup_tables_when_cache_is_empty(
+class TestGetVersionedLookupModels(SimpleTestCase):
+    @patch("api.services.lookup_loader.CalculationConstant.objects")
+    @patch("api.services.lookup_loader.OnCostRate.objects")
+    @patch("api.services.lookup_loader.EbaIncrease.objects")
+    @patch("api.services.lookup_loader.SalaryRateMultiplier.objects")
+    @patch("api.services.lookup_loader.SalaryRate.objects")
+    def test_returns_versioned_lookup_querysets(
         self,
-        mock_tables,
-        mock_cache_set,
+        mock_salary_rate_objects,
+        mock_multiplier_objects,
+        mock_eba_objects,
+        mock_on_cost_objects,
+        mock_constant_objects,
     ):
-        queryset = Mock()
-        rows = ["row1", "row2"]
-        queryset.all.return_value = rows
+        version_id = 7
 
-        mock_tables.items.return_value = [
-            (
-                lookup_loader.LookupTable.DEPARTMENTS,
-                queryset,
-            ),
-        ]
+        salary_rates = Mock()
+        mock_salary_rate_objects.filter.return_value.order_by.return_value = (
+            salary_rates
+        )
 
-        result = get_lookup_tables()
+        multipliers = Mock()
+        mock_multiplier_objects.filter.return_value.order_by.return_value = multipliers
+
+        eba_increases = Mock()
+        mock_eba_objects.filter.return_value.order_by.return_value = eba_increases
+
+        on_cost_rates = Mock()
+        mock_on_cost_objects.filter.return_value.order_by.return_value = on_cost_rates
+
+        constants = Mock()
+        mock_constant_objects.filter.return_value.order_by.return_value = constants
+
+        result = lookup_loader._get_versioned_lookup_models(version_id)
 
         self.assertEqual(
             result,
             {
-                "departments": rows,
+                lookup_loader.LookupTable.SALARY_RATES: salary_rates,
+                lookup_loader.LookupTable.SALARY_RATE_MULTIPLIERS: multipliers,
+                lookup_loader.LookupTable.EBA_INCREASES: eba_increases,
+                lookup_loader.LookupTable.ON_COST_RATES: on_cost_rates,
+                lookup_loader.LookupTable.CALCULATION_CONSTANTS: constants,
             },
         )
 
-        queryset.all.assert_called_once()
-        mock_cache_set.assert_called_once_with(
-            CACHE_KEY,
+        mock_salary_rate_objects.filter.assert_called_once_with(
+            version_id=version_id,
+        )
+        mock_salary_rate_objects.filter.return_value.order_by.assert_called_once_with(
+            "payroll_type",
+            "category",
+            "classification",
+        )
+
+        mock_multiplier_objects.filter.assert_called_once_with(
+            version_id=version_id,
+        )
+        mock_multiplier_objects.filter.return_value.order_by.assert_called_once_with(
+            "time_basis",
+        )
+
+        mock_eba_objects.filter.assert_called_once_with(
+            version_id=version_id,
+        )
+        mock_eba_objects.filter.return_value.order_by.assert_called_once_with(
+            "year",
+        )
+
+        mock_on_cost_objects.filter.assert_called_once_with(
+            version_id=version_id,
+        )
+        mock_on_cost_objects.filter.return_value.order_by.assert_called_once_with(
+            "on_cost_type",
+            "employment_type",
+            "year",
+        )
+
+        mock_constant_objects.filter.assert_called_once_with(
+            version_id=version_id,
+        )
+        mock_constant_objects.filter.return_value.order_by.assert_called_once_with(
+            "name",
+        )
+
+
+class TestGetLookupModels(SimpleTestCase):
+    @patch("api.services.lookup_loader._get_versioned_lookup_models")
+    @patch("api.services.lookup_loader._get_unversioned_lookup_models")
+    def test_combines_unversioned_and_versioned_lookup_models(
+        self,
+        mock_get_unversioned,
+        mock_get_versioned,
+    ):
+        version_id = 7
+
+        department_queryset = Mock()
+        department_rows = ["department"]
+        department_queryset.all.return_value = department_rows
+
+        salary_rate_queryset = Mock()
+        salary_rate_rows = ["salary_rate"]
+        salary_rate_queryset.all.return_value = salary_rate_rows
+
+        mock_get_unversioned.return_value = {
+            lookup_loader.LookupTable.DEPARTMENTS: department_queryset,
+        }
+
+        mock_get_versioned.return_value = {
+            lookup_loader.LookupTable.SALARY_RATES: salary_rate_queryset,
+        }
+
+        result = lookup_loader._get_lookup_models(version_id)
+
+        self.assertEqual(
             result,
+            {
+                "departments": department_rows,
+                "salary_rates": salary_rate_rows,
+            },
+        )
+
+        mock_get_unversioned.assert_called_once_with()
+        mock_get_versioned.assert_called_once_with(version_id)
+
+        department_queryset.all.assert_called_once_with()
+        salary_rate_queryset.all.assert_called_once_with()
+
+
+class TestGetLookupTables(SimpleTestCase):
+    @patch("api.services.lookup_loader.cache.set")
+    @patch("api.services.lookup_loader.LookupConfiguration.objects.get")
+    @patch("api.services.lookup_loader._get_lookup_models")
+    def test_loads_lookup_tables_when_cache_is_empty(
+        self,
+        mock_get_lookup_models,
+        mock_config_get,
+        mock_cache_set,
+    ):
+        config = Mock()
+        config.current_version_id = 3
+        mock_config_get.return_value = config
+
+        lookup_models = {
+            "departments": ["department"],
+            "salary_rates": ["salary_rate"],
+        }
+        mock_get_lookup_models.return_value = lookup_models
+
+        result = get_lookup_tables()
+
+        self.assertEqual(result, lookup_models)
+
+        mock_config_get.assert_called_once_with()
+        mock_get_lookup_models.assert_called_once_with(3)
+        mock_cache_set.assert_called_once_with(
+            MODELS_CACHE_KEY,
+            lookup_models,
             CACHE_TIMEOUT,
         )
 
@@ -75,7 +202,7 @@ class TestGetLookupTables(SimpleTestCase):
         result = get_lookup_tables()
 
         self.assertEqual(result, cached_tables)
-        mock_cache_get.assert_called_once_with(CACHE_KEY)
+        mock_cache_get.assert_called_once_with(MODELS_CACHE_KEY)
         mock_cache_set.assert_not_called()
 
 
@@ -163,16 +290,42 @@ class TestGetConstants(SimpleTestCase):
             ],
         }
 
+    def _mock_querysets(self, tables):
+        return {
+            lookup_loader.LookupTable.SALARY_RATES: self._mock_queryset(
+                tables["salary_rates"]
+            ),
+            lookup_loader.LookupTable.SALARY_RATE_MULTIPLIERS: self._mock_queryset(
+                tables["salary_rate_multipliers"]
+            ),
+            lookup_loader.LookupTable.EBA_INCREASES: self._mock_queryset(
+                tables["eba_increases"]
+            ),
+            lookup_loader.LookupTable.ON_COST_RATES: self._mock_queryset(
+                tables["on_cost_rates"]
+            ),
+            lookup_loader.LookupTable.CALCULATION_CONSTANTS: self._mock_queryset(
+                tables["calculation_constants"]
+            ),
+        }
+
+    @staticmethod
+    def _mock_queryset(rows):
+        queryset = Mock()
+        queryset.all.return_value = rows
+        return queryset
+
     @patch("api.services.lookup_loader.cache.set")
-    @patch("api.services.lookup_loader.get_lookup_tables")
+    @patch("api.services.lookup_loader._get_versioned_lookup_models")
     def test_converts_lookup_tables_to_constants(
         self,
-        mock_get_tables,
+        mock_get_versioned_lookup_models,
         mock_cache_set,
     ):
-        mock_get_tables.return_value = self._build_tables()
+        tables = self._build_tables()
+        mock_get_versioned_lookup_models.return_value = self._mock_querysets(tables)
 
-        result = get_constants()
+        result = get_constants(3)
 
         self.assertEqual(
             result["salary_rate"],
@@ -228,18 +381,19 @@ class TestGetConstants(SimpleTestCase):
             },
         )
 
+        mock_get_versioned_lookup_models.assert_called_once_with(3)
         mock_cache_set.assert_called_once_with(
-            CONSTANTS_CACHE_KEY,
+            "lookup_version_3",
             result,
             CACHE_TIMEOUT,
         )
 
-    @patch("api.services.lookup_loader.get_lookup_tables")
+    @patch("api.services.lookup_loader._get_versioned_lookup_models")
     @patch("api.services.lookup_loader.cache.get")
     def test_returns_cached_constants_without_loading_tables(
         self,
         mock_cache_get,
-        mock_get_tables,
+        mock_get_versioned_lookup_models,
     ):
         cached_constants = {
             "salary_rate": {},
@@ -251,16 +405,16 @@ class TestGetConstants(SimpleTestCase):
 
         mock_cache_get.return_value = cached_constants
 
-        result = get_constants()
+        result = get_constants(3)
 
         self.assertEqual(result, cached_constants)
-        mock_cache_get.assert_called_once_with(CONSTANTS_CACHE_KEY)
-        mock_get_tables.assert_not_called()
+        mock_cache_get.assert_called_once_with("lookup_version_3")
+        mock_get_versioned_lookup_models.assert_not_called()
 
-    @patch("api.services.lookup_loader.get_lookup_tables")
+    @patch("api.services.lookup_loader._get_versioned_lookup_models")
     def test_raises_error_when_on_cost_default_rate_is_missing(
         self,
-        mock_get_tables,
+        mock_get_versioned_lookup_models,
     ):
         on_cost = Mock(spec=OnCostRate)
         on_cost.on_cost_type = "superannuation"
@@ -271,18 +425,18 @@ class TestGetConstants(SimpleTestCase):
         tables = self._build_tables()
         tables["on_cost_rates"] = [on_cost]
 
-        mock_get_tables.return_value = tables
+        mock_get_versioned_lookup_models.return_value = self._mock_querysets(tables)
 
         with self.assertRaisesRegex(
             ValueError,
             "Missing default rate for superannuation and Continuing",
         ):
-            get_constants()
+            get_constants(3)
 
-    @patch("api.services.lookup_loader.get_lookup_tables")
+    @patch("api.services.lookup_loader._get_versioned_lookup_models")
     def test_raises_error_when_required_constant_is_missing(
         self,
-        mock_get_tables,
+        mock_get_versioned_lookup_models,
     ):
         tables = self._build_tables()
         tables["calculation_constants"] = [
@@ -293,30 +447,32 @@ class TestGetConstants(SimpleTestCase):
             self.constant_6,
         ]
 
-        mock_get_tables.return_value = tables
+        mock_get_versioned_lookup_models.return_value = self._mock_querysets(tables)
 
         with self.assertRaisesRegex(
             KeyError,
             "Missing required calculation constants: gst_rate",
         ):
-            get_constants()
+            get_constants(3)
 
 
 class TestConstantsFor(SimpleTestCase):
-    """
-    The seam lookup versioning lands on. A budget prices against the live
-    rates today; when a budget can pin the version it was authorised against,
-    only this function changes.
-    """
-
     @patch("api.services.lookup_loader.get_constants")
-    def test_prices_against_the_live_constants(self, mock_get_constants):
-        mock_get_constants.return_value = {"constants": {"gst_rate": Decimal("0.10")}}
+    def test_uses_budget_lookup_version(self, mock_get_constants):
+        budget = Mock(spec=Budget)
+        budget.lookup_version_id = 7
 
-        result = constants_for(Mock(spec=Budget))
+        expected = {
+            "constants": {
+                "gst_rate": Decimal("0.10"),
+            },
+        }
+        mock_get_constants.return_value = expected
 
-        self.assertEqual(result, {"constants": {"gst_rate": Decimal("0.10")}})
-        mock_get_constants.assert_called_once_with()
+        result = constants_for(budget)
+
+        self.assertEqual(result, expected)
+        mock_get_constants.assert_called_once_with(7)
 
 
 class TestValidateConstants(SimpleTestCase):
@@ -346,11 +502,19 @@ class TestValidateConstants(SimpleTestCase):
             validate_constants(constants)
 
 
-class TestInvalidateLookupCache(SimpleTestCase):
+class TestInvalidateLookupCache(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+        LookupConfiguration.objects.create(
+            current_version=self.version,
+        )
+
     @patch("api.services.lookup_loader.cache.delete")
     def test_deletes_lookup_caches(self, mock_cache_delete):
         invalidate_lookup_cache()
 
+        mock_cache_delete.assert_any_call(MODELS_CACHE_KEY)
+        mock_cache_delete.assert_any_call(
+            lookup_loader._constants_cache_key(self.version.id),
+        )
         self.assertEqual(mock_cache_delete.call_count, 2)
-        mock_cache_delete.assert_any_call(CACHE_KEY)
-        mock_cache_delete.assert_any_call(CONSTANTS_CACHE_KEY)

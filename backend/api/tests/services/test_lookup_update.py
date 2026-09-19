@@ -1,10 +1,17 @@
+from decimal import Decimal
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
-from api.models import Department
+from api.models import (
+    Department,
+    LookupConfiguration,
+    LookupVersion,
+    SalaryRate,
+    SalaryRateMultiplier,
+)
 from api.services.lookup_update import create, update
 
 
@@ -221,4 +228,236 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         department = Department.objects.get(code="SCI")
 
         self.assertEqual(department.name, "Science")
+        mock_invalidate_cache.assert_not_called()
+
+
+class TestVersionedCreate(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+        self.config = LookupConfiguration.objects.create(
+            current_version=self.version,
+            referenced=False,
+        )
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_creates_new_version_when_referenced(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        create(
+            "salary_rates",
+            {
+                "payroll_type": "Fortnight",
+                "category": "Academic",
+                "classification": "A",
+                "rate": Decimal(100000),
+            },
+        )
+
+        self.config.refresh_from_db()
+
+        self.assertNotEqual(
+            self.config.current_version_id,
+            self.version.id,
+        )
+        self.assertFalse(self.config.referenced)
+        self.assertEqual(LookupVersion.objects.count(), 2)
+
+        salary_rate = SalaryRate.objects.get(
+            version_id=self.config.current_version_id,
+            classification="A",
+        )
+
+        self.assertEqual(salary_rate.rate, Decimal(100000))
+        mock_invalidate_cache.assert_called_once()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_rolls_back_new_version_when_create_fails(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        with self.assertRaises(DjangoValidationError):
+            create(
+                "salary_rates",
+                {
+                    "payroll_type": "Fortnight",
+                    "category": "Academic",
+                    "classification": "A",
+                    "rate": Decimal(-1),
+                },
+            )
+
+        self.config.refresh_from_db()
+
+        self.assertEqual(
+            self.config.current_version_id,
+            self.version.id,
+        )
+        self.assertTrue(self.config.referenced)
+        self.assertEqual(LookupVersion.objects.count(), 1)
+        self.assertEqual(SalaryRate.objects.count(), 0)
+        mock_invalidate_cache.assert_not_called()
+
+
+class TestVersionedUpdate(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+        self.config = LookupConfiguration.objects.create(
+            current_version=self.version,
+            referenced=False,
+        )
+
+    def create_salary_rate(
+        self,
+        *,
+        rate: Decimal = Decimal(100000),
+    ) -> SalaryRate:
+        return SalaryRate.objects.create(
+            version=self.version,
+            payroll_type="Fortnight",
+            category="Academic",
+            classification="A",
+            rate=rate,
+        )
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_creates_new_version_when_referenced(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.create_salary_rate()
+
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        update(
+            "salary_rates",
+            {
+                "payroll_type": "Fortnight",
+                "category": "Academic",
+                "classification": "A",
+            },
+            {"rate": Decimal(120000)},
+        )
+
+        self.config.refresh_from_db()
+
+        self.assertNotEqual(
+            self.config.current_version_id,
+            self.version.id,
+        )
+        self.assertFalse(self.config.referenced)
+
+        old_salary_rate = SalaryRate.objects.get(
+            version=self.version,
+            classification="A",
+        )
+        new_salary_rate = SalaryRate.objects.get(
+            version_id=self.config.current_version_id,
+            classification="A",
+        )
+
+        self.assertEqual(old_salary_rate.rate, Decimal(100000))
+        self.assertEqual(new_salary_rate.rate, Decimal(120000))
+        self.assertNotEqual(
+            old_salary_rate.id,
+            new_salary_rate.id,
+        )
+
+        mock_invalidate_cache.assert_called_once()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_new_version_copies_all_versioned_lookup_rows(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.create_salary_rate()
+
+        SalaryRateMultiplier.objects.create(
+            version=self.version,
+            time_basis="FTE",
+            multiplier=Decimal(1),
+        )
+
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        update(
+            "salary_rates",
+            {
+                "payroll_type": "Fortnight",
+                "category": "Academic",
+                "classification": "A",
+            },
+            {"rate": Decimal(120000)},
+        )
+
+        self.config.refresh_from_db()
+        new_version_id = self.config.current_version_id
+
+        new_salary_rate = SalaryRate.objects.get(
+            version_id=new_version_id,
+            classification="A",
+        )
+        new_multiplier = SalaryRateMultiplier.objects.get(
+            version_id=new_version_id,
+            time_basis="FTE",
+        )
+
+        self.assertEqual(new_salary_rate.rate, Decimal(120000))
+        self.assertEqual(new_multiplier.multiplier, Decimal(1))
+
+        self.assertNotEqual(
+            new_salary_rate.id,
+            SalaryRate.objects.get(
+                version=self.version,
+                classification="A",
+            ).id,
+        )
+        self.assertNotEqual(
+            new_multiplier.id,
+            SalaryRateMultiplier.objects.get(
+                version=self.version,
+                time_basis="FTE",
+            ).id,
+        )
+
+        mock_invalidate_cache.assert_called_once()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_does_not_create_new_version_when_row_does_not_exist(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        with self.assertRaisesRegex(
+            ValidationError,
+            "No matching row found in lookup table 'salary_rates'.",
+        ):
+            update(
+                "salary_rates",
+                {
+                    "payroll_type": "Fortnight",
+                    "category": "Academic",
+                    "classification": "UNKNOWN",
+                },
+                {"rate": Decimal(120000)},
+            )
+
+        self.config.refresh_from_db()
+
+        self.assertEqual(
+            self.config.current_version_id,
+            self.version.id,
+        )
+        self.assertTrue(self.config.referenced)
+        self.assertEqual(LookupVersion.objects.count(), 1)
         mock_invalidate_cache.assert_not_called()

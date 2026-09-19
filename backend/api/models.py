@@ -28,10 +28,17 @@ class LookupVersion(models.Model):
 
 
 class LookupConfiguration(models.Model):
+    if TYPE_CHECKING:
+        current_version_id: int
+    # Singleton
+    id = models.IntegerField(primary_key=True, default=1, editable=False)
     current_version = models.ForeignKey(
         "LookupVersion",
         on_delete=models.PROTECT,
     )
+    # Whether current version is referenced by authorised budget.
+    # Determines whether a new version should be created when updating current version.
+    referenced = models.BooleanField(default=False)
 
 
 class Department(models.Model):
@@ -62,7 +69,10 @@ class SalaryRateMultiplier(models.Model):
     # FTE 1, Daily 1/220, Hourly 1. Hourly is 1 because Casual rows in
     # SalaryRate are already hourly rates, not because hourly needs no
     # conversion in general.
-    time_basis = models.CharField(max_length=20, primary_key=True)
+    if TYPE_CHECKING:
+        id: int
+
+    time_basis = models.CharField(max_length=20)
     multiplier = models.DecimalField(
         max_digits=20,
         decimal_places=18,
@@ -73,6 +83,14 @@ class SalaryRateMultiplier(models.Model):
         "LookupVersion",
         on_delete=models.PROTECT,
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["time_basis", "version"],
+                name="unique_salary_rate_multiplier",
+            )
+        ]
 
     def __str__(self):
         return f"{self.time_basis} x{self.multiplier}"
@@ -88,7 +106,7 @@ class IncrementCap(models.Model):
 # TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
 # Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
-    year = models.PositiveSmallIntegerField(primary_key=True)
+    year = models.PositiveSmallIntegerField()
     multiplier = models.DecimalField(
         max_digits=8,
         decimal_places=6,
@@ -100,11 +118,22 @@ class EbaIncrease(models.Model):
         on_delete=models.PROTECT,
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["year", "version"],
+                name="unique_eba",
+            )
+        ]
+
 
 class SalaryRate(models.Model):
     """
     Base rates from the RCPT workbook's tSalaryRate table.
     """
+
+    if TYPE_CHECKING:
+        id: int
 
     class PayrollType(models.TextChoices):
         # MEMBER = value, label
@@ -134,7 +163,7 @@ class SalaryRate(models.Model):
             # Mirrors workbook's CONCATENATE(payroll_type, category, classification)
             # lookup key, without storing a duplicate concatenated string column.
             models.UniqueConstraint(
-                fields=["payroll_type", "category", "classification"],
+                fields=["payroll_type", "category", "classification", "version"],
                 name="unique_salary_rate",
             )
         ]
@@ -207,7 +236,7 @@ class OnCostRate(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["on_cost_type", "employment_type", "year"],
+                fields=["on_cost_type", "employment_type", "year", "version"],
                 name="unique_on_cost_rate",
                 nulls_distinct=False,
             )
@@ -233,7 +262,7 @@ class NonStaffCostCategory(models.Model):
 class CalculationConstant(models.Model):
     # Standalone numbers the costing engine needs that don't belong to any
     # lookup table. Stored as rows rather than Python constants
-    name = models.CharField(max_length=50, primary_key=True)
+    name = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
     value = models.DecimalField(
         max_digits=12,
@@ -244,6 +273,14 @@ class CalculationConstant(models.Model):
         "LookupVersion",
         on_delete=models.PROTECT,
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "version"],
+                name="unique_calculation_constant",
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} = {self.value}"
@@ -382,6 +419,10 @@ class Project(models.Model):
         return self.title
 
 
+def get_current_lookup_version() -> int:
+    return LookupConfiguration.objects.get().current_version_id
+
+
 # TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
@@ -410,10 +451,17 @@ class Budget(models.Model):
 
     if TYPE_CHECKING:
         id: int
+        lookup_version_id: int
         deliverables: RelatedManager["Deliverable"]
         staff_lines: RelatedManager["StaffCostLine"]
         non_staff_lines: RelatedManager["NonStaffCostLine"]
         approval_steps: RelatedManager["ApprovalStep"]
+
+    lookup_version = models.ForeignKey(
+        "LookupVersion",
+        default=get_current_lookup_version,
+        on_delete=models.PROTECT,
+    )
 
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE
