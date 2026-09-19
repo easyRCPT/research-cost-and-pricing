@@ -8,6 +8,7 @@ from api.models import (
     Budget,
     CalculationConstant,
     Department,
+    Faculty,
     LookupConfiguration,
     Project,
     User,
@@ -29,8 +30,9 @@ class ProjectTestMixin:
             name="Science",
             school="Science School",
             school_code="SCI",
-            faculty="Science Faculty",
-            faculty_code="SCI",
+            faculty=Faculty.objects.get_or_create(
+                code="SCI", defaults={"name": "Science Faculty"}
+            )[0],
         )
 
     def project_data(self, **overrides) -> dict:

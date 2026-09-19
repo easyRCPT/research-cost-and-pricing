@@ -3,8 +3,8 @@
   "model": "api.lookupversion",
   "pk": 1,
   "fields": {
-    "created_at": "2026-09-19T09:47:39.601Z",
-    "updated_at": "2026-09-19T09:47:39.601Z",
+    "created_at": "2026-09-19T10:16:05.078Z",
+    "updated_at": "2026-09-19T10:16:05.078Z",
     "updated_by": null
   }
 },
@@ -17,14 +17,202 @@
   }
 },
 {
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_01",
+  "fields": {
+    "name": "Faculty of Arts"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_02",
+  "fields": {
+    "name": "Faculty of Medicine, Dentistry and Health Sciences"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_03",
+  "fields": {
+    "name": "Chief Operating Officer"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_04",
+  "fields": {
+    "name": "Faculty of Architecture, Building and Planning"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_05",
+  "fields": {
+    "name": "Faculty of Business and Economics"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_06",
+  "fields": {
+    "name": "Faculty of Engineering and Information Technology"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_07",
+  "fields": {
+    "name": "Faculty of Fine Arts and Music"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_08",
+  "fields": {
+    "name": "Faculty of Science"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_09",
+  "fields": {
+    "name": "Faculty of Education"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_10",
+  "fields": {
+    "name": "Melbourne Law School"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_11",
+  "fields": {
+    "name": "Advancement, Communications & Marketing"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_12",
+  "fields": {
+    "name": "Global, Culture and Engagement"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_13",
+  "fields": {
+    "name": "Office of the Provost"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_14",
+  "fields": {
+    "name": "Office of the Vice-Chancellor"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_15",
+  "fields": {
+    "name": "Research & Enterprise"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_16",
+  "fields": {
+    "name": "University Central Reporting Group"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_17",
+  "fields": {
+    "name": "Nossal Institute Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_18",
+  "fields": {
+    "name": "UM Commercialisation Pty Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_19",
+  "fields": {
+    "name": "UM Commercialisation Trust"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_20",
+  "fields": {
+    "name": "UMELB (Singapore)"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_21",
+  "fields": {
+    "name": "UOM Commercial Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_22",
+  "fields": {
+    "name": "Melbourne Business School Limited Group"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_23",
+  "fields": {
+    "name": "UoM International Holdings Limited Group"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_24",
+  "fields": {
+    "name": "Ao Mo Da (Beijing) Consulting Co. Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_25",
+  "fields": {
+    "name": "Unimelb Germany GmbH"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_26",
+  "fields": {
+    "name": "Deputy Vice-Chancellor Indigenous"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_27",
+  "fields": {
+    "name": "Deputy Vice-Chancellor Education"
+  }
+},
+{
   "model": "api.department",
   "pk": "CCH_H1_5_01",
   "fields": {
     "name": "Faculty of Arts - Admin",
     "school": "Faculty of Arts, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_01",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_01"
   }
 },
@@ -35,8 +223,7 @@
     "name": "Faculty of Arts - Centres and Institutes",
     "school": "Faculty of Arts, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_01",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_02"
   }
 },
@@ -47,8 +234,7 @@
     "name": "Asia Institute (D)",
     "school": "Asia Institute",
     "school_code": "CCH_H1_4_02",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_03"
   }
 },
@@ -59,8 +245,7 @@
     "name": "Graduate School of Humanities and Social Sciences (D)",
     "school": "Graduate School of Humanities and Social Sciences",
     "school_code": "CCH_H1_4_03",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_04"
   }
 },
@@ -71,8 +256,7 @@
     "name": "School of Culture and Communication (D)",
     "school": "School of Culture and Communication",
     "school_code": "CCH_H1_4_04",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_05"
   }
 },
@@ -83,8 +267,7 @@
     "name": "School of Historical and Philosophical Studies (D)",
     "school": "School of Historical and Philosophical Studies",
     "school_code": "CCH_H1_4_05",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_06"
   }
 },
@@ -95,8 +278,7 @@
     "name": "School of Languages and Linguistics (D)",
     "school": "School of Languages and Linguistics",
     "school_code": "CCH_H1_4_06",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_07"
   }
 },
@@ -107,8 +289,7 @@
     "name": "School of Social and Political Sciences (D)",
     "school": "School of Social and Political Sciences",
     "school_code": "CCH_H1_4_07",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_08"
   }
 },
@@ -119,8 +300,7 @@
     "name": "The Peter Doherty Institute for Infection and Immunity",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_09"
   }
 },
@@ -131,8 +311,7 @@
     "name": "Office of the CIO",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_10"
   }
 },
@@ -143,8 +322,7 @@
     "name": "School of BioSciences - Centres and Institutes",
     "school": "School of BioSciences",
     "school_code": "CCH_H1_4_32",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_100"
   }
 },
@@ -155,8 +333,7 @@
     "name": "School of Chemistry (D)",
     "school": "School of Chemistry",
     "school_code": "CCH_H1_4_33",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_101"
   }
 },
@@ -167,8 +344,7 @@
     "name": "School of Chemistry - Centres and Institutes",
     "school": "School of Chemistry",
     "school_code": "CCH_H1_4_33",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_102"
   }
 },
@@ -179,8 +355,7 @@
     "name": "School of Geography, Earth and Atmospheric Sciences (D)",
     "school": "School of Geography, Earth and Atmospheric Sciences",
     "school_code": "CCH_H1_4_34",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_103"
   }
 },
@@ -191,8 +366,7 @@
     "name": "School of Geography, Earth and Atmospheric Sciences - Centres and Institutes",
     "school": "School of Geography, Earth and Atmospheric Sciences",
     "school_code": "CCH_H1_4_34",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_104"
   }
 },
@@ -203,8 +377,7 @@
     "name": "School of Mathematics and Statistics (D)",
     "school": "School of Mathematics and Statistics",
     "school_code": "CCH_H1_4_35",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_105"
   }
 },
@@ -215,8 +388,7 @@
     "name": "School of Mathematics and Statistics - Centres and Institutes",
     "school": "School of Mathematics and Statistics",
     "school_code": "CCH_H1_4_35",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_106"
   }
 },
@@ -227,8 +399,7 @@
     "name": "School of Physics (D)",
     "school": "School of Physics",
     "school_code": "CCH_H1_4_36",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_107"
   }
 },
@@ -239,8 +410,7 @@
     "name": "School of Physics - Centres and Institutes",
     "school": "School of Physics",
     "school_code": "CCH_H1_4_36",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_108"
   }
 },
@@ -251,8 +421,7 @@
     "name": "Melbourne Veterinary School (D)",
     "school": "Melbourne Veterinary School",
     "school_code": "CCH_H1_4_37",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_109"
   }
 },
@@ -263,8 +432,7 @@
     "name": "Client Services",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_11"
   }
 },
@@ -275,8 +443,7 @@
     "name": "Melbourne Veterinary School - Centres and Institutes",
     "school": "Melbourne Veterinary School",
     "school_code": "CCH_H1_4_37",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_110"
   }
 },
@@ -287,8 +454,7 @@
     "name": "Faculty of Education - Admin",
     "school": "Faculty of Education, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_38",
-    "faculty": "Faculty of Education",
-    "faculty_code": "CCH_H1_3_09",
+    "faculty": "CCH_H1_3_09",
     "budget_unit": "CCH_H1_5_111"
   }
 },
@@ -299,8 +465,7 @@
     "name": "Faculty of Education - Centres and Institutes",
     "school": "Faculty of Education, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_38",
-    "faculty": "Faculty of Education",
-    "faculty_code": "CCH_H1_3_09",
+    "faculty": "CCH_H1_3_09",
     "budget_unit": "CCH_H1_5_112"
   }
 },
@@ -311,8 +476,7 @@
     "name": "Faculty of Education (D)",
     "school": "Faculty of Education (S)",
     "school_code": "CCH_H1_4_39",
-    "faculty": "Faculty of Education",
-    "faculty_code": "CCH_H1_3_09",
+    "faculty": "CCH_H1_3_09",
     "budget_unit": "CCH_H1_5_113"
   }
 },
@@ -323,8 +487,7 @@
     "name": "Melbourne Law School - Admin",
     "school": "Melbourne Law School (S)",
     "school_code": "CCH_H1_4_40",
-    "faculty": "Melbourne Law School",
-    "faculty_code": "CCH_H1_3_10",
+    "faculty": "CCH_H1_3_10",
     "budget_unit": "CCH_H1_5_114"
   }
 },
@@ -335,8 +498,7 @@
     "name": "Melbourne Law School - Centres and Institutes",
     "school": "Melbourne Law School (S)",
     "school_code": "CCH_H1_4_40",
-    "faculty": "Melbourne Law School",
-    "faculty_code": "CCH_H1_3_10",
+    "faculty": "CCH_H1_3_10",
     "budget_unit": "CCH_H1_5_115"
   }
 },
@@ -347,8 +509,7 @@
     "name": "Melbourne Law School (D)",
     "school": "Melbourne Law School (S)",
     "school_code": "CCH_H1_4_40",
-    "faculty": "Melbourne Law School",
-    "faculty_code": "CCH_H1_3_10",
+    "faculty": "CCH_H1_3_10",
     "budget_unit": "CCH_H1_5_116"
   }
 },
@@ -359,8 +520,7 @@
     "name": "Office of the VP Advancement",
     "school": "Advancement, Communications & Marketing",
     "school_code": "CCH_H1_4_42",
-    "faculty": "Advancement, Communications & Marketing",
-    "faculty_code": "CCH_H1_3_11",
+    "faculty": "CCH_H1_3_11",
     "budget_unit": "CCH_H1_5_118"
   }
 },
@@ -371,8 +531,7 @@
     "name": "Advancement",
     "school": "Advancement, Communications & Marketing",
     "school_code": "CCH_H1_4_42",
-    "faculty": "Advancement, Communications & Marketing",
-    "faculty_code": "CCH_H1_3_11",
+    "faculty": "CCH_H1_3_11",
     "budget_unit": "CCH_H1_5_119"
   }
 },
@@ -383,8 +542,7 @@
     "name": "Academic Technology",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_12"
   }
 },
@@ -395,8 +553,7 @@
     "name": "Communications and Marketing",
     "school": "Advancement, Communications & Marketing",
     "school_code": "CCH_H1_4_42",
-    "faculty": "Advancement, Communications & Marketing",
-    "faculty_code": "CCH_H1_3_11",
+    "faculty": "CCH_H1_3_11",
     "budget_unit": "CCH_H1_5_120"
   }
 },
@@ -407,8 +564,7 @@
     "name": "Office of the Chief Operating Officer (D)",
     "school": "Office of the Chief Operating Officer",
     "school_code": "CCH_H1_4_43",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_121"
   }
 },
@@ -419,8 +575,7 @@
     "name": "Governance",
     "school": "Office of the Chief Operating Officer",
     "school_code": "CCH_H1_4_43",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_122"
   }
 },
@@ -431,8 +586,7 @@
     "name": "Strategy, Planning and Performance",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_123"
   }
 },
@@ -443,8 +597,7 @@
     "name": "Office of the CFO",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_124"
   }
 },
@@ -455,8 +608,7 @@
     "name": "Corporate Finance, Property and Sustainability",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_125"
   }
 },
@@ -467,8 +619,7 @@
     "name": "Financial Planning, Partnering and Advisory",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_126"
   }
 },
@@ -479,8 +630,7 @@
     "name": "Procurement",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_127"
   }
 },
@@ -491,8 +641,7 @@
     "name": "Strategic Financial Initiatives",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_128"
   }
 },
@@ -503,8 +652,7 @@
     "name": "Office of General Counsel",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_129"
   }
 },
@@ -515,8 +663,7 @@
     "name": "Health & Safety",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_13"
   }
 },
@@ -527,8 +674,7 @@
     "name": "Information Governance Services",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_130"
   }
 },
@@ -539,8 +685,7 @@
     "name": "Legal Services",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_131"
   }
 },
@@ -551,8 +696,7 @@
     "name": "Risk and Assurance",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_132"
   }
 },
@@ -563,8 +707,7 @@
     "name": "Enterprise Service Group Directorate",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_133"
   }
 },
@@ -575,8 +718,7 @@
     "name": "Change Practice (EPG)",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_135"
   }
 },
@@ -587,8 +729,7 @@
     "name": "University Decision Support",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_136"
   }
 },
@@ -599,8 +740,7 @@
     "name": "Projects and Portfolio Management",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_138"
   }
 },
@@ -611,8 +751,7 @@
     "name": "Finance Services",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_14"
   }
 },
@@ -623,8 +762,7 @@
     "name": "Service Experience & Design",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_140"
   }
 },
@@ -635,8 +773,7 @@
     "name": "RIC Directorate",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_141"
   }
 },
@@ -647,8 +784,7 @@
     "name": "Commercialisation Ventures",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_142"
   }
 },
@@ -659,8 +795,7 @@
     "name": "Innovation & Enterprise",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_143"
   }
 },
@@ -671,8 +806,7 @@
     "name": "Melbourne Entrepreneurial Centre (MEC)",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_144"
   }
 },
@@ -683,8 +817,7 @@
     "name": "Office of Research Management",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_145"
   }
 },
@@ -695,8 +828,7 @@
     "name": "Student and Scholarly Services Directorate",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_146"
   }
 },
@@ -707,8 +839,7 @@
     "name": "Future Students",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_147"
   }
 },
@@ -719,8 +850,7 @@
     "name": "Enterprise Technology",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_15"
   }
 },
@@ -731,8 +861,7 @@
     "name": "University Colleges and Residential Life",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_150"
   }
 },
@@ -743,8 +872,7 @@
     "name": "Scholarly Services",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_151"
   }
 },
@@ -755,8 +883,7 @@
     "name": "Student Administration",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_152"
   }
 },
@@ -767,8 +894,7 @@
     "name": "Student Success",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_154"
   }
 },
@@ -779,8 +905,7 @@
     "name": "Office of the DVC Global, Culture and Engagement",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_155"
   }
 },
@@ -791,8 +916,7 @@
     "name": "HR Services",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_16"
   }
 },
@@ -803,8 +927,7 @@
     "name": "Engagement (GCE)",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_162"
   }
 },
@@ -815,8 +938,7 @@
     "name": "Melbourne Theatre Company",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_164"
   }
 },
@@ -827,8 +949,7 @@
     "name": "Research Computing Services",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_17"
   }
 },
@@ -839,8 +960,7 @@
     "name": "Office of the DVC Indigenous",
     "school": "Deputy Vice-Chancellor Indigenous (S)",
     "school_code": "CCH_H1_4_66",
-    "faculty": "Deputy Vice-Chancellor Indigenous",
-    "faculty_code": "CCH_H1_3_26",
+    "faculty": "CCH_H1_3_26",
     "budget_unit": "CCH_H1_5_171"
   }
 },
@@ -851,8 +971,7 @@
     "name": "People and Community",
     "school": "Office of the Provost (S)",
     "school_code": "CCH_H1_4_50",
-    "faculty": "Office of the Provost",
-    "faculty_code": "CCH_H1_3_13",
+    "faculty": "CCH_H1_3_13",
     "budget_unit": "CCH_H1_5_173"
   }
 },
@@ -863,8 +982,7 @@
     "name": "Office of the Vice-Chancellor (D)",
     "school": "Office of the Vice-Chancellor (S)",
     "school_code": "CCH_H1_4_51",
-    "faculty": "Office of the Vice-Chancellor",
-    "faculty_code": "CCH_H1_3_14",
+    "faculty": "CCH_H1_3_14",
     "budget_unit": "CCH_H1_5_174"
   }
 },
@@ -875,8 +993,7 @@
     "name": "Office of the DVC Research",
     "school": "Research & Enterprise (S)",
     "school_code": "CCH_H1_4_52",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_175"
   }
 },
@@ -887,8 +1004,7 @@
     "name": "Atlantic Fellows for Social Equity",
     "school": "Atlantic Fellows for Social Equity",
     "school_code": "CCH_H1_4_69",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_176"
   }
 },
@@ -899,8 +1015,7 @@
     "name": "Melbourne Connect",
     "school": "Melbourne Connect",
     "school_code": "CCH_H1_4_70",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_178"
   }
 },
@@ -911,8 +1026,7 @@
     "name": "Campus Management",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_18"
   }
 },
@@ -923,8 +1037,7 @@
     "name": "Corporate",
     "school": "University Corporate",
     "school_code": "CCH_H1_4_53",
-    "faculty": "University Central Reporting Group",
-    "faculty_code": "CCH_H1_3_16",
+    "faculty": "CCH_H1_3_16",
     "budget_unit": "CCH_H1_5_184"
   }
 },
@@ -935,8 +1048,7 @@
     "name": "Service Recipients",
     "school": "University Corporate",
     "school_code": "CCH_H1_4_53",
-    "faculty": "University Central Reporting Group",
-    "faculty_code": "CCH_H1_3_16",
+    "faculty": "CCH_H1_3_16",
     "budget_unit": "CCH_H1_5_185"
   }
 },
@@ -947,8 +1059,7 @@
     "name": "Nossal Institute Ltd (D)",
     "school": "Nossal Institute Ltd (S)",
     "school_code": "CCH_H1_4_55",
-    "faculty": "Nossal Institute Ltd",
-    "faculty_code": "CCH_H1_3_17",
+    "faculty": "CCH_H1_3_17",
     "budget_unit": "CCH_H1_5_187"
   }
 },
@@ -959,8 +1070,7 @@
     "name": "Office of the Provost (D)",
     "school": "Office of the Provost (S)",
     "school_code": "CCH_H1_4_50",
-    "faculty": "Office of the Provost",
-    "faculty_code": "CCH_H1_3_13",
+    "faculty": "CCH_H1_3_13",
     "budget_unit": "CCH_H1_5_188"
   }
 },
@@ -971,8 +1081,7 @@
     "name": "UM Commercialisation Pty Ltd (D)",
     "school": "UM Commercialisation Pty Ltd (S)",
     "school_code": "CCH_H1_4_56",
-    "faculty": "UM Commercialisation Pty Ltd",
-    "faculty_code": "CCH_H1_3_18",
+    "faculty": "CCH_H1_3_18",
     "budget_unit": "CCH_H1_5_189"
   }
 },
@@ -983,8 +1092,7 @@
     "name": "Planning & Assurance",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_19"
   }
 },
@@ -995,8 +1103,7 @@
     "name": "UM Commercialisation Trust (D)",
     "school": "UM Commercialisation Trust (S)",
     "school_code": "CCH_H1_4_57",
-    "faculty": "UM Commercialisation Trust",
-    "faculty_code": "CCH_H1_3_19",
+    "faculty": "CCH_H1_3_19",
     "budget_unit": "CCH_H1_5_190"
   }
 },
@@ -1007,8 +1114,7 @@
     "name": "UMELB (Singapore) (D)",
     "school": "UMELB (Singapore) (S)",
     "school_code": "CCH_H1_4_58",
-    "faculty": "UMELB (Singapore)",
-    "faculty_code": "CCH_H1_3_20",
+    "faculty": "CCH_H1_3_20",
     "budget_unit": "CCH_H1_5_191"
   }
 },
@@ -1019,8 +1125,7 @@
     "name": "UOM Commercial Ltd (D)",
     "school": "UOM Commercial Ltd (S)",
     "school_code": "CCH_H1_4_59",
-    "faculty": "UOM Commercial Ltd",
-    "faculty_code": "CCH_H1_3_21",
+    "faculty": "CCH_H1_3_21",
     "budget_unit": "CCH_H1_5_192"
   }
 },
@@ -1031,8 +1136,7 @@
     "name": "Melbourne Business School Limited Group (D)",
     "school": "Melbourne Business School Limited Group (S)",
     "school_code": "CCH_H1_4_60",
-    "faculty": "Melbourne Business School Limited Group",
-    "faculty_code": "CCH_H1_3_22",
+    "faculty": "CCH_H1_3_22",
     "budget_unit": "CCH_H1_5_193"
   }
 },
@@ -1043,8 +1147,7 @@
     "name": "UoM International Holdings Limited Group (D)",
     "school": "UoM International Holdings Limited Group (S)",
     "school_code": "CCH_H1_4_61",
-    "faculty": "UoM International Holdings Limited Group",
-    "faculty_code": "CCH_H1_3_23",
+    "faculty": "CCH_H1_3_23",
     "budget_unit": "CCH_H1_5_194"
   }
 },
@@ -1055,8 +1158,7 @@
     "name": "Ao Mo Da (Beijing) Consulting Co. Ltd (D)",
     "school": "Ao Mo Da (Beijing) Consulting Co. Ltd (S)",
     "school_code": "CCH_H1_4_62",
-    "faculty": "Ao Mo Da (Beijing) Consulting Co. Ltd",
-    "faculty_code": "CCH_H1_3_24",
+    "faculty": "CCH_H1_3_24",
     "budget_unit": "CCH_H1_5_195"
   }
 },
@@ -1067,8 +1169,7 @@
     "name": "Unimelb Germany GmbH (D)",
     "school": "Unimelb Germany GmbH (S)",
     "school_code": "CCH_H1_4_63",
-    "faculty": "Unimelb Germany GmbH",
-    "faculty_code": "CCH_H1_3_25",
+    "faculty": "CCH_H1_3_25",
     "budget_unit": "CCH_H1_5_196"
   }
 },
@@ -1079,8 +1180,7 @@
     "name": "School of Chemical and Biomedical Engineering (D)",
     "school": "School of Chemical and Biomedical Engineering",
     "school_code": "CCH_H1_4_18",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_197"
   }
 },
@@ -1091,8 +1191,7 @@
     "name": "Melbourne Online",
     "school": "Melbourne Online",
     "school_code": "CCH_H1_4_68",
-    "faculty": "Office of the Provost",
-    "faculty_code": "CCH_H1_3_13",
+    "faculty": "CCH_H1_3_13",
     "budget_unit": "CCH_H1_5_198"
   }
 },
@@ -1103,8 +1202,7 @@
     "name": "Asia Institute - Centres and Institutes",
     "school": "Asia Institute",
     "school_code": "CCH_H1_4_02",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_199"
   }
 },
@@ -1115,8 +1213,7 @@
     "name": "Cybersecurity",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_20"
   }
 },
@@ -1127,8 +1224,7 @@
     "name": "School of Languages and Linguistics - Centres and Institutes",
     "school": "School of Languages and Linguistics",
     "school_code": "CCH_H1_4_06",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_200"
   }
 },
@@ -1139,8 +1235,7 @@
     "name": "School of Social and Political Sciences - Centres and Institutes",
     "school": "School of Social and Political Sciences",
     "school_code": "CCH_H1_4_07",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_201"
   }
 },
@@ -1151,8 +1246,7 @@
     "name": "Global (GCE)",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_202"
   }
 },
@@ -1163,8 +1257,7 @@
     "name": "Culture (GCE)",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_203"
   }
 },
@@ -1175,8 +1268,7 @@
     "name": "Melbourne Academy of Surgical Anatomy (MDHS)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_204"
   }
 },
@@ -1187,8 +1279,7 @@
     "name": "Melbourne Teaching Health Clinics",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_205"
   }
 },
@@ -1199,8 +1290,7 @@
     "name": "Clinical Research Support (MISCH)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_206"
   }
 },
@@ -1211,8 +1301,7 @@
     "name": "Melbourne Academic Centre for Health (MACH)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_207"
   }
 },
@@ -1223,8 +1312,7 @@
     "name": "Robert Cripps Institute for Cultural Conservation",
     "school": "Faculty of Arts, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_01",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_208"
   }
 },
@@ -1235,8 +1323,7 @@
     "name": "Melbourne National Security and Defence",
     "school": "Research & Enterprise (S)",
     "school_code": "CCH_H1_4_52",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_209"
   }
 },
@@ -1247,8 +1334,7 @@
     "name": "Melbourne Bio-Resources",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_21"
   }
 },
@@ -1259,8 +1345,7 @@
     "name": "Chief People Officer",
     "school": "Chief People Officer",
     "school_code": "CCH_H1_4_64",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_210"
   }
 },
@@ -1271,8 +1356,7 @@
     "name": "Corporate Development Directorate",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_211"
   }
 },
@@ -1283,8 +1367,7 @@
     "name": "Infrastructure",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_212"
   }
 },
@@ -1295,8 +1378,7 @@
     "name": "Sustainability",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_213"
   }
 },
@@ -1307,8 +1389,7 @@
     "name": "Office of the DVC Education",
     "school": "Deputy Vice-Chancellor Education (S)",
     "school_code": "CCH_H1_4_67",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_214"
   }
 },
@@ -1319,8 +1400,7 @@
     "name": "Melbourne Institute of Applied Economic and Social Research",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_215"
   }
 },
@@ -1331,8 +1411,7 @@
     "name": "Wellbeing Services",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_216"
   }
 },
@@ -1343,8 +1422,7 @@
     "name": "Commercial Management",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_217"
   }
 },
@@ -1355,8 +1433,7 @@
     "name": "Stakeholder Relations and Engagement",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_218"
   }
 },
@@ -1367,8 +1444,7 @@
     "name": "Funding Policy Planning",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_219"
   }
 },
@@ -1379,8 +1455,7 @@
     "name": "Faculty of Architecture, Building and Planning - Admin",
     "school": "Faculty of Architecture, Building and Planning, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_10",
-    "faculty": "Faculty of Architecture, Building and Planning",
-    "faculty_code": "CCH_H1_3_04",
+    "faculty": "CCH_H1_3_04",
     "budget_unit": "CCH_H1_5_22"
   }
 },
@@ -1391,8 +1466,7 @@
     "name": "Faculty of Architecture, Building and Planning - Centres and Institutes",
     "school": "Faculty of Architecture, Building and Planning, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_10",
-    "faculty": "Faculty of Architecture, Building and Planning",
-    "faculty_code": "CCH_H1_3_04",
+    "faculty": "CCH_H1_3_04",
     "budget_unit": "CCH_H1_5_23"
   }
 },
@@ -1403,8 +1477,7 @@
     "name": "Faculty of Architecture, Building and Planning (D)",
     "school": "Faculty of Architecture, Building and Planning (S)",
     "school_code": "CCH_H1_4_11",
-    "faculty": "Faculty of Architecture, Building and Planning",
-    "faculty_code": "CCH_H1_3_04",
+    "faculty": "CCH_H1_3_04",
     "budget_unit": "CCH_H1_5_24"
   }
 },
@@ -1415,8 +1488,7 @@
     "name": "Faculty of Business and Economics - Admin",
     "school": "Faculty of Business and Economics, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_13",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_26"
   }
 },
@@ -1427,8 +1499,7 @@
     "name": "Faculty of Business and Economics - Centres and Institutes",
     "school": "Faculty of Business and Economics, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_13",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_27"
   }
 },
@@ -1439,8 +1510,7 @@
     "name": "Department of Accounting",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_28"
   }
 },
@@ -1451,8 +1521,7 @@
     "name": "Department of Business Administration",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_29"
   }
 },
@@ -1463,8 +1532,7 @@
     "name": "Department of Economics",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_30"
   }
 },
@@ -1475,8 +1543,7 @@
     "name": "Department of Finance",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_31"
   }
 },
@@ -1487,8 +1554,7 @@
     "name": "Department of Management and Marketing",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_32"
   }
 },
@@ -1499,8 +1565,7 @@
     "name": "Melbourne Professional Education (MPE)",
     "school": "Deputy Vice-Chancellor Education (S)",
     "school_code": "CCH_H1_4_67",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_34"
   }
 },
@@ -1511,8 +1576,7 @@
     "name": "Faculty of Engineering and Information Technology – Admin",
     "school": "Faculty of Engineering and Information Technology, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_17",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_35"
   }
 },
@@ -1523,8 +1587,7 @@
     "name": "Faculty of Engineering and Information Technology - Centres and Institutes",
     "school": "Faculty of Engineering and Information Technology, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_17",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_36"
   }
 },
@@ -1535,8 +1598,7 @@
     "name": "Department of Biomedical Engineering",
     "school": "School of Chemical and Biomedical Engineering",
     "school_code": "CCH_H1_4_18",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_37"
   }
 },
@@ -1547,8 +1609,7 @@
     "name": "Department of Chemical Engineering",
     "school": "School of Chemical and Biomedical Engineering",
     "school_code": "CCH_H1_4_18",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_38"
   }
 },
@@ -1559,8 +1620,7 @@
     "name": "School of Computing and Information Systems (D)",
     "school": "School of Computing and Information Systems",
     "school_code": "CCH_H1_4_19",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_39"
   }
 },
@@ -1571,8 +1631,7 @@
     "name": "School of Electrical, Mechanical and Infrastructure Eng (D)",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_40"
   }
 },
@@ -1583,8 +1642,7 @@
     "name": "Department of Electrical and Electronic Engineering",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_41"
   }
 },
@@ -1595,8 +1653,7 @@
     "name": "Department of Infrastructure Engineering",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_42"
   }
 },
@@ -1607,8 +1664,7 @@
     "name": "Department of Mechanical Engineering",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_43"
   }
 },
@@ -1619,8 +1675,7 @@
     "name": "Faculty of Fine Arts and Music - Admin",
     "school": "Faculty of Fine Arts and Music, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_21",
-    "faculty": "Faculty of Fine Arts and Music",
-    "faculty_code": "CCH_H1_3_07",
+    "faculty": "CCH_H1_3_07",
     "budget_unit": "CCH_H1_5_44"
   }
 },
@@ -1631,8 +1686,7 @@
     "name": "Melbourne Conservatorium of Music",
     "school": "Faculty of Fine Arts and Music (S)",
     "school_code": "CCH_H1_4_22",
-    "faculty": "Faculty of Fine Arts and Music",
-    "faculty_code": "CCH_H1_3_07",
+    "faculty": "CCH_H1_3_07",
     "budget_unit": "CCH_H1_5_46"
   }
 },
@@ -1643,8 +1697,7 @@
     "name": "Victorian College of the Arts",
     "school": "Faculty of Fine Arts and Music (S)",
     "school_code": "CCH_H1_4_22",
-    "faculty": "Faculty of Fine Arts and Music",
-    "faculty_code": "CCH_H1_3_07",
+    "faculty": "CCH_H1_3_07",
     "budget_unit": "CCH_H1_5_47"
   }
 },
@@ -1655,8 +1708,7 @@
     "name": "Faculty of Medicine, Dentistry and Health Sciences - Admin (D)",
     "school": "Faculty of Medicine, Dentistry and Health Sciences - Admin",
     "school_code": "CCH_H1_4_23",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_48"
   }
 },
@@ -1667,8 +1719,7 @@
     "name": "Centre for Cancer Research",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_49"
   }
 },
@@ -1679,8 +1730,7 @@
     "name": "Centre for Collaborative Practice",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_50"
   }
 },
@@ -1691,8 +1741,7 @@
     "name": "Centre for Digital Transformation of Health",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_51"
   }
 },
@@ -1703,8 +1752,7 @@
     "name": "Centre for Youth Mental Health (Orygen)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_52"
   }
 },
@@ -1715,8 +1763,7 @@
     "name": "Comprehensive Dementia Centre",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_53"
   }
 },
@@ -1727,8 +1774,7 @@
     "name": "Department of Medical Biology (WEHI)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_54"
   }
 },
@@ -1739,8 +1785,7 @@
     "name": "Florey Department of Neuroscience and Mental Health",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_55"
   }
 },
@@ -1751,8 +1796,7 @@
     "name": "Medical Bionics Department",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_56"
   }
 },
@@ -1763,8 +1807,7 @@
     "name": "Melbourne Bioinformatics (VLSCI)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_57"
   }
 },
@@ -1775,8 +1818,7 @@
     "name": "Melbourne Poche Centre for Indigenous Health",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_60"
   }
 },
@@ -1787,8 +1829,7 @@
     "name": "National Ageing Research Institute",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_61"
   }
 },
@@ -1799,8 +1840,7 @@
     "name": "Australian Biocommons",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_62"
   }
 },
@@ -1811,8 +1851,7 @@
     "name": "The Sir Peter MacCallum Department of Oncology",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_63"
   }
 },
@@ -1823,8 +1862,7 @@
     "name": "Melbourne Dental School (D)",
     "school": "Melbourne Dental School",
     "school_code": "CCH_H1_4_24",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_65"
   }
 },
@@ -1835,8 +1873,7 @@
     "name": "Melbourne Medical School - Admin",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_66"
   }
 },
@@ -1847,8 +1884,7 @@
     "name": "Baker Department of Cardiometabolic Health",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_69"
   }
 },
@@ -1859,8 +1895,7 @@
     "name": "Department of Clinical Pathology",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_70"
   }
 },
@@ -1871,8 +1906,7 @@
     "name": "Department of Critical Care",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_71"
   }
 },
@@ -1883,8 +1917,7 @@
     "name": "Department of General Practice and Primary Care",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_72"
   }
 },
@@ -1895,8 +1928,7 @@
     "name": "Department of Infectious Diseases",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_73"
   }
 },
@@ -1907,8 +1939,7 @@
     "name": "Department of Medical Education",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_74"
   }
 },
@@ -1919,8 +1950,7 @@
     "name": "Department of Medicine",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_75"
   }
 },
@@ -1931,8 +1961,7 @@
     "name": "Department of Obstetrics, Gynaecology and Newborn Health",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_76"
   }
 },
@@ -1943,8 +1972,7 @@
     "name": "Department of Paediatrics",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_77"
   }
 },
@@ -1955,8 +1983,7 @@
     "name": "Department of Psychiatry",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_78"
   }
 },
@@ -1967,8 +1994,7 @@
     "name": "Department of Radiology",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_79"
   }
 },
@@ -1979,8 +2005,7 @@
     "name": "Department of Rural Health",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_80"
   }
 },
@@ -1991,8 +2016,7 @@
     "name": "Department of Surgery",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_81"
   }
 },
@@ -2003,8 +2027,7 @@
     "name": "Melbourne School of Health Sciences - Admin",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_82"
   }
 },
@@ -2015,8 +2038,7 @@
     "name": "Department of Audiology and Speech Pathology",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_83"
   }
 },
@@ -2027,8 +2049,7 @@
     "name": "Department of Nursing",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_84"
   }
 },
@@ -2039,8 +2060,7 @@
     "name": "Department of Optometry and Vision Sciences",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_85"
   }
 },
@@ -2051,8 +2071,7 @@
     "name": "Department of Physiotherapy",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_86"
   }
 },
@@ -2063,8 +2082,7 @@
     "name": "Department of Social Work",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_87"
   }
 },
@@ -2075,8 +2093,7 @@
     "name": "Melbourne School of Population and Global Health (D)",
     "school": "Melbourne School of Population and Global Health",
     "school_code": "CCH_H1_4_27",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_88"
   }
 },
@@ -2087,8 +2104,7 @@
     "name": "Melbourne School of Population and Global Health - Centres and Institutes",
     "school": "Melbourne School of Population and Global Health",
     "school_code": "CCH_H1_4_27",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_89"
   }
 },
@@ -2099,8 +2115,7 @@
     "name": "Melbourne School of Psychological Sciences (D)",
     "school": "Melbourne School of Psychological Sciences",
     "school_code": "CCH_H1_4_28",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_90"
   }
 },
@@ -2111,8 +2126,7 @@
     "name": "Melbourne School of Psychological Sciences - Centres and Institutes",
     "school": "Melbourne School of Psychological Sciences",
     "school_code": "CCH_H1_4_28",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_91"
   }
 },
@@ -2123,8 +2137,7 @@
     "name": "School of Biomedical Sciences - Admin",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_92"
   }
 },
@@ -2135,8 +2148,7 @@
     "name": "Department of Anatomy and Physiology",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_93"
   }
 },
@@ -2147,8 +2159,7 @@
     "name": "Department of Biochemistry and Pharmacology",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_94"
   }
 },
@@ -2159,8 +2170,7 @@
     "name": "Department of Microbiology and Immunology",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_95"
   }
 },
@@ -2171,8 +2181,7 @@
     "name": "Faculty of Science - Admin",
     "school": "Faculty of Science, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_30",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_96"
   }
 },
@@ -2183,8 +2192,7 @@
     "name": "Faculty of Science - Centres and Institutes",
     "school": "Faculty of Science, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_30",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_97"
   }
 },
@@ -2195,8 +2203,7 @@
     "name": "School of Agriculture, Food and Ecosystem Sciences (D)",
     "school": "School of Agriculture, Food and Ecosystem Sciences",
     "school_code": "CCH_H1_4_31",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_98"
   }
 },
@@ -2207,8 +2214,7 @@
     "name": "School of BioSciences (D)",
     "school": "School of BioSciences",
     "school_code": "CCH_H1_4_32",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_99"
   }
 },

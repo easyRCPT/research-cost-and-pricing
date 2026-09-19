@@ -41,20 +41,44 @@ class LookupConfiguration(models.Model):
     referenced = models.BooleanField(default=False)
 
 
+class Faculty(models.Model):
+    # A table rather than two CharFields on Department, because a dean is
+    # assigned to a faculty and a string cannot be pointed at.
+    if TYPE_CHECKING:
+        departments: RelatedManager["Department"]
+
+    code = models.CharField(max_length=20, primary_key=True)
+    name = models.CharField(max_length=150)
+
+    class Meta:
+        verbose_name_plural = "faculties"
+
+    def __str__(self):
+        return self.name
+
+
 class Department(models.Model):
     code = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=150)
     school = models.CharField(max_length=150)
     school_code = models.CharField(max_length=20)
-    faculty = models.CharField(max_length=150)
-    faculty_code = models.CharField(max_length=20)
+    faculty = models.ForeignKey(
+        "Faculty", related_name="departments", on_delete=models.PROTECT
+    )
     budget_unit = models.CharField(max_length=20, blank=True, default="")
+
+    if TYPE_CHECKING:
+        faculty_id: str
 
     def __str__(self):
         return self.name
 
 
 class User(AbstractUser):
+    if TYPE_CHECKING:
+        id: int
+        org_assignments: RelatedManager["UserOrgAssignment"]
+
     department = models.ForeignKey(
         # models.PROTECT prevents a department from being deleted if it has users
         "Department",
@@ -62,6 +86,86 @@ class User(AbstractUser):
         blank=True,
         on_delete=models.PROTECT,
     )
+
+
+class UserOrgAssignment(models.Model):
+    # This person, in this part of the university, in this role.
+    #
+    # There is no hod or dean group, and there should not be one: a group says
+    # which door someone comes in through, and a group alone cannot say *which*
+    # department someone heads. The scope is the whole of the approval rule, so
+    # the row that carries the scope is the only record of the fact.
+
+    if TYPE_CHECKING:
+        id: int
+
+        def get_role_display(self) -> str: ...
+
+    class Role(models.TextChoices):
+        MEMBER = "member", "Member"
+        HOD = "hod", "Head of Department"
+        DEAN = "dean", "Dean"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="org_assignments",
+        on_delete=models.CASCADE,
+    )
+    role = models.CharField(max_length=20, choices=Role.choices)
+
+    # Exactly one of these is set, and which one is decided by the role.
+    department = models.ForeignKey(
+        "Department",
+        null=True,
+        blank=True,
+        related_name="org_assignments",
+        on_delete=models.PROTECT,
+    )
+    faculty = models.ForeignKey(
+        "Faculty",
+        null=True,
+        blank=True,
+        related_name="org_assignments",
+        on_delete=models.PROTECT,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            # A dean is assigned to a faculty; everyone else to a department.
+            # Spelled with string literals because a nested Meta cannot see the
+            # names in the class body around it.
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        role__in=["member", "hod"],
+                        department__isnull=False,
+                        faculty__isnull=True,
+                    )
+                    | models.Q(
+                        role="dean",
+                        faculty__isnull=False,
+                        department__isnull=True,
+                    )
+                ),
+                name="org_assignment_scope_matches_role",
+            ),
+            # The same role twice over the same place is one fact recorded
+            # twice. Two departments for one person is not, and stays allowed.
+            models.UniqueConstraint(
+                fields=["user", "role", "department"],
+                name="unique_department_assignment",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "role", "faculty"],
+                name="unique_faculty_assignment",
+            ),
+        ]
+
+    def __str__(self):
+        where = self.faculty or self.department
+        return f"{self.user} — {self.get_role_display()} ({where})"
 
 
 class SalaryRateMultiplier(models.Model):

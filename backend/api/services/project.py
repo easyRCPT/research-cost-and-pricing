@@ -64,7 +64,7 @@ def list_projects(user) -> list[dict]:
     # project. Which budget is the latest is decided in build_row, not here.
     projects = (
         visible_projects(user)
-        .select_related("department")
+        .select_related("department__faculty")
         .prefetch_related(Prefetch("budgets", queryset=Budget.objects.all()))
         .annotate(last_activity=Greatest("updated_at", Max("budgets__updated_at")))
         .order_by("-last_activity", "-id")
@@ -94,7 +94,7 @@ def build_row(project: Project) -> dict:
         "chief_investigator": project.chief_investigator,
         "funder": project.funder,
         "department": project.department.name,
-        "faculty": project.department.faculty,
+        "faculty": project.department.faculty.name,
         "start_year": project.start_year,
         "end_year": project.end_year,
         # Null only for a project whose budgets have all been deleted. The

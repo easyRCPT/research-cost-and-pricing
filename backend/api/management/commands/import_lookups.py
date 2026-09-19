@@ -25,6 +25,7 @@ from api.models import (
     DeliverableType,
     Department,
     EbaIncrease,
+    Faculty,
     IncrementCap,
     LookupConfiguration,
     LookupVersion,
@@ -140,6 +141,12 @@ def import_departments(workbook):
         if not dept_code or dept_code == "Dept code":
             continue
 
+        # The faculty is a row of its own now, created from the same two
+        # columns the department used to carry as strings.
+        faculty_row, _ = Faculty.objects.update_or_create(
+            code=faculty_code, defaults={"name": faculty}
+        )
+
         # Store each department
         Department.objects.update_or_create(
             code=dept_code,
@@ -147,8 +154,7 @@ def import_departments(workbook):
                 "name": dept_name,
                 "school": school,
                 "school_code": school_code,
-                "faculty": faculty,
-                "faculty_code": faculty_code,
+                "faculty": faculty_row,
                 "budget_unit": budget_unit or "",
             },
         )

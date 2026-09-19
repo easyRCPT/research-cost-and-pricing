@@ -916,8 +916,8 @@ export interface components {
             name: string;
             school: string;
             school_code: string;
-            faculty: string;
-            faculty_code: string;
+            readonly faculty: string;
+            readonly faculty_code: string;
             budget_unit?: string;
         };
         EbaIncrease: {

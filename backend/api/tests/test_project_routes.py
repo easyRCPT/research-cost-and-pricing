@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.urls import reverse
 
-from api.models import Budget, Department, Project
+from api.models import Budget, Department, Faculty, Project
 
 
 class ProjectRoutesTestCase(TestCase):
@@ -14,8 +14,9 @@ class ProjectRoutesTestCase(TestCase):
             name="Science",
             school="Science School",
             school_code="SCI",
-            faculty="Science Faculty",
-            faculty_code="SCI",
+            faculty=Faculty.objects.get_or_create(
+                code="SCI", defaults={"name": "Science Faculty"}
+            )[0],
         )
 
     def valid_body(self, **overrides) -> dict:
@@ -100,8 +101,9 @@ class ModelValidationTestCase(TestCase):
             name="Science",
             school="Science School",
             school_code="SCI",
-            faculty="Science Faculty",
-            faculty_code="SCI",
+            faculty=Faculty.objects.get_or_create(
+                code="SCI", defaults={"name": "Science Faculty"}
+            )[0],
         )
         project = Project.objects.create(
             title="Test Project",
