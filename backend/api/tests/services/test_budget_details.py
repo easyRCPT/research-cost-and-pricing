@@ -273,10 +273,10 @@ def details_with_price(price: Decimal) -> dict:
 class TestGetBudgetDetails(SimpleTestCase):
     @patch("api.services.budget_details.build_budget_details")
     @patch("api.services.budget_details.data_loader.load_budget_data")
-    @patch("api.services.budget_details.lookup_loader.get_constants")
+    @patch("api.services.budget_details.lookup_loader.constants_for")
     def test_get_budget_details(
         self,
-        mock_get_constants,
+        mock_constants_for,
         mock_load_budget_data,
         mock_build_budget_details,
     ):
@@ -286,13 +286,13 @@ class TestGetBudgetDetails(SimpleTestCase):
         budget_data = {}
         expected = details_with_price(Decimal("1234.5678"))
 
-        mock_get_constants.return_value = constants
+        mock_constants_for.return_value = constants
         mock_load_budget_data.return_value = budget_data
         mock_build_budget_details.return_value = expected
 
         result = get_budget_details(budget)
 
-        mock_get_constants.assert_called_once_with()
+        mock_constants_for.assert_called_once_with(budget)
         mock_load_budget_data.assert_called_once_with(budget)
         mock_build_budget_details.assert_called_once_with(
             constants,

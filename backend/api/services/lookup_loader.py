@@ -234,11 +234,23 @@ def get_constants(version_id: int) -> dict:
     return result
 
 
+def current_version_id() -> int:
+    return LookupConfiguration.objects.get().current_version_id
+
+
 def constants_for(budget: Budget) -> dict:
     """
-    Return the calculation lookup constants for the budget's lookup version.
+    The lookup state one budget prices against.
+
+    A draft has no version of its own and reads the live rates, so a lookup
+    edit reaches it: an unauthorised budget is meant to pick up a rate change
+    made after it was created. Submitting stamps the version in use, and from
+    then on the budget is frozen against that one however the rates move.
     """
-    return get_constants(budget.lookup_version_id)
+    version_id = budget.lookup_version_id
+    if version_id is None:
+        version_id = current_version_id()
+    return get_constants(version_id)
 
 
 def invalidate_lookup_cache() -> None:
@@ -246,5 +258,4 @@ def invalidate_lookup_cache() -> None:
     Refresh the cache after an administrator modifies Lookup table data.
     """
     cache.delete(MODELS_CACHE_KEY)
-    current_version_id = LookupConfiguration.objects.get().current_version_id
-    cache.delete(_constants_cache_key(current_version_id))
+    cache.delete(_constants_cache_key(current_version_id()))

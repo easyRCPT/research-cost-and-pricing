@@ -1040,7 +1040,6 @@ export interface components {
             eba_increases: components["schemas"]["EbaIncrease"][];
             on_cost_rates: components["schemas"]["OnCostRate"][];
             non_staff_cost_categories: components["schemas"]["NonStaffCostCategory"][];
-            minimum_cost_recovery_multipliers: components["schemas"]["MinimumCostRecoveryMultiplier"][];
             calculation_constants: components["schemas"]["CalculationConstant"][];
             activities: components["schemas"]["Activity"][];
             regions: components["schemas"]["Region"][];
@@ -1193,11 +1192,6 @@ export interface components {
             detail: string;
         };
         LookupsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
-        MinimumCostRecoveryMultiplier: {
-            year: number;
-            /** Format: double */
-            multiplier: number;
-        };
         /**
          * @description * `simple` - Simple
          *     * `full` - Full

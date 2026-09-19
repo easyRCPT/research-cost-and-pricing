@@ -4,9 +4,21 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from api.models import Budget, CalculationConstant, Department, Project, User
+from api.models import (
+    Budget,
+    CalculationConstant,
+    Department,
+    LookupConfiguration,
+    Project,
+    User,
+)
 from api.services import budget_update
 from api.services.project import budget_defaults, create, list_projects
+
+
+def current_version():
+    """The singleton the lookup versioning migration creates."""
+    return LookupConfiguration.objects.get().current_version
 
 
 class ProjectTestMixin:
@@ -173,12 +185,20 @@ class TestDecimalFields(ProjectTestMixin, TestCase):
 class TestBudgetDefaults(ProjectTestMixin, TestCase):
     def test_reads_the_constants(self):
         CalculationConstant.objects.create(
-            name="full_cost_recovery_multiplier", value=Decimal("1.90")
+            name="full_cost_recovery_multiplier",
+            value=Decimal("1.90"),
+            version=current_version(),
         )
         CalculationConstant.objects.create(
-            name="in_kind_multiplier", value=Decimal("1.25")
+            name="in_kind_multiplier",
+            value=Decimal("1.25"),
+            version=current_version(),
         )
-        CalculationConstant.objects.create(name="default_margin", value=Decimal("0.25"))
+        CalculationConstant.objects.create(
+            name="default_margin",
+            value=Decimal("0.25"),
+            version=current_version(),
+        )
 
         self.assertEqual(
             budget_defaults(),
@@ -215,7 +235,9 @@ class TestCreate(ProjectTestMixin, TestCase):
 
     def test_seeds_the_budget_multipliers_from_the_constants(self):
         CalculationConstant.objects.create(
-            name="full_cost_recovery_multiplier", value=Decimal("1.90")
+            name="full_cost_recovery_multiplier",
+            value=Decimal("1.90"),
+            version=current_version(),
         )
 
         row = create(self.project_data(), None)
@@ -224,7 +246,11 @@ class TestCreate(ProjectTestMixin, TestCase):
         self.assertEqual(budget.cost_multiplier, Decimal("1.90"))
 
     def test_seeds_the_budget_margin_from_the_constant(self):
-        CalculationConstant.objects.create(name="default_margin", value=Decimal("0.25"))
+        CalculationConstant.objects.create(
+            name="default_margin",
+            value=Decimal("0.25"),
+            version=current_version(),
+        )
 
         row = create(self.project_data(), None)
         budget = Project.objects.get(pk=row["id"]).budgets.get()

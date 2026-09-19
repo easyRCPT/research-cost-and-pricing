@@ -8,7 +8,6 @@ from api.models import (
     CalculationConstant,
     EbaIncrease,
     LookupConfiguration,
-    LookupVersion,
     OnCostRate,
     SalaryRate,
     SalaryRateMultiplier,
@@ -504,10 +503,8 @@ class TestValidateConstants(SimpleTestCase):
 
 class TestInvalidateLookupCache(TestCase):
     def setUp(self):
-        self.version = LookupVersion.objects.create()
-        LookupConfiguration.objects.create(
-            current_version=self.version,
-        )
+        # The singleton comes from the lookup versioning migration.
+        self.version = LookupConfiguration.objects.get().current_version
 
     @patch("api.services.lookup_loader.cache.delete")
     def test_deletes_lookup_caches(self, mock_cache_delete):

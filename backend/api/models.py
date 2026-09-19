@@ -419,10 +419,6 @@ class Project(models.Model):
         return self.title
 
 
-def get_current_lookup_version() -> int:
-    return LookupConfiguration.objects.get().current_version_id
-
-
 # TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     # One costed attempt at a project. A project can carry several: a first
@@ -451,15 +447,20 @@ class Budget(models.Model):
 
     if TYPE_CHECKING:
         id: int
-        lookup_version_id: int
+        lookup_version_id: int | None
         deliverables: RelatedManager["Deliverable"]
         staff_lines: RelatedManager["StaffCostLine"]
         non_staff_lines: RelatedManager["NonStaffCostLine"]
         approval_steps: RelatedManager["ApprovalStep"]
 
+    # Null while the budget is a draft, which is what makes it price against
+    # the live rates: an unauthorised budget is meant to pick up lookup changes
+    # made after it was created. It is stamped with the current version at
+    # submit, and from then on the budget is frozen against that one.
     lookup_version = models.ForeignKey(
         "LookupVersion",
-        default=get_current_lookup_version,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
     )
 

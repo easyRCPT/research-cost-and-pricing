@@ -233,11 +233,12 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
 
 class TestVersionedCreate(TestCase):
     def setUp(self):
-        self.version = LookupVersion.objects.create()
-        self.config = LookupConfiguration.objects.create(
-            current_version=self.version,
-            referenced=False,
-        )
+        # The singleton already exists: the lookup versioning migration
+        # creates it, so the app can assume there is always a current version.
+        self.config = LookupConfiguration.objects.get()
+        self.version = self.config.current_version
+        self.config.referenced = False
+        self.config.save(update_fields=["referenced"])
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_creates_new_version_when_referenced(
@@ -307,11 +308,12 @@ class TestVersionedCreate(TestCase):
 
 class TestVersionedUpdate(TestCase):
     def setUp(self):
-        self.version = LookupVersion.objects.create()
-        self.config = LookupConfiguration.objects.create(
-            current_version=self.version,
-            referenced=False,
-        )
+        # The singleton already exists: the lookup versioning migration
+        # creates it, so the app can assume there is always a current version.
+        self.config = LookupConfiguration.objects.get()
+        self.version = self.config.current_version
+        self.config.referenced = False
+        self.config.save(update_fields=["referenced"])
 
     def create_salary_rate(
         self,
