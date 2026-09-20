@@ -191,3 +191,93 @@ jobs:
       - name: Type-check and build
         working-directory: frontend
         run: pnpm build
+
+  e2e:
+    name: Frontend (end to end)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # The app cannot do anything without the API, so this job runs the whole
+    # stack: the same Postgres major as the backend job, migrated and seeded,
+    # with Django and the built frontend started by Playwright itself.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: rcpt
+          POSTGRES_PASSWORD: rcpt
+          POSTGRES_DB: rcpt
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rcpt -d rcpt"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: postgresql://rcpt:rcpt@localhost:5432/rcpt
+      DJANGO_SECRET_KEY: ci-only-not-a-real-secret
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_SSL: "False"
+      VITE_API_URL: http://127.0.0.1:8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync --locked
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      # Keyed on the lockfile: the browser is 114 MB and changes only when
+      # @playwright/test does.
+      - name: Cache the browser
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        working-directory: frontend
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Prepare the database
+        working-directory: backend
+        run: |
+          uv run python manage.py migrate
+          uv run python manage.py seed
+
+      # Playwright starts Django and the built frontend itself, and waits for
+      # both to answer before the first test runs.
+      - name: Run the tests
+        working-directory: frontend
+        run: pnpm test:e2e
+
+      - name: Keep the report when something failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
