@@ -1,8 +1,8 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -74,10 +74,60 @@ class Department(models.Model):
         return self.name
 
 
+class UserManager(BaseUserManager["User"]):
+    """
+    Creates users by email, since there is no username left to key on.
+
+    Django's own manager takes a username first and would refuse every call
+    once that field is gone.
+    """
+
+    use_in_migrations = True
+
+    def _create(self, email: str, password: str | None, **extra):
+        if not email:
+            raise ValueError("An email address is required.")
+        user = self.model(email=self.normalize_email(email), **extra)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email: str, password: str | None = None, **extra):
+        extra.setdefault("is_staff", False)
+        extra.setdefault("is_superuser", False)
+        return self._create(email, password, **extra)
+
+    def create_superuser(self, email: str, password: str | None = None, **extra):
+        extra.setdefault("is_staff", True)
+        extra.setdefault("is_superuser", True)
+        if extra.get("is_staff") is not True:
+            raise ValueError("A superuser must have is_staff=True.")
+        if extra.get("is_superuser") is not True:
+            raise ValueError("A superuser must have is_superuser=True.")
+        return self._create(email, password, **extra)
+
+
 class User(AbstractUser):
+    # Signed in by email, because that is what the University issues and what
+    # every door asks for. AbstractUser's username is dropped rather than
+    # filled with a copy of the email: two fields holding one fact are free to
+    # disagree, and this is the fact people type.
     if TYPE_CHECKING:
         id: int
         org_assignments: RelatedManager["UserOrgAssignment"]
+
+    username = None  # type: ignore[assignment]
+    email = models.EmailField(unique=True)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    if TYPE_CHECKING:
+        # AbstractUser declares objects as Django's own UserManager, whose
+        # create_user takes a username. Ours does not.
+        objects: ClassVar[UserManager]  # type: ignore[assignment]
+    else:
+        objects = UserManager()
 
     department = models.ForeignKey(
         # models.PROTECT prevents a department from being deleted if it has users
@@ -98,6 +148,8 @@ class UserOrgAssignment(models.Model):
 
     if TYPE_CHECKING:
         id: int
+        department_id: str | None
+        faculty_id: str | None
 
         def get_role_display(self) -> str: ...
 

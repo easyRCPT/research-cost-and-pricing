@@ -70,9 +70,8 @@ class Command(BaseCommand):
 
         for person in PEOPLE:
             user, created = User.objects.get_or_create(
-                username=person["email"],
+                email=person["email"],
                 defaults={
-                    "email": person["email"],
                     "first_name": person["first_name"],
                     "last_name": person["last_name"],
                 },

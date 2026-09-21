@@ -23,7 +23,7 @@ class OrgTestMixin:
             school_code="ENG",
             faculty=self.faculty,
         )
-        self.user = User.objects.create_user(username="hana")
+        self.user = User.objects.create_user(email="hana@unimelb.edu.au")
 
 
 class TestTheScopeMatchesTheRole(OrgTestMixin, TestCase):

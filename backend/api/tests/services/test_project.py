@@ -260,7 +260,7 @@ class TestCreate(ProjectTestMixin, TestCase):
         self.assertEqual(budget.margin, Decimal("0.2500"))
 
     def test_records_the_author_when_there_is_one(self):
-        user = User.objects.create_user(username="researcher")
+        user = User.objects.create_user(email="researcher@unimelb.edu.au")
 
         row = create(self.project_data(), user)
 

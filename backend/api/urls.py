@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import views_auth
 from .views import (
     BudgetDetailView,
     DeliverableView,
@@ -27,6 +28,17 @@ urlpatterns = [
         ProjectView.as_view(http_method_names=["get", "post"]),
         name="projects",
     ),
+    # Auth
+    path("auth/signup/", views_auth.SignupView.as_view(), name="signup"),
+    path("auth/login/", views_auth.LoginView.as_view(), name="login"),
+    path(
+        "auth/admin-login/",
+        views_auth.AdminLoginView.as_view(),
+        name="admin-login",
+    ),
+    path("auth/logout/", views_auth.LogoutView.as_view(), name="logout"),
+    path("auth/me/", views_auth.MeView.as_view(), name="me"),
+    path("auth/csrf/", views_auth.CsrfView.as_view(), name="csrf"),
     # Budget
     path(
         "budgets/<int:budget_id>/",

@@ -97,7 +97,7 @@ class TestOneStepPerLevel(ApprovalStepTestMixin, TestCase):
 class TestADecidedStepNamesItsDecider(ApprovalStepTestMixin, TestCase):
     def setUp(self):
         self.budget = self.create_budget()
-        self.approver = User.objects.create_user(username="hod")
+        self.approver = User.objects.create_user(email="hod@unimelb.edu.au")
 
     def test_a_decision_with_a_decider_and_a_time_is_stored(self):
         step = self.step(
@@ -137,7 +137,7 @@ class TestADecidedStepNamesItsDecider(ApprovalStepTestMixin, TestCase):
 class TestAnUndecidedStepNamesNobody(ApprovalStepTestMixin, TestCase):
     def setUp(self):
         self.budget = self.create_budget()
-        self.approver = User.objects.create_user(username="hod")
+        self.approver = User.objects.create_user(email="hod@unimelb.edu.au")
 
     def test_a_pending_step_stores_neither(self):
         step = self.step(self.budget)
@@ -173,7 +173,7 @@ class TestWhatOutlivesWhat(ApprovalStepTestMixin, TestCase):
 
     def test_a_decider_cannot_be_deleted_out_from_under_a_decision(self):
         budget = self.create_budget()
-        approver = User.objects.create_user(username="hod")
+        approver = User.objects.create_user(email="hod@unimelb.edu.au")
         self.step(
             budget,
             status=ApprovalStep.Status.APPROVED,
@@ -190,7 +190,7 @@ class TestWhatOutlivesWhat(ApprovalStepTestMixin, TestCase):
 
     def test_deactivating_a_decider_leaves_the_decision_intact(self):
         budget = self.create_budget()
-        approver = User.objects.create_user(username="hod")
+        approver = User.objects.create_user(email="hod@unimelb.edu.au")
         step = self.step(
             budget,
             status=ApprovalStep.Status.APPROVED,
