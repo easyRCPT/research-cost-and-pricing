@@ -2,6 +2,7 @@
 
 import api.models
 from django.db import migrations, models
+from django.db.models.functions import Lower
 
 
 def fill_blank_emails(apps, schema_editor):
@@ -17,6 +18,22 @@ def fill_blank_emails(apps, schema_editor):
     for user in User.objects.filter(email="").only("id", "username"):
         handle = (user.username or f"user{user.id}").strip()
         User.objects.filter(pk=user.pk).update(email=f"{handle}@invalid.local")
+
+
+def lowercase_emails(apps, schema_editor):
+    """
+    Fold existing addresses down before a case-insensitive unique index.
+
+    Sign-in matches case-insensitively, so two rows differing only by case
+    would be indistinguishable to it. Production has no users yet; in a
+    developer database such a pair would surface here as a constraint error,
+    which is the right place to find out.
+    """
+    User = apps.get_model("api", "User")
+    for user in User.objects.exclude(email="").only("id", "email"):
+        lowered = user.email.lower()
+        if lowered != user.email:
+            User.objects.filter(pk=user.pk).update(email=lowered)
 
 
 class Migration(migrations.Migration):
@@ -42,5 +59,14 @@ class Migration(migrations.Migration):
             model_name='user',
             name='email',
             field=models.EmailField(max_length=254, unique=True),
+        ),
+        migrations.RunPython(lowercase_emails, migrations.RunPython.noop),
+        # unique=True above is case-sensitive, which is not what signing in
+        # does. This is what makes one address mean one account.
+        migrations.AddConstraint(
+            model_name='user',
+            constraint=models.UniqueConstraint(
+                Lower('email'), name='user_email_unique_ci'
+            ),
         ),
     ]

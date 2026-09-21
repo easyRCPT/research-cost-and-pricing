@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.functions import Lower
 from django.utils import timezone
 
 if TYPE_CHECKING:
@@ -84,6 +85,19 @@ class UserManager(BaseUserManager["User"]):
 
     use_in_migrations = True
 
+    @classmethod
+    def normalize_email(cls, email: str | None) -> str:
+        """
+        Lowercase the whole address, not just the domain.
+
+        Django's own version leaves the local part alone, which is correct by
+        the RFC and wrong here: the column is unique case-sensitively, so
+        Ruth@ and ruth@ are two rows, while sign-in matches case-insensitively
+        and would then find both. Nobody at the University means two people by
+        those, and the pair locks one of them out.
+        """
+        return super().normalize_email(email).lower()
+
     def _create(self, email: str, password: str | None, **extra):
         if not email:
             raise ValueError("An email address is required.")
@@ -136,6 +150,14 @@ class User(AbstractUser):
         blank=True,
         on_delete=models.PROTECT,
     )
+
+    class Meta(AbstractUser.Meta):
+        constraints = [
+            # The manager lowercases on the way in, but objects.create, the
+            # admin and a data import do not go through it. This is the line
+            # that actually holds.
+            models.UniqueConstraint(Lower("email"), name="user_email_unique_ci"),
+        ]
 
 
 class UserOrgAssignment(models.Model):
