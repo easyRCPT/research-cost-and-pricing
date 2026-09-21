@@ -95,9 +95,36 @@ export async function fillStaffRow(
 
   const choices = [employment, category, classification, basis]
   for (const [index, value] of choices.entries()) {
-    await row.getByRole('combobox').nth(index).click()
-    await page.getByRole('option', { name: value, exact: true }).click()
+    await chooseOption(page, row.getByRole('combobox').nth(index), value)
   }
+}
+
+/**
+ * Open one select and pick a value, retrying the open.
+ *
+ * The click that opens a select is sometimes swallowed: each choice patches the
+ * budget, and the re-render on the reply can land between Playwright deciding
+ * the trigger is actionable and the click arriving. The option then never
+ * appears and the wait runs to the full test timeout, which is what made this
+ * the flakiest line in the suite.
+ *
+ * Retrying needs the guard: a select that did open toggles shut on a second
+ * click, so the listbox is checked before pressing again.
+ */
+async function chooseOption(page: Page, trigger: Locator, value: string) {
+  const option = page.getByRole('option', { name: value, exact: true })
+
+  await expect(async () => {
+    if (!(await page.getByRole('listbox').isVisible())) {
+      await trigger.click()
+    }
+    await expect(option).toBeVisible({ timeout: 2_000 })
+  }).toPass({ timeout: 15_000 })
+
+  await option.click()
+  // Gone before the next one is asked for, so `listbox` above is this row's
+  // next select and never the one just used.
+  await expect(option).toBeHidden()
 }
 
 /** A title nothing else will collide with, so specs can run in parallel. */
