@@ -25,12 +25,10 @@ test('a staff row prices, and is still there after a reload', async ({ page, req
   const rowTotal = row.locator('td').nth(-2)
   await expect(rowTotal).not.toHaveText('—')
 
-  // And it is a saved row, not a draft held in the browser. Reloading returns
-  // to the projects list rather than the screen it was left on, because the
-  // editor is React state and not a URL yet (#43).
+  // And it is a saved row, not a draft held in the browser. Since #43 the
+  // screen is a URL, so a reload comes back to it rather than to the list.
   await page.reload()
-  await openProject(page, title)
-  await goToScreen(page, 'Staff Costs')
+  await expect(page.getByRole('heading', { name: 'Staff Costs' })).toBeVisible()
   await expect(page.locator('input[value="Dr A. Rahman"]')).toBeVisible()
   await expect(page.locator('tbody tr').first().locator('td').nth(-2)).not.toHaveText('—')
 })
