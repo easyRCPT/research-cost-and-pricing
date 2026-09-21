@@ -15,12 +15,37 @@ from .models import Department, Faculty, User, UserOrgAssignment
 
 @admin.register(User)
 class RcptUserAdmin(UserAdmin):
-    # Django's own, plus the search autocomplete needs and the department the
-    # user model already carries.
-    search_fields = ["username", "email", "first_name", "last_name"]
+    # Django's own, rekeyed on email: there is no username to order, search or
+    # sign in with any more.
+    ordering = ["email"]
+    list_display = ["email", "first_name", "last_name", "is_staff"]
+    search_fields = ["email", "first_name", "last_name"]
     fieldsets = (
-        *(UserAdmin.fieldsets or ()),
+        (None, {"fields": ("email", "password")}),
+        ("Personal info", {"fields": ("first_name", "last_name")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
         ("RCPT", {"fields": ("department",)}),
+    )
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2"),
+            },
+        ),
     )
 
 
@@ -47,7 +72,7 @@ class UserOrgAssignmentAdmin(admin.ModelAdmin):
     # database has the final say.
     list_display = ["user", "role", "department", "faculty", "created_at"]
     list_filter = ["role", "faculty"]
-    search_fields = ["user__email", "user__username", "department__name"]
+    search_fields = ["user__email", "department__name"]
     autocomplete_fields = ["user", "department", "faculty"]
-    ordering = ["user__username", "role"]
+    ordering = ["user__email", "role"]
     list_select_related = ["user", "department", "faculty"]

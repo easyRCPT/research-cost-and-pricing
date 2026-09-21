@@ -4,6 +4,119 @@
  */
 
 export interface paths {
+    "/api/auth/admin-login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_admin_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/csrf/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Hand a signed-out browser the csrftoken cookie.
+         *
+         *     The login doors below are csrf_protect, and DRF rejects an anonymous
+         *     request at `initial()` before any view code runs, so `/me` cannot be what
+         *     seeds the cookie: while nobody is signed in it answers 401 and its handler
+         *     never executes. The frontend calls this on first paint instead, and the
+         *     cookie is then in place for the login POST. Django rotates the token on
+         *     login, and that rotation sets the cookie again, so this is only needed once
+         *     per browser session.
+         */
+        get: operations["auth_csrf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_logout_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Who is signed in.
+         *
+         *     Also refreshes the csrftoken cookie, which matters after a login has
+         *     rotated the token. A signed-out browser gets 401 here and uses CsrfView.
+         */
+        get: operations["auth_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_signup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/budgets/{budget_id}/": {
         parameters: {
             query?: never;
@@ -182,9 +295,277 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description * `researcher` - researcher
+         *     * `staff` - staff
+         * @enum {string}
+         */
+        AccountTypeEnum: "researcher" | "staff";
         Activity: {
             code: string;
             name: string;
+        };
+        AdminLogin: {
+            /** Format: email */
+            email: string;
+            password: string;
+        };
+        Assignment: {
+            id: number;
+            role: string;
+            department: string | null;
+            faculty: string | null;
+        };
+        AuthAdminLoginCreateEmailErrorComponent: {
+            /**
+             * @description * `email` - email (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "email";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthAdminLoginCreateError: components["schemas"]["AuthAdminLoginCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AuthAdminLoginCreateEmailErrorComponent"] | components["schemas"]["AuthAdminLoginCreatePasswordErrorComponent"];
+        AuthAdminLoginCreateErrorResponse400: components["schemas"]["AuthAdminLoginCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AuthAdminLoginCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AuthAdminLoginCreatePasswordErrorComponent: {
+            /**
+             * @description * `password` - password (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "password";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthAdminLoginCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AuthAdminLoginCreateError"][];
+        };
+        AuthCsrfRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AuthLoginCreateAccountTypeErrorComponent: {
+            /**
+             * @description * `account_type` - account_type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "account_type";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AuthLoginCreateEmailErrorComponent: {
+            /**
+             * @description * `email` - email (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "email";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthLoginCreateError: components["schemas"]["AuthLoginCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AuthLoginCreateEmailErrorComponent"] | components["schemas"]["AuthLoginCreatePasswordErrorComponent"] | components["schemas"]["AuthLoginCreateAccountTypeErrorComponent"];
+        AuthLoginCreateErrorResponse400: components["schemas"]["AuthLoginCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AuthLoginCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AuthLoginCreatePasswordErrorComponent: {
+            /**
+             * @description * `password` - password (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "password";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthLoginCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AuthLoginCreateError"][];
+        };
+        AuthLogoutCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AuthMeRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AuthSignupCreateAccountTypeErrorComponent: {
+            /**
+             * @description * `account_type` - account_type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "account_type";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AuthSignupCreateEmailErrorComponent: {
+            /**
+             * @description * `email` - email (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "email";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthSignupCreateError: components["schemas"]["AuthSignupCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AuthSignupCreateEmailErrorComponent"] | components["schemas"]["AuthSignupCreatePasswordErrorComponent"] | components["schemas"]["AuthSignupCreateFirstNameErrorComponent"] | components["schemas"]["AuthSignupCreateLastNameErrorComponent"] | components["schemas"]["AuthSignupCreateAccountTypeErrorComponent"];
+        AuthSignupCreateErrorResponse400: components["schemas"]["AuthSignupCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AuthSignupCreateFirstNameErrorComponent: {
+            /**
+             * @description * `first_name` - first_name (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "first_name";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthSignupCreateLastNameErrorComponent: {
+            /**
+             * @description * `last_name` - last_name (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "last_name";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthSignupCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AuthSignupCreatePasswordErrorComponent: {
+            /**
+             * @description * `password` - password (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "password";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthSignupCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AuthSignupCreateError"][];
         };
         /** @enum {unknown} */
         BlankEnum: "";
@@ -937,6 +1318,11 @@ export interface components {
             detail: string;
             attr: string | null;
         };
+        Error403: {
+            code: components["schemas"]["ErrorCode403Enum"];
+            detail: string;
+            attr: string | null;
+        };
         Error404: {
             code: components["schemas"]["ErrorCode404Enum"];
             detail: string;
@@ -969,6 +1355,11 @@ export interface components {
          */
         ErrorCode401Enum: "authentication_failed" | "not_authenticated";
         /**
+         * @description * `permission_denied` - Permission Denied
+         * @enum {string}
+         */
+        ErrorCode403Enum: "permission_denied";
+        /**
          * @description * `not_found` - Not Found
          * @enum {string}
          */
@@ -996,6 +1387,10 @@ export interface components {
         ErrorResponse401: {
             type: components["schemas"]["ClientErrorEnum"];
             errors: components["schemas"]["Error401"][];
+        };
+        ErrorResponse403: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error403"][];
         };
         ErrorResponse404: {
             type: components["schemas"]["ClientErrorEnum"];
@@ -1026,6 +1421,12 @@ export interface components {
         IncrementCap: {
             level: string;
             max_steps: number;
+        };
+        Login: {
+            /** Format: email */
+            email: string;
+            password: string;
+            account_type: components["schemas"]["AccountTypeEnum"];
         };
         LookupCreate: {
             values: {
@@ -1192,6 +1593,17 @@ export interface components {
             detail: string;
         };
         LookupsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        /**
+         * @description Everything a guard needs in one answer.
+         *
+         *     `assignments` sits beside `groups` because the client cannot tell from
+         *     groups alone whether someone approves anything: the scope is the rule.
+         */
+        Me: {
+            user: components["schemas"]["User"];
+            groups: string[];
+            assignments: components["schemas"]["Assignment"][];
+        };
         /**
          * @description * `simple` - Simple
          *     * `full` - Full
@@ -1662,6 +2074,14 @@ export interface components {
          * @enum {string}
          */
         ServerErrorEnum: "server_error";
+        Signup: {
+            /** Format: email */
+            email: string;
+            password: string;
+            first_name: string;
+            last_name: string;
+            account_type: components["schemas"]["AccountTypeEnum"];
+        };
         StaffBudget: {
             category_totals: {
                 [key: string]: number;
@@ -1760,6 +2180,13 @@ export interface components {
          * @enum {string}
          */
         TimeBasisEnum: "FTE" | "Daily" | "Hourly";
+        User: {
+            id: number;
+            /** Format: email */
+            email: string;
+            first_name: string;
+            last_name: string;
+        };
         /**
          * @description * `validation_error` - Validation Error
          * @enum {string}
@@ -1784,6 +2211,496 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    auth_admin_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminLogin"];
+                "application/x-www-form-urlencoded": components["schemas"]["AdminLogin"];
+                "multipart/form-data": components["schemas"]["AdminLogin"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthAdminLoginCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_csrf_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthCsrfRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Login"];
+                "application/x-www-form-urlencoded": components["schemas"]["Login"];
+                "multipart/form-data": components["schemas"]["Login"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthLoginCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthLogoutCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthMeRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_signup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Signup"];
+                "application/x-www-form-urlencoded": components["schemas"]["Signup"];
+                "multipart/form-data": components["schemas"]["Signup"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSignupCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     budgets_retrieve: {
         parameters: {
             query?: never;
