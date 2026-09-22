@@ -21,7 +21,16 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // Two everywhere, not "CI is constrained, a laptop is not". Every worker
+  // shares one Django dev server, and a cold load pulls the lookups and the
+  // project list before it can paint. Past two workers those queue: at eight,
+  // two to four specs a run die with the loading skeleton still on screen,
+  // having spent the whole assertion timeout waiting for a heading. Which
+  // specs fail moves around, because it is the server and not any one of them.
+  //
+  // It costs nothing to cap it. The suite takes about 30s either way, since
+  // what it waits on is that server rather than the number of workers.
+  workers: 2,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
 
   use: {
