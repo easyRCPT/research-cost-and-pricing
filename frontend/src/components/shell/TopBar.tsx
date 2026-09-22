@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { AccountMenu } from './AccountMenu'
 
 interface TopBarProps {
   right?: ReactNode
@@ -17,6 +18,9 @@ export function TopBar({ right }: TopBarProps) {
       </div>
       <div className="flex-1" />
       {right}
+      {/* Every screen with this bar is behind a guard, so there is always
+          somebody to sign out. */}
+      <AccountMenu />
     </header>
   )
 }

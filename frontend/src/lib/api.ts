@@ -3,7 +3,38 @@ import type { paths } from '@/types/api'
 
 export const api = createClient<paths>({
   baseUrl: import.meta.env.VITE_API_URL,
+  // The session cookie is the credential, and a cross-origin fetch leaves it
+  // behind unless it is asked for. :5173 and :8000 are different origins in
+  // development, so without this nothing is ever signed in.
+  credentials: 'include',
 })
+
+const SAFE = ['GET', 'HEAD', 'OPTIONS', 'TRACE']
+
+/**
+ * Django refuses an unsafe method that cannot show the cookie back to it.
+ *
+ * The token is readable by script on purpose: proving the request came from a
+ * page on this origin is the whole mechanism, and an attacker's page cannot
+ * read the cookie to copy it. `/api/auth/csrf/` is what puts it there for a
+ * browser nobody has signed in on yet.
+ */
+api.use({
+  onRequest({ request }) {
+    if (!SAFE.includes(request.method)) {
+      const token = readCookie('csrftoken')
+      if (token) request.headers.set('X-CSRFToken', token)
+    }
+    return request
+  },
+})
+
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${name}=([^;]*)`),
+  )
+  return match ? decodeURIComponent(match[1]) : null
+}
 
 export class ApiError extends Error {
   status: number

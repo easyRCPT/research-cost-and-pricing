@@ -221,7 +221,12 @@ jobs:
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
       DATABASE_SSL: "False"
-      VITE_API_URL: http://127.0.0.1:8000
+      # Empty on purpose: the app then calls /api on its own origin and the
+      # preview server proxies it to Django. An absolute URL makes the API a
+      # different site from the page, and the session cookie is SameSite=Lax,
+      # so the browser keeps it to itself and every signed-in spec fails on a
+      # 401 that looks like bad credentials rather than a bad origin.
+      VITE_API_URL: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -267,6 +272,11 @@ jobs:
         run: |
           uv run python manage.py migrate
           uv run python manage.py seed
+          # Every screen is behind a sign-in since #44, so the suite needs
+          # accounts to sign in with. The command is deliberately manual rather
+          # than a seed, because it writes a known password -- which is exactly
+          # what a throwaway CI database wants and a real one must never have.
+          uv run python manage.py create_demo_users
 
       # Playwright starts Django and the built frontend itself, and waits for
       # both to answer before the first test runs.
