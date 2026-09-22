@@ -162,7 +162,13 @@ export async function signIn(
     headers: { 'X-CSRFToken': token },
     data: { email, password: DEMO.password, account_type: accountType },
   })
-  expect(response.status(), await response.text()).toBe(200)
+  // A 401 here is almost always a database without the demo accounts rather
+  // than anything the test did, and it fails every signed-in spec at once, so
+  // say which command fixes it instead of leaving 16 red lines to interpret.
+  expect(
+    response.status(),
+    `Could not sign in as ${email}. If this is a fresh database, run: make demo-users\n${await response.text()}`,
+  ).toBe(200)
 }
 
 /**

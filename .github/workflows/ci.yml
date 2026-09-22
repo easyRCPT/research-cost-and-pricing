@@ -267,6 +267,11 @@ jobs:
         run: |
           uv run python manage.py migrate
           uv run python manage.py seed
+          # Every screen is behind a sign-in since #44, so the suite needs
+          # accounts to sign in with. The command is deliberately manual rather
+          # than a seed, because it writes a known password -- which is exactly
+          # what a throwaway CI database wants and a real one must never have.
+          uv run python manage.py create_demo_users
 
       # Playwright starts Django and the built frontend itself, and waits for
       # both to answer before the first test runs.

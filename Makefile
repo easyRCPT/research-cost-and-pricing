@@ -89,6 +89,9 @@ seed-list: ## Show which seed files would run, in order
 superuser: ## Create a Django admin user
 	cd backend && uv run python manage.py createsuperuser
 
+demo-users: ## Create the four demo accounts the e2e suite signs in with
+	cd backend && uv run python manage.py create_demo_users
+
 backend: preflight ## Run the Django dev server on :8000
 	cd backend && uv run python manage.py runserver
 
