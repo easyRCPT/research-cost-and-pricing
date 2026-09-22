@@ -5,11 +5,15 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from '@tanstack/react-router'
 import { Toaster } from './components/ui/sonner.tsx'
 import './index.css'
-import { router } from './router.tsx'
+import { makeRouter } from './router.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
 })
+
+// The router needs the cache: its guards ask who is signed in before a private
+// route loads, and share the answer with the screens underneath.
+const router = makeRouter(queryClient)
 
 // Measuring how the app feels: do it against `pnpm build && pnpm preview`,
 // not the dev server. StrictMode renders every component twice in development,

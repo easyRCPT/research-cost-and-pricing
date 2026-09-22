@@ -25,4 +25,12 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    // Playwright fixtures take a parameter named `use`, which the React rule
+    // reads as a hook called outside a component. There is no React here.
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
 ])

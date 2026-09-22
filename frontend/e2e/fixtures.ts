@@ -131,5 +131,53 @@ async function chooseOption(page: Page, trigger: Locator, value: string) {
 export const uniqueTitle = (what: string) =>
   `${what} ${Date.now()}-${Math.floor(Math.random() * 1e4)}`
 
-export const test = base
+export const DEMO = {
+  researcher: 'researcher@unimelb.edu.au',
+  hod: 'hod@unimelb.edu.au',
+  dean: 'dean@unimelb.edu.au',
+  admin: 'admin@unimelb.edu.au',
+  password: 'demo1234',
+}
+
+/**
+ * Put a session in the browser, without going through the form.
+ *
+ * Through the page's own origin, not the API's: the proxy makes them the same
+ * site, which is what lets the browser keep the cookie at all. Signing in by
+ * API keeps a spec that is not about signing in from breaking when the login
+ * screen changes, and from spending a form fill on every test.
+ */
+export async function signIn(
+  page: Page,
+  email: string = DEMO.researcher,
+  accountType: 'researcher' | 'staff' = 'researcher',
+) {
+  const csrf = await page.request.get('/api/auth/csrf/')
+  expect(csrf.status(), await csrf.text()).toBe(204)
+
+  const cookies = await page.context().cookies()
+  const token = cookies.find((c) => c.name === 'csrftoken')?.value ?? ''
+
+  const response = await page.request.post('/api/auth/login/', {
+    headers: { 'X-CSRFToken': token },
+    data: { email, password: DEMO.password, account_type: accountType },
+  })
+  expect(response.status(), await response.text()).toBe(200)
+}
+
+/**
+ * Every spec starts signed in.
+ *
+ * Since #44 the screens are behind a guard, so a spec that just navigates
+ * would land on the login page instead. The three auth specs opt out with
+ * `test.use({ signedIn: false })`.
+ */
+export const test = base.extend<{ signedIn: boolean }>({
+  signedIn: [true, { option: true }],
+  page: async ({ page, signedIn }, use) => {
+    if (signedIn) await signIn(page)
+    await use(page)
+  },
+})
+
 export { expect }
