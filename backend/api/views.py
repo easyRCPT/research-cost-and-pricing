@@ -39,6 +39,7 @@ from .services import (
     project,
     staff_line,
 )
+from .services.budget_state import require_draft
 
 
 class ProjectView(APIView):
@@ -82,6 +83,7 @@ class BudgetDetailView(APIView):
     )
     def patch(self, request: Request, budget_id: int) -> Response:
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         envelope = SectionSerializer(data=request.data)
         envelope.is_valid(raise_exception=True)
         section: str = cast(dict, envelope.validated_data)["section"]
@@ -100,6 +102,7 @@ class StaffLineView(APIView):
     @extend_schema(request=StaffLineSerializer, responses={201: BudgetDetailSerializer})
     def post(self, request: Request, budget_id: int) -> Response:
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         serializer = StaffLineSerializer(
             data=request.data,
             context={"budget": budget},
@@ -118,6 +121,7 @@ class StaffLineView(APIView):
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         # Check that the line belongs to the budget
         line = get_object_or_404(StaffCostLine, id=line_id, budget=budget)
         result = staff_line.delete(budget, line)
@@ -135,6 +139,7 @@ class NonStaffLineView(APIView):
     def post(self, request: Request, budget_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         serializer = NonStaffLineSerializer(
             data=request.data,
             context={"budget": budget},
@@ -151,6 +156,7 @@ class NonStaffLineView(APIView):
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         # Check that the line belongs to the budget
         line = get_object_or_404(NonStaffCostLine, id=line_id, budget=budget)
         result = non_staff_line.delete(budget, line)
@@ -168,6 +174,7 @@ class DeliverableView(APIView):
     def post(self, request: Request, budget_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         serializer = DeliverableSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = deliverable.create(budget, cast(dict, serializer.validated_data))
@@ -183,6 +190,7 @@ class DeliverableView(APIView):
     def delete(self, request: Request, budget_id: int, deliverable_id: int) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(Budget, id=budget_id)
+        require_draft(budget)
         # Check that the deliverable belongs to the budget
         item = get_object_or_404(Deliverable, id=deliverable_id, budget=budget)
 
