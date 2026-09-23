@@ -23,6 +23,9 @@ class NonStaffLineSerializer(serializers.Serializer):
         allow_blank=True,
     )
     in_kind = serializers.BooleanField(default=False)
+    in_kind_reason = serializers.CharField(
+        max_length=200, required=False, allow_blank=True, default=""
+    )
     add_ten_percent = serializers.BooleanField(default=False)
     indirect_rate_multiplier = serializers.DecimalField(
         max_digits=4,

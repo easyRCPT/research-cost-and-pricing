@@ -115,6 +115,7 @@ export const emptyStaffLine = (id: number, years: number[]): StaffLine => ({
   classification: '',
   time_basis: '',
   in_kind: false,
+  in_kind_reason: '',
   rate_2025: 0,
   by_year: years.map((year) => ({ year, time: 0, cost: 0 })),
   total: 0,

@@ -50,6 +50,7 @@ export const emptyNonStaffLine = (
   expense_type: '',
   description: '',
   in_kind: false,
+  in_kind_reason: '',
   add_ten_percent: false,
   indirect_rate_multiplier: null,
   by_year: years.map((year) => ({ year, amount: 0 })),

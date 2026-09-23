@@ -21,6 +21,9 @@ class StaffLineSerializer(serializers.Serializer):
     classification = serializers.CharField(max_length=20)
     time_basis = serializers.ChoiceField(choices=StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField(default=False)
+    in_kind_reason = serializers.CharField(
+        max_length=200, required=False, allow_blank=True, default=""
+    )
 
     allocations = YearAllocationSerializer(many=True, required=False)
 

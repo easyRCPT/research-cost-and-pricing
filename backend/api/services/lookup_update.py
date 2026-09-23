@@ -16,6 +16,11 @@ from .lookup_loader import (
     invalidate_lookup_cache,
 )
 
+# Fixed by the University, not a rate that gets corrected. It decides whether a
+# budget needs a Dean (calculation/pricing.py), so editing it changes who has to
+# approve every budget in the system rather than what any of them cost.
+FIXED_CONSTANTS = frozenset({"full_cost_recovery_multiplier"})
+
 VERSIONED_MODELS = (
     SalaryRate,
     SalaryRateMultiplier,
@@ -55,6 +60,25 @@ def create_lookup_version(config: LookupConfiguration) -> int:
     return new_version.id
 
 
+def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
+    """
+    Refuse any write that names a constant the API does not get to change.
+
+    Checked before anything else, because minting a version is a side effect and
+    a refused edit should leave no trace. Covers the delete path too: `update`
+    with empty data removes the row, which is a change to 1.70 by another name.
+    """
+    if model is not CalculationConstant:
+        return
+
+    for source in sources:
+        name = source.get("name")
+        if name in FIXED_CONSTANTS:
+            raise ValidationError(
+                f"'{name}' is fixed and cannot be changed through the API.",
+            )
+
+
 def _get_model(table: str) -> type[models.Model]:
     try:
         lookup_table = LookupTable(table)
@@ -84,6 +108,7 @@ def create(
 ) -> None:
     # Get model
     model = _get_model(table)
+    _reject_fixed_constant(model, data)
 
     # Determines whether a new version should be created
     # Validate the model before saving
@@ -110,6 +135,7 @@ def update(
 ) -> None:
     # Get model
     model = _get_model(table)
+    _reject_fixed_constant(model, lookup, data)
 
     try:
         if model in VERSIONED_MODELS:

@@ -295,7 +295,9 @@ class FieldConfigurationTestCase(SimpleTestCase):
                 "justification_notes",
                 "dean_exemption_reason",
                 "mode",
-                "status",
+                # No "status": the browser could PATCH a budget straight to
+                # approved and skip every review (#77). Submit (#78) and
+                # decide (#80) are the only things that move it.
                 "cost_multiplier",
                 "in_kind_multiplier",
                 "margin",

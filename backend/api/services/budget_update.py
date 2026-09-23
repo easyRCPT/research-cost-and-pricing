@@ -144,7 +144,6 @@ def update_budget(
         "justification",
         "justification_notes",
         "dean_exemption_reason",
-        "status",
     }
 
     fields_requiring_calculation = {
@@ -177,6 +176,31 @@ def update_budget(
     raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
+def _set_in_kind(line, field: str, value: object) -> None:
+    """
+    Keep the reason and the tick in step.
+
+    Unticking clears the sentence: a reason the University is absorbing a cost
+    it is not absorbing is worse than no reason, and the database refuses the
+    pair anyway. Writing a reason onto an unticked line is refused rather than
+    silently ticking it, because which of the two the caller meant is a guess.
+    """
+    if field == "in_kind":
+        line.in_kind = value
+        if not value:
+            line.in_kind_reason = ""
+        line.full_clean()
+        line.save(update_fields=["in_kind", "in_kind_reason"])
+        return
+
+    if not line.in_kind:
+        raise ValidationError(
+            "A line has to be marked in-kind before it can be given a reason.",
+        )
+
+    _set_field(line, field, value)
+
+
 def update_staff(
     budget: Budget,
     row_id: int,
@@ -201,6 +225,7 @@ def update_staff(
         "category",
         "time_basis",
         "in_kind",
+        "in_kind_reason",
     }
 
     if field in fields_without_calculation:
@@ -208,7 +233,10 @@ def update_staff(
         return False
 
     if field in fields_requiring_calculation:
-        _set_field(staff_line, field, value)
+        if field in {"in_kind", "in_kind_reason"}:
+            _set_in_kind(staff_line, field, value)
+        else:
+            _set_field(staff_line, field, value)
         return True
 
     if field == "year_value":
@@ -240,6 +268,7 @@ def update_non_staff(
 
     fields_requiring_calculation = {
         "in_kind",
+        "in_kind_reason",
         "add_ten_percent",
         "indirect_rate_multiplier",
     }
@@ -249,7 +278,10 @@ def update_non_staff(
         return False
 
     if field in fields_requiring_calculation:
-        _set_field(non_staff_line, field, value)
+        if field in {"in_kind", "in_kind_reason"}:
+            _set_in_kind(non_staff_line, field, value)
+        else:
+            _set_field(non_staff_line, field, value)
         return True
 
     if field == "category":

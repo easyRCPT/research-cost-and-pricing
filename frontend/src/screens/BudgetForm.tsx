@@ -6,6 +6,7 @@ import { PriceSummarySection } from './budget-form/PriceSummarySection'
 import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
 import { NonStaffBudgetSection } from './budget-form/NonStaffBudgetSection'
 import { DeliverablesSection } from './budget-form/DeliverablesSection'
+import { InKindSection } from './budget-form/InKindSection'
 
 export interface BudgetFormProps {
   lookups: LookupTables
@@ -33,6 +34,7 @@ export function BudgetForm({ lookups }: BudgetFormProps) {
         nonStaffBudget={budget.budget_summary.non_staff_budget}
         lookups={lookups}
       />
+      <InKindSection budget={budget} />
       <DeliverablesSection />
     </Panel>
   )

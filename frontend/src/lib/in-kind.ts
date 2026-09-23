@@ -24,6 +24,9 @@ export const costRows = (
       cost: line.total,
       inKind: line.in_kind,
       toggle: (value: boolean) => staff.patchLine(line.id, { in_kind: value }),
+      reason: line.in_kind_reason ?? '',
+      setReason: (value: string) =>
+        staff.patchLine(line.id, { in_kind_reason: value }),
     })),
   ...nonStaff.lines
     .filter((line) => line.cost_group || line.description)
@@ -36,5 +39,8 @@ export const costRows = (
       inKind: line.in_kind,
       toggle: (value: boolean) =>
         nonStaff.patchLine(line.id, { in_kind: value }),
+      reason: line.in_kind_reason ?? '',
+      setReason: (value: string) =>
+        nonStaff.patchLine(line.id, { in_kind_reason: value }),
     })),
 ]

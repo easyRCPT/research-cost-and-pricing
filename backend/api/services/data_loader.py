@@ -69,6 +69,7 @@ def build_staff_info_table(staff_lines: list[StaffCostLine]) -> dict:
             "classification": line.classification,
             "time_basis": line.time_basis,
             "in_kind": line.in_kind,
+            "in_kind_reason": line.in_kind_reason,
         }
         for line in staff_lines
     }
@@ -90,6 +91,7 @@ def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
             "expense_type": line.category.cost_subcategory,
             "description": line.description,
             "in_kind": line.in_kind,
+            "in_kind_reason": line.in_kind_reason,
             "add_ten_percent": line.add_ten_percent,
             "indirect_rate_multiplier": line.indirect_rate_multiplier,
         }
