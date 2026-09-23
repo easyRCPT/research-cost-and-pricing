@@ -1,4 +1,4 @@
-import { Grid, Money, Td, Th } from '@/components/shell'
+import { CellText, Grid, Money, Td, Th } from '@/components/shell'
 import { Checkbox } from '@/components/ui/checkbox'
 import { money } from '@/lib/format/utils'
 
@@ -11,6 +11,9 @@ export interface CostRow {
   cost: number
   inKind: boolean
   toggle: (value: boolean) => void
+  /** Why the University absorbs it. Only a ticked line may carry one. */
+  reason: string
+  setReason: (value: string) => void
 }
 
 export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
@@ -48,7 +51,9 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
                 onCheckedChange={(checked) => row.toggle(checked === true)}
               />
             </Td>
-            <Td className="text-muted-foreground">—</Td>
+            <Td>
+              <ReasonCell row={row} />
+            </Td>
           </tr>
         ))}
         {rows.length === 0 && (
@@ -60,5 +65,31 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
         )}
       </tbody>
     </Grid>
+  )
+}
+
+/**
+ * The reason, once there is a tick to hang it on.
+ *
+ * Unticked it says so rather than rendering a disabled box: the server refuses
+ * a reason without a tick, and an input that looks fillable but is not is how
+ * someone types a sentence and loses it.
+ *
+ * CellText rather than a plain input, so this settles like every other text
+ * cell in the editor instead of recosting the budget on each keystroke.
+ */
+function ReasonCell({ row }: { row: CostRow }) {
+  if (!row.inKind) {
+    return <span className="text-muted-foreground">Tick the box to say why</span>
+  }
+
+  return (
+    <CellText
+      value={row.reason}
+      onChange={row.setReason}
+      maxLength={200}
+      placeholder="Why the University absorbs it"
+      aria-label={`Reason the University absorbs ${row.label}`}
+    />
   )
 }

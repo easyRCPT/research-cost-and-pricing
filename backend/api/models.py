@@ -864,6 +864,22 @@ class StaffCostLine(models.Model):
     # In-kind lines add to the project's cost but never to its price, and are
     # costed at the in-kind multiplier rather than the project's.
     in_kind = models.BooleanField(default=False)
+    # Why the University is carrying this rather than charging it. The column
+    # on Adjust Price promised somewhere to write this and had nowhere (#92):
+    # a tick with no sentence beside it does not tell a reviewer who decided
+    # the University would absorb the cost, or on what grounds.
+    in_kind_reason = models.CharField(max_length=200, blank=True, default="")
+
+    class Meta:
+        constraints = [
+            # A reason belongs to a tick. Without this the column could carry
+            # an explanation for a cost nobody is absorbing, which reads as
+            # though the line were in-kind when it is not.
+            models.CheckConstraint(
+                condition=models.Q(in_kind=True) | models.Q(in_kind_reason=""),
+                name="%(class)s_reason_needs_the_tick",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.name_role} ({self.classification})"
@@ -917,6 +933,11 @@ class NonStaffCostLine(models.Model):
     description = models.CharField(max_length=200, blank=True)
 
     in_kind = models.BooleanField(default=False)
+    # Why the University is carrying this rather than charging it. The column
+    # on Adjust Price promised somewhere to write this and had nowhere (#92):
+    # a tick with no sentence beside it does not tell a reviewer who decided
+    # the University would absorb the cost, or on what grounds.
+    in_kind_reason = models.CharField(max_length=200, blank=True, default="")
 
     # An estimate for extra cost
     add_ten_percent = models.BooleanField(default=False)
@@ -928,6 +949,17 @@ class NonStaffCostLine(models.Model):
         blank=True,
         validators=[MinValueValidator(Decimal(0))],
     )
+
+    class Meta:
+        constraints = [
+            # A reason belongs to a tick. Without this the column could carry
+            # an explanation for a cost nobody is absorbing, which reads as
+            # though the line were in-kind when it is not.
+            models.CheckConstraint(
+                condition=models.Q(in_kind=True) | models.Q(in_kind_reason=""),
+                name="%(class)s_reason_needs_the_tick",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.category} - {self.description}"

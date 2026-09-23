@@ -106,6 +106,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
         line_1.classification = "Level A.1"
         line_1.time_basis = "FTE"
         line_1.in_kind = False
+        line_1.in_kind_reason = ""
 
         line_2 = Mock(spec=StaffCostLine)
         line_2.id = 2
@@ -115,6 +116,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
         line_2.classification = "Level B.1"
         line_2.time_basis = "Hourly"
         line_2.in_kind = True
+        line_2.in_kind_reason = ""
 
         result = build_staff_info_table([line_1, line_2])
 
@@ -128,6 +130,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "classification": "Level A.1",
                     "time_basis": "FTE",
                     "in_kind": False,
+                    "in_kind_reason": "",
                 },
                 2: {
                     "name_role": "Research Assistant",
@@ -136,6 +139,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "classification": "Level B.1",
                     "time_basis": "Hourly",
                     "in_kind": True,
+                    "in_kind_reason": "",
                 },
             },
         )
@@ -201,6 +205,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
         line.category = category
         line.description = "Computer"
         line.in_kind = False
+        line.in_kind_reason = ""
         line.add_ten_percent = True
         line.indirect_rate_multiplier = Decimal("1.2")
 
@@ -214,6 +219,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
                     "expense_type": "Equipment",
                     "description": "Computer",
                     "in_kind": False,
+                    "in_kind_reason": "",
                     "add_ten_percent": True,
                     "indirect_rate_multiplier": Decimal("1.2"),
                 }

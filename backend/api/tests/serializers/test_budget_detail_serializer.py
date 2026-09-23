@@ -85,6 +85,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "classification": "Level A",
                             "time_basis": "FTE",
                             "in_kind": False,
+                            "in_kind_reason": "",
                         },
                         "rate_2025": Decimal("50000.0000"),
                         "numeric": {
@@ -123,6 +124,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "expense_type": "Domestic",
                             "description": "Travel expenses",
                             "in_kind": False,
+                            "in_kind_reason": "",
                             "add_ten_percent": False,
                             "indirect_rate_multiplier": Decimal("1.00"),
                         },
@@ -255,6 +257,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "classification": "Level A",
                     "time_basis": "FTE",
                     "in_kind": False,
+                    "in_kind_reason": "",
                     "rate_2025": Decimal("50000.0000"),
                     "by_year": [
                         {
@@ -314,6 +317,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "expense_type": "Domestic",
                     "description": "Travel expenses",
                     "in_kind": False,
+                    "in_kind_reason": "",
                     "add_ten_percent": False,
                     "indirect_rate_multiplier": Decimal("1.00"),
                     "by_year": [

@@ -136,6 +136,7 @@ class StaffLineSerializer(serializers.Serializer):
     # TODO: ChoiceField(StaffCostLine.TimeBasis.choices) so the response type matches the input
     time_basis = serializers.CharField()
     in_kind = serializers.BooleanField()
+    in_kind_reason = serializers.CharField(allow_blank=True)
 
     rate_2025 = serializers.DecimalField(
         max_digits=12,
@@ -193,6 +194,7 @@ class NonStaffLineSerializer(serializers.Serializer):
     expense_type = serializers.CharField()
     description = serializers.CharField(allow_blank=True)
     in_kind = serializers.BooleanField()
+    in_kind_reason = serializers.CharField(allow_blank=True)
     add_ten_percent = serializers.BooleanField()
 
     indirect_rate_multiplier = serializers.DecimalField(
@@ -470,6 +472,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "classification": row["info"]["classification"],
                 "time_basis": row["info"]["time_basis"],
                 "in_kind": row["info"]["in_kind"],
+                "in_kind_reason": row["info"]["in_kind_reason"],
                 "rate_2025": row["rate_2025"],
                 "by_year": [
                     {
@@ -509,6 +512,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "expense_type": row["info"]["expense_type"],
                 "description": row["info"]["description"],
                 "in_kind": row["info"]["in_kind"],
+                "in_kind_reason": row["info"]["in_kind_reason"],
                 "add_ten_percent": row["info"]["add_ten_percent"],
                 "indirect_rate_multiplier": row["info"]["indirect_rate_multiplier"],
                 "by_year": [

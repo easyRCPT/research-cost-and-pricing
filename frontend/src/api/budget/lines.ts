@@ -45,11 +45,13 @@ const STAFF_FIELDS = new Set<string>([
   'category',
   'time_basis',
   'in_kind',
+  'in_kind_reason',
 ])
 
 const NON_STAFF_FIELDS = new Set<string>([
   'description',
   'in_kind',
+  'in_kind_reason',
   'add_ten_percent',
   'indirect_rate_multiplier',
 ])
@@ -218,6 +220,7 @@ const toStaffInput = (line: StaffLine): StaffLineInput => ({
   classification: line.classification,
   time_basis: line.time_basis as StaffLineInput['time_basis'],
   in_kind: line.in_kind,
+  in_kind_reason: line.in_kind_reason,
   allocations: line.by_year
     .filter((entry) => entry.time > 0)
     .map(({ year, time }) => ({ year, time })),
@@ -440,6 +443,7 @@ const toNonStaffInput = (line: NonStaffLine): NonStaffLineInput => ({
   expense_type: line.expense_type,
   description: line.description,
   in_kind: line.in_kind,
+  in_kind_reason: line.in_kind_reason,
   add_ten_percent: line.add_ten_percent,
   indirect_rate_multiplier: line.indirect_rate_multiplier,
   amounts: line.by_year
