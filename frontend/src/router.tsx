@@ -147,11 +147,16 @@ export function makeRouter(queryClient: QueryClient) {
     routeTree,
     context: { queryClient },
     // The guards await `me` before a private route loads, and on a cold load
-    // that is a round trip with nothing on screen behind it. A skeleton rather
-    // than a blank frame, and immediately, since waiting a second to admit
-    // something is loading is the flicker it is meant to avoid.
+    // that is a round trip with nothing on screen behind it, so it gets a
+    // skeleton rather than a blank frame.
+    //
+    // The threshold is what stops that skeleton appearing on a warm move
+    // between tabs, which resolves from cache in about 150ms. Showing it at
+    // 0ms floored every switch at half a second, because once the pending
+    // component is up `defaultPendingMinMs` (500) holds it there to avoid a
+    // flash -- so the guard against flicker became the delay.
     defaultPendingComponent: () => <AppSkeleton screen="details" />,
-    defaultPendingMs: 0,
+    defaultPendingMs: 400,
   })
 }
 
