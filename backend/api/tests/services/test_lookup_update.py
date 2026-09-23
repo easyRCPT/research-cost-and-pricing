@@ -6,6 +6,7 @@ from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
 from api.models import (
+    CalculationConstant,
     Department,
     Faculty,
     LookupConfiguration,
@@ -469,3 +470,88 @@ class TestVersionedUpdate(TestCase):
         self.assertTrue(self.config.referenced)
         self.assertEqual(LookupVersion.objects.count(), 1)
         mock_invalidate_cache.assert_not_called()
+
+
+class TestFixedConstants(TestCase):
+    """
+    1.70 is not a rate that gets corrected (#60).
+
+    It decides whether a budget needs a Dean, so an edit changes who has to
+    approve every budget in the system. The API refuses it however the write is
+    dressed up: as a change, as a new row, or as a delete.
+    """
+
+    TABLE = "calculation_constants"
+    FIXED = "full_cost_recovery_multiplier"
+
+    def setUp(self):
+        self.config = LookupConfiguration.objects.get()
+        self.version = self.config.current_version
+        self.constant = CalculationConstant.objects.create(
+            version=self.version,
+            name=self.FIXED,
+            description="Default cost recovery multiplier",
+            value=Decimal("1.700000"),
+        )
+
+    def test_it_cannot_be_changed(self):
+        with self.assertRaises(ValidationError) as refused:
+            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.000000")})
+
+        self.assertIn(self.FIXED, str(refused.exception))
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.value, Decimal("1.700000"))
+
+    def test_it_cannot_be_deleted(self):
+        # Empty data is how this service spells a delete.
+        with self.assertRaises(ValidationError):
+            update(self.TABLE, {"name": self.FIXED}, {})
+
+        self.assertTrue(
+            CalculationConstant.objects.filter(
+                name=self.FIXED, version=self.version
+            ).exists()
+        )
+
+    def test_it_cannot_be_put_back_at_another_value(self):
+        # Removed behind the service's back, so what is under test is the guard
+        # and not the unique constraint a duplicate would have hit anyway.
+        CalculationConstant.objects.filter(name=self.FIXED).delete()
+
+        with self.assertRaises(ValidationError) as refused:
+            create(
+                self.TABLE,
+                {
+                    "name": self.FIXED,
+                    "description": "Sneaking one in",
+                    "value": Decimal("2.000000"),
+                },
+            )
+
+        self.assertIn(self.FIXED, str(refused.exception))
+        self.assertFalse(CalculationConstant.objects.filter(name=self.FIXED).exists())
+
+    def test_a_refused_edit_mints_no_version(self):
+        # The refusal comes before the copy-on-write check, so a rejected write
+        # leaves no new version lying around.
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+        before = LookupVersion.objects.count()
+
+        with self.assertRaises(ValidationError):
+            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.5")})
+
+        self.assertEqual(LookupVersion.objects.count(), before)
+
+    def test_every_other_constant_is_still_editable(self):
+        other = CalculationConstant.objects.create(
+            version=self.version,
+            name="default_margin",
+            description="Default margin",
+            value=Decimal("0.300000"),
+        )
+
+        update(self.TABLE, {"name": "default_margin"}, {"value": Decimal("0.250000")})
+
+        other.refresh_from_db()
+        self.assertEqual(other.value, Decimal("0.250000"))
