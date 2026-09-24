@@ -161,6 +161,12 @@ CSRF_TRUSTED_ORIGINS = _env_list(
     "DJANGO_CSRF_TRUSTED_ORIGINS", ["http://localhost:5173"]
 )
 
+# Sign-up is only open to these addresses. Existing accounts are not re-checked.
+ALLOWED_EMAIL_DOMAINS = [
+    domain.lower()
+    for domain in _env_list("DJANGO_ALLOWED_EMAIL_DOMAINS", ["unimelb.edu.au"])
+]
+
 # Two weeks, HttpOnly so no script can read it, Lax so it survives a normal
 # navigation but not a cross-site form post. Secure follows DEBUG: a cookie
 # marked Secure is never sent over plain http, which would break local work.

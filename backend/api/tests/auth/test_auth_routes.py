@@ -67,6 +67,25 @@ class TestSignup(AuthTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test_an_address_outside_the_university_is_refused(self):
+        response = self.signup(email="someone@gmail.com")
+
+        self.assertEqual(response.status_code, 400)
+        error = response.json()["errors"][0]
+        self.assertEqual(error["attr"], "email")
+        self.assertIn("@unimelb.edu.au", error["detail"])
+        self.assertFalse(User.objects.filter(email="someone@gmail.com").exists())
+
+    def test_the_domain_is_matched_without_case(self):
+        response = self.signup(email="new@UniMelb.edu.au")
+
+        self.assertEqual(response.status_code, 201, response.content)
+
+    def test_a_subdomain_is_not_the_domain(self):
+        response = self.signup(email="new@student.unimelb.edu.au")
+
+        self.assertEqual(response.status_code, 400)
+
 
 class TestLogin(AuthTestMixin, TestCase):
     def setUp(self):

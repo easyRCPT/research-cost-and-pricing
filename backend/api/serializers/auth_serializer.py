@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
@@ -23,6 +24,13 @@ class SignupSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     account_type = AccountTypeField()
+
+    def validate_email(self, value: str) -> str:
+        allowed = settings.ALLOWED_EMAIL_DOMAINS
+        if value.rsplit("@", 1)[-1].lower() not in allowed:
+            addresses = " or ".join(f"@{domain}" for domain in allowed)
+            raise serializers.ValidationError(f"Sign up with your {addresses} address.")
+        return value
 
     def validate_password(self, value: str) -> str:
         # Django's own validators, so the rules live in settings rather than
