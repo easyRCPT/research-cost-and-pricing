@@ -49,5 +49,5 @@ export function useDrafts(): Drafts {
   return useSyncExternalStore(subscribe, () => getDrafts(budgetId))
 }
 
-/** Draft rows carry negative ids so a saved row is never mistaken for one. */
+/** Draft deliverables carry negative ids so a saved one is never mistaken for one. */
 export const isDraft = (id: number) => id < 0

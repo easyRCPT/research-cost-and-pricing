@@ -15,8 +15,7 @@ import type {
 } from '@/types'
 import { useBudgetId } from './context'
 import { budgetKey } from './detail'
-import { getDrafts, isDraft, setDrafts, useDrafts } from './drafts'
-import { nextTempId } from '@/lib/utils'
+import { getDrafts, setDrafts, useDrafts } from './drafts'
 import { useBudget } from './detail'
 import {
   reportWriteError,
@@ -29,9 +28,9 @@ import {
 export interface Lines<T> {
   lines: T[]
   years: number[]
-  patchLine: (id: number, patch: Partial<T>) => void
+  patchLine: (id: string, patch: Partial<T>) => void
   addLine: () => void
-  removeLine: (id: number) => void
+  removeLine: (id: string) => void
 }
 
 export type StaffLines = Lines<StaffLine>
@@ -56,7 +55,8 @@ const NON_STAFF_FIELDS = new Set<string>([
   'indirect_rate_multiplier',
 ])
 
-const byId = (a: { id: number }, b: { id: number }) => a.id - b.id
+const byPosition = (a: { position: number }, b: { position: number }) =>
+  a.position - b.position
 
 /**
  * Names the field a burst of edits is landing on, so the writes coalesce.
@@ -68,7 +68,7 @@ const byId = (a: { id: number }, b: { id: number }) => a.id - b.id
  */
 function coalesceKey(
   section: string,
-  id: number,
+  id: string,
   patch: object,
 ): string | undefined {
   const fields = Object.keys(patch)
@@ -86,7 +86,7 @@ function coalesceKey(
  * it still there and would post it a second time. One create per draft row.
  */
 const creating = new Set<string>()
-const inFlight = (budgetId: number, draftId: number) => `${budgetId}:${draftId}`
+const inFlight = (budgetId: number, draftId: string) => `${budgetId}:${draftId}`
 
 function useLineMutations() {
   const budgetId = useBudgetId()
@@ -102,7 +102,7 @@ function useLineMutations() {
   const save = (detail: BudgetDetail) => queryClient.setQueryData(key, detail)
 
   /** Drops the draft the reply is for, then stores the budget that came back. */
-  const settleDraft = (which: 'staff' | 'non_staff') => (draftId: number) => {
+  const settleDraft = (which: 'staff' | 'non_staff') => (draftId: string) => {
     creating.delete(inFlight(budgetId, draftId))
     const drafts = getDrafts(budgetId)
     setDrafts(budgetId, {
@@ -114,7 +114,7 @@ function useLineMutations() {
   const createStaff = useMutation({
     mutationKey: writeKey,
     scope,
-    mutationFn: async ({ body }: { draftId: number; body: StaffLineInput }) => {
+    mutationFn: async ({ body }: { draftId: string; body: StaffLineInput }) => {
       const { data, error, response } = await api.POST(
         '/api/budgets/{budget_id}/staff-lines/',
         { params: { path: { budget_id: budgetId } }, body },
@@ -139,7 +139,7 @@ function useLineMutations() {
   const deleteStaff = useMutation({
     mutationKey: writeKey,
     scope,
-    mutationFn: async (lineId: number) => {
+    mutationFn: async (lineId: string) => {
       const { data, error, response } = await api.DELETE(
         '/api/budgets/{budget_id}/staff-lines/{line_id}/',
         {
@@ -161,7 +161,7 @@ function useLineMutations() {
     mutationFn: async ({
       body,
     }: {
-      draftId: number
+      draftId: string
       body: NonStaffLineInput
     }) => {
       const { data, error, response } = await api.POST(
@@ -190,7 +190,7 @@ function useLineMutations() {
   const deleteNonStaff = useMutation({
     mutationKey: writeKey,
     scope,
-    mutationFn: async (lineId: number) => {
+    mutationFn: async (lineId: string) => {
       const { data, error, response } = await api.DELETE(
         '/api/budgets/{budget_id}/non-staff-lines/{line_id}/',
         {
@@ -214,6 +214,7 @@ function useLineMutations() {
 // ------------------------------------------------------------------
 
 const toStaffInput = (line: StaffLine): StaffLineInput => ({
+  id: line.id,
   name_role: line.name_role,
   employment_type: line.employment_type as StaffLineInput['employment_type'],
   category: line.category as StaffLineInput['category'],
@@ -255,7 +256,7 @@ const withEnteredTime = (
 
 /** The row as it is shown, patched in place wherever the reply put it. */
 const echoStaffLine =
-  (id: number, patch: Partial<StaffLine>) =>
+  (id: string, patch: Partial<StaffLine>) =>
   (budget: BudgetDetail): BudgetDetail => {
     const apply = (lines: StaffLine[]) =>
       lines.map((line) => (line.id === id ? withEnteredTime(line, patch) : line))
@@ -286,10 +287,10 @@ const echoStaffLine =
  */
 function blankRows<T>(
   count: number,
-  empty: (id: number, years: number[]) => T,
+  empty: (id: string, years: number[]) => T,
   years: number[],
 ) {
-  return Array.from({ length: count }, (_, index) => empty(-(index + 1), years))
+  return Array.from({ length: count }, () => empty(crypto.randomUUID(), years))
 }
 
 function ensureBlankStaffRows(
@@ -330,9 +331,12 @@ export function useStaffLines(years: number[]): StaffLines {
   const saved = [
     ...budget.staff_cost.lines,
     ...budget.staff_in_kind_cost.lines,
-  ].sort(byId)
+  ].sort(byPosition)
 
-  const lines = [...saved, ...drafts.staff]
+  // A draft keeps its id once saved, so the server having it is what ends it.
+  const savedIds = new Set(saved.map((line) => line.id))
+  const isDraft = (id: string) => !savedIds.has(id)
+  const lines = [...saved, ...drafts.staff.filter((row) => isDraft(row.id))]
 
   const blanks = drafts.staff.length
   useEffect(() => {
@@ -349,7 +353,7 @@ export function useStaffLines(years: number[]): StaffLines {
     addLine: () =>
       writeDrafts([
         ...getDrafts(budgetId).staff,
-        emptyStaffLine(nextTempId(lines), years),
+        emptyStaffLine(crypto.randomUUID(), years),
       ]),
 
     removeLine: (id) => {
@@ -439,6 +443,7 @@ const isCosted = (line: NonStaffLine) =>
   line.cost_group !== '' && line.expense_type !== ''
 
 const toNonStaffInput = (line: NonStaffLine): NonStaffLineInput => ({
+  id: line.id,
   cost_group: line.cost_group,
   expense_type: line.expense_type,
   description: line.description,
@@ -452,7 +457,7 @@ const toNonStaffInput = (line: NonStaffLine): NonStaffLineInput => ({
 })
 
 const echoNonStaffLine =
-  (id: number, patch: Partial<NonStaffLine>) =>
+  (id: string, patch: Partial<NonStaffLine>) =>
   (budget: BudgetDetail): BudgetDetail => {
     const apply = (lines: NonStaffLine[]) =>
       lines.map((line) => (line.id === id ? { ...line, ...patch } : line))
@@ -481,9 +486,14 @@ export function useNonStaffLines(years: number[]): NonStaffLines {
   const saved = [
     ...budget.non_staff_cost.lines,
     ...budget.non_staff_in_kind_cost.lines,
-  ].sort(byId)
+  ].sort(byPosition)
 
-  const lines = [...saved, ...drafts.non_staff]
+  const savedIds = new Set(saved.map((line) => line.id))
+  const isDraft = (id: string) => !savedIds.has(id)
+  const lines = [
+    ...saved,
+    ...drafts.non_staff.filter((row) => isDraft(row.id)),
+  ]
 
   const blanks = drafts.non_staff.length
   useEffect(() => {
@@ -508,7 +518,7 @@ export function useNonStaffLines(years: number[]): NonStaffLines {
     addLine: () =>
       writeDrafts([
         ...getDrafts(budgetId).non_staff,
-        emptyNonStaffLine(nextTempId(lines), years),
+        emptyNonStaffLine(crypto.randomUUID(), years),
       ]),
 
     removeLine: (id) => {

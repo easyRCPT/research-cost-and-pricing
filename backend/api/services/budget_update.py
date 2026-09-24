@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 from typing import cast
+from uuid import UUID
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models, transaction
@@ -190,7 +191,7 @@ def _set_in_kind(line, field: str, value: object) -> None:
         if not value:
             line.in_kind_reason = ""
         line.full_clean()
-        line.save(update_fields=["in_kind", "in_kind_reason"])
+        _save(line, ["in_kind", "in_kind_reason"])
         return
 
     if not line.in_kind:
@@ -203,7 +204,7 @@ def _set_in_kind(line, field: str, value: object) -> None:
 
 def update_staff(
     budget: Budget,
-    row_id: int,
+    row_id: UUID,
     field: str,
     value: object,
     year: int | None,
@@ -217,6 +218,7 @@ def update_staff(
 
     fields_without_calculation = {
         "name_role",
+        "position",
     }
 
     fields_requiring_calculation = {
@@ -243,6 +245,7 @@ def update_staff(
         if year is None:
             raise ValidationError("year is required for year_value.")
         update_year_allocation(staff_line, year, value)
+        _save(staff_line, [])
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -250,7 +253,7 @@ def update_staff(
 
 def update_non_staff(
     budget: Budget,
-    row_id: int,
+    row_id: UUID,
     field: str,
     value: object,
     year: int | None,
@@ -264,6 +267,7 @@ def update_non_staff(
 
     fields_without_calculation = {
         "description",
+        "position",
     }
 
     fields_requiring_calculation = {
@@ -301,6 +305,7 @@ def update_non_staff(
         if year is None:
             raise ValidationError("year is required for year_value.")
         update_year_amount(non_staff_line, year, value)
+        _save(non_staff_line, [])
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")

@@ -881,7 +881,7 @@ export interface components {
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
             detail: string;
         };
-        BudgetsNonStaffLinesCreateError: components["schemas"]["BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIndirectRateMultiplierErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
+        BudgetsNonStaffLinesCreateError: components["schemas"]["BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIndirectRateMultiplierErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
         BudgetsNonStaffLinesCreateErrorResponse400: components["schemas"]["BudgetsNonStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         BudgetsNonStaffLinesCreateExpenseTypeErrorComponent: {
             /**
@@ -899,6 +899,20 @@ export interface components {
              * @enum {string}
              */
             code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        BudgetsNonStaffLinesCreateIdErrorComponent: {
+            /**
+             * @description * `id` - id (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "id";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
             detail: string;
         };
         BudgetsNonStaffLinesCreateInKindErrorComponent: {
@@ -1170,8 +1184,22 @@ export interface components {
             code: "invalid_choice" | "null" | "required";
             detail: string;
         };
-        BudgetsStaffLinesCreateError: components["schemas"]["BudgetsStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateCategoryErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateClassificationErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXTimeErrorComponent"];
+        BudgetsStaffLinesCreateError: components["schemas"]["BudgetsStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateCategoryErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateClassificationErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXTimeErrorComponent"];
         BudgetsStaffLinesCreateErrorResponse400: components["schemas"]["BudgetsStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        BudgetsStaffLinesCreateIdErrorComponent: {
+            /**
+             * @description * `id` - id (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "id";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
         BudgetsStaffLinesCreateInKindErrorComponent: {
             /**
              * @description * `in_kind` - in_kind (enum property replaced by openapi-typescript)
@@ -1686,12 +1714,15 @@ export interface components {
          *     * `in_kind` - in_kind
          *     * `in_kind_reason` - in_kind_reason
          *     * `indirect_rate_multiplier` - indirect_rate_multiplier
+         *     * `position` - position
          *     * `year_value` - year_value
          * @enum {string}
          */
-        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "in_kind_reason" | "indirect_rate_multiplier" | "year_value";
+        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "in_kind_reason" | "indirect_rate_multiplier" | "position" | "year_value";
         NonStaffLine: {
-            id: number;
+            /** Format: uuid */
+            id: string;
+            position: number;
             cost_group: string;
             expense_type: string;
             description: string;
@@ -1707,6 +1738,8 @@ export interface components {
             direct_total: number;
         };
         NonStaffLineInput: {
+            /** Format: uuid */
+            id?: string;
             cost_group: string;
             expense_type: string;
             description?: string;
@@ -1732,7 +1765,8 @@ export interface components {
         };
         NonStaffUpdate: {
             value: unknown;
-            row_id: number;
+            /** Format: uuid */
+            row_id: string;
             year?: number;
             field: components["schemas"]["NonStaffFieldEnum"];
             /**
@@ -2157,13 +2191,16 @@ export interface components {
          *     * `in_kind` - in_kind
          *     * `in_kind_reason` - in_kind_reason
          *     * `name_role` - name_role
+         *     * `position` - position
          *     * `time_basis` - time_basis
          *     * `year_value` - year_value
          * @enum {string}
          */
-        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "in_kind_reason" | "name_role" | "time_basis" | "year_value";
+        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "in_kind_reason" | "name_role" | "position" | "time_basis" | "year_value";
         StaffLine: {
-            id: number;
+            /** Format: uuid */
+            id: string;
+            position: number;
             name_role: string;
             employment_type: string;
             category: string;
@@ -2178,6 +2215,8 @@ export interface components {
             total: number;
         };
         StaffLineInput: {
+            /** Format: uuid */
+            id?: string;
             name_role: string;
             employment_type: components["schemas"]["EmploymentTypeEnum"];
             category: components["schemas"]["CategoryEnum"];
@@ -2201,7 +2240,8 @@ export interface components {
         };
         StaffUpdate: {
             value: unknown;
-            row_id: number;
+            /** Format: uuid */
+            row_id: string;
             year?: number;
             field: components["schemas"]["StaffFieldEnum"];
             /**
@@ -3189,7 +3229,7 @@ export interface operations {
             header?: never;
             path: {
                 budget_id: number;
-                line_id: number;
+                line_id: string;
             };
             cookie?: never;
         };
@@ -3350,7 +3390,7 @@ export interface operations {
             header?: never;
             path: {
                 budget_id: number;
-                line_id: number;
+                line_id: string;
             };
             cookie?: never;
         };
