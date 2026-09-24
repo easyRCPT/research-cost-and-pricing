@@ -31,6 +31,7 @@ from .serializers.auth_serializer import (
     SignupSerializer,
 )
 from .services import auth
+from .throttles import SignInThrottle
 
 # One message for a wrong password, an unknown address, a deactivated account
 # and the wrong tab. Anything more specific says which accounts exist and what
@@ -84,6 +85,7 @@ class SignupView(APIView):
 
 class LoginView(APIView):
     permission_classes = [AllowAny, CsrfProtected]
+    throttle_classes = [SignInThrottle]
 
     @extend_schema(request=LoginSerializer, responses={200: MeSerializer})
     def post(self, request: Request) -> Response:
@@ -104,6 +106,7 @@ class LoginView(APIView):
 
 class AdminLoginView(APIView):
     permission_classes = [AllowAny, CsrfProtected]
+    throttle_classes = [SignInThrottle]
 
     @extend_schema(request=AdminLoginSerializer, responses={200: MeSerializer})
     def post(self, request: Request) -> Response:

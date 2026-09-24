@@ -1,6 +1,7 @@
 import time
 
 from django.contrib.auth.models import Group
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -12,6 +13,10 @@ PASSWORD = "a-perfectly-ordinary-password"
 class AuthTestMixin:
     # Supplied by TestCase, which every user of this mixin also inherits.
     client: Client
+
+    def setUp(self):
+        # The sign-in throttle counts in the cache, which outlives each test.
+        cache.clear()
 
     @staticmethod
     def make_user(email: str, *, groups: list[str], active: bool = True) -> User:
@@ -89,6 +94,7 @@ class TestSignup(AuthTestMixin, TestCase):
 
 class TestLogin(AuthTestMixin, TestCase):
     def setUp(self):
+        super().setUp()
         self.researcher = self.make_user("ruth@unimelb.edu.au", groups=["researcher"])
 
     def test_signs_in_through_its_own_door(self):
@@ -111,6 +117,18 @@ class TestLogin(AuthTestMixin, TestCase):
 
         self.assertEqual(unknown.status_code, 401)
         self.assertEqual(unknown.json(), wrong_password.json())
+
+    def test_a_sixth_attempt_in_a_minute_is_throttled(self):
+        for _ in range(5):
+            self.login("ruth@unimelb.edu.au", password="not it")
+
+        self.assertEqual(self.login("ruth@unimelb.edu.au").status_code, 429)
+
+    def test_the_throttle_counts_each_address_apart(self):
+        for _ in range(5):
+            self.login("nobody@unimelb.edu.au")
+
+        self.assertEqual(self.login("ruth@unimelb.edu.au").status_code, 200)
 
     def test_a_deactivated_account_is_refused_the_same_way(self):
         self.make_user("gone@unimelb.edu.au", groups=["researcher"], active=False)
