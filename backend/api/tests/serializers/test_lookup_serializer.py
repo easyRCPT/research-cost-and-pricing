@@ -9,7 +9,7 @@ from api.serializers.lookup_serializer import (
     LookupUpdateSerializer,
 )
 
-from .serializer_utils import get_errors, get_validated_data
+from .serializer_utils import get_errors
 
 
 class LookupSerializersTestCase(SimpleTestCase):
@@ -96,19 +96,19 @@ class LookupUpdateSerializerTestCase(SimpleTestCase):
 
         self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
-    def test_values_is_optional(self):
+    def test_values_is_required(self):
+        serializer = LookupUpdateSerializer(data={"lookup": {"code": "SCI"}})
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("values", get_errors(serializer))
+
+    def test_values_cannot_be_empty(self):
         serializer = LookupUpdateSerializer(
-            data={
-                "lookup": {"code": "SCI"},
-            }
+            data={"lookup": {"code": "SCI"}, "values": {}}
         )
 
-        self.assertTrue(serializer.is_valid(), get_errors(serializer))
-        validated_data = get_validated_data(serializer)
-        self.assertEqual(
-            validated_data["values"],
-            {},
-        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("values", get_errors(serializer))
 
     def test_lookup_is_required(self):
         serializer = LookupUpdateSerializer(

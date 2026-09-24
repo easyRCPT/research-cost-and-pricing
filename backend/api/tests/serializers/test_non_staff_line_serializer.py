@@ -8,6 +8,7 @@ from api.models import (
     Faculty,
     NonStaffCostCategory,
     Project,
+    User,
 )
 from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
 
@@ -34,6 +35,7 @@ class NonStaffLineSerializerTestCase(TestCase):
             start_month=1,
             end_year=2027,
             end_month=12,
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
 
         self.budget = Budget.objects.create(

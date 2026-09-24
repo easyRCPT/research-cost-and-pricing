@@ -161,6 +161,12 @@ CSRF_TRUSTED_ORIGINS = _env_list(
     "DJANGO_CSRF_TRUSTED_ORIGINS", ["http://localhost:5173"]
 )
 
+# Sign-up is only open to these addresses. Existing accounts are not re-checked.
+ALLOWED_EMAIL_DOMAINS = [
+    domain.lower()
+    for domain in _env_list("DJANGO_ALLOWED_EMAIL_DOMAINS", ["unimelb.edu.au"])
+]
+
 # Two weeks, HttpOnly so no script can read it, Lax so it survives a normal
 # navigation but not a cross-site form post. Secure follows DEBUG: a cookie
 # marked Secure is never sent over plain http, which would break local work.
@@ -179,6 +185,7 @@ REST_FRAMEWORK = {
     # Signed in unless a view says otherwise. Only the sign-in routes opt out,
     # so a new route can't ship open by forgetting a line.
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_THROTTLE_RATES": {"sign_in": "5/min"},
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",

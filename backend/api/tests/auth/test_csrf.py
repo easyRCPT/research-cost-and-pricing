@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -16,6 +17,7 @@ class TestCsrfOnWrites(TestCase):
     """
 
     def setUp(self):
+        cache.clear()  # the sign-in throttle
         self.client = Client(enforce_csrf_checks=True)
         user = User.objects.create_user(email="ruth@unimelb.edu.au", password=PASSWORD)
         user.groups.set(Group.objects.filter(name="researcher"))
@@ -70,6 +72,7 @@ class TestCsrfOnTheAnonymousDoors(TestCase):
     """
 
     def setUp(self):
+        cache.clear()  # the sign-in throttle
         self.client = Client(enforce_csrf_checks=True)
         user = User.objects.create_user(email="ruth@unimelb.edu.au", password=PASSWORD)
         user.groups.set(Group.objects.filter(name="researcher"))
@@ -131,6 +134,7 @@ class TestCsrfOnTheAnonymousDoors(TestCase):
 
 class TestCsrfBootstrap(TestCase):
     def setUp(self):
+        cache.clear()  # the sign-in throttle
         self.client = Client(enforce_csrf_checks=True)
 
     def test_it_hands_out_the_cookie_while_signed_out(self):

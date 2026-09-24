@@ -3,9 +3,7 @@ import type { paths } from '@/types/api'
 
 export const api = createClient<paths>({
   baseUrl: import.meta.env.VITE_API_URL,
-  // The session cookie is the credential, and a cross-origin fetch leaves it
-  // behind unless it is asked for. :5173 and :8000 are different origins in
-  // development, so without this nothing is ever signed in.
+  // Only matters if VITE_API_URL points at another origin; /api is same-origin.
   credentials: 'include',
 })
 
@@ -26,6 +24,18 @@ api.use({
       if (token) request.headers.set('X-CSRFToken', token)
     }
     return request
+  },
+  async onResponse({ request, response }) {
+    // The session expired mid-visit: sign in again and come back here.
+    const path = new URL(request.url, location.origin).pathname
+    if (response.status === 401 && !path.startsWith('/api/auth/')) {
+      const here = location.pathname + location.search
+      location.assign(`/login?redirect=${encodeURIComponent(here)}`)
+    }
+    // An empty error body comes back as `error: ""`, which callers read as success.
+    if (!response.ok && !(await response.clone().text())) {
+      throw new ApiError(response.status, null)
+    }
   },
 })
 

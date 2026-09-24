@@ -115,20 +115,14 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         mock_invalidate_cache.assert_called_once()
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_deletes_lookup_row_when_data_is_empty(
-        self,
-        mock_invalidate_cache,
-    ):
+    def test_refuses_empty_data(self, mock_invalidate_cache):
         department = self.create_department()
 
-        update(
-            "departments",
-            {"code": department.code},
-            {},
-        )
+        with self.assertRaises(ValidationError):
+            update("departments", {"code": department.code}, {})
 
-        self.assertFalse(Department.objects.filter(code=department.code).exists())
-        mock_invalidate_cache.assert_called_once()
+        self.assertTrue(Department.objects.filter(code=department.code).exists())
+        mock_invalidate_cache.assert_not_called()
 
     def test_raises_error_for_invalid_lookup_table(self):
         with self.assertRaisesRegex(
@@ -477,8 +471,8 @@ class TestFixedConstants(TestCase):
     1.70 is not a rate that gets corrected (#60).
 
     It decides whether a budget needs a Dean, so an edit changes who has to
-    approve every budget in the system. The API refuses it however the write is
-    dressed up: as a change, as a new row, or as a delete.
+    approve every budget in the system. The API refuses it however the row is
+    named: by name, by id, or as a new row.
     """
 
     TABLE = "calculation_constants"
@@ -502,16 +496,20 @@ class TestFixedConstants(TestCase):
         self.constant.refresh_from_db()
         self.assertEqual(self.constant.value, Decimal("1.700000"))
 
-    def test_it_cannot_be_deleted(self):
-        # Empty data is how this service spells a delete.
-        with self.assertRaises(ValidationError):
-            update(self.TABLE, {"name": self.FIXED}, {})
+    def test_it_cannot_be_changed_by_id(self):
+        with self.assertRaises(ValidationError) as refused:
+            update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("1.5")})
 
-        self.assertTrue(
-            CalculationConstant.objects.filter(
-                name=self.FIXED, version=self.version
-            ).exists()
-        )
+        self.assertIn(self.FIXED, str(refused.exception))
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.value, Decimal("1.700000"))
+
+    def test_it_cannot_be_renamed_by_id(self):
+        with self.assertRaises(ValidationError):
+            update(self.TABLE, {"id": self.constant.pk}, {"name": "renamed"})
+
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.name, self.FIXED)
 
     def test_it_cannot_be_put_back_at_another_value(self):
         # Removed behind the service's back, so what is under test is the guard

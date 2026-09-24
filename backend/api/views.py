@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Deliverable, NonStaffCostLine, StaffCostLine
+from .permissions import IsSuperadmin
 from .serializers.budget_detail_serializer import BudgetDetailSerializer
 from .serializers.budget_update_serializer import (
     UPDATE_SERIALIZERS,
@@ -204,6 +205,10 @@ class LookupView(APIView):
     def get(self, request: Request) -> Response:
         tables = lookup_loader.get_lookup_tables()
         return Response(LookupTablesSerializer(tables).data)
+
+
+class LookupTableView(APIView):
+    permission_classes = [IsSuperadmin]
 
     @extend_schema(request=LookupCreateSerializer, responses={201: None})
     def post(self, request: Request, table: str) -> Response:

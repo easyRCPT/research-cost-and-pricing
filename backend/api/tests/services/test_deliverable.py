@@ -11,6 +11,7 @@ from api.models import (
     Department,
     Faculty,
     Project,
+    User,
 )
 from api.services.deliverable import create, delete
 
@@ -37,6 +38,7 @@ class DeliverableTestMixin:
             start_month=1,
             end_year=2026,
             end_month=12,
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
 
     def create_budget(self) -> Budget:

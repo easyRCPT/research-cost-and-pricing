@@ -11,6 +11,7 @@ from api.models import (
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
+    User,
     YearAmount,
 )
 from api.services.non_staff_line import create, delete
@@ -38,6 +39,7 @@ class NonStaffLineTestMixin:
             start_month=1,
             end_year=2026,
             end_month=12,
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
 
     def create_budget(self) -> Budget:

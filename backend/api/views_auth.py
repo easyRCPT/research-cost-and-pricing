@@ -31,6 +31,7 @@ from .serializers.auth_serializer import (
     SignupSerializer,
 )
 from .services import auth
+from .throttles import SignInThrottle
 
 # One message for a wrong password, an unknown address, a deactivated account
 # and the wrong tab. Anything more specific says which accounts exist and what
@@ -84,6 +85,7 @@ class SignupView(APIView):
 
 class LoginView(APIView):
     permission_classes = [AllowAny, CsrfProtected]
+    throttle_classes = [SignInThrottle]
 
     @extend_schema(request=LoginSerializer, responses={200: MeSerializer})
     def post(self, request: Request) -> Response:
@@ -96,6 +98,7 @@ class LoginView(APIView):
         # The wrong tab is refused like a wrong password, and takes the same
         # shape of answer, so the tabs cannot be used to enumerate accounts.
         if user is None or not auth.may_use_door(user, data["account_type"]):
+            SignInThrottle.record_failure(request)
             raise AuthenticationFailed(WRONG)
 
         login(cast(HttpRequest, request), user)  # rotates the session key
@@ -104,6 +107,7 @@ class LoginView(APIView):
 
 class AdminLoginView(APIView):
     permission_classes = [AllowAny, CsrfProtected]
+    throttle_classes = [SignInThrottle]
 
     @extend_schema(request=AdminLoginSerializer, responses={200: MeSerializer})
     def post(self, request: Request) -> Response:
@@ -116,6 +120,7 @@ class AdminLoginView(APIView):
         # 403 for every failure, so a correct password for an ordinary account
         # is indistinguishable from a wrong one.
         if user is None or auth.SUPERADMIN not in auth.groups_of(user):
+            SignInThrottle.record_failure(request)
             raise PermissionDenied(WRONG)
 
         login(cast(HttpRequest, request), user)
