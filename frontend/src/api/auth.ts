@@ -62,9 +62,12 @@ function useSignIn<TBody>(
       await ensureCsrf()
       return call(body)
     },
-    // The reply is the same shape `me` answers with, so the guards can read it
-    // without a second round trip on the way in.
-    onSuccess: (me) => queryClient.setQueryData(meKey, me),
+    // Drop whatever the last account left cached. The reply is the same shape
+    // `me` answers with, so the guards can read it without a second round trip.
+    onSuccess: (me) => {
+      queryClient.removeQueries()
+      queryClient.setQueryData(meKey, me)
+    },
   })
 }
 
@@ -101,17 +104,13 @@ export function useAdminLogin() {
   }, queryClient)
 }
 
+/** The caller clears the cache after navigating away; see AccountMenu. */
 export function useLogout() {
-  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
       const { error, response } = await api.POST('/api/auth/logout/', {})
       if (error) throw new ApiError(response.status, error)
     },
-    // The caller navigates first and clears after. Clearing while the guards
-    // are still mounted sends them looking for `me` again on the way out, and
-    // the sign-in screen flashes twice.
-    onSuccess: () => queryClient.clear(),
   })
 }
 
