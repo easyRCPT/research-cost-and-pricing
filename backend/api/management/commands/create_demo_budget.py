@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from api.models import Budget, Department, Project
+from api.models import Budget, Department, Project, User
 from api.services.project import budget_defaults
 
 TITLE = "Demo Project"
+OWNER = "researcher@unimelb.edu.au"
 
 
 class Command(BaseCommand):
@@ -20,6 +21,10 @@ class Command(BaseCommand):
         if department is None:
             raise CommandError("No departments. Run `make seed` first.")
 
+        owner = User.objects.filter(email=OWNER).first()
+        if owner is None:
+            raise CommandError(f"No {OWNER}. Run `make demo-users` first.")
+
         project, _ = Project.objects.get_or_create(
             title=TITLE,
             defaults={
@@ -30,6 +35,7 @@ class Command(BaseCommand):
                 "start_month": 1,
                 "end_year": options["end_year"],
                 "end_month": 12,
+                "created_by": owner,
             },
         )
 

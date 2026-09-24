@@ -30,6 +30,7 @@ from api.models import (
     Department,
     NonStaffCostCategory,
     SalaryRate,
+    User,
 )
 from api.services import non_staff_line, project, staff_line
 
@@ -62,7 +63,7 @@ class TestGoldenCosting(TestCase):
                 "end_year": 2026,
                 "end_month": 12,
             },
-            None,
+            User.objects.create_user("owner@unimelb.edu.au"),
         )
         cls.budget = Budget.objects.get(project_id=row["id"])
 

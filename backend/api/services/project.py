@@ -130,10 +130,7 @@ def create(data: dict, user) -> dict:
     The two go together because a project with no budget has nothing to open:
     every editing route is budgets/<id>/.
     """
-    project = Project(
-        **data,
-        created_by=user if user is not None and user.is_authenticated else None,
-    )
+    project = Project(**data, created_by=user)
     project.full_clean()
     project.save()
 

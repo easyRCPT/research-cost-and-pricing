@@ -561,9 +561,8 @@ class Project(models.Model):
 
     additional_information = models.TextField(blank=True)
 
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
-    )
+    # PROTECT: a user who owns projects is deactivated, never deleted.
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     # Null only between the insert and the second write in save() below, which
     # is why this is nullable rather than blank: two blank strings would

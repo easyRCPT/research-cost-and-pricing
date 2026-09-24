@@ -3,7 +3,7 @@ from typing import Any
 
 from django.test import TestCase
 
-from api.models import Budget, Department, Faculty, Project, StaffCostLine
+from api.models import Budget, Department, Faculty, Project, StaffCostLine, User
 from api.serializers.staff_line_serializer import StaffLineSerializer
 
 from .serializer_utils import get_errors, get_validated_data
@@ -29,6 +29,7 @@ class StaffLineSerializerTestCase(TestCase):
             start_month=1,
             end_year=2027,
             end_month=12,
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
 
         self.budget = Budget.objects.create(

@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from unittest.mock import patch
 
+from django.db.models import ProtectedError
 from django.test import TestCase
 
 from api.models import (
@@ -229,7 +230,7 @@ class TestBudgetDefaults(ProjectTestMixin, TestCase):
 
 class TestCreate(ProjectTestMixin, TestCase):
     def test_creates_a_project_with_its_first_budget(self):
-        row = create(self.project_data(), None)
+        row = create(self.project_data(), self.owner())
 
         project = Project.objects.get(pk=row["id"])
         budget = project.budgets.get()
@@ -246,7 +247,7 @@ class TestCreate(ProjectTestMixin, TestCase):
             version=current_version(),
         )
 
-        row = create(self.project_data(), None)
+        row = create(self.project_data(), self.owner())
         budget = Project.objects.get(pk=row["id"]).budgets.get()
 
         self.assertEqual(budget.cost_multiplier, Decimal("1.90"))
@@ -258,25 +259,27 @@ class TestCreate(ProjectTestMixin, TestCase):
             version=current_version(),
         )
 
-        row = create(self.project_data(), None)
+        row = create(self.project_data(), self.owner())
         budget = Project.objects.get(pk=row["id"]).budgets.get()
 
         self.assertEqual(budget.margin, Decimal("0.2500"))
 
-    def test_records_the_author_when_there_is_one(self):
+    def test_records_the_author(self):
         user = User.objects.create_user(email="researcher@unimelb.edu.au")
 
         row = create(self.project_data(), user)
 
         self.assertEqual(Project.objects.get(pk=row["id"]).created_by, user)
 
-    def test_leaves_the_author_unset_for_an_anonymous_request(self):
-        row = create(self.project_data(), None)
+    def test_a_user_who_owns_a_project_cannot_be_deleted(self):
+        user = User.objects.create_user(email="researcher@unimelb.edu.au")
+        create(self.project_data(), user)
 
-        self.assertIsNone(Project.objects.get(pk=row["id"]).created_by)
+        with self.assertRaises(ProtectedError):
+            user.delete()
 
     def test_the_new_project_has_a_reference(self):
-        row = create(self.project_data(), None)
+        row = create(self.project_data(), self.owner())
 
         self.assertEqual(row["reference"], f"RCP-2026-{row['id']:04d}")
 

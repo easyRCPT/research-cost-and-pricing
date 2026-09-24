@@ -18,6 +18,7 @@ from api.models import (
     NonStaffCostLine,
     Project,
     StaffCostLine,
+    User,
 )
 from api.services.budget_update import update_non_staff, update_staff
 from api.services.project import budget_defaults
@@ -44,6 +45,7 @@ class InKindReasonTestCase(TestCase):
             start_month=1,
             end_year=2026,
             end_month=12,
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
         self.budget = Budget.objects.create(project=project, **budget_defaults())
         self.staff = StaffCostLine.objects.create(

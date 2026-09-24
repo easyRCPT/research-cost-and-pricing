@@ -42,6 +42,7 @@ class ApprovalStepTestMixin:
             start_month=1,
             end_year=2026,
             end_month=12,
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
         return Budget.objects.create(
             project=project,
