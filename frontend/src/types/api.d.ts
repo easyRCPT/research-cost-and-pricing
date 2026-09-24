@@ -1374,6 +1374,11 @@ export interface components {
             detail: string;
             attr: string | null;
         };
+        Error429: {
+            code: components["schemas"]["ErrorCode429Enum"];
+            detail: string;
+            attr: string | null;
+        };
         Error500: {
             code: components["schemas"]["ErrorCode500Enum"];
             detail: string;
@@ -1411,6 +1416,11 @@ export interface components {
          */
         ErrorCode415Enum: "unsupported_media_type";
         /**
+         * @description * `throttled` - Throttled
+         * @enum {string}
+         */
+        ErrorCode429Enum: "throttled";
+        /**
          * @description * `error` - Error
          * @enum {string}
          */
@@ -1438,6 +1448,10 @@ export interface components {
         ErrorResponse415: {
             type: components["schemas"]["ClientErrorEnum"];
             errors: components["schemas"]["Error415"][];
+        };
+        ErrorResponse429: {
+            type: components["schemas"]["ClientErrorEnum"];
+            errors: components["schemas"]["Error429"][];
         };
         ErrorResponse500: {
             type: components["schemas"]["ServerErrorEnum"];
@@ -2331,6 +2345,14 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse415"];
                 };
             };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse429"];
+                };
+            };
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -2492,6 +2514,14 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse429"];
                 };
             };
             500: {
