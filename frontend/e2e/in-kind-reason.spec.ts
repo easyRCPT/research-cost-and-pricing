@@ -15,11 +15,16 @@ import {
  * instant they click, and this control is server-backed, so under load they
  * fail on a state that is merely not back yet.
  */
-const toggle = (page: import('@playwright/test').Page, box: import('@playwright/test').Locator) =>
-  saved(page, () => box.click())
+const toggle = (
+  page: import('@playwright/test').Page,
+  box: import('@playwright/test').Locator,
+) => saved(page, () => box.click())
 
 /** A write, and the round trip it starts. The cells settle before they send. */
-const saved = (page: import('@playwright/test').Page, act: () => Promise<void>) =>
+const saved = (
+  page: import('@playwright/test').Page,
+  act: () => Promise<void>,
+) =>
   Promise.all([
     page.waitForResponse(
       (response) =>
@@ -34,10 +39,9 @@ const REASON = 'Absorbed from the school research support fund'
 
 test('an in-kind line can say why, and the reason survives a reload', async ({
   page,
-  request,
 }) => {
   const title = uniqueTitle('In-kind reason')
-  await createProject(request, title, { start: 2026, end: 2026 })
+  await createProject(page, title, { start: 2026, end: 2026 })
   await openProject(page, title)
   await goToScreen(page, 'Staff Costs')
 
@@ -64,18 +68,18 @@ test('an in-kind line can say why, and the reason survives a reload', async ({
 
   await page.reload()
   await expect(
-    page.locator('tbody tr').first().getByRole('textbox', {
-      name: /Reason the University/,
-    }),
+    page
+      .locator('tbody tr')
+      .first()
+      .getByRole('textbox', {
+        name: /Reason the University/,
+      }),
   ).toHaveValue(REASON)
 })
 
-test('unticking a line takes its reason away with it', async ({
-  page,
-  request,
-}) => {
+test('unticking a line takes its reason away with it', async ({ page }) => {
   const title = uniqueTitle('In-kind untick')
-  await createProject(request, title, { start: 2026, end: 2026 })
+  await createProject(page, title, { start: 2026, end: 2026 })
   await openProject(page, title)
   await goToScreen(page, 'Staff Costs')
 

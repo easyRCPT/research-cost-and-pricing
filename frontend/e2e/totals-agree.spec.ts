@@ -21,10 +21,9 @@ import {
  */
 test('the year total and the row total agree after a time is changed', async ({
   page,
-  request,
 }) => {
   const title = uniqueTitle('Totals agree')
-  await createProject(request, title, { start: 2026, end: 2026 })
+  await createProject(page, title, { start: 2026, end: 2026 })
   await openProject(page, title)
   await goToScreen(page, 'Staff Costs')
 

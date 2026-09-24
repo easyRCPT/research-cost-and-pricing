@@ -8,9 +8,11 @@ import {
   uniqueTitle,
 } from './fixtures'
 
-test('a staff row prices, and is still there after a reload', async ({ page, request }) => {
+test('a staff row prices, and is still there after a reload', async ({
+  page,
+}) => {
   const title = uniqueTitle('Staff costs')
-  await createProject(request, title, { start: 2026, end: 2026 })
+  await createProject(page, title, { start: 2026, end: 2026 })
   await openProject(page, title)
   await goToScreen(page, 'Staff Costs')
 
@@ -30,5 +32,7 @@ test('a staff row prices, and is still there after a reload', async ({ page, req
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Staff Costs' })).toBeVisible()
   await expect(page.locator('input[value="Dr A. Rahman"]')).toBeVisible()
-  await expect(page.locator('tbody tr').first().locator('td').nth(-2)).not.toHaveText('—')
+  await expect(
+    page.locator('tbody tr').first().locator('td').nth(-2),
+  ).not.toHaveText('—')
 })

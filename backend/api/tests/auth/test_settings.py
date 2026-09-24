@@ -41,11 +41,3 @@ class TestWhatAuthenticatesARequest(SimpleTestCase):
         classes = settings.REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
 
         self.assertEqual(classes, ["api.authentication.SessionAuthentication"])
-
-    def test_permissions_are_still_decided_per_view(self):
-        # #45 sets them. Flipping the global default would 403 the lookups the
-        # signed-out login screen still loads.
-        self.assertEqual(
-            settings.REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"],
-            ["rest_framework.permissions.AllowAny"],
-        )

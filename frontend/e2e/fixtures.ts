@@ -1,10 +1,4 @@
-import {
-  test as base,
-  expect,
-  type APIRequestContext,
-  type Locator,
-  type Page,
-} from '@playwright/test'
+import { test as base, expect, type Locator, type Page } from '@playwright/test'
 
 const API = 'http://127.0.0.1:8000'
 
@@ -23,14 +17,15 @@ export interface Project {
  * same rows.
  */
 export async function createProject(
-  request: APIRequestContext,
+  page: Page,
   title: string,
   years: { start: number; end: number } = { start: 2026, end: 2028 },
 ): Promise<Project> {
-  const lookups = await (await request.get(`${API}/api/lookups/`)).json()
+  const lookups = await (await page.request.get(`${API}/api/lookups/`)).json()
   const department = lookups.departments[0].code
 
-  const response = await request.post(`${API}/api/projects/`, {
+  const response = await page.request.post(`${API}/api/projects/`, {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
     data: {
       title,
       department,
@@ -48,7 +43,9 @@ export async function createProject(
 export async function openProject(page: Page, title: string) {
   await page.goto('/')
   await page.getByRole('button', { name: title, exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Project Details' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Project Details' }),
+  ).toBeVisible()
 }
 
 /**
@@ -131,6 +128,11 @@ async function chooseOption(page: Page, trigger: Locator, value: string) {
 export const uniqueTitle = (what: string) =>
   `${what} ${Date.now()}-${Math.floor(Math.random() * 1e4)}`
 
+async function csrfToken(page: Page) {
+  const cookies = await page.context().cookies()
+  return cookies.find((c) => c.name === 'csrftoken')?.value ?? ''
+}
+
 export const DEMO = {
   researcher: 'researcher@unimelb.edu.au',
   hod: 'hod@unimelb.edu.au',
@@ -155,11 +157,8 @@ export async function signIn(
   const csrf = await page.request.get('/api/auth/csrf/')
   expect(csrf.status(), await csrf.text()).toBe(204)
 
-  const cookies = await page.context().cookies()
-  const token = cookies.find((c) => c.name === 'csrftoken')?.value ?? ''
-
   const response = await page.request.post('/api/auth/login/', {
-    headers: { 'X-CSRFToken': token },
+    headers: { 'X-CSRFToken': await csrfToken(page) },
     data: { email, password: DEMO.password, account_type: accountType },
   })
   // A 401 here is almost always a database without the demo accounts rather

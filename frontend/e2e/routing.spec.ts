@@ -9,9 +9,8 @@ import { createProject, expect, test, uniqueTitle } from './fixtures'
 
 test('a screen can be linked to, and opens on a cold load', async ({
   page,
-  request,
 }) => {
-  const project = await createProject(request, uniqueTitle('Deep linked'))
+  const project = await createProject(page, uniqueTitle('Deep linked'))
 
   await page.goto(`/projects/${project.id}/staff`)
 
@@ -23,9 +22,8 @@ test('a screen can be linked to, and opens on a cold load', async ({
 
 test('the rail writes the URL, and browser Back returns to the last screen', async ({
   page,
-  request,
 }) => {
-  const project = await createProject(request, uniqueTitle('Back and forward'))
+  const project = await createProject(page, uniqueTitle('Back and forward'))
 
   await page.goto(`/projects/${project.id}/details`)
   await page.getByRole('button', { name: 'Staff Costs', exact: true }).click()
@@ -41,8 +39,8 @@ test('the rail writes the URL, and browser Back returns to the last screen', asy
   ).toBeVisible()
 })
 
-test('Continue and Back move through the URL too', async ({ page, request }) => {
-  const project = await createProject(request, uniqueTitle('Continue'))
+test('Continue and Back move through the URL too', async ({ page }) => {
+  const project = await createProject(page, uniqueTitle('Continue'))
 
   await page.goto(`/projects/${project.id}/details`)
   await page.getByRole('button', { name: /^Continue to / }).click()
@@ -54,8 +52,8 @@ test('Continue and Back move through the URL too', async ({ page, request }) => 
   await expect(page).toHaveURL(`/projects/${project.id}/details`)
 })
 
-test('a screen nobody has lands on the first one', async ({ page, request }) => {
-  const project = await createProject(request, uniqueTitle('Stale screen'))
+test('a screen nobody has lands on the first one', async ({ page }) => {
+  const project = await createProject(page, uniqueTitle('Stale screen'))
 
   await page.goto(`/projects/${project.id}/nonsense`)
 
@@ -67,13 +65,14 @@ test('a screen nobody has lands on the first one', async ({ page, request }) => 
 
 test('the lookups screen is a screen, with nothing selected in the rail', async ({
   page,
-  request,
 }) => {
-  const project = await createProject(request, uniqueTitle('Lookups by URL'))
+  const project = await createProject(page, uniqueTitle('Lookups by URL'))
 
   await page.goto(`/projects/${project.id}/lookups`)
 
-  await expect(page.getByRole('heading', { name: 'Lookup Tables' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Lookup Tables' }),
+  ).toBeVisible()
   // It is not in SECTIONS, so the rail shows no page as current.
   await expect(page.locator('[aria-current="page"]')).toHaveCount(0)
 })

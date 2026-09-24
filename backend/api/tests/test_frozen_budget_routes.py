@@ -24,6 +24,7 @@ from api.models import (
     NonStaffCostLine,
     Project,
     StaffCostLine,
+    User,
 )
 from api.services.project import budget_defaults
 
@@ -48,6 +49,7 @@ class FrozenBudgetTestCase(TestCase):
         )
 
     def setUp(self):
+        self.client.force_login(User.objects.create_user("owner@unimelb.edu.au"))
         faculty, _ = Faculty.objects.get_or_create(
             code="SCI", defaults={"name": "Science Faculty"}
         )

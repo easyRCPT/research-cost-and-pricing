@@ -176,9 +176,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "api.authentication.SessionAuthentication",
     ],
-    # Stays AllowAny: #45 sets permissions per view. Flipping the default here
-    # would 403 the lookups the signed-out login screen still loads.
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    # Signed in unless a view says otherwise. Only the sign-in routes opt out,
+    # so a new route can't ship open by forgetting a line.
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",

@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -46,12 +45,9 @@ class ProjectView(APIView):
     """
     The list of projects, and the way to start one.
 
-    Open to anyone for now. When authentication lands this is where
-    IsAuthenticated goes; who may see which project is decided one level down,
-    in services/project.visible_projects.
+    Who may see which project is decided one level down, in
+    services/project.visible_projects.
     """
-
-    permission_classes = [AllowAny]
 
     @extend_schema(responses=ProjectRowSerializer(many=True))
     def get(self, request: Request) -> Response:
