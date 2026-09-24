@@ -1,7 +1,5 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test'
 
-const API = 'http://127.0.0.1:8000'
-
 export interface Project {
   id: number
   title: string
@@ -21,10 +19,10 @@ export async function createProject(
   title: string,
   years: { start: number; end: number } = { start: 2026, end: 2028 },
 ): Promise<Project> {
-  const lookups = await (await page.request.get(`${API}/api/lookups/`)).json()
+  const lookups = await (await page.request.get('/api/lookups/')).json()
   const department = lookups.departments[0].code
 
-  const response = await page.request.post(`${API}/api/projects/`, {
+  const response = await page.request.post('/api/projects/', {
     headers: { 'X-CSRFToken': await csrfToken(page) },
     data: {
       title,
