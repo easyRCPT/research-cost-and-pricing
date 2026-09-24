@@ -4,6 +4,7 @@ import { NumberInput } from '@/components/ui/number-input'
 import { toastOutOfRange } from '@/lib/range'
 import { Slider } from '@/components/ui/slider'
 
+// TODO(#87): the 0 floor and 100% ceiling hold until Frank sets the margin policy.
 const MAX_MARGIN = 100
 
 const asPercent = (fraction: number) => fraction * 100
