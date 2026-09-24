@@ -124,6 +124,10 @@ class TestLogin(AuthTestMixin, TestCase):
 
         self.assertEqual(self.login("ruth@unimelb.edu.au").status_code, 429)
 
+    def test_a_successful_sign_in_is_not_counted(self):
+        for _ in range(6):
+            self.assertEqual(self.login("ruth@unimelb.edu.au").status_code, 200)
+
     def test_the_throttle_counts_each_address_apart(self):
         for _ in range(5):
             self.login("nobody@unimelb.edu.au")
