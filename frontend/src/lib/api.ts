@@ -25,12 +25,16 @@ api.use({
     }
     return request
   },
-  onResponse({ request, response }) {
+  async onResponse({ request, response }) {
     // The session expired mid-visit: sign in again and come back here.
     const path = new URL(request.url, location.origin).pathname
     if (response.status === 401 && !path.startsWith('/api/auth/')) {
       const here = location.pathname + location.search
       location.assign(`/login?redirect=${encodeURIComponent(here)}`)
+    }
+    // An empty error body comes back as `error: ""`, which callers read as success.
+    if (!response.ok && !(await response.clone().text())) {
+      throw new ApiError(response.status, null)
     }
   },
 })
