@@ -4,6 +4,7 @@ from . import views_auth
 from .views import (
     BudgetDetailView,
     DeliverableView,
+    LookupTableView,
     LookupView,
     NonStaffLineView,
     ProjectView,
@@ -19,7 +20,7 @@ urlpatterns = [
     ),
     path(
         "lookups/<table>/",
-        LookupView.as_view(http_method_names=["post", "patch"]),
+        LookupTableView.as_view(http_method_names=["post", "patch"]),
         name="lookup-table",
     ),
     # Projects

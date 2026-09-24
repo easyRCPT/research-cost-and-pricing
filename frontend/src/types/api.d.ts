@@ -1482,7 +1482,7 @@ export interface components {
             lookup: {
                 [key: string]: unknown;
             };
-            values?: {
+            values: {
                 [key: string]: unknown;
             };
         };
@@ -1601,11 +1601,13 @@ export interface components {
              */
             attr: "values";
             /**
-             * @description * `not_a_dict` - not_a_dict
+             * @description * `empty` - empty
+             *     * `not_a_dict` - not_a_dict
              *     * `null` - null
+             *     * `required` - required
              * @enum {string}
              */
-            code: "not_a_dict" | "null";
+            code: "empty" | "not_a_dict" | "null" | "required";
             detail: string;
         };
         LookupsPartialUpdateValuesKEYErrorComponent: {
@@ -3505,6 +3507,14 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse401"];
                 };
             };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3585,6 +3595,14 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
                 };
             };
             404: {

@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
 
 from ..models import (
@@ -61,13 +62,7 @@ def create_lookup_version(config: LookupConfiguration) -> int:
 
 
 def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
-    """
-    Refuse any write that names a constant the API does not get to change.
-
-    Checked before anything else, because minting a version is a side effect and
-    a refused edit should leave no trace. Covers the delete path too: `update`
-    with empty data removes the row, which is a change to 1.70 by another name.
-    """
+    """Refuse any write that names a constant the API does not get to change."""
     if model is not CalculationConstant:
         return
 
@@ -133,9 +128,11 @@ def update(
     lookup: dict,
     data: dict,
 ) -> None:
-    # Get model
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
+
+    if not data:
+        raise ValidationError("Nothing to update.")
 
     try:
         if model in VERSIONED_MODELS:
@@ -158,12 +155,10 @@ def update(
             f"Multiple matching rows found in lookup table '{table}'.",
         )
 
-    # Delete the lookup row if a matching row is found and data is empty
-    if not data:
-        instance.delete()
-    # Update the matching lookup row if data is provided
-    else:
-        _update_instance(instance, lookup, data)
+    # The lookup may name the row by id rather than by name.
+    _reject_fixed_constant(model, model_to_dict(instance))
+
+    _update_instance(instance, lookup, data)
 
     invalidate_lookup_cache()
 

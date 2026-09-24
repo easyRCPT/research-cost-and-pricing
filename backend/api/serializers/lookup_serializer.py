@@ -139,6 +139,5 @@ class LookupUpdateSerializer(serializers.Serializer):
     )
     values = serializers.DictField(
         child=serializers.JSONField(),
-        required=False,
-        default=dict,
+        allow_empty=False,
     )
