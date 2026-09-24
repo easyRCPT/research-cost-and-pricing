@@ -18,10 +18,10 @@ interface StaffTableProps {
   salaryRates: SalaryRate[]
   multipliers: SalaryRateMultiplier[]
   /** The CI's row, and whether their time is being costed. */
-  ciId: number | null
+  ciId: string | null
   ciIncluded: boolean
-  patchLine: (id: number, patch: Partial<StaffLine>) => void
-  removeLine: (id: number) => void
+  patchLine: (id: string, patch: Partial<StaffLine>) => void
+  removeLine: (id: string) => void
   addLine: () => void
 }
 

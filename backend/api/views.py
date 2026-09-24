@@ -1,4 +1,5 @@
 from typing import cast
+from uuid import UUID
 
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
@@ -115,7 +116,7 @@ class StaffLineView(APIView):
     # Spelled with the status code: a bare `responses=` on a delete is
     # documented as 204 No Content, which this one is not.
     @extend_schema(responses={200: BudgetDetailSerializer})
-    def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
+    def delete(self, request: Request, budget_id: int, line_id: UUID) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_editable(request.user, budget)
@@ -150,7 +151,7 @@ class NonStaffLineView(APIView):
         )
 
     @extend_schema(responses={200: BudgetDetailSerializer})
-    def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
+    def delete(self, request: Request, budget_id: int, line_id: UUID) -> Response:
         # Check that the budget exists
         budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_editable(request.user, budget)

@@ -2,6 +2,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from ..models import NonStaffCostCategory
+from .line_id import validate_new_line_id
 
 
 class YearAmountSerializer(serializers.Serializer):
@@ -14,6 +15,7 @@ class YearAmountSerializer(serializers.Serializer):
 
 @extend_schema_serializer(component_name="NonStaffLineInput")
 class NonStaffLineSerializer(serializers.Serializer):
+    id = serializers.UUIDField(required=False, validators=[validate_new_line_id])
     cost_group = serializers.CharField()
     expense_type = serializers.CharField()
 

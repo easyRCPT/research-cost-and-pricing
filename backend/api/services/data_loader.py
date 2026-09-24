@@ -63,6 +63,7 @@ def build_project_info(project: Project) -> dict:
 def build_staff_info_table(staff_lines: list[StaffCostLine]) -> dict:
     return {
         line.id: {
+            "position": line.position,
             "name_role": line.name_role,
             "employment_type": line.employment_type,
             "category": line.category,
@@ -87,6 +88,7 @@ def build_staff_numeric_table(staff_lines: list[StaffCostLine]) -> dict:
 def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
     return {
         line.id: {
+            "position": line.position,
             "cost_group": line.category.cost_category,
             "expense_type": line.category.cost_subcategory,
             "description": line.description,

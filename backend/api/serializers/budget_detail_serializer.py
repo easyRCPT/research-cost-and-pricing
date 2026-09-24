@@ -128,7 +128,8 @@ class StaffYearSerializer(serializers.Serializer):
 
 
 class StaffLineSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.UUIDField()
+    position = serializers.IntegerField()
     name_role = serializers.CharField()
     employment_type = serializers.CharField()
     category = serializers.CharField()
@@ -189,7 +190,8 @@ class NonStaffYearSerializer(serializers.Serializer):
 
 
 class NonStaffLineSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.UUIDField()
+    position = serializers.IntegerField()
     cost_group = serializers.CharField()
     expense_type = serializers.CharField()
     description = serializers.CharField(allow_blank=True)
@@ -466,6 +468,7 @@ class BudgetDetailSerializer(serializers.Serializer):
         return [
             {
                 "id": row_id,
+                "position": row["info"]["position"],
                 "name_role": row["info"]["name_role"],
                 "employment_type": row["info"]["employment_type"],
                 "category": row["info"]["category"],
@@ -508,6 +511,7 @@ class BudgetDetailSerializer(serializers.Serializer):
         return [
             {
                 "id": row_id,
+                "position": row["info"]["position"],
                 "cost_group": row["info"]["cost_group"],
                 "expense_type": row["info"]["expense_type"],
                 "description": row["info"]["description"],

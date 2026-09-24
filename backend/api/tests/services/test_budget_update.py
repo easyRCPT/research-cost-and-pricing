@@ -1,5 +1,6 @@
 from decimal import Decimal
 from unittest.mock import Mock, patch
+from uuid import UUID
 
 from django.test import SimpleTestCase, TestCase
 from rest_framework.exceptions import ValidationError
@@ -21,6 +22,8 @@ from api.models import (
     YearAmount,
 )
 from api.services import budget_update
+
+LINE_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 class BudgetUpdateTestMixin:
@@ -429,7 +432,7 @@ class TestUpdateStaff(SimpleTestCase):
     def test_updates_non_calculation_field(self):
         result = budget_update.update_staff(
             self.budget,
-            1,
+            LINE_ID,
             "name_role",
             "Senior Researcher",
             None,
@@ -441,12 +444,14 @@ class TestUpdateStaff(SimpleTestCase):
             "Senior Researcher",
         )
         self.staff_line.full_clean.assert_called_once()
-        self.staff_line.save.assert_called_once_with(update_fields=["name_role"])
+        self.staff_line.save.assert_called_once_with(
+            update_fields=["name_role", "updated_at"]
+        )
 
     def test_updates_calculation_field(self):
         result = budget_update.update_staff(
             self.budget,
-            1,
+            LINE_ID,
             "classification",
             "Level A.2",
             None,
@@ -462,7 +467,7 @@ class TestUpdateStaff(SimpleTestCase):
     def test_updates_year_value(self, mock_update):
         result = budget_update.update_staff(
             self.budget,
-            1,
+            LINE_ID,
             "year_value",
             Decimal("0.5"),
             2025,
@@ -482,7 +487,7 @@ class TestUpdateStaff(SimpleTestCase):
         ):
             budget_update.update_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "year_value",
                 Decimal("0.5"),
                 None,
@@ -497,7 +502,7 @@ class TestUpdateStaff(SimpleTestCase):
         ):
             budget_update.update_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "name_role",
                 "Researcher",
                 None,
@@ -510,7 +515,7 @@ class TestUpdateStaff(SimpleTestCase):
         ):
             budget_update.update_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "invalid",
                 "value",
                 None,
@@ -526,7 +531,7 @@ class TestUpdateNonStaff(SimpleTestCase):
     def test_updates_non_calculation_field(self):
         result = budget_update.update_non_staff(
             self.budget,
-            1,
+            LINE_ID,
             "description",
             "New description",
             None,
@@ -541,7 +546,7 @@ class TestUpdateNonStaff(SimpleTestCase):
     def test_updates_calculation_field(self):
         result = budget_update.update_non_staff(
             self.budget,
-            1,
+            LINE_ID,
             "add_ten_percent",
             True,
             None,
@@ -557,7 +562,7 @@ class TestUpdateNonStaff(SimpleTestCase):
 
         result = budget_update.update_non_staff(
             self.budget,
-            1,
+            LINE_ID,
             "category",
             "1001",
             None,
@@ -569,7 +574,9 @@ class TestUpdateNonStaff(SimpleTestCase):
             self.non_staff_line.category,
             category,
         )
-        self.non_staff_line.save.assert_called_once_with(update_fields=["category"])
+        self.non_staff_line.save.assert_called_once_with(
+            update_fields=["category", "updated_at"]
+        )
 
     def test_rejects_non_string_category(self):
         with self.assertRaisesMessage(
@@ -578,7 +585,7 @@ class TestUpdateNonStaff(SimpleTestCase):
         ):
             budget_update.update_non_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "category",
                 1001,
                 None,
@@ -594,7 +601,7 @@ class TestUpdateNonStaff(SimpleTestCase):
         ):
             budget_update.update_non_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "category",
                 "9999",
                 None,
@@ -604,7 +611,7 @@ class TestUpdateNonStaff(SimpleTestCase):
     def test_updates_year_value(self, mock_update):
         result = budget_update.update_non_staff(
             self.budget,
-            1,
+            LINE_ID,
             "year_value",
             Decimal(1000),
             2025,
@@ -624,7 +631,7 @@ class TestUpdateNonStaff(SimpleTestCase):
         ):
             budget_update.update_non_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "year_value",
                 Decimal(1000),
                 None,
@@ -639,7 +646,7 @@ class TestUpdateNonStaff(SimpleTestCase):
         ):
             budget_update.update_non_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "description",
                 "Equipment",
                 None,
@@ -652,7 +659,7 @@ class TestUpdateNonStaff(SimpleTestCase):
         ):
             budget_update.update_non_staff(
                 self.budget,
-                1,
+                LINE_ID,
                 "invalid",
                 "value",
                 None,

@@ -107,8 +107,10 @@ export const withTime = (
     cost: costFor(line, y),
   }))
 
-export const emptyStaffLine = (id: number, years: number[]): StaffLine => ({
+export const emptyStaffLine = (id: string, years: number[]): StaffLine => ({
   id,
+  // The server appends it on create.
+  position: 0,
   name_role: '',
   employment_type: '',
   category: '',
