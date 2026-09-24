@@ -116,7 +116,7 @@ class ModelValidationTestCase(TestCase):
             start_month=1,
             end_year=2028,
             end_month=12,
-            created_by=owner
+            created_by=owner,
         )
         self.budget = Budget.objects.create(
             project=project,

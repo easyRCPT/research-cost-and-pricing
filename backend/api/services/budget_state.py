@@ -8,7 +8,7 @@ rejected attempt is the only copy of what was actually turned down (#81).
 """
 
 from rest_framework import status
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, PermissionDenied
 
 from ..models import Budget
 
@@ -32,3 +32,10 @@ def require_draft(budget: Budget) -> None:
             f"Budget {budget.id} is {budget.get_status_display().lower()} "
             f"and cannot be edited.",
         )
+
+
+def require_editable(user, budget: Budget) -> None:
+    """Only if is owner and a draft can a budget be edited"""
+    if budget.project.created_by_id != user.pk:
+        raise PermissionDenied("Only the person who created this budget can edit it")
+    require_draft(budget)

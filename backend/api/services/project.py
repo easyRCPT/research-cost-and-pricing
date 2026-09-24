@@ -1,11 +1,12 @@
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
-from django.db.models import Max, Prefetch
+from django.db.models import Max, Prefetch, Q
 from django.db.models.functions import Greatest
 
-from ..models import Budget, CalculationConstant, Project
+from ..models import Budget, CalculationConstant, Project, UserOrgAssignment
 from . import lookup_loader
+from .auth import SUPERADMIN, groups_of
 
 # What a budget's numbers start at. The live values are rows, not Python
 # constants, so they are read at creation time and then frozen on the budget.
@@ -46,12 +47,30 @@ def budget_defaults() -> dict[str, Decimal]:
 
 
 def visible_projects(user):
-    """The projects this user has created."""
-    return Project.objects.filter(created_by=user)
+    """Projects you own, and any with a budget you may read."""
+    return Project.objects.filter(
+        Q(created_by=user) | Q(id__in=visible_budgets(user).values("project"))
+    )
+
 
 def visible_budgets(user):
-    """Budgets on the projects this user may see"""
-    return Budget.objects.filter(project__in=visible_projects(user))
+    """
+    Your own budgets, any status. A HoD also reads their department's and a Dean
+    their faculty's, but only once submitted. The superadmin reads everything.
+    """
+    if SUPERADMIN in groups_of(user):
+        return Budget.objects.all()
+
+    Role = UserOrgAssignment.Role
+    departments = user.org_assignments.filter(role=Role.HOD).values("department")
+    faculties = user.org_assignments.filter(role=Role.DEAN).values("faculty")
+    reviews = Q(project__department__in=departments) | Q(
+        project__department__faculty__in=faculties
+    )
+
+    return Budget.objects.filter(
+        Q(project__created_by=user) | (reviews & ~Q(status=Budget.Status.DRAFT))
+    )
 
 
 def list_projects(user) -> list[dict]:
@@ -61,7 +80,7 @@ def list_projects(user) -> list[dict]:
     projects = (
         visible_projects(user)
         .select_related("department__faculty")
-        .prefetch_related(Prefetch("budgets", queryset=Budget.objects.all()))
+        .prefetch_related(Prefetch("budgets", queryset=visible_budgets(user)))
         .annotate(last_activity=Greatest("updated_at", Max("budgets__updated_at")))
         .order_by("-last_activity", "-id")
     )

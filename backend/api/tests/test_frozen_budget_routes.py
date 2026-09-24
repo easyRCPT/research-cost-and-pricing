@@ -68,7 +68,7 @@ class FrozenBudgetTestCase(TestCase):
             start_month=1,
             end_year=2026,
             end_month=12,
-            created_by=owner
+            created_by=owner,
         )
         # The same defaults a real budget is created with.
         self.budget = Budget.objects.create(project=project, **budget_defaults())
