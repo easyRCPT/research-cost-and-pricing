@@ -18,10 +18,9 @@ import {
  */
 test('an over-cap entry stays on screen, marked, and the row survives', async ({
   page,
-  request,
 }) => {
   const title = uniqueTitle('Over cap')
-  await createProject(request, title, { start: 2026, end: 2026 })
+  await createProject(page, title, { start: 2026, end: 2026 })
   await openProject(page, title)
   await goToScreen(page, 'Staff Costs')
 

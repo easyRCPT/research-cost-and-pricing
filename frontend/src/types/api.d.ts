@@ -271,18 +271,16 @@ export interface paths {
         /**
          * @description The list of projects, and the way to start one.
          *
-         *     Open to anyone for now. When authentication lands this is where
-         *     IsAuthenticated goes; who may see which project is decided one level down,
-         *     in services/project.visible_projects.
+         *     Who may see which project is decided one level down, in
+         *     services/project.visible_projects.
          */
         get: operations["projects_list"];
         put?: never;
         /**
          * @description The list of projects, and the way to start one.
          *
-         *     Open to anyone for now. When authentication lands this is where
-         *     IsAuthenticated goes; who may see which project is decided one level down,
-         *     in services/project.visible_projects.
+         *     Who may see which project is decided one level down, in
+         *     services/project.visible_projects.
          */
         post: operations["projects_create"];
         delete?: never;

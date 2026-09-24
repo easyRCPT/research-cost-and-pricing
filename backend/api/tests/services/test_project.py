@@ -50,11 +50,15 @@ class ProjectTestMixin:
         }
 
     @staticmethod
-    def create_project(department: Department, **overrides) -> Project:
+    def owner() -> User:
+        return User.objects.get_or_create(email="owner@unimelb.edu.au")[0]
+
+    def create_project(self, department: Department, **overrides) -> Project:
         return Project.objects.create(
             **{
                 "title": "Test Project",
                 "department": department,
+                "created_by": self.owner(),
                 "funder": "Test Funder",
                 "start_year": 2026,
                 "start_month": 1,
@@ -138,9 +142,9 @@ class TestTouch(ProjectTestMixin, TestCase):
         budget = self.create_budget(project)
         self.touch(budget, datetime(2020, 1, 1, tzinfo=UTC))
 
-        before = list_projects(None)[0]["updated_at"]
+        before = list_projects(self.owner())[0]["updated_at"]
         budget.touch()
-        after = list_projects(None)[0]["updated_at"]
+        after = list_projects(self.owner())[0]["updated_at"]
 
         self.assertGreater(after, before)
 
@@ -279,12 +283,12 @@ class TestCreate(ProjectTestMixin, TestCase):
 
 class TestListProjects(ProjectTestMixin, TestCase):
     def test_empty(self):
-        self.assertEqual(list_projects(None), [])
+        self.assertEqual(list_projects(self.owner()), [])
 
     def test_reports_the_department_and_faculty_by_name(self):
         self.create_budget(self.create_project(self.create_department()))
 
-        row = list_projects(None)[0]
+        row = list_projects(self.owner())[0]
 
         self.assertEqual(row["department"], "Science")
         self.assertEqual(row["faculty"], "Science Faculty")
@@ -296,7 +300,7 @@ class TestListProjects(ProjectTestMixin, TestCase):
         self.touch(older, datetime(2026, 1, 1, tzinfo=UTC))
         self.touch(newer, datetime(2026, 6, 1, tzinfo=UTC))
 
-        row = list_projects(None)[0]
+        row = list_projects(self.owner())[0]
 
         self.assertEqual(row["status"], Budget.Status.DRAFT)
         self.assertEqual(row["budget_id"], newer.id)
@@ -307,14 +311,14 @@ class TestListProjects(ProjectTestMixin, TestCase):
         self.create_budget(project, total_price_exc_gst=Decimal("12345.67"))
 
         self.assertEqual(
-            list_projects(None)[0]["total_price_exc_gst"],
+            list_projects(self.owner())[0]["total_price_exc_gst"],
             Decimal("12345.67"),
         )
 
     def test_renders_a_project_whose_budgets_are_gone(self):
         self.create_project(self.create_department())
 
-        row = list_projects(None)[0]
+        row = list_projects(self.owner())[0]
 
         self.assertIsNone(row["status"])
         self.assertIsNone(row["budget_id"])
@@ -331,6 +335,6 @@ class TestListProjects(ProjectTestMixin, TestCase):
         self.touch(self.create_budget(busy), datetime(2027, 1, 1, tzinfo=UTC))
 
         self.assertEqual(
-            [row["title"] for row in list_projects(None)],
+            [row["title"] for row in list_projects(self.owner())],
             ["Busy", "Quiet"],
         )

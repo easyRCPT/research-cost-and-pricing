@@ -1,15 +1,23 @@
-import { test, expect, createProject, uniqueTitle, DEMO, signIn } from './fixtures'
+import {
+  test,
+  expect,
+  createProject,
+  uniqueTitle,
+  DEMO,
+  signIn,
+} from './fixtures'
 
 /** These are about signing in, so they start signed out. */
 test.use({ signedIn: false })
 
 test('a private screen sends a signed-out visitor to login, and returns them after', async ({
   page,
-  request,
 }) => {
   // A screen deep in the costing flow, so "returns them after" means the screen
   // they asked for and not merely somewhere signed in.
-  const project = await createProject(request, uniqueTitle('Deep link auth'))
+  await signIn(page)
+  const project = await createProject(page, uniqueTitle('Deep link auth'))
+  await page.context().clearCookies()
   await page.goto(`/projects/${project.id}/staff`)
   await expect(page).toHaveURL(/\/login/)
 
@@ -104,12 +112,11 @@ test('signing out ends the session', async ({ page }) => {
 
 test('a write from a signed-in session carries the CSRF header', async ({
   page,
-  request,
 }) => {
   // Its own project: the list may be empty, and another spec's rows are not
   // this spec's to edit.
-  const project = await createProject(request, uniqueTitle('CSRF'))
   await signIn(page)
+  const project = await createProject(page, uniqueTitle('CSRF'))
 
   const writes: number[] = []
   page.on('response', (r) => {

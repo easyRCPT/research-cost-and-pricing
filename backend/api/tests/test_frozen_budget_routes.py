@@ -24,6 +24,7 @@ from api.models import (
     NonStaffCostLine,
     Project,
     StaffCostLine,
+    User,
 )
 from api.services.project import budget_defaults
 
@@ -48,6 +49,8 @@ class FrozenBudgetTestCase(TestCase):
         )
 
     def setUp(self):
+        owner = User.objects.create_user("owner@unimelb.edu.au")
+        self.client.force_login(owner)
         faculty, _ = Faculty.objects.get_or_create(
             code="SCI", defaults={"name": "Science Faculty"}
         )
@@ -65,6 +68,7 @@ class FrozenBudgetTestCase(TestCase):
             start_month=1,
             end_year=2026,
             end_month=12,
+            created_by=owner,
         )
         # The same defaults a real budget is created with.
         self.budget = Budget.objects.create(project=project, **budget_defaults())
