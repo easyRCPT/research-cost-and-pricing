@@ -130,6 +130,8 @@ def calculate_dean_required(
     ):
         return True
 
+    # TODO(#87): the floor is seeded at 0.30, and "<" rather than "<=", until
+    # Frank sets the margin policy.
     minimum_margin = general.get("minimum_margin")
     if minimum_margin is None:
         return False
