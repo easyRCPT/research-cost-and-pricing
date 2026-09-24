@@ -5,7 +5,8 @@ Table ranges resolved through defined names where able to,
 otherwise cell ranges are used. Names stay put even if tables may shift.
 
 Re-running is safe since rows are matched on their
-natural key.
+natural key. If a budget is pinned to the current version,
+the import goes into a new one instead.
 
 """
 
@@ -36,6 +37,7 @@ from api.models import (
     SalaryRate,
     SalaryRateMultiplier,
 )
+from api.services.lookup_update import create_lookup_version
 
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
@@ -467,19 +469,14 @@ def import_revenue_categories(workbook):
     return count
 
 
-def get_or_create_current_version() -> LookupVersion:
-    config = LookupConfiguration.objects.first()
+def version_to_import_into() -> LookupVersion:
+    """The current version, or a fresh copy of it if a budget is pinned to it."""
+    config = LookupConfiguration.objects.select_for_update().get()
 
-    if config:
-        return config.current_version
+    if config.referenced:
+        create_lookup_version(config)
 
-    version = LookupVersion.objects.create()
-
-    LookupConfiguration.objects.create(
-        current_version=version,
-    )
-
-    return version
+    return config.current_version
 
 
 class Command(BaseCommand):
@@ -527,7 +524,7 @@ class Command(BaseCommand):
         # One transaction, a failure halfway leaves no partial lookup
         # tables
         with transaction.atomic():
-            version = get_or_create_current_version()
+            version = version_to_import_into()
 
             for label, importer in unversioned_importers:
                 self.stdout.write(f"  {label} ... ", ending="")
