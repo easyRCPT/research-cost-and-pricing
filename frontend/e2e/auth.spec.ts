@@ -115,8 +115,8 @@ test('a write from a signed-in session carries the CSRF header', async ({
 }) => {
   // Its own project: the list may be empty, and another spec's rows are not
   // this spec's to edit.
-  const project = await createProject(page, uniqueTitle('CSRF'))
   await signIn(page)
+  const project = await createProject(page, uniqueTitle('CSRF'))
 
   const writes: number[] = []
   page.on('response', (r) => {
