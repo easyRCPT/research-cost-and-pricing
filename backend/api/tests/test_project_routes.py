@@ -97,7 +97,8 @@ class ModelValidationTestCase(TestCase):
     """full_clean() failures are bad requests, not server errors."""
 
     def setUp(self):
-        self.client.force_login(User.objects.create_user("owner@unimelb.edu.au"))
+        owner = User.objects.create_user("owner@unimelb.edu.au")
+        self.client.force_login(owner)
         department = Department.objects.create(
             code="SCI",
             name="Science",
@@ -115,6 +116,7 @@ class ModelValidationTestCase(TestCase):
             start_month=1,
             end_year=2028,
             end_month=12,
+            created_by=owner
         )
         self.budget = Budget.objects.create(
             project=project,

@@ -46,16 +46,12 @@ def budget_defaults() -> dict[str, Decimal]:
 
 
 def visible_projects(user):
-    """
-    The projects one request may see.
+    """The projects this user has created."""
+    return Project.objects.filter(created_by=user)
 
-    Every project, for now. This is the single place scoping goes when
-    authentication lands -- filter on created_by, or on the department once
-    Head of Department and Dean roles exist -- so the routes above it do not
-    change.
-    """
-    del user
-    return Project.objects.all()
+def visible_budgets(user):
+    """Budgets on the projects this user may see"""
+    return Budget.objects.filter(project__in=visible_projects(user))
 
 
 def list_projects(user) -> list[dict]:

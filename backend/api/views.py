@@ -8,7 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Budget, Deliverable, NonStaffCostLine, StaffCostLine
+from .models import Deliverable, NonStaffCostLine, StaffCostLine
 from .serializers.budget_detail_serializer import BudgetDetailSerializer
 from .serializers.budget_update_serializer import (
     UPDATE_SERIALIZERS,
@@ -68,7 +68,7 @@ class ProjectView(APIView):
 class BudgetDetailView(APIView):
     @extend_schema(responses=BudgetDetailSerializer)
     def get(self, request: Request, budget_id: int) -> Response:
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         result = budget_details.get_budget_details(budget)
         serializer = BudgetDetailSerializer(result)
         return Response(serializer.data)
@@ -78,7 +78,7 @@ class BudgetDetailView(APIView):
         responses={200: BudgetDetailSerializer, 204: None},
     )
     def patch(self, request: Request, budget_id: int) -> Response:
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         envelope = SectionSerializer(data=request.data)
         envelope.is_valid(raise_exception=True)
@@ -97,7 +97,7 @@ class BudgetDetailView(APIView):
 class StaffLineView(APIView):
     @extend_schema(request=StaffLineSerializer, responses={201: BudgetDetailSerializer})
     def post(self, request: Request, budget_id: int) -> Response:
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         serializer = StaffLineSerializer(
             data=request.data,
@@ -116,7 +116,7 @@ class StaffLineView(APIView):
     @extend_schema(responses={200: BudgetDetailSerializer})
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
         # Check that the budget exists
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         # Check that the line belongs to the budget
         line = get_object_or_404(StaffCostLine, id=line_id, budget=budget)
@@ -134,7 +134,7 @@ class NonStaffLineView(APIView):
     )
     def post(self, request: Request, budget_id: int) -> Response:
         # Check that the budget exists
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         serializer = NonStaffLineSerializer(
             data=request.data,
@@ -151,7 +151,7 @@ class NonStaffLineView(APIView):
     @extend_schema(responses={200: BudgetDetailSerializer})
     def delete(self, request: Request, budget_id: int, line_id: int) -> Response:
         # Check that the budget exists
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         # Check that the line belongs to the budget
         line = get_object_or_404(NonStaffCostLine, id=line_id, budget=budget)
@@ -169,7 +169,7 @@ class DeliverableView(APIView):
     )
     def post(self, request: Request, budget_id: int) -> Response:
         # Check that the budget exists
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         serializer = DeliverableSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -185,7 +185,7 @@ class DeliverableView(APIView):
     @extend_schema(responses={200: BudgetDetailSerializer})
     def delete(self, request: Request, budget_id: int, deliverable_id: int) -> Response:
         # Check that the budget exists
-        budget = get_object_or_404(Budget, id=budget_id)
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         require_draft(budget)
         # Check that the deliverable belongs to the budget
         item = get_object_or_404(Deliverable, id=deliverable_id, budget=budget)
