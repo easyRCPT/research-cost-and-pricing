@@ -83,7 +83,7 @@ class LookupWriteAccessTestCase(TestCase):
 
         response = self.patch(
             "calculation_constants",
-            {"lookup": {"id": self.fixed.id}, "values": {"value": "1.5"}},
+            {"lookup": {"id": self.fixed.pk}, "values": {"value": "1.5"}},
         )
 
         self.assertEqual(response.status_code, 400)

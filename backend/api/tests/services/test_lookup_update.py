@@ -498,7 +498,7 @@ class TestFixedConstants(TestCase):
 
     def test_it_cannot_be_changed_by_id(self):
         with self.assertRaises(ValidationError) as refused:
-            update(self.TABLE, {"id": self.constant.id}, {"value": Decimal("1.5")})
+            update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("1.5")})
 
         self.assertIn(self.FIXED, str(refused.exception))
         self.constant.refresh_from_db()
@@ -506,7 +506,7 @@ class TestFixedConstants(TestCase):
 
     def test_it_cannot_be_renamed_by_id(self):
         with self.assertRaises(ValidationError):
-            update(self.TABLE, {"id": self.constant.id}, {"name": "renamed"})
+            update(self.TABLE, {"id": self.constant.pk}, {"name": "renamed"})
 
         self.constant.refresh_from_db()
         self.assertEqual(self.constant.name, self.FIXED)
