@@ -8,7 +8,7 @@ from .views import (
     LookupView,
     NonStaffLineView,
     ProjectView,
-    StaffLineView,
+    StaffLineView, BudgetSubmitView,
 )
 
 urlpatterns = [
@@ -45,6 +45,11 @@ urlpatterns = [
         "budgets/<int:budget_id>/",
         BudgetDetailView.as_view(http_method_names=["get", "patch"]),
         name="budget-detail",
+    ),
+    path(
+        "budgets/<int:budget_id>/submit/",
+        BudgetSubmitView.as_view(http_method_names=["post"]),
+        name="submission",
     ),
     # Staff lines
     path(

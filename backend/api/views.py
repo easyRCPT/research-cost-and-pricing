@@ -38,6 +38,8 @@ from .services import (
     non_staff_line,
     project,
     staff_line,
+    submission,
+    submission_validation,
 )
 from .services.budget_state import require_editable
 
@@ -93,6 +95,25 @@ class BudgetDetailView(APIView):
         if result is None:
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(BudgetDetailSerializer(result).data, status=status.HTTP_200_OK)
+
+
+class BudgetSubmitView(APIView):
+    @extend_schema(responses={200: None})
+    def post(self, request: Request, budget_id: int) -> Response:
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
+        # Only a draft can be submitted
+        require_editable(request.user, budget)
+        # Check if the draft is ready
+        reasons = submission_validation.validate_submission(budget)
+        if reasons:
+            return Response(
+                {"reasons": reasons},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        submission.submit_budget(budget, request.user)
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class StaffLineView(APIView):
