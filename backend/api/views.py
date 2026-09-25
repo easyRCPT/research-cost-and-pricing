@@ -111,7 +111,7 @@ class BudgetSubmitView(APIView):
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-        submission.submit_budget(budget, request.user)
+        submission.submit_budget(budget)
 
         return Response(status=status.HTTP_200_OK)
 

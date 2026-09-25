@@ -2,7 +2,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
-from api.models import SalaryRate, StaffCostLine, OnCostRate
+from api.models import OnCostRate, SalaryRate, StaffCostLine
 
 # ------------------------------------------------------------------
 # Rounding
