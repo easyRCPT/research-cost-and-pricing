@@ -3,7 +3,13 @@ from django.db import transaction
 from django.utils import timezone
 
 from api.exceptions import Conflict, UnprocessableEntity
-from api.models import ApprovalStep, Budget, User, UserOrgAssignment
+from api.models import (
+    ApprovalStep,
+    Budget,
+    LookupConfiguration,
+    User,
+    UserOrgAssignment,
+)
 
 
 @transaction.atomic
@@ -39,6 +45,7 @@ def decide(
         ],
     )
 
+    # Move budget status
     if decision == "reject":
         budget.status = Budget.Status.REJECTED
 
@@ -70,6 +77,11 @@ def decide(
             raise Conflict("The approval workflow is in an invalid state.")
 
     budget.save(update_fields=["status"])
+
+    # Mark current lookup version as referenced
+    config = LookupConfiguration.objects.select_for_update().get()
+    config.referenced = True
+    config.save(update_fields=["referenced"])
 
     # TODO: Audit log
 

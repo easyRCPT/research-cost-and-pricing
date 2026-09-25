@@ -9,6 +9,8 @@ from api.models import (
     Budget,
     Department,
     Faculty,
+    LookupConfiguration,
+    LookupVersion,
     Project,
     User,
     UserOrgAssignment,
@@ -60,6 +62,15 @@ class ApprovalDecideTest(TestCase):
             end_year=2027,
             end_month=12,
             created_by=cls.owner,
+        )
+
+        cls.lookup_version = LookupVersion.objects.create()
+
+        LookupConfiguration.objects.get_or_create(
+            id=1,
+            defaults={
+                "current_version": cls.lookup_version,
+            },
         )
 
         UserOrgAssignment.objects.create(
@@ -133,6 +144,8 @@ class ApprovalDecideTest(TestCase):
         step.refresh_from_db()
         budget.refresh_from_db()
 
+        config = LookupConfiguration.objects.get()
+
         self.assertEqual(
             step.status,
             ApprovalStep.Status.APPROVED,
@@ -145,6 +158,7 @@ class ApprovalDecideTest(TestCase):
             budget.status,
             Budget.Status.DEAN_REVIEW,
         )
+        self.assertTrue(config.referenced)
 
     def test_hod_can_reject_department_step(self) -> None:
         budget = self.create_budget()
@@ -169,6 +183,8 @@ class ApprovalDecideTest(TestCase):
             ApprovalStep.Level.FACULTY,
         )
 
+        config = LookupConfiguration.objects.get()
+
         self.assertEqual(
             step.status,
             ApprovalStep.Status.REJECTED,
@@ -183,6 +199,8 @@ class ApprovalDecideTest(TestCase):
             faculty_step.status,
             ApprovalStep.Status.NOT_REQUIRED,
         )
+
+        self.assertTrue(config.referenced)
 
     def test_dean_can_approve_faculty_step(self) -> None:
         budget = self.create_budget()
