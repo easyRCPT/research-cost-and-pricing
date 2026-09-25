@@ -9,7 +9,7 @@ from api.services import approval_queue
 class ApprovalView(APIView):
     def get(self, request: Request) -> Response:
         user = request.user
-        result = approval_queue.get_approval_queue(user)
+        steps = approval_queue.get_approval_steps(user)
 
-        serializer = ApprovalQueueSerializer(result, many=True)
+        serializer = ApprovalQueueSerializer(steps, many=True)
         return Response(serializer.data)
