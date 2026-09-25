@@ -3,12 +3,13 @@ from django.urls import path
 from . import views_auth
 from .views import (
     BudgetDetailView,
+    BudgetSubmitView,
     DeliverableView,
     LookupTableView,
     LookupView,
     NonStaffLineView,
     ProjectView,
-    StaffLineView, BudgetSubmitView,
+    StaffLineView,
 )
 
 urlpatterns = [

@@ -920,6 +920,7 @@ class NonStaffCostLine(models.Model):
 
     if TYPE_CHECKING:
         id: int
+        category_id: int
         amounts: RelatedManager["YearAmount"]
 
     # Carries reference data, FK allows that data to be connected
