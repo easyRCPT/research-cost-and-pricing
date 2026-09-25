@@ -32,7 +32,7 @@ class TestBuildProjectInfo(SimpleTestCase):
     def setUp(self):
         self.department = Mock(spec=Department)
         self.department.name = "Science"
-        self.department.faculty = "Science Faculty"
+        self.department.faculty.name = "Science Faculty"
         self.department.code = "SCI"
 
         self.activity = Mock(spec=Activity)
