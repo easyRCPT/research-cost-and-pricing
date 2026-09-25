@@ -7,23 +7,10 @@ be able to read a costing knowing it cannot change while they read it, and a
 rejected attempt is the only copy of what was actually turned down (#81).
 """
 
-from rest_framework import status
-from rest_framework.exceptions import APIException, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
+from ..exceptions import Conflict
 from ..models import Budget
-
-
-class Conflict(APIException):
-    """
-    409 rather than 403.
-
-    403 says *you* may not do this; 409 says nobody may, in this state. The
-    frontend renders them differently, one as a permission problem and the
-    other as a read-only screen, so the distinction has to reach it.
-    """
-
-    status_code = status.HTTP_409_CONFLICT
-    default_code = "conflict"
 
 
 def require_draft(budget: Budget) -> None:

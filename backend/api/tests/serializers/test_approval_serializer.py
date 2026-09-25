@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from decimal import Decimal
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from api.models import (
     ApprovalStep,
@@ -12,7 +12,12 @@ from api.models import (
     Project,
     User,
 )
-from api.serializers.approval_serializer import ApprovalQueueSerializer
+from api.serializers.approval_serializer import (
+    ApprovalDecideSerializer,
+    ApprovalQueueSerializer,
+)
+
+from .serializer_utils import get_data, get_errors, get_validated_data
 
 
 class ApprovalQueueSerializerTest(TestCase):
@@ -94,4 +99,58 @@ class ApprovalQueueSerializerTest(TestCase):
             "dean_triggers": ["margin_below_minimum"],
         }
 
-        self.assertEqual(serializer.data, expected)
+        self.assertEqual(get_data(serializer), expected)
+
+
+class ApprovalDecideSerializerTests(SimpleTestCase):
+    def test_approve_without_comment_is_valid(self) -> None:
+        serializer = ApprovalDecideSerializer(
+            data={"decision": "approve"},
+        )
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(get_validated_data(serializer)["decision"], "approve")
+        self.assertEqual(get_validated_data(serializer)["comment"], "")
+
+    def test_approve_with_comment_is_valid(self) -> None:
+        serializer = ApprovalDecideSerializer(
+            data={
+                "decision": "approve",
+                "comment": "Looks good.",
+            },
+        )
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(get_validated_data(serializer)["decision"], "approve")
+        self.assertEqual(get_validated_data(serializer)["comment"], "Looks good.")
+
+    def test_reject_without_comment_is_valid(self) -> None:
+        serializer = ApprovalDecideSerializer(
+            data={"decision": "reject"},
+        )
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(get_validated_data(serializer)["decision"], "reject")
+        self.assertEqual(get_validated_data(serializer)["comment"], "")
+
+    def test_reject_with_comment_is_valid(self) -> None:
+        serializer = ApprovalDecideSerializer(
+            data={
+                "decision": "reject",
+                "comment": "Please revise the budget.",
+            },
+        )
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(
+            get_validated_data(serializer)["comment"],
+            "Please revise the budget.",
+        )
+
+    def test_invalid_decision_is_invalid(self) -> None:
+        serializer = ApprovalDecideSerializer(
+            data={"decision": "pending"},
+        )
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("decision", get_errors(serializer))

@@ -19,6 +19,11 @@ urlpatterns = [
         views_approvals.ApprovalView.as_view(http_method_names=["get"]),
         name="approvals-queue",
     ),
+    path(
+        "approvals/{int:step_id}/decide/",
+        views_approvals.ApprovalDecideView.as_view(http_method_names=["post"]),
+        name="approvals-decide",
+    ),
     # Lookups
     path(
         "lookups/",

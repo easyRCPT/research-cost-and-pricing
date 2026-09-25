@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_standardized_errors.handler import ExceptionHandler as StandardizedHandler
+from rest_framework import status
+from rest_framework.exceptions import APIException
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.fields import get_error_detail
 
@@ -33,3 +35,23 @@ class ExceptionHandler(StandardizedHandler):
         if isinstance(exc, DjangoValidationError):
             return DRFValidationError(detail=get_error_detail(exc))
         return super().convert_known_exceptions(exc)
+
+
+class Conflict(APIException):
+    """
+    409 rather than 403.
+
+    403 says *you* may not do this; 409 says nobody may, in this state. The
+    frontend renders them differently, one as a permission problem and the
+    other as a read-only screen, so the distinction has to reach it.
+    """
+
+    status_code = status.HTTP_409_CONFLICT
+    default_code = "conflict"
+
+
+class UnprocessableEntity(APIException):
+    """The request is valid but cannot be processed due to business rules."""
+
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    default_code = "unprocessable_entity"

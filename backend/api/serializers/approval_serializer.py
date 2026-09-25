@@ -38,3 +38,14 @@ class ApprovalQueueSerializer(serializers.ModelSerializer):
             "budget",
             "dean_triggers",
         ]
+
+
+class ApprovalDecideSerializer(serializers.Serializer):
+    decision = serializers.ChoiceField(
+        choices=("approve", "reject"),
+    )
+    comment = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+    )
