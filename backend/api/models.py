@@ -749,7 +749,6 @@ class ApprovalStep(models.Model):
         "Budget", related_name="approval_steps", on_delete=models.CASCADE
     )
     level = models.CharField(max_length=20, choices=Level.choices)
-    required = models.BooleanField()
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.PENDING
     )
