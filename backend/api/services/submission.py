@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 
 from api.calculation.pricing import calculate_dean_required
 from api.models import (
@@ -45,10 +46,11 @@ def submit_budget(budget: Budget) -> None:
     )
 
     # Change status of the budget
+    budget.dean_triggers = triggers
     budget.status = Budget.Status.HOD_REVIEW
-    budget.save(update_fields=["status"])
+    budget.submitted_at = timezone.now()
+    budget.save(update_fields=["dean_triggers", "status", "submitted_at"])
 
     # TODO: Notify HoD
 
     # TODO: Audit log
-    del triggers

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views_auth
+from . import views_approvals, views_auth
 from .views import (
     BudgetDetailView,
     BudgetSubmitView,
@@ -13,6 +13,12 @@ from .views import (
 )
 
 urlpatterns = [
+    # Approvals
+    path(
+        "approvals/queue/",
+        views_approvals.ApprovalView.as_view(http_method_names=["get"]),
+        name="approvals-queue",
+    ),
     # Lookups
     path(
         "lookups/",

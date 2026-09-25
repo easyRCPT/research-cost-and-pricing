@@ -19,7 +19,8 @@ class LookupVersion(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # TODO: replace with admin, initial version don't have editor
+    # TODO: replace with admin
+    # initial version don't have editor
     updated_by = models.ForeignKey(
         "User",
         null=True,
@@ -680,6 +681,8 @@ class Budget(models.Model):
 
     comments = models.TextField(blank=True, default="")
 
+    dean_triggers = models.JSONField(default=list, blank=True)
+
     justification = models.CharField(max_length=200, blank=True, default="")
     justification_notes = models.TextField(blank=True, default="")
     dean_exemption_reason = models.TextField(blank=True, default="")
@@ -694,7 +697,7 @@ class Budget(models.Model):
     # one query rather than one pricing run per project. Written by
     # services/budget_details.py, which every path that changes a priced field
     # already goes through.
-    total_price_exc_gst = models.DecimalField(
+    total_price_inc_gst = models.DecimalField(
         max_digits=14,
         decimal_places=2,
         default=Decimal(0),
@@ -702,6 +705,7 @@ class Budget(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
 
     def touch(self) -> None:
         """

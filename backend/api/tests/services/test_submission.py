@@ -8,7 +8,6 @@ from api.models import (
     CalculationConstant,
     Department,
     Faculty,
-    LookupConfiguration,
     LookupVersion,
     Project,
     User,
@@ -20,11 +19,6 @@ class SubmitBudgetTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.lookup_version = LookupVersion.objects.create()
-
-        LookupConfiguration.objects.update_or_create(
-            id=1,
-            defaults={"current_version": cls.lookup_version},
-        )
 
         CalculationConstant.objects.create(
             name="minimum_margin",
@@ -127,3 +121,25 @@ class SubmitBudgetTest(TestCase):
             self.budget.status,
             Budget.Status.HOD_REVIEW,
         )
+
+    def test_submit_budget_records_dean_triggers(self) -> None:
+        self.budget.margin = Decimal("0.10")
+        self.budget.save(update_fields=["margin"])
+
+        submit_budget(self.budget)
+
+        self.budget.refresh_from_db()
+
+        self.assertEqual(
+            self.budget.dean_triggers,
+            ["margin_below_minimum"],
+        )
+
+    def test_submit_budget_records_submitted_at(self) -> None:
+        self.assertIsNone(self.budget.submitted_at)
+
+        submit_budget(self.budget)
+
+        self.budget.refresh_from_db()
+
+        self.assertIsNotNone(self.budget.submitted_at)
