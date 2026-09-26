@@ -21,7 +21,7 @@ urlpatterns = [
         name="approvals-queue",
     ),
     path(
-        "approvals/{int:step_id}/decide/",
+        "approvals/<int:step_id>/decide/",
         views_approvals.ApprovalDecideView.as_view(http_method_names=["post"]),
         name="approvals-decide",
     ),
@@ -32,7 +32,7 @@ urlpatterns = [
         name="lookups",
     ),
     path(
-        "lookups/<table>/",
+        "lookups/<str:table>/",
         LookupTableView.as_view(http_method_names=["post", "patch"]),
         name="lookup-table",
     ),

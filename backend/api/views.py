@@ -53,7 +53,7 @@ class ProjectView(APIView):
     services/project.visible_projects.
     """
 
-    @extend_schema(responses=ProjectRowSerializer(many=True))
+    @extend_schema(responses={200: ProjectRowSerializer(many=True)})
     def get(self, request: Request) -> Response:
         rows = project.list_projects(request.user)
         return Response(ProjectRowSerializer(rows, many=True).data)
@@ -99,7 +99,7 @@ class BudgetDetailView(APIView):
 
 
 class BudgetSubmitView(APIView):
-    @extend_schema(responses={200: None})
+    @extend_schema(request=None, responses={200: None})
     def post(self, request: Request, budget_id: int) -> Response:
         budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         # Only a draft can be submitted
@@ -118,7 +118,7 @@ class BudgetSubmitView(APIView):
 
 
 class BudgetCloneView(APIView):
-    @extend_schema(responses={201: BudgetDetailSerializer})
+    @extend_schema(request=None, responses={201: BudgetDetailSerializer})
     def post(self, request: Request, budget_id: int) -> Response:
         budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
         # Only the owner can clone the budget

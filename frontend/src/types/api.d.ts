@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/api/approvals/{step_id}/decide/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["approvals_decide_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/approvals/queue/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["approvals_queue_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/admin-login/": {
         parameters: {
             query?: never;
@@ -133,6 +165,22 @@ export interface paths {
         patch: operations["budgets_partial_update"];
         trace?: never;
     };
+    "/api/budgets/{budget_id}/clone/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["budgets_clone_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/budgets/{budget_id}/deliverables/": {
         parameters: {
             query?: never;
@@ -229,6 +277,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/budgets/{budget_id}/submit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["budgets_submit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/lookups/": {
         parameters: {
             query?: never;
@@ -308,6 +372,86 @@ export interface components {
             email: string;
             password: string;
         };
+        ApprovalDecide: {
+            decision: components["schemas"]["DecisionEnum"];
+            /** @default  */
+            comment: string;
+        };
+        ApprovalQueue: {
+            step_id: number;
+            level: string;
+            budget: components["schemas"]["ApprovalQueueBudget"];
+            dean_triggers: string[];
+        };
+        ApprovalQueueBudget: {
+            id: number;
+            project_title: string;
+            department: string;
+            faculty: string;
+            chief_investigator: string;
+            /** Format: double */
+            total_price_inc_gst: number;
+            /** Format: double */
+            margin: number;
+            /** Format: date-time */
+            submitted_at: string;
+        };
+        ApprovalsDecideCreateCommentErrorComponent: {
+            /**
+             * @description * `comment` - comment (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "comment";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        ApprovalsDecideCreateDecisionErrorComponent: {
+            /**
+             * @description * `decision` - decision (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "decision";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        ApprovalsDecideCreateError: components["schemas"]["ApprovalsDecideCreateNonFieldErrorsErrorComponent"] | components["schemas"]["ApprovalsDecideCreateDecisionErrorComponent"] | components["schemas"]["ApprovalsDecideCreateCommentErrorComponent"];
+        ApprovalsDecideCreateErrorResponse400: components["schemas"]["ApprovalsDecideCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        ApprovalsDecideCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        ApprovalsDecideCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["ApprovalsDecideCreateError"][];
+        };
+        ApprovalsQueueListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         Assignment: {
             id: number;
             role: string;
@@ -626,6 +770,7 @@ export interface components {
             dean_required: boolean;
         };
         BudgetUpdate: components["schemas"]["ProjectUpdate"] | components["schemas"]["BudgetFieldUpdate"] | components["schemas"]["StaffUpdate"] | components["schemas"]["NonStaffUpdate"] | components["schemas"]["DeliverableUpdate"];
+        BudgetsCloneCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         BudgetsDeliverablesCreateDeliverableTypeErrorComponent: {
             /**
              * @description * `deliverable_type` - deliverable_type (enum property replaced by openapi-typescript)
@@ -1260,6 +1405,7 @@ export interface components {
             errors: components["schemas"]["BudgetsStaffLinesCreateError"][];
         };
         BudgetsStaffLinesDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        BudgetsSubmitCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         CalculationConstant: {
             name: string;
             description?: string;
@@ -1277,6 +1423,12 @@ export interface components {
          * @enum {string}
          */
         ClientErrorEnum: "client_error";
+        /**
+         * @description * `approve` - approve
+         *     * `reject` - reject
+         * @enum {string}
+         */
+        DecisionEnum: "approve" | "reject";
         Deliverable: {
             number: number;
             description: string;
@@ -2165,10 +2317,10 @@ export interface components {
         StaffLine: {
             id: number;
             name_role: string;
-            employment_type: string;
-            category: string;
+            employment_type: components["schemas"]["EmploymentTypeEnum"];
+            category: components["schemas"]["CategoryEnum"];
             classification: string;
-            time_basis: string;
+            time_basis: components["schemas"]["TimeBasisEnum"];
             in_kind: boolean;
             in_kind_reason: string;
             /** Format: double */
@@ -2266,6 +2418,163 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    approvals_decide_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                step_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalDecide"];
+                "application/x-www-form-urlencoded": components["schemas"]["ApprovalDecide"];
+                "multipart/form-data": components["schemas"]["ApprovalDecide"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalsDecideCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    approvals_queue_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalQueue"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalsQueueListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     auth_admin_login_create: {
         parameters: {
             query?: never;
@@ -2939,6 +3248,83 @@ export interface operations {
             };
         };
     };
+    budgets_clone_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                budget_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetsCloneCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     budgets_deliverables_create: {
         parameters: {
             query?: never;
@@ -3370,6 +3756,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BudgetsStaffLinesDestroyErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    budgets_submit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                budget_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetsSubmitCreateErrorResponse400"];
                 };
             };
             401: {
