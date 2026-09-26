@@ -683,6 +683,8 @@ class Budget(models.Model):
 
     dean_triggers = models.JSONField(default=list, blank=True)
 
+    # TODO: Verify whether these fields are still required.
+    #  They appear to overlap with comments and dean_triggers.
     justification = models.CharField(max_length=200, blank=True, default="")
     justification_notes = models.TextField(blank=True, default="")
     dean_exemption_reason = models.TextField(blank=True, default="")
@@ -701,6 +703,16 @@ class Budget(models.Model):
         max_digits=14,
         decimal_places=2,
         default=Decimal(0),
+    )
+
+    # The attempt this one was cloned from, so a reviewer can put the two
+    # side by side. Null on a first attempt.
+    cloned_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        related_name="clones",
+        on_delete=models.SET_NULL,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
