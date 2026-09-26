@@ -97,7 +97,7 @@ def decide(
     config.save(update_fields=["referenced"])
 
     # Notify budget owner that a decision is made
-    notify_budget_decision(budget, decision=decision, comment=comment)
+    notify_budget_decision(budget, decision=decision, comment=comment, approver=user)
 
     write_audit(
         actor=user,
