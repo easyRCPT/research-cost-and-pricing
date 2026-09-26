@@ -66,7 +66,7 @@ export const projectColumns = (
       },
       meta: { className: 'w-[220px]' },
     }),
-    col.accessor('total_price_exc_gst', {
+    col.accessor('total_price_inc_gst', {
       header: 'Total price (exc. GST)',
       meta: {
         align: 'right',
@@ -75,7 +75,7 @@ export const projectColumns = (
       cell: ({ row }) =>
         row.original.budget_id === null
           ? '—'
-          : money(row.original.total_price_exc_gst),
+          : money(row.original.total_price_inc_gst),
     }),
     col.accessor('updated_at', {
       header: 'Last updated',

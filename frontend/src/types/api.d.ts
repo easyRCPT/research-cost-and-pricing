@@ -2055,7 +2055,7 @@ export interface components {
             status: (components["schemas"]["StatusEnum"] | components["schemas"]["NullEnum"]) | null;
             budget_count: number;
             /** Format: double */
-            total_price_exc_gst: number;
+            total_price_inc_gst: number;
             /** Format: date-time */
             updated_at: string;
         };
