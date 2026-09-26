@@ -10,6 +10,7 @@ from api.models import (
     User,
     UserOrgAssignment,
 )
+from api.services.audit import write_audit
 
 
 @transaction.atomic
@@ -27,6 +28,7 @@ def decide(
         raise UnprocessableEntity("A comment is required when rejecting an approval.")
 
     budget = step.budget
+    before_status = budget.status
 
     # Record step decision
     step.status = (
@@ -71,6 +73,9 @@ def decide(
         # Approved by HoD, progress to dean review
         if faculty_step.status == ApprovalStep.Status.PENDING:
             budget.status = Budget.Status.DEAN_REVIEW
+
+            # TODO: notify dean
+
         # Mark budget as approved if HoD approves and dean review not required
         elif faculty_step.status == ApprovalStep.Status.NOT_REQUIRED:
             budget.status = Budget.Status.APPROVED
@@ -89,7 +94,23 @@ def decide(
     config.referenced = True
     config.save(update_fields=["referenced"])
 
-    # TODO: Audit log
+    # TODO: notify budget owner
+
+    write_audit(
+        actor=user,
+        action="approval.decide",
+        object_type="budget",
+        object_id=str(budget.id),
+        detail={
+            "before": {"status": before_status},
+            "after": {"status": budget.status},
+            "step": step.id,
+            "level": step.level,
+            "decision": decision,
+            "triggers": budget.dean_triggers,
+            "lookup_version_id": budget.lookup_version_id,
+        },
+    )
 
 
 def get_decidable_step(user: User, step_id: int) -> ApprovalStep:

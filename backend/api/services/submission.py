@@ -6,13 +6,16 @@ from api.models import (
     ApprovalStep,
     Budget,
     CalculationConstant,
+    LookupConfiguration,
+    User,
 )
+from api.services.audit import write_audit
 
 
 @transaction.atomic
-def submit_budget(budget: Budget) -> None:
+def submit_budget(actor: User, budget: Budget) -> None:
     # Check if the submission requires approval from dean and head of department
-    version_id = budget.lookup_version_id
+    version_id = LookupConfiguration.objects.get(pk=1).current_version_id
     margin = budget.margin
     minimum_margin = CalculationConstant.objects.get(
         name="minimum_margin",
@@ -53,4 +56,13 @@ def submit_budget(budget: Budget) -> None:
 
     # TODO: Notify HoD
 
-    # TODO: Audit log
+    write_audit(
+        actor=actor,
+        action="budget.submit",
+        object_type="budget",
+        object_id=str(budget.id),
+        detail={
+            "after": {"status": budget.status},
+            "triggers": triggers,
+        },
+    )

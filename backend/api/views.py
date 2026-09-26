@@ -112,7 +112,7 @@ class BudgetSubmitView(APIView):
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-        submission.submit_budget(budget)
+        submission.submit_budget(request.user, budget)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -125,7 +125,7 @@ class BudgetCloneView(APIView):
         require_ownership(request.user, budget)
 
         # Clone the budget
-        cloned_budget = budget_clone.clone_budget(budget)
+        cloned_budget = budget_clone.clone_budget(request.user, budget)
 
         result = budget_details.get_budget_details(cloned_budget)
 

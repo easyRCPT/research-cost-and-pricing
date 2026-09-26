@@ -1,9 +1,11 @@
 from decimal import Decimal
 
+from django.db import transaction
 from django.test import TestCase
 
 from api.exceptions import Conflict
 from api.models import (
+    AuditLog,
     Budget,
     Deliverable,
     DeliverableType,
@@ -18,6 +20,8 @@ from api.models import (
     YearAmount,
 )
 from api.services.budget_clone import clone_budget
+
+from .test_submission import ForceRollbackError
 
 
 class BudgetCloneTest(TestCase):
@@ -80,7 +84,7 @@ class BudgetCloneTest(TestCase):
             status=Budget.Status.REJECTED,
         )
 
-        clone = clone_budget(source)
+        clone = clone_budget(self.owner, source)
 
         self.assertNotEqual(
             clone.id,
@@ -120,7 +124,7 @@ class BudgetCloneTest(TestCase):
 
         source.save()
 
-        clone = clone_budget(source)
+        clone = clone_budget(self.owner, source)
 
         self.assertEqual(
             clone.cost_multiplier,
@@ -172,7 +176,7 @@ class BudgetCloneTest(TestCase):
             time=Decimal("0.5000"),
         )
 
-        clone = clone_budget(source)
+        clone = clone_budget(self.owner, source)
 
         cloned_line = clone.staff_lines.get()
 
@@ -218,7 +222,7 @@ class BudgetCloneTest(TestCase):
             amount=Decimal(500),
         )
 
-        clone = clone_budget(source)
+        clone = clone_budget(self.owner, source)
 
         cloned_line = clone.non_staff_lines.get()
 
@@ -260,7 +264,7 @@ class BudgetCloneTest(TestCase):
             sponsor="Sponsor",
         )
 
-        clone = clone_budget(source)
+        clone = clone_budget(self.owner, source)
 
         cloned = clone.deliverables.get()
 
@@ -293,7 +297,7 @@ class BudgetCloneTest(TestCase):
             time_basis=StaffCostLine.TimeBasis.FTE,
         )
 
-        clone = clone_budget(source)
+        clone = clone_budget(self.owner, source)
 
         cloned_line = clone.staff_lines.get()
 
@@ -313,7 +317,7 @@ class BudgetCloneTest(TestCase):
         )
 
         with self.assertRaises(Conflict):
-            clone_budget(budget)
+            clone_budget(self.owner, budget)
 
     def test_cannot_clone_approved_budget(self) -> None:
         budget = self.create_budget(
@@ -321,4 +325,53 @@ class BudgetCloneTest(TestCase):
         )
 
         with self.assertRaises(Conflict):
-            clone_budget(budget)
+            clone_budget(self.owner, budget)
+
+    def test_clone_budget_creates_audit_log(self) -> None:
+        source_budget = self.create_budget(
+            status=Budget.Status.REJECTED,
+        )
+
+        cloned_budget = clone_budget(
+            user=self.owner,
+            budget=source_budget,
+        )
+
+        audit = AuditLog.objects.get(
+            action="budget.clone",
+            object_type="budget",
+            object_id=str(cloned_budget.id),
+        )
+
+        self.assertEqual(
+            audit.actor,
+            self.owner,
+        )
+
+        self.assertEqual(
+            audit.detail["cloned_from"],
+            source_budget.id,
+        )
+
+        self.assertEqual(
+            audit.detail["after"]["status"],
+            Budget.Status.DRAFT,
+        )
+
+    def test_failed_clone_does_not_create_audit_log(self) -> None:
+        source_budget = self.create_budget(
+            status=Budget.Status.REJECTED,
+        )
+
+        with self.assertRaises(ForceRollbackError), transaction.atomic():
+            clone_budget(
+                user=self.owner,
+                budget=source_budget,
+            )
+            raise ForceRollbackError("force rollback")
+
+        self.assertFalse(
+            AuditLog.objects.filter(
+                action="budget.clone",
+            ).exists()
+        )

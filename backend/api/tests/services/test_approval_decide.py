@@ -1,11 +1,13 @@
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.test import TestCase
 
 from api.exceptions import Conflict, UnprocessableEntity
 from api.models import (
     ApprovalStep,
+    AuditLog,
     Budget,
     Department,
     Faculty,
@@ -16,6 +18,8 @@ from api.models import (
     UserOrgAssignment,
 )
 from api.services.approval_decide import decide
+
+from .test_submission import ForceRollbackError
 
 
 class ApprovalDecideTest(TestCase):
@@ -361,3 +365,82 @@ class ApprovalDecideTest(TestCase):
                 decision="reject",
                 comment="",
             )
+
+    def test_decide_creates_audit_log(self) -> None:
+        budget = self.create_budget()
+
+        step = self.get_step(
+            budget,
+            ApprovalStep.Level.DEPARTMENT,
+        )
+
+        decide(
+            user=self.hod,
+            step_id=step.id,
+            decision="approve",
+            comment="Approved by HOD",
+        )
+
+        audit = AuditLog.objects.get(
+            action="approval.decide",
+            object_type="budget",
+            object_id=str(budget.id),
+        )
+
+        self.assertEqual(
+            audit.actor,
+            self.hod,
+        )
+
+        self.assertEqual(
+            audit.detail["before"]["status"],
+            Budget.Status.HOD_REVIEW,
+        )
+
+        self.assertEqual(
+            audit.detail["after"]["status"],
+            Budget.Status.DEAN_REVIEW,
+        )
+
+        self.assertEqual(
+            audit.detail["step"],
+            step.id,
+        )
+
+        self.assertEqual(
+            audit.detail["level"],
+            ApprovalStep.Level.DEPARTMENT,
+        )
+
+        self.assertEqual(
+            audit.detail["decision"],
+            "approve",
+        )
+
+        self.assertEqual(
+            audit.detail["lookup_version_id"],
+            self.lookup_version.id,
+        )
+
+    def test_failed_decision_does_not_create_audit_log(self) -> None:
+        budget = self.create_budget()
+
+        step = self.get_step(
+            budget,
+            ApprovalStep.Level.DEPARTMENT,
+        )
+
+        with self.assertRaises(ForceRollbackError), transaction.atomic():
+            decide(
+                user=self.hod,
+                step_id=step.id,
+                decision="approve",
+                comment="Approved",
+            )
+            raise ForceRollbackError("force rollback")
+
+        self.assertFalse(
+            AuditLog.objects.filter(
+                action="approval.decide",
+            ).exists()
+        )

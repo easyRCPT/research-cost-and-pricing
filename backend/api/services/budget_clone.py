@@ -7,15 +7,17 @@ from api.models import (
     Deliverable,
     NonStaffCostLine,
     StaffCostLine,
+    User,
     YearAllocation,
     YearAmount,
 )
+from api.services.audit import write_audit
 
 from .budget_state import require_rejected
 
 
 @transaction.atomic
-def clone_budget(budget: Budget) -> Budget:
+def clone_budget(user: User, budget: Budget) -> Budget:
     """Clone a rejected budget into a new draft budget."""
     # Raise 409 if budget is not at the status rejected
     require_rejected(budget)
@@ -40,7 +42,16 @@ def clone_budget(budget: Budget) -> Budget:
     _clone_non_staff_lines(budget, new_budget)
     _clone_deliverables(budget, new_budget)
 
-    # TODO: Audit log
+    write_audit(
+        actor=user,
+        action="budget.clone",
+        object_type="budget",
+        object_id=str(new_budget.id),
+        detail={
+            "cloned_from": budget.id,
+            "after": {"status": new_budget.status},
+        },
+    )
 
     return new_budget
 
