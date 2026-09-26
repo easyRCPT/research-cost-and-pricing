@@ -72,6 +72,11 @@ CONSTANTS = {
 LITERAL_CONSTANTS = {
     "in_kind_multiplier": (Decimal("1.7"), "Matches full cost recovery."),
     "gst_rate": (Decimal("0.10"), "Goods and Services Tax Amount"),
+    "default_margin": (Decimal("0.30"), "Default margin"),
+    "minimum_margin": (
+        Decimal("0.00"),
+        "Minimum margin that not requires dean approval",
+    ),
 }
 
 

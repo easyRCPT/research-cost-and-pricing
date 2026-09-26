@@ -6,6 +6,7 @@ from django.test import SimpleTestCase
 from api.calculation.pricing import (
     calculate_budget_summary,
     calculate_dean_required,
+    calculate_dean_required_with_dict,
     calculate_non_staff_budget,
     calculate_price_summary,
     calculate_staff_budget,
@@ -14,102 +15,138 @@ from api.calculation.pricing import (
 
 
 class TestCalculateDeanRequired(SimpleTestCase):
-    def test_requires_dean_when_cost_multiplier_is_below_default(self):
+    def test_requires_dean_when_margin_is_below_minimum(self):
+        result = calculate_dean_required(
+            margin=Decimal("0.20"),
+            minimum_margin=Decimal("0.25"),
+            has_in_kind=False,
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "dean_required": True,
+                "dean_triggers": ["margin_below_minimum"],
+            },
+        )
+
+    def test_does_not_require_dean_when_margin_equals_minimum(self):
+        result = calculate_dean_required(
+            margin=Decimal("0.25"),
+            minimum_margin=Decimal("0.25"),
+            has_in_kind=False,
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "dean_required": False,
+                "dean_triggers": [],
+            },
+        )
+
+    def test_does_not_require_dean_when_margin_is_above_minimum(self):
+        result = calculate_dean_required(
+            margin=Decimal("0.30"),
+            minimum_margin=Decimal("0.25"),
+            has_in_kind=False,
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "dean_required": False,
+                "dean_triggers": [],
+            },
+        )
+
+    def test_requires_dean_when_in_kind_cost_is_present(self):
+        result = calculate_dean_required(
+            margin=Decimal("0.30"),
+            minimum_margin=Decimal("0.25"),
+            has_in_kind=True,
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "dean_required": True,
+                "dean_triggers": ["in_kind_present"],
+            },
+        )
+
+    def test_returns_both_triggers_when_both_conditions_apply(self):
+        result = calculate_dean_required(
+            margin=Decimal("0.20"),
+            minimum_margin=Decimal("0.25"),
+            has_in_kind=True,
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "dean_required": True,
+                "dean_triggers": [
+                    "margin_below_minimum",
+                    "in_kind_present",
+                ],
+            },
+        )
+
+
+class TestCalculateDeanRequiredWithDict(SimpleTestCase):
+    def test_uses_margin_minimum_and_in_kind_cost_from_dicts(self):
         budget_info = {
-            "cost_multiplier": Decimal("0.8"),
-            "margin": Decimal("0.3"),
+            "margin": Decimal("0.20"),
         }
         general = {
-            "full_cost_recovery_multiplier": Decimal(1),
-            "minimum_margin": Decimal(0),
+            "minimum_margin": Decimal("0.25"),
+        }
+        price_summary = {
+            "in_kind_project_cost": Decimal(100),
         }
 
-        result = calculate_dean_required(budget_info, general)
+        result = calculate_dean_required_with_dict(
+            budget_info,
+            general,
+            price_summary,
+        )
 
-        self.assertTrue(result)
+        self.assertEqual(
+            result,
+            {
+                "dean_required": True,
+                "dean_triggers": [
+                    "margin_below_minimum",
+                    "in_kind_present",
+                ],
+            },
+        )
 
-    def test_does_not_require_dean_when_cost_multiplier_is_at_default(self):
+    def test_does_not_require_dean_when_no_trigger_applies(self):
         budget_info = {
-            "cost_multiplier": Decimal(1),
-            "margin": Decimal("0.3"),
-        }
-        general = {
-            "full_cost_recovery_multiplier": Decimal(1),
-            "minimum_margin": Decimal(0),
-        }
-
-        result = calculate_dean_required(budget_info, general)
-
-        self.assertFalse(result)
-
-    def test_requires_dean_when_margin_is_below_the_floor(self):
-        # A negative margin is a price below cost, which is the case the floor
-        # exists to route to a Dean.
-        budget_info = {
-            "cost_multiplier": Decimal(1),
-            "margin": Decimal("-0.1"),
-        }
-        general = {
-            "full_cost_recovery_multiplier": Decimal(1),
-            "minimum_margin": Decimal(0),
-        }
-
-        result = calculate_dean_required(budget_info, general)
-
-        self.assertTrue(result)
-
-    def test_does_not_require_dean_when_margin_is_exactly_the_floor(self):
-        budget_info = {
-            "cost_multiplier": Decimal(1),
-            "margin": Decimal(0),
-        }
-        general = {
-            "full_cost_recovery_multiplier": Decimal(1),
-            "minimum_margin": Decimal(0),
-        }
-
-        result = calculate_dean_required(budget_info, general)
-
-        self.assertFalse(result)
-
-    def test_a_margin_below_the_default_is_not_by_itself_a_dean_matter(self):
-        # Pricing under the starting margin is the ordinary case a Head of
-        # Department signs off; only the floor sends it further.
-        budget_info = {
-            "cost_multiplier": Decimal(1),
-            "margin": Decimal("0.05"),
-        }
-        general = {
-            "full_cost_recovery_multiplier": Decimal(1),
-            "default_margin": Decimal("0.30"),
-            "minimum_margin": Decimal(0),
-        }
-
-        result = calculate_dean_required(budget_info, general)
-
-        self.assertFalse(result)
-
-    def test_no_floor_configured_means_no_dean_on_margin_grounds(self):
-        budget_info = {
-            "cost_multiplier": Decimal(1),
-            "margin": Decimal("-0.5"),
-        }
-        general = {"full_cost_recovery_multiplier": Decimal(1)}
-
-        result = calculate_dean_required(budget_info, general)
-
-        self.assertFalse(result)
-
-    def test_does_not_require_dean_when_nothing_is_configured(self):
-        budget_info = {
-            "cost_multiplier": Decimal(1),
             "margin": Decimal("0.30"),
         }
-        general = {}
+        general = {
+            "minimum_margin": Decimal("0.25"),
+        }
+        price_summary = {
+            "in_kind_project_cost": Decimal(0),
+        }
 
-        result = calculate_dean_required(budget_info, general)
+        result = calculate_dean_required_with_dict(
+            budget_info,
+            general,
+            price_summary,
+        )
 
-        self.assertFalse(result)
+        self.assertEqual(
+            result,
+            {
+                "dean_required": False,
+                "dean_triggers": [],
+            },
+        )
 
 
 class TestCalculatePriceSummary(SimpleTestCase):
@@ -443,6 +480,13 @@ class TestCalculateBudgetSummary(SimpleTestCase):
             Decimal(500),
         )
         self.assertTrue(result["dean_required"])
+        self.assertEqual(
+            result["dean_triggers"],
+            [
+                "margin_below_minimum",
+                "in_kind_present",
+            ],
+        )
 
 
 class TestPricing(SimpleTestCase):

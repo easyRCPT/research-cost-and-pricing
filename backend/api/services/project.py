@@ -117,7 +117,7 @@ def build_row(project: Project) -> dict:
         "budget_id": latest.id if latest else None,
         "status": latest.status if latest else None,
         "budget_count": len(budgets),
-        "total_price_exc_gst": (latest.total_price_exc_gst if latest else Decimal(0)),
+        "total_price_inc_gst": (latest.total_price_inc_gst if latest else Decimal(0)),
         "updated_at": getattr(project, "last_activity", project.updated_at),
     }
 

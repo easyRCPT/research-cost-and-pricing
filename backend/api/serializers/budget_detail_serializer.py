@@ -2,6 +2,8 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
+from api.models import OnCostRate, SalaryRate, StaffCostLine
+
 # ------------------------------------------------------------------
 # Rounding
 # ------------------------------------------------------------------
@@ -31,9 +33,9 @@ class CostDecimalField(serializers.DecimalField):
 
 
 class ProjectInfoSerializer(serializers.Serializer):
-    title = serializers.CharField()
+    title = serializers.CharField(allow_blank=True)
     chief_investigator = serializers.CharField(allow_blank=True)
-    funder = serializers.CharField()
+    funder = serializers.CharField(allow_blank=True)
     department = serializers.CharField()
     faculty = serializers.CharField()
     scheme = serializers.CharField(allow_blank=True)
@@ -130,11 +132,10 @@ class StaffYearSerializer(serializers.Serializer):
 class StaffLineSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name_role = serializers.CharField()
-    employment_type = serializers.CharField()
-    category = serializers.CharField()
+    employment_type = serializers.ChoiceField(OnCostRate.EmploymentType.choices)
+    category = serializers.ChoiceField(SalaryRate.Category.choices)
     classification = serializers.CharField()
-    # TODO: ChoiceField(StaffCostLine.TimeBasis.choices) so the response type matches the input
-    time_basis = serializers.CharField()
+    time_basis = serializers.ChoiceField(StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField()
     in_kind_reason = serializers.CharField(allow_blank=True)
 

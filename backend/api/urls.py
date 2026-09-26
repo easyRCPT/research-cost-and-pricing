@@ -1,8 +1,10 @@
 from django.urls import path
 
-from . import views_auth
+from . import views_approvals, views_auth
 from .views import (
+    BudgetCloneView,
     BudgetDetailView,
+    BudgetSubmitView,
     DeliverableView,
     LookupTableView,
     LookupView,
@@ -12,6 +14,17 @@ from .views import (
 )
 
 urlpatterns = [
+    # Approvals
+    path(
+        "approvals/queue/",
+        views_approvals.ApprovalView.as_view(http_method_names=["get"]),
+        name="approvals-queue",
+    ),
+    path(
+        "approvals/<int:step_id>/decide/",
+        views_approvals.ApprovalDecideView.as_view(http_method_names=["post"]),
+        name="approvals-decide",
+    ),
     # Lookups
     path(
         "lookups/",
@@ -19,7 +32,7 @@ urlpatterns = [
         name="lookups",
     ),
     path(
-        "lookups/<table>/",
+        "lookups/<str:table>/",
         LookupTableView.as_view(http_method_names=["post", "patch"]),
         name="lookup-table",
     ),
@@ -45,6 +58,16 @@ urlpatterns = [
         "budgets/<int:budget_id>/",
         BudgetDetailView.as_view(http_method_names=["get", "patch"]),
         name="budget-detail",
+    ),
+    path(
+        "budgets/<int:budget_id>/submit/",
+        BudgetSubmitView.as_view(http_method_names=["post"]),
+        name="submission",
+    ),
+    path(
+        "budgets/<int:budget_id>/clone/",
+        BudgetCloneView.as_view(http_method_names=["post"]),
+        name="clone",
     ),
     # Staff lines
     path(

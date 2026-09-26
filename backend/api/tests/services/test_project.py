@@ -127,14 +127,14 @@ class TestTouch(ProjectTestMixin, TestCase):
         budget = self.create_budget(
             self.create_project(self.create_department()),
             status=Budget.Status.APPROVED,
-            total_price_exc_gst=Decimal("500.00"),
+            total_price_inc_gst=Decimal("500.00"),
         )
 
         budget.touch()
 
         budget.refresh_from_db()
         self.assertEqual(budget.status, Budget.Status.APPROVED)
-        self.assertEqual(budget.total_price_exc_gst, Decimal("500.00"))
+        self.assertEqual(budget.total_price_inc_gst, Decimal("500.00"))
 
     def test_a_line_edit_reaches_the_projects_list(self):
         # The point of touch(): a budget's own columns do not move when a cost
@@ -311,10 +311,10 @@ class TestListProjects(ProjectTestMixin, TestCase):
 
     def test_reads_the_price_off_the_budget(self):
         project = self.create_project(self.create_department())
-        self.create_budget(project, total_price_exc_gst=Decimal("12345.67"))
+        self.create_budget(project, total_price_inc_gst=Decimal("12345.67"))
 
         self.assertEqual(
-            list_projects(self.owner())[0]["total_price_exc_gst"],
+            list_projects(self.owner())[0]["total_price_inc_gst"],
             Decimal("12345.67"),
         )
 
@@ -326,7 +326,7 @@ class TestListProjects(ProjectTestMixin, TestCase):
         self.assertIsNone(row["status"])
         self.assertIsNone(row["budget_id"])
         self.assertEqual(row["budget_count"], 0)
-        self.assertEqual(row["total_price_exc_gst"], Decimal(0))
+        self.assertEqual(row["total_price_inc_gst"], Decimal(0))
 
     def test_newest_activity_first(self):
         department = self.create_department()

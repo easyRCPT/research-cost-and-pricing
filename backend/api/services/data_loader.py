@@ -43,7 +43,7 @@ def build_project_info(project: Project) -> dict:
         "chief_investigator": project.chief_investigator,
         "funder": project.funder,
         "department": project.department.name,
-        "faculty": project.department.faculty,
+        "faculty": project.department.faculty.name,
         "scheme": project.scheme,
         "start_year": project.start_year,
         "start_month": project.start_month,
