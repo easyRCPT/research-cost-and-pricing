@@ -106,7 +106,7 @@ class ProjectRowSerializerTestCase(TestCase):
             "budget_id": 4,
             "status": Budget.Status.DRAFT,
             "budget_count": 1,
-            "total_price_exc_gst": Decimal("1234.5678"),
+            "total_price_inc_gst": Decimal("1234.5678"),
             "updated_at": "2026-09-17T00:00:00Z",
             **overrides,
         }
@@ -114,7 +114,7 @@ class ProjectRowSerializerTestCase(TestCase):
     def test_rounds_the_price_to_cents(self):
         data = get_data(ProjectRowSerializer(self.row()))
 
-        self.assertEqual(data["total_price_exc_gst"], Decimal("1234.57"))
+        self.assertEqual(data["total_price_inc_gst"], Decimal("1234.57"))
 
     def test_a_project_with_no_budget(self):
         data = get_data(

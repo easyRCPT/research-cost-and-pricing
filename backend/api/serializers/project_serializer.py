@@ -24,7 +24,7 @@ class ProjectRowSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=Budget.Status.choices, allow_null=True)
     budget_count = serializers.IntegerField()
 
-    total_price_exc_gst = CostDecimalField(max_digits=14, decimal_places=2)
+    total_price_inc_gst = CostDecimalField(max_digits=14, decimal_places=2)
 
     updated_at = serializers.DateTimeField()
 

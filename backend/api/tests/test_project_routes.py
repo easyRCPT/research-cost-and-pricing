@@ -75,12 +75,12 @@ class ProjectRoutesTestCase(TestCase):
             content_type="application/json",
         ).json()
         Budget.objects.filter(pk=created["budget_id"]).update(
-            total_price_exc_gst=Decimal("98765.43")
+            total_price_inc_gst=Decimal("98765.43")
         )
 
         body = self.client.get(self.url).json()
 
-        self.assertEqual(body[0]["total_price_exc_gst"], 98765.43)
+        self.assertEqual(body[0]["total_price_inc_gst"], 98765.43)
 
     def test_rejects_a_project_that_ends_before_it_starts(self):
         response = self.client.post(
