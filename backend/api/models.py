@@ -123,10 +123,13 @@ class UserManager(BaseUserManager["User"]):
 
 
 class User(AbstractUser):
-    # Signed in by email, because that is what the University issues and what
-    # every door asks for. AbstractUser's username is dropped rather than
-    # filled with a copy of the email: two fields holding one fact are free to
-    # disagree, and this is the fact people type.
+    """
+    Signed in by email, because that is what the University issues and what
+    every door asks for. AbstractUser's username is dropped rather than
+    filled with a copy of the email: two fields holding one fact are free to
+    disagree, and this is the fact people type.
+    """
+
     if TYPE_CHECKING:
         id: int
         org_assignments: RelatedManager["UserOrgAssignment"]
@@ -162,12 +165,14 @@ class User(AbstractUser):
 
 
 class UserOrgAssignment(models.Model):
-    # This person, in this part of the university, in this role.
-    #
-    # There is no hod or dean group, and there should not be one: a group says
-    # which door someone comes in through, and a group alone cannot say *which*
-    # department someone heads. The scope is the whole of the approval rule, so
-    # the row that carries the scope is the only record of the fact.
+    """
+    This person, in this part of the university, in this role.
+
+    There is no hod or dean group, and there should not be one: a group says
+    which door someone comes in through, and a group alone cannot say *which*
+    department someone heads. The scope is the whole of the approval rule, so
+    the row that carries the scope is the only record of the fact.
+    """
 
     if TYPE_CHECKING:
         id: int
@@ -244,10 +249,13 @@ class UserOrgAssignment(models.Model):
 
 
 class SalaryRateMultiplier(models.Model):
-    # tSalaryRateMultiplier. Converts a stored rate to the entered time basis:
-    # FTE 1, Daily 1/220, Hourly 1. Hourly is 1 because Casual rows in
-    # SalaryRate are already hourly rates, not because hourly needs no
-    # conversion in general.
+    """
+    tSalaryRateMultiplier. Converts a stored rate to the entered time basis:
+    FTE 1, Daily 1/220, Hourly 1. Hourly is 1 because Casual rows in
+    SalaryRate are already hourly rates, not because hourly needs no
+    conversion in general.
+    """
+
     if TYPE_CHECKING:
         id: int
 
@@ -427,9 +435,12 @@ class OnCostRate(models.Model):
 
 
 class NonStaffCostCategory(models.Model):
-    # The expense types a non-staff cost line can be booked against. Each one
-    # carries the finance ledger ID that ends up on the budget form, which is
-    # what lets Finance code the spend. Source: Lookup Tables H132:J149.
+    """
+    The expense types a non-staff cost line can be booked against. Each one
+    carries the finance ledger ID that ends up on the budget form, which is
+    what lets Finance code the spend. Source: Lookup Tables H132:J149.
+    """
+
     ledger_id = models.PositiveIntegerField(primary_key=True)
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
@@ -439,8 +450,11 @@ class NonStaffCostCategory(models.Model):
 
 
 class CalculationConstant(models.Model):
-    # Standalone numbers the costing engine needs that don't belong to any
-    # lookup table. Stored as rows rather than Python constants
+    """
+    Standalone numbers the costing engine needs that don't belong to any
+    lookup table. Stored as rows rather than Python constants
+    """
+
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
     value = models.DecimalField(
@@ -599,12 +613,14 @@ class Project(models.Model):
 
 # TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
-    # One costed attempt at a project. A project can carry several: a first
-    # attempt, a revision after a rejection, a variant for a different funder,
-    # which is the thing the workbook cannot do, since one file is one budget.
-    #
-    # The multipliers are stored per budget rather than read from
-    # CalculationConstant at calculation time.
+    """
+    One costed attempt at a project. A project can carry several: a first
+    attempt, a revision after a rejection, a variant for a different funder,
+    which is the thing the workbook cannot do, since one file is one budget.
+
+    The multipliers are stored per budget rather than read from
+    CalculationConstant at calculation time.
+    """
 
     if TYPE_CHECKING:
 
@@ -735,14 +751,16 @@ class Budget(models.Model):
 
 
 class ApprovalStep(models.Model):
-    # One review a budget has to pass. Created in pairs at submit: a department
-    # step that is always required, and a faculty step that is marked
-    # not_required when no dean trigger fired, so the history reads straight
-    # either way rather than going quiet when no Dean was needed.
-    #
-    # There is no signature field, and there should not be one. The
-    # authenticated login, the decision and the timestamp are the evidence;
-    # nothing drawn, typed or uploaded is collected.
+    """
+    One review a budget has to pass. Created in pairs at submit: a department
+    step that is always required, and a faculty step that is marked
+    not_required when no dean trigger fired, so the history reads straight
+    either way rather than going quiet when no Dean was needed.
+
+    There is no signature field, and there should not be one. The
+    authenticated login, the decision and the timestamp are the evidence;
+    nothing drawn, typed or uploaded is collected.
+    """
 
     if TYPE_CHECKING:
         id: int
@@ -809,6 +827,44 @@ class ApprovalStep(models.Model):
 
     def __str__(self):
         return f"{self.get_level_display()} ({self.get_status_display()})"
+
+
+class AuditLog(models.Model):
+    """
+    Immutable record of important system changes.
+
+    Audit logs are append-only. They record who performed an action,
+    what object was affected, and the details of the change.
+    """
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="audit_logs",
+    )
+
+    action = models.CharField(max_length=60)
+    object_type = models.CharField(max_length=60)
+    object_id = models.CharField(max_length=60)
+    detail = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["-created_at"],
+                name="audit_created_desc_idx",
+            ),
+            models.Index(
+                fields=["action"],
+                name="audit_action_idx",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.action} {self.object_type}:{self.object_id}"
 
 
 class Deliverable(models.Model):
@@ -900,8 +956,10 @@ class StaffCostLine(models.Model):
 
 
 class YearAllocation(models.Model):
-    # How much time a staff line commits in one project year. Separate rows
-    # rather than fixed year columns, so a project can run any number of years.
+    """
+    How much time a staff line commits in one project year. Separate rows
+    rather than fixed year columns, so a project can run any number of years.
+    """
 
     staff_line = models.ForeignKey(
         "StaffCostLine", related_name="allocations", on_delete=models.CASCADE

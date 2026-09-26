@@ -2,7 +2,6 @@ from typing import cast
 
 from django.db import transaction
 
-from api.exceptions import Conflict
 from api.models import (
     Budget,
     Deliverable,
@@ -11,6 +10,7 @@ from api.models import (
     YearAllocation,
     YearAmount,
 )
+
 from .budget_state import require_rejected
 
 
