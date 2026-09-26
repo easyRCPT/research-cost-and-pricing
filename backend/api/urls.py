@@ -2,6 +2,7 @@ from django.urls import path
 
 from . import views_approvals, views_auth
 from .views import (
+    BudgetCloneView,
     BudgetDetailView,
     BudgetSubmitView,
     DeliverableView,
@@ -62,6 +63,11 @@ urlpatterns = [
         "budgets/<int:budget_id>/submit/",
         BudgetSubmitView.as_view(http_method_names=["post"]),
         name="submission",
+    ),
+    path(
+        "budgets/<int:budget_id>/clone/",
+        BudgetCloneView.as_view(http_method_names=["post"]),
+        name="clone",
     ),
     # Staff lines
     path(

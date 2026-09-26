@@ -30,6 +30,7 @@ from .serializers.project_serializer import (
 )
 from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
+    budget_clone,
     budget_details,
     budget_update,
     deliverable,
@@ -41,7 +42,7 @@ from .services import (
     submission,
     submission_validation,
 )
-from .services.budget_state import require_editable
+from .services.budget_state import require_editable, require_ownership
 
 
 class ProjectView(APIView):
@@ -114,6 +115,26 @@ class BudgetSubmitView(APIView):
         submission.submit_budget(budget)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class BudgetCloneView(APIView):
+    @extend_schema(responses={201: BudgetDetailSerializer})
+    def post(self, request: Request, budget_id: int) -> Response:
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
+        # Only the owner can clone the budget
+        require_ownership(request.user, budget)
+
+        # Clone the budget
+        cloned_budget = budget_clone.clone_budget(budget)
+
+        result = budget_details.get_budget_details(cloned_budget)
+
+        serializer = BudgetDetailSerializer(result)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class StaffLineView(APIView):

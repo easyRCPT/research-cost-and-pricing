@@ -11,14 +11,14 @@ from api.models import (
     YearAllocation,
     YearAmount,
 )
+from .budget_state import require_rejected
 
 
 @transaction.atomic
 def clone_budget(budget: Budget) -> Budget:
     """Clone a rejected budget into a new draft budget."""
     # Raise 409 if budget is not at the status rejected
-    if budget.status != Budget.Status.REJECTED:
-        raise Conflict("Only rejected budget can be cloned.")
+    require_rejected(budget)
 
     new_budget = Budget.objects.create(
         project=budget.project,

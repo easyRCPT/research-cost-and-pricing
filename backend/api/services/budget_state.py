@@ -21,8 +21,20 @@ def require_draft(budget: Budget) -> None:
         )
 
 
-def require_editable(user, budget: Budget) -> None:
-    """Only if is owner and a draft can a budget be edited"""
+def require_rejected(budget: Budget) -> None:
+    if budget.status != Budget.Status.REJECTED:
+        raise Conflict(
+            f"Budget {budget.id} is {budget.get_status_display().lower()} "
+            f"and cannot be cloned.",
+        )
+
+
+def require_ownership(user, budget: Budget) -> None:
     if budget.project.created_by_id != user.pk:
         raise PermissionDenied("Only the person who created this budget can edit it")
+
+
+def require_editable(user, budget: Budget) -> None:
+    """Only if is owner and a draft can a budget be edited"""
+    require_ownership(user, budget)
     require_draft(budget)
