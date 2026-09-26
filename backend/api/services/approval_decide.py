@@ -28,6 +28,7 @@ def decide(
 
     budget = step.budget
 
+    # Record step decision
     step.status = (
         ApprovalStep.Status.APPROVED
         if decision == "approve"
@@ -76,10 +77,15 @@ def decide(
         else:
             raise Conflict("The approval workflow is in an invalid state.")
 
-    budget.save(update_fields=["status"])
+    # Record current lookup version as referenced version
+    config = LookupConfiguration.objects.select_for_update().get()
+    budget.lookup_version_id = config.current_version_id
+
+    budget.save(update_fields=["lookup_version", "status"])
 
     # Mark current lookup version as referenced
-    config = LookupConfiguration.objects.select_for_update().get()
+    # After a change to versioned lookup tables, a new lookup version
+    # will be created. This budget will continue using its recorded version
     config.referenced = True
     config.save(update_fields=["referenced"])
 

@@ -66,11 +66,20 @@ class ApprovalDecideTest(TestCase):
 
         cls.lookup_version = LookupVersion.objects.create()
 
-        LookupConfiguration.objects.get_or_create(
+        config, _ = LookupConfiguration.objects.get_or_create(
             id=1,
             defaults={
                 "current_version": cls.lookup_version,
             },
+        )
+
+        config.current_version = cls.lookup_version
+        config.referenced = False
+        config.save(
+            update_fields=[
+                "current_version",
+                "referenced",
+            ],
         )
 
         UserOrgAssignment.objects.create(
@@ -150,14 +159,22 @@ class ApprovalDecideTest(TestCase):
             step.status,
             ApprovalStep.Status.APPROVED,
         )
+
         self.assertEqual(
             step.decided_by,
             self.hod,
         )
+
         self.assertEqual(
             budget.status,
             Budget.Status.DEAN_REVIEW,
         )
+
+        self.assertEqual(
+            budget.lookup_version_id,
+            self.lookup_version.id,
+        )
+
         self.assertTrue(config.referenced)
 
     def test_hod_can_reject_department_step(self) -> None:
@@ -198,6 +215,11 @@ class ApprovalDecideTest(TestCase):
         self.assertEqual(
             faculty_step.status,
             ApprovalStep.Status.NOT_REQUIRED,
+        )
+
+        self.assertEqual(
+            budget.lookup_version_id,
+            self.lookup_version.id,
         )
 
         self.assertTrue(config.referenced)
