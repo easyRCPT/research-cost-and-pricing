@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget Review Required</title>
+</head>
+<body>
+<p>
+  A budget requires <strong>Head of Department</strong> review.
+</p>
+
+<p>
+  <strong>Project:</strong>
+  {{ budget.project.title }}
+</p>
+
+<p>
+  <strong>Department:</strong>
+  {{ budget.project.department.name }}
+</p>
+
+<p>
+  <a href="{{ url }}">Open budget</a>
+</p>
+
+</body>
+</html>

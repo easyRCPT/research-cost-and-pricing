@@ -11,6 +11,7 @@ from api.models import (
     UserOrgAssignment,
 )
 from api.services.audit import write_audit
+from api.services.notification import notify_budget_decision, notify_dean_review
 
 
 @transaction.atomic
@@ -74,7 +75,8 @@ def decide(
         if faculty_step.status == ApprovalStep.Status.PENDING:
             budget.status = Budget.Status.DEAN_REVIEW
 
-            # TODO: notify dean
+            # Notify Dean review
+            notify_dean_review(budget)
 
         # Mark budget as approved if HoD approves and dean review not required
         elif faculty_step.status == ApprovalStep.Status.NOT_REQUIRED:
@@ -94,7 +96,8 @@ def decide(
     config.referenced = True
     config.save(update_fields=["referenced"])
 
-    # TODO: notify budget owner
+    # Notify budget owner that a decision is made
+    notify_budget_decision(budget, decision=decision, comment=comment)
 
     write_audit(
         actor=user,

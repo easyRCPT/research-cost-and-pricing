@@ -10,6 +10,7 @@ from api.models import (
     User,
 )
 from api.services.audit import write_audit
+from api.services.notification import notify_hod_review
 
 
 @transaction.atomic
@@ -54,7 +55,8 @@ def submit_budget(actor: User, budget: Budget) -> None:
     budget.submitted_at = timezone.now()
     budget.save(update_fields=["dean_triggers", "status", "submitted_at"])
 
-    # TODO: Notify HoD
+    # Notify HOD review
+    notify_hod_review(budget)
 
     write_audit(
         actor=actor,

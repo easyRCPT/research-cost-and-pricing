@@ -1,0 +1,16 @@
+A budget requires Dean review.
+
+Project:
+{{ budget.project.title }}
+
+Department:
+{{ budget.project.department.name }}
+
+Dean approval is required because:
+
+{% for trigger in triggers %}
+- {{ trigger }}
+{% endfor %}
+
+Please review the budget in RCPT:
+{{ url }}
