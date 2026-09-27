@@ -57,7 +57,7 @@ def uuid_key():
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api", "0025_project_owner_required"),
+        ("api", "0029_auditlog"),
     ]
 
     operations = [
