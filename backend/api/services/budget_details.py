@@ -20,7 +20,7 @@ def get_budget_details(budget: Budget) -> dict:
 
 def store_price(budget: Budget, details: dict) -> None:
     """
-    Keep Budget.total_price_exc_gst in step with what the engine just returned,
+    Keep Budget.total_price_inc_gst in step with what the engine just returned,
     so the projects list can read a price without pricing every project.
 
     Every route that changes a priced field comes through here, and so does a
@@ -29,14 +29,14 @@ def store_price(budget: Budget, details: dict) -> None:
     read-only in the ordinary case. updated_at is left out of update_fields
     deliberately: syncing a price is not an edit to the budget.
     """
-    price = details["budget_summary"]["price_summary"]["total_price_exc_gst"]
+    price = details["budget_summary"]["price_summary"]["total_price_inc_gst"]
     price = Decimal(price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-    if budget.total_price_exc_gst == price:
+    if budget.total_price_inc_gst == price:
         return
 
-    budget.total_price_exc_gst = price
-    budget.save(update_fields=["total_price_exc_gst"])
+    budget.total_price_inc_gst = price
+    budget.save(update_fields=["total_price_inc_gst"])
 
 
 def build_budget_details(constants: dict, budget_data: dict) -> dict:

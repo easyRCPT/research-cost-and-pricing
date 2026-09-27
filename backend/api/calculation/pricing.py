@@ -105,36 +105,37 @@ def calculate_budget_summary(
         "staff_budget": staff_budget,
         "non_staff_budget": non_staff_budget,
         "in_kind_costs": in_kind_costs,
-        "dean_required": calculate_dean_required(budget_info, general),
+        **calculate_dean_required_with_dict(budget_info, general, price_summary),
     }
 
 
-def calculate_dean_required(
+def calculate_dean_required_with_dict(
     budget_info: dict,
     general: dict,
-) -> bool:
+    price_summary: dict,
+) -> dict:
+    return calculate_dean_required(
+        budget_info["margin"],
+        general["minimum_margin"],
+        price_summary["in_kind_project_cost"] > 0,
+    )
+
+
+def calculate_dean_required(
+    margin: Decimal,
+    minimum_margin: Decimal,
+    has_in_kind: bool,
+) -> dict:
     """
-    A budget priced below the default cost recovery multiplier, or below the
-    margin floor, needs a Dean's authorisation as well as the Head of
-    Department's.
-
-    The floor is minimum_margin, not default_margin: what a budget starts at
-    and what it may not go below without a Dean are two different decisions,
-    and pricing at less than the default is the ordinary case a Head of
-    Department signs off. Both are rows, so moving either is a lookup edit
-    rather than a deploy.
+    Dean review on top of the Head of Department's, when the price is below
+    the margin floor or the University is contributing in kind.
     """
-    default_multiplier = general.get("full_cost_recovery_multiplier")
-    if default_multiplier is not None and (
-        budget_info["cost_multiplier"] < default_multiplier
-    ):
-        return True
-
-    minimum_margin = general.get("minimum_margin")
-    if minimum_margin is None:
-        return False
-
-    return budget_info["margin"] < minimum_margin
+    triggers = []
+    if margin < minimum_margin:
+        triggers.append("margin_below_minimum")
+    if has_in_kind:
+        triggers.append("in_kind_present")
+    return {"dean_required": bool(triggers), "dean_triggers": triggers}
 
 
 def calculate_price_summary(
