@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-import type { Deliverable, NonStaffLine, StaffLine } from '@/types'
+import type { Deliverable, NonStaffLine, EditableStaffLine } from '@/types'
 import { useBudgetId } from './context'
 
 /**
@@ -16,7 +16,7 @@ import { useBudgetId } from './context'
  * description and a type before the model will hold it.
  */
 export interface Drafts {
-  staff: StaffLine[]
+  staff: EditableStaffLine[]
   non_staff: NonStaffLine[]
   deliverable: Deliverable[]
 }

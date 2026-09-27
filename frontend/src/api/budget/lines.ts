@@ -8,8 +8,10 @@ import { emptyNonStaffLine } from '@/lib/non-staff'
 import { emptyStaffLine, isRated } from '@/lib/staff'
 import type {
   BudgetDetail,
+  EditableStaffLine,
   NonStaffLine,
   NonStaffLineInput,
+  RatedStaffLine,
   StaffLine,
   StaffLineInput,
 } from '@/types'
@@ -34,7 +36,7 @@ export interface Lines<T> {
   removeLine: (id: number) => void
 }
 
-export type StaffLines = Lines<StaffLine>
+export type StaffLines = Lines<EditableStaffLine>
 export type NonStaffLines = Lines<NonStaffLine>
 
 /** Fields of a staff row the API takes one at a time. */
@@ -213,7 +215,7 @@ function useLineMutations() {
 // Staff
 // ------------------------------------------------------------------
 
-const toStaffInput = (line: StaffLine): StaffLineInput => ({
+const toStaffInput = (line: RatedStaffLine): StaffLineInput => ({
   name_role: line.name_role,
   employment_type: line.employment_type as StaffLineInput['employment_type'],
   category: line.category as StaffLineInput['category'],
@@ -239,9 +241,11 @@ const toStaffInput = (line: StaffLine): StaffLineInput => ({
  */
 const withEnteredTime = (
   line: StaffLine,
-  patch: Partial<StaffLine>,
+  patch: Partial<EditableStaffLine>,
 ): StaffLine => {
-  const merged = { ...line, ...patch }
+  // This helper only echoes edits to saved server rows. Choice controls only
+  // offer API enum values, so those fields remain within the response type.
+  const merged = { ...line, ...patch } as StaffLine
   if (!patch.by_year) return merged
 
   return {
@@ -255,10 +259,12 @@ const withEnteredTime = (
 
 /** The row as it is shown, patched in place wherever the reply put it. */
 const echoStaffLine =
-  (id: number, patch: Partial<StaffLine>) =>
+  (id: number, patch: Partial<EditableStaffLine>) =>
   (budget: BudgetDetail): BudgetDetail => {
     const apply = (lines: StaffLine[]) =>
-      lines.map((line) => (line.id === id ? withEnteredTime(line, patch) : line))
+      lines.map((line) =>
+        line.id === id ? withEnteredTime(line, patch) : line,
+      )
 
     return {
       ...budget,
@@ -339,7 +345,7 @@ export function useStaffLines(years: number[]): StaffLines {
     if (blanks === 0) ensureBlankStaffRows(budgetId, years, saved.length)
   }, [blanks, saved.length, budgetId, years])
 
-  const writeDrafts = (rows: StaffLine[]) =>
+  const writeDrafts = (rows: EditableStaffLine[]) =>
     setDrafts(budgetId, { ...getDrafts(budgetId), staff: rows })
 
   return {
@@ -375,7 +381,9 @@ export function useStaffLines(years: number[]): StaffLines {
         // that was no longer on screen.
         if (isRated(next)) {
           writeDrafts(
-            getDrafts(budgetId).staff.map((row) => (row.id === id ? next : row)),
+            getDrafts(budgetId).staff.map((row) =>
+              row.id === id ? next : row,
+            ),
           )
           const key = inFlight(budgetId, id)
           if (!creating.has(key)) {
