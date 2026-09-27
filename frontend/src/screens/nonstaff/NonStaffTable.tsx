@@ -10,8 +10,8 @@ interface NonStaffTableProps {
   lines: NonStaffLine[]
   years: number[]
   categories: NonStaffCategory[]
-  patchLine: (id: number, patch: Partial<NonStaffLine>) => void
-  removeLine: (id: number) => void
+  patchLine: (id: string, patch: Partial<NonStaffLine>) => void
+  removeLine: (id: string) => void
   addLine: () => void
 }
 

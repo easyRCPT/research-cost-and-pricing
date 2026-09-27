@@ -42,10 +42,12 @@ export const lineTotal = (line: NonStaffLine, years: number[]) =>
   years.reduce((sum, year) => sum + amountFor(line, year), 0)
 
 export const emptyNonStaffLine = (
-  id: number,
+  id: string,
   years: number[],
 ): NonStaffLine => ({
   id,
+  // The server appends it on create.
+  position: 0,
   cost_group: '',
   expense_type: '',
   description: '',

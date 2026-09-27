@@ -100,6 +100,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
     def test_builds_staff_info_table(self):
         line_1 = Mock(spec=StaffCostLine)
         line_1.id = 1
+        line_1.position = 0
         line_1.name_role = "Researcher"
         line_1.employment_type = "Continuing"
         line_1.category = "Academic"
@@ -110,6 +111,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
 
         line_2 = Mock(spec=StaffCostLine)
         line_2.id = 2
+        line_2.position = 1
         line_2.name_role = "Research Assistant"
         line_2.employment_type = "Casual"
         line_2.category = "Professional"
@@ -124,6 +126,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
             result,
             {
                 1: {
+                    "position": 0,
                     "name_role": "Researcher",
                     "employment_type": "Continuing",
                     "category": "Academic",
@@ -133,6 +136,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "in_kind_reason": "",
                 },
                 2: {
+                    "position": 1,
                     "name_role": "Research Assistant",
                     "employment_type": "Casual",
                     "category": "Professional",
@@ -202,6 +206,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
 
         line = Mock(spec=NonStaffCostLine)
         line.id = 1
+        line.position = 0
         line.category = category
         line.description = "Computer"
         line.in_kind = False
@@ -215,6 +220,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
             result,
             {
                 1: {
+                    "position": 0,
                     "cost_group": "Equipment",
                     "expense_type": "Equipment",
                     "description": "Computer",

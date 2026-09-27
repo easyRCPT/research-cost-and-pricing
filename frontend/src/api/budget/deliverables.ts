@@ -14,7 +14,6 @@ import type { BudgetDetail, Deliverable } from '@/types'
 import { useBudgetId } from './context'
 import { budgetKey, useBudget } from './detail'
 import { getDrafts, isDraft, setDrafts, useDrafts } from './drafts'
-import { nextTempId } from '@/lib/utils'
 import {
   reportWriteError,
   useEdit,
@@ -31,6 +30,9 @@ export interface Deliverables {
 }
 
 /** Fields the API takes one at a time, under their own names. */
+const nextTempId = (rows: readonly { id: number }[]) =>
+  Math.min(0, ...rows.map((row) => row.id)) - 1
+
 const FIELDS = new Set<string>([
   'number',
   'description',

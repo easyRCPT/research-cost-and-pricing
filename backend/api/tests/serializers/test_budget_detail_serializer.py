@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import cast
+from uuid import UUID
 
 from django.test import SimpleTestCase
 
@@ -7,6 +8,8 @@ from api.serializers.budget_detail_serializer import (
     BudgetDetailSerializer,
     CostDecimalField,
 )
+
+LINE_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 class CostDecimalFieldTestCase(SimpleTestCase):
@@ -77,8 +80,9 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
             },
             "staff_table": {
                 "cost_results": {
-                    1: {
+                    LINE_ID: {
                         "info": {
+                            "position": 0,
                             "name_role": "Research Assistant",
                             "employment_type": "Continuing",
                             "category": "Academic",
@@ -118,8 +122,9 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
             },
             "non_staff_table": {
                 "cost_results": {
-                    1: {
+                    LINE_ID: {
                         "info": {
+                            "position": 0,
                             "cost_group": "Travel",
                             "expense_type": "Domestic",
                             "description": "Travel expenses",
@@ -250,7 +255,8 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
             data["staff_cost"]["lines"],
             [
                 {
-                    "id": 1,
+                    "id": str(LINE_ID),
+                    "position": 0,
                     "name_role": "Research Assistant",
                     "employment_type": "Continuing",
                     "category": "Academic",
@@ -312,7 +318,8 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
             data["non_staff_cost"]["lines"],
             [
                 {
-                    "id": 1,
+                    "id": str(LINE_ID),
+                    "position": 0,
                     "cost_group": "Travel",
                     "expense_type": "Domestic",
                     "description": "Travel expenses",

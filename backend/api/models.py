@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING, ClassVar
 
@@ -915,12 +916,17 @@ class StaffCostLine(models.Model):
         HOURLY = "Hourly", "Hourly"
 
     if TYPE_CHECKING:
-        id: int
         allocations: RelatedManager["YearAllocation"]
 
+    # Minted by the browser when the row is added, so it has an id before the
+    # server has seen it.
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     budget = models.ForeignKey(
         "Budget", related_name="staff_lines", on_delete=models.CASCADE
     )
+    position = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     name_role = models.CharField(max_length=100)
 
     # Reused from the lookup models so the valid values cannot drift apart.
@@ -941,6 +947,7 @@ class StaffCostLine(models.Model):
     in_kind_reason = models.CharField(max_length=200, blank=True, default="")
 
     class Meta:
+        ordering = ["position", "created_at"]
         constraints = [
             # A reason belongs to a tick. Without this the column could carry
             # an explanation for a cost nobody is absorbing, which reads as
@@ -992,14 +999,17 @@ class NonStaffCostLine(models.Model):
     """
 
     if TYPE_CHECKING:
-        id: int
         category_id: int
         amounts: RelatedManager["YearAmount"]
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # Carries reference data, FK allows that data to be connected
     budget = models.ForeignKey(
         "Budget", related_name="non_staff_lines", on_delete=models.CASCADE
     )
+    position = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     category = models.ForeignKey("NonStaffCostCategory", on_delete=models.PROTECT)
 
@@ -1024,6 +1034,7 @@ class NonStaffCostLine(models.Model):
     )
 
     class Meta:
+        ordering = ["position", "created_at"]
         constraints = [
             # A reason belongs to a tick. Without this the column could carry
             # an explanation for a cost nobody is absorbing, which reads as

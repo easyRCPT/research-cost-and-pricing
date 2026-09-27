@@ -12,9 +12,9 @@ ROUTES = [
     ("get", "budget-detail", [1]),
     ("patch", "budget-detail", [1]),
     ("post", "staff-line", [1]),
-    ("delete", "staff-line-detail", [1, 1]),
+    ("delete", "staff-line-detail", [1, "00000000-0000-0000-0000-000000000001"]),
     ("post", "non-staff-line", [1]),
-    ("delete", "non-staff-line-detail", [1, 1]),
+    ("delete", "non-staff-line-detail", [1, "00000000-0000-0000-0000-000000000001"]),
     ("post", "deliverable", [1]),
     ("delete", "deliverable-detail", [1, 1]),
 ]

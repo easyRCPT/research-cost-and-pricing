@@ -109,10 +109,12 @@ export const withTime = (
   }))
 
 export const emptyStaffLine = (
-  id: number,
+  id: string,
   years: number[],
 ): EditableStaffLine => ({
   id,
+  // The server appends it on create.
+  position: 0,
   name_role: '',
   employment_type: '',
   category: '',

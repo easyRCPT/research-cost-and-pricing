@@ -38,10 +38,10 @@ interface StaffTableBodyProps {
   years: number[]
   salaryRates: SalaryRate[]
   multipliers: SalaryRateMultiplier[]
-  ciId: number | null
+  ciId: string | null
   ciIncluded: boolean
-  patchLine: (id: number, patch: Partial<EditableStaffLine>) => void
-  removeLine: (id: number) => void
+  patchLine: (id: string, patch: Partial<EditableStaffLine>) => void
+  removeLine: (id: string) => void
 }
 
 export function StaffTableBody({

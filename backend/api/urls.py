@@ -76,7 +76,7 @@ urlpatterns = [
         name="staff-line",
     ),
     path(
-        "budgets/<int:budget_id>/staff-lines/<int:line_id>/",
+        "budgets/<int:budget_id>/staff-lines/<uuid:line_id>/",
         StaffLineView.as_view(http_method_names=["delete"]),
         name="staff-line-detail",
     ),
@@ -87,7 +87,7 @@ urlpatterns = [
         name="non-staff-line",
     ),
     path(
-        "budgets/<int:budget_id>/non-staff-lines/<int:line_id>/",
+        "budgets/<int:budget_id>/non-staff-lines/<uuid:line_id>/",
         NonStaffLineView.as_view(http_method_names=["delete"]),
         name="non-staff-line-detail",
     ),

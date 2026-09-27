@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from ..models import OnCostRate, SalaryRate, StaffCostLine
 from ..services.staff_time_validation import check_time_against_basis
+from .line_id import validate_new_line_id
 
 
 class YearAllocationSerializer(serializers.Serializer):
@@ -15,6 +16,7 @@ class YearAllocationSerializer(serializers.Serializer):
 
 @extend_schema_serializer(component_name="StaffLineInput")
 class StaffLineSerializer(serializers.Serializer):
+    id = serializers.UUIDField(required=False, validators=[validate_new_line_id])
     name_role = serializers.CharField(max_length=100)
     employment_type = serializers.ChoiceField(choices=OnCostRate.EmploymentType.choices)
     category = serializers.ChoiceField(choices=SalaryRate.Category.choices)
