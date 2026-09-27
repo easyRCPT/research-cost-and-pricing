@@ -131,8 +131,7 @@ def calculate_dean_required(
     the margin floor or the University is contributing in kind.
     """
     triggers = []
-    # TODO(#87): the floor is seeded at 0.30, and "<" rather than "<=", until
-    #  Frank sets the margin policy.
+    # TODO(#87): the floor is seeded at 0, until Frank sets the margin policy.
     if margin < minimum_margin:
         triggers.append("margin_below_minimum")
     if has_in_kind:
