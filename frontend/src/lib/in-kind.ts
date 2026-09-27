@@ -1,10 +1,10 @@
 import type { NonStaffLines, StaffLines } from '@/api/budget'
 import { lineTotal } from '@/lib/non-staff'
 import { withCosts } from '@/lib/staff'
-import type { BudgetDetail, StaffLine } from '@/types'
+import type { BudgetDetail, EditableStaffLine } from '@/types'
 import type { CostRow } from '@/screens/inkind/InKindFlagsTable'
 
-const detailOf = (line: StaffLine) =>
+const detailOf = (line: EditableStaffLine) =>
   [line.category, line.employment_type, line.classification]
     .filter(Boolean)
     .join(' · ') || '—'

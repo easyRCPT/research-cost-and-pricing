@@ -30,6 +30,7 @@ from .serializers.project_serializer import (
 )
 from .serializers.staff_line_serializer import StaffLineSerializer
 from .services import (
+    budget_clone,
     budget_details,
     budget_update,
     deliverable,
@@ -38,8 +39,10 @@ from .services import (
     non_staff_line,
     project,
     staff_line,
+    submission,
+    submission_validation,
 )
-from .services.budget_state import require_editable
+from .services.budget_state import require_editable, require_ownership
 
 
 class ProjectView(APIView):
@@ -50,7 +53,7 @@ class ProjectView(APIView):
     services/project.visible_projects.
     """
 
-    @extend_schema(responses=ProjectRowSerializer(many=True))
+    @extend_schema(responses={200: ProjectRowSerializer(many=True)})
     def get(self, request: Request) -> Response:
         rows = project.list_projects(request.user)
         return Response(ProjectRowSerializer(rows, many=True).data)
@@ -93,6 +96,45 @@ class BudgetDetailView(APIView):
         if result is None:
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(BudgetDetailSerializer(result).data, status=status.HTTP_200_OK)
+
+
+class BudgetSubmitView(APIView):
+    @extend_schema(request=None, responses={200: None})
+    def post(self, request: Request, budget_id: int) -> Response:
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
+        # Only a draft can be submitted
+        require_editable(request.user, budget)
+        # Check if the draft is ready
+        reasons = submission_validation.validate_submission(budget)
+        if reasons:
+            return Response(
+                {"reasons": reasons},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        submission.submit_budget(request.user, budget)
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class BudgetCloneView(APIView):
+    @extend_schema(request=None, responses={201: BudgetDetailSerializer})
+    def post(self, request: Request, budget_id: int) -> Response:
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
+        # Only the owner can clone the budget
+        require_ownership(request.user, budget)
+
+        # Clone the budget
+        cloned_budget = budget_clone.clone_budget(request.user, budget)
+
+        result = budget_details.get_budget_details(cloned_budget)
+
+        serializer = BudgetDetailSerializer(result)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class StaffLineView(APIView):

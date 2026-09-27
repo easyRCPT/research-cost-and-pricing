@@ -58,7 +58,6 @@ class ApprovalStepTestMixin:
         return ApprovalStep.objects.create(
             budget=budget,
             level=overrides.pop("level", ApprovalStep.Level.DEPARTMENT),
-            required=overrides.pop("required", True),
             **overrides,
         )
 
@@ -71,7 +70,6 @@ class TestOneStepPerLevel(ApprovalStepTestMixin, TestCase):
         self.step(
             budget,
             level=ApprovalStep.Level.FACULTY,
-            required=False,
             status=ApprovalStep.Status.NOT_REQUIRED,
         )
 
@@ -157,7 +155,6 @@ class TestAnUndecidedStepNamesNobody(ApprovalStepTestMixin, TestCase):
             self.step(
                 self.budget,
                 level=ApprovalStep.Level.FACULTY,
-                required=False,
                 status=ApprovalStep.Status.NOT_REQUIRED,
                 decided_by=self.approver,
             )

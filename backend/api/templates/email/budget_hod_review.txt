@@ -1,0 +1,10 @@
+A budget requires Head of Department review.
+
+Project:
+{{ budget.project.title }}
+
+Department:
+{{ budget.project.department.name }}
+
+Please review the budget in RCPT:
+{{ url }}

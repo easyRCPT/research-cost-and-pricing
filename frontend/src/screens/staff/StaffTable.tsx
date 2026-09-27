@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import type {
   SalaryRate,
   SalaryRateMultiplier,
-  StaffLine,
+  EditableStaffLine,
   StaffTotal,
 } from '@/types'
 import { Plus } from 'lucide-react'
@@ -12,7 +12,7 @@ import { StaffTableFooter } from './StaffTableFooter'
 import { StaffTableHeader } from './StaffTableHeader'
 
 interface StaffTableProps {
-  lines: StaffLine[]
+  lines: EditableStaffLine[]
   years: number[]
   columnTotal: StaffTotal
   salaryRates: SalaryRate[]
@@ -20,7 +20,7 @@ interface StaffTableProps {
   /** The CI's row, and whether their time is being costed. */
   ciId: number | null
   ciIncluded: boolean
-  patchLine: (id: number, patch: Partial<StaffLine>) => void
+  patchLine: (id: number, patch: Partial<EditableStaffLine>) => void
   removeLine: (id: number) => void
   addLine: () => void
 }
