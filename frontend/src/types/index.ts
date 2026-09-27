@@ -32,6 +32,25 @@ export type PriceSummary = S['PriceSummary']
 export type StaffBudget = S['StaffBudget']
 export type NonStaffBudget = S['NonStaffBudget']
 
+// Temporary types for staff
+export type EditableStaffLine = Omit<
+  StaffLine,
+  'employment_type' | 'category' | 'time_basis'
+> & {
+  employment_type: EmploymentType | ''
+  category: StaffCategory | ''
+  time_basis: TimeBasis | ''
+}
+
+export type RatedStaffLine = Omit<
+  EditableStaffLine,
+  'employment_type' | 'category' | 'time_basis'
+> & {
+  employment_type: EmploymentType
+  category: StaffCategory
+  time_basis: TimeBasis
+}
+
 // Input types
 export type StaffLineInput = S['StaffLineInput']
 export type NonStaffLineInput = S['NonStaffLineInput']

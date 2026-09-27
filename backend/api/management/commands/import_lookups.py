@@ -5,7 +5,8 @@ Table ranges resolved through defined names where able to,
 otherwise cell ranges are used. Names stay put even if tables may shift.
 
 Re-running is safe since rows are matched on their
-natural key.
+natural key. If a budget is pinned to the current version,
+the import goes into a new one instead.
 
 """
 
@@ -36,6 +37,7 @@ from api.models import (
     SalaryRate,
     SalaryRateMultiplier,
 )
+from api.services.lookup_update import create_lookup_version
 
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
@@ -72,6 +74,11 @@ CONSTANTS = {
 LITERAL_CONSTANTS = {
     "in_kind_multiplier": (Decimal("1.7"), "Matches full cost recovery."),
     "gst_rate": (Decimal("0.10"), "Goods and Services Tax Amount"),
+    "default_margin": (Decimal("0.30"), "Default margin"),
+    "minimum_margin": (
+        Decimal("0.00"),
+        "Minimum margin that not requires dean approval",
+    ),
 }
 
 
@@ -467,19 +474,20 @@ def import_revenue_categories(workbook):
     return count
 
 
-def get_or_create_current_version() -> LookupVersion:
-    config = LookupConfiguration.objects.first()
+def version_to_import_into() -> LookupVersion:
+    """The current version, or a fresh copy of it if a budget is pinned to it."""
+    config = LookupConfiguration.objects.select_for_update().get()
 
-    if config:
-        return config.current_version
+    # Create the lookup configuration singleton on the first run of import_lookups
+    if config is None:
+        version = LookupVersion.objects.create()
+        LookupConfiguration.objects.create(current_version=version)
+        return version
 
-    version = LookupVersion.objects.create()
+    if config.referenced:
+        create_lookup_version(config)
 
-    LookupConfiguration.objects.create(
-        current_version=version,
-    )
-
-    return version
+    return config.current_version
 
 
 class Command(BaseCommand):
@@ -527,7 +535,7 @@ class Command(BaseCommand):
         # One transaction, a failure halfway leaves no partial lookup
         # tables
         with transaction.atomic():
-            version = get_or_create_current_version()
+            version = version_to_import_into()
 
             for label, importer in unversioned_importers:
                 self.stdout.write(f"  {label} ... ", ending="")

@@ -26,17 +26,21 @@ import {
   withTime,
 } from '@/lib/staff'
 import { cn } from '@/lib/utils'
-import type { SalaryRate, SalaryRateMultiplier, StaffLine } from '@/types'
+import type {
+  EditableStaffLine,
+  SalaryRate,
+  SalaryRateMultiplier,
+} from '@/types'
 import { X } from 'lucide-react'
 
 interface StaffTableBodyProps {
-  lines: StaffLine[]
+  lines: EditableStaffLine[]
   years: number[]
   salaryRates: SalaryRate[]
   multipliers: SalaryRateMultiplier[]
   ciId: string | null
   ciIncluded: boolean
-  patchLine: (id: string, patch: Partial<StaffLine>) => void
+  patchLine: (id: string, patch: Partial<EditableStaffLine>) => void
   removeLine: (id: string) => void
 }
 
@@ -96,14 +100,17 @@ export function StaffTableBody({
                 options={EMPLOYMENT_TYPES}
                 placeholder="—"
                 onChange={(employment_type) => {
-                  const bases = timeBasesFor(multipliers, employment_type)
+                  const selected =
+                    employment_type as EditableStaffLine['employment_type']
+                  const bases = timeBasesFor(multipliers, selected)
                   if (bases.includes(line.time_basis)) {
-                    patchLine(line.id, { employment_type })
+                    patchLine(line.id, { employment_type: selected })
                     return
                   }
-                  const time_basis = bases[0] ?? line.time_basis
+                  const time_basis = (bases[0] ??
+                    line.time_basis) as EditableStaffLine['time_basis']
                   patchLine(line.id, {
-                    employment_type,
+                    employment_type: selected,
                     time_basis,
                     by_year: clampedByYear(line, time_basis),
                   })
@@ -116,9 +123,10 @@ export function StaffTableBody({
                 options={categories}
                 placeholder="—"
                 onChange={(category) => {
+                  const selected = category as EditableStaffLine['category']
                   const options = classificationsFor(salaryRates, category)
                   patchLine(line.id, {
-                    category,
+                    category: selected,
                     ...(options.includes(line.classification)
                       ? {}
                       : { classification: options[0] ?? line.classification }),
@@ -147,7 +155,7 @@ export function StaffTableBody({
                 disabled={!line.employment_type}
                 onChange={(time_basis) =>
                   patchLine(line.id, {
-                    time_basis,
+                    time_basis: time_basis as EditableStaffLine['time_basis'],
                     by_year: clampedByYear(line, time_basis),
                   })
                 }

@@ -1,9 +1,10 @@
 import type {
   BudgetDetail,
+  EditableStaffLine,
   EmploymentType,
+  RatedStaffLine,
   SalaryRate,
   SalaryRateMultiplier,
-  StaffLine,
 } from '@/types'
 
 export const EMPLOYMENT_TYPES: readonly EmploymentType[] = [
@@ -73,7 +74,7 @@ export const timeLabelFor = (timeBasis: string) =>
   TIME_LIMITS[timeBasis]?.label ?? 'Time'
 
 /** Re-clamps the entered time after a change of basis. */
-export const clampedByYear = (line: StaffLine, timeBasis: string) => {
+export const clampedByYear = (line: EditableStaffLine, timeBasis: string) => {
   const max = maxTimeFor(timeBasis)
   if (max === undefined) return line.by_year
   return line.by_year.map((entry) => ({
@@ -82,10 +83,10 @@ export const clampedByYear = (line: StaffLine, timeBasis: string) => {
   }))
 }
 
-export const timeFor = (line: StaffLine, year: number) =>
+export const timeFor = (line: EditableStaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.time ?? 0
 
-export const costFor = (line: StaffLine, year: number) =>
+export const costFor = (line: EditableStaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.cost ?? 0
 
 /**
@@ -96,7 +97,7 @@ export const costFor = (line: StaffLine, year: number) =>
  * here and the money from the server's reply. See withEnteredTime.
  */
 export const withTime = (
-  line: StaffLine,
+  line: EditableStaffLine,
   years: number[],
   year: number,
   time: number,
@@ -107,7 +108,10 @@ export const withTime = (
     cost: costFor(line, y),
   }))
 
-export const emptyStaffLine = (id: string, years: number[]): StaffLine => ({
+export const emptyStaffLine = (
+  id: string,
+  years: number[],
+): EditableStaffLine => ({
   id,
   // The server appends it on create.
   position: 0,
@@ -124,7 +128,7 @@ export const emptyStaffLine = (id: string, years: number[]): StaffLine => ({
 })
 
 /** Rows the engine can rate. The name is echoed back, never priced. */
-export const isRated = (line: StaffLine) =>
+export const isRated = (line: EditableStaffLine): line is RatedStaffLine =>
   line.employment_type !== '' &&
   line.category !== '' &&
   line.classification !== '' &&
@@ -134,11 +138,16 @@ export const isRated = (line: StaffLine) =>
  * The CI's own row, which is the first one. Their name is typed on Project
  * Details, so the row carries it rather than letting the two drift apart.
  */
-export const ciLineId = (lines: StaffLine[], chiefInvestigator: string) =>
-  chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null)
+export const ciLineId = (
+  lines: EditableStaffLine[],
+  chiefInvestigator: string,
+) => (chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null))
 
 /** Puts the CI's name on their row, wherever it was last edited. */
-export const withCiName = (lines: StaffLine[], chiefInvestigator: string) => {
+export const withCiName = (
+  lines: EditableStaffLine[],
+  chiefInvestigator: string,
+) => {
   const id = ciLineId(lines, chiefInvestigator)
   if (id === null) return lines
   const name_role = chiefInvestigator.trim()
@@ -146,7 +155,7 @@ export const withCiName = (lines: StaffLine[], chiefInvestigator: string) => {
 }
 
 /** Rate and cost columns from whichever block priced the row. */
-export const withCosts = (lines: StaffLine[], budget: BudgetDetail) => {
+export const withCosts = (lines: EditableStaffLine[], budget: BudgetDetail) => {
   const priced = new Map(
     [...budget.staff_cost.lines, ...budget.staff_in_kind_cost.lines].map(
       (line) => [line.id, line],
