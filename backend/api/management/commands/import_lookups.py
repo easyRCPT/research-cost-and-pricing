@@ -478,6 +478,12 @@ def version_to_import_into() -> LookupVersion:
     """The current version, or a fresh copy of it if a budget is pinned to it."""
     config = LookupConfiguration.objects.select_for_update().get()
 
+    # Create the lookup configuration singleton on the first run of import_lookups
+    if config is None:
+        version = LookupVersion.objects.create()
+        LookupConfiguration.objects.create(current_version=version)
+        return version
+
     if config.referenced:
         create_lookup_version(config)
 
