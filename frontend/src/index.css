@@ -221,6 +221,22 @@
     break-inside: avoid;
   }
 
+  /* The standalone Budget Form template is what the browser prints. Keep its
+     compact sections together, while allowing a long deliverables table to
+     flow across pages with its own repeated heading. */
+  .budget-print-section:not(.budget-print-deliverables) {
+    break-inside: avoid;
+    margin-bottom: 0.5rem;
+  }
+
+  .budget-print-document thead {
+    display: table-header-group;
+  }
+
+  .budget-print-document tr {
+    break-inside: avoid;
+  }
+
   /* The React Query devtools are dev-only and never reach the bundle, but
      they float over a print preview and make it untrustworthy while working
      on one. */

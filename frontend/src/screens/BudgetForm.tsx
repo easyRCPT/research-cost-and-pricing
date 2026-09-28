@@ -7,6 +7,7 @@ import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
 import { NonStaffBudgetSection } from './budget-form/NonStaffBudgetSection'
 import { DeliverablesSection } from './budget-form/DeliverablesSection'
 import { InKindSection } from './budget-form/InKindSection'
+import { BudgetPrintDocument } from './budget-form/BudgetPrintDocument'
 
 export interface BudgetFormProps {
   lookups: LookupTables
@@ -19,23 +20,28 @@ export function BudgetForm({ lookups }: BudgetFormProps) {
   const summary = budget.budget_summary.price_summary
 
   return (
-    <Panel>
-      <ProjectDetailsSection
-        project={budget.project_info}
-        years={budget.years}
-        summary={summary}
-      />
-      <PriceSummarySection
-        summary={summary}
-        gstApplicable={info.gst_applicable}
-      />
-      <StaffBudgetSection staffBudget={budget.budget_summary.staff_budget} />
-      <NonStaffBudgetSection
-        nonStaffBudget={budget.budget_summary.non_staff_budget}
-        lookups={lookups}
-      />
-      <InKindSection budget={budget} />
-      <DeliverablesSection />
-    </Panel>
+    <>
+      <Panel className="print:hidden">
+        <ProjectDetailsSection
+          project={budget.project_info}
+          years={budget.years}
+          summary={summary}
+        />
+        <PriceSummarySection
+          summary={summary}
+          gstApplicable={info.gst_applicable}
+        />
+        <StaffBudgetSection staffBudget={budget.budget_summary.staff_budget} />
+        <NonStaffBudgetSection
+          nonStaffBudget={budget.budget_summary.non_staff_budget}
+          lookups={lookups}
+        />
+        <InKindSection budget={budget} />
+        <DeliverablesSection />
+      </Panel>
+      <div className="hidden print:block">
+        <BudgetPrintDocument budget={budget} lookups={lookups} />
+      </div>
+    </>
   )
 }

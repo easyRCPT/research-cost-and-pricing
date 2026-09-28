@@ -8,6 +8,10 @@ export { PriceSummary, type PriceSummaryProps } from './PriceSummary'
 export { AdjustPrice, type AdjustPriceProps } from './AdjustPrice'
 export { CashCoContributions } from './CashCoContributions'
 export { BudgetForm, type BudgetFormProps } from './BudgetForm'
+export {
+  BudgetPrintDocument,
+  type BudgetPrintDocumentProps,
+} from './budget-form/BudgetPrintDocument'
 // TODO: approvals — restore when auth lands.
 // export { Approvals, type ApprovalsProps } from './Approvals'
 export { EmptyStateScreen } from './EmptyStateScreen'
