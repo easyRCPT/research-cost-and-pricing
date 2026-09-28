@@ -18,7 +18,7 @@ from django.contrib.auth.models import Group
 from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
 
-from ..exceptions import UnprocessableEntity
+from ..exceptions import Conflict, UnprocessableEntity
 from ..models import Department, Faculty, User, UserOrgAssignment
 from .audit import write_audit
 from .auth import SUPERADMIN
@@ -72,7 +72,7 @@ def _set_groups(user: User, names: list[str]) -> None:
 def create_user(actor: User, data: dict) -> User:
     email = User.objects.normalize_email(data["email"])
     if User.objects.filter(email__iexact=email).exists():
-        raise UnprocessableEntity(f"An account for {email} already exists.")
+        raise Conflict(f"An account for {email} already exists.")
     user = User.objects.create_user(
         email=email,
         password=data["password"],

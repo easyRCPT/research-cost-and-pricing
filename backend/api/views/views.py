@@ -272,7 +272,7 @@ class LookupTableView(APIView):
         lookup_update.create(
             table=table,
             data=cast(dict, row_serializer.validated_data),
-            user=request.user,
+            actor=request.user,
         )
 
         return Response(status=status.HTTP_201_CREATED)
@@ -288,6 +288,6 @@ class LookupTableView(APIView):
             table=table,
             lookup=cast(dict, validated_data["lookup"]),
             data=cast(dict, validated_data["values"]),
-            user=request.user,
+            actor=request.user,
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
