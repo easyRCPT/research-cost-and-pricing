@@ -130,6 +130,54 @@ class RestoreVersionTest(TestCase):
         budget.refresh_from_db()
         self.assertEqual(budget.lookup_version_id, edited)
 
+    def a_costing(self) -> Budget:
+        """A draft with one Level A.1 line, so it prices on the live rates."""
+        from api.models import Department, Project, StaffCostLine, YearAllocation
+
+        project = Project.objects.create(
+            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
+            title="Priced",
+            department=Department.objects.order_by("code").first(),
+            start_year=2026,
+            start_month=1,
+            end_year=2026,
+            end_month=12,
+        )
+        budget = Budget.objects.create(
+            project=project,
+            cost_multiplier=Decimal("1.70"),
+            in_kind_multiplier=Decimal("1.70"),
+            margin=Decimal("0.30"),
+        )
+        line = StaffCostLine.objects.create(
+            budget=budget,
+            name_role="Dr A",
+            employment_type="Continuing",
+            **{k: v for k, v in LEVEL_A1.items() if k != "payroll_type"},
+            time_basis="FTE",
+        )
+        YearAllocation.objects.create(staff_line=line, year=2026, time=Decimal("0.5"))
+        return budget
+
+    @staticmethod
+    def price(budget: Budget) -> Decimal:
+        from api.services.budget_details import get_budget_details
+
+        summary = get_budget_details(budget)["budget_summary"]["price_summary"]
+        return Decimal(str(summary["total_price_inc_gst"]))
+
+    def test_a_new_costing_on_restored_rates_prices_as_it_did_on_the_original(self):
+        version = self.current()
+        original = self.price(self.a_costing())
+
+        self.edit_rate("99999.0000")
+        # The edit has to move the price, or matching it afterwards proves nothing.
+        self.assertNotEqual(self.price(self.a_costing()), original)
+
+        restore_version(version, self.admin)
+
+        self.assertEqual(self.price(self.a_costing()), original)
+
     def test_restoring_the_current_version_is_refused(self):
         with self.assertRaises(ValidationError):
             restore_version(self.current(), self.admin)
