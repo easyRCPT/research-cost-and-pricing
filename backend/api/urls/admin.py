@@ -8,7 +8,13 @@ by walking these patterns rather than trusting each view to remember.
 
 from django.urls import path
 
-from .views_admin import audit, lookups, overview, projects, users
+from api.views.admin import (
+    audit,
+    lookups,
+    overview,
+    projects,
+    users,
+)
 
 urlpatterns = [
     path("overview/", overview.OverviewView.as_view(), name="admin-overview"),

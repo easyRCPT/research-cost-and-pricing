@@ -9,28 +9,28 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Deliverable, NonStaffCostLine, StaffCostLine
-from .permissions import IsSuperadmin
-from .serializers.budget_detail_serializer import BudgetDetailSerializer
-from .serializers.budget_update_serializer import (
+from api.models import Deliverable, NonStaffCostLine, StaffCostLine
+from api.permissions import IsSuperadmin
+from api.serializers.budget_detail_serializer import BudgetDetailSerializer
+from api.serializers.budget_update_serializer import (
     UPDATE_SERIALIZERS,
     BudgetUpdateSchema,
     SectionSerializer,
 )
-from .serializers.deliverable_serializer import DeliverableSerializer
-from .serializers.lookup_serializer import (
+from api.serializers.deliverable_serializer import DeliverableSerializer
+from api.serializers.lookup_serializer import (
     LOOKUP_SERIALIZERS,
     LookupCreateSerializer,
     LookupTablesSerializer,
     LookupUpdateSerializer,
 )
-from .serializers.non_staff_line_serializer import NonStaffLineSerializer
-from .serializers.project_serializer import (
+from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
+from api.serializers.project_serializer import (
     ProjectCreateSerializer,
     ProjectRowSerializer,
 )
-from .serializers.staff_line_serializer import StaffLineSerializer
-from .services import (
+from api.serializers.staff_line_serializer import StaffLineSerializer
+from api.services import (
     budget_clone,
     budget_details,
     budget_update,
@@ -43,7 +43,7 @@ from .services import (
     submission,
     submission_validation,
 )
-from .services.budget_state import require_editable, require_ownership
+from api.services.budget_state import require_editable, require_ownership
 
 
 class ProjectView(APIView):
@@ -251,6 +251,7 @@ class LookupView(APIView):
 
 
 class LookupTableView(APIView):
+    # Only superadmins are allowed to create/update lookup tables
     permission_classes = [IsSuperadmin]
 
     @extend_schema(request=LookupCreateSerializer, responses={201: None})
