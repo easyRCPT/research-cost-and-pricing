@@ -210,12 +210,63 @@
 
   @bottom-center {
     content: "Page " counter(page) " of " counter(pages);
-    color: #444;
-    font-size: 9pt;
+    color: #111;
+    font-size: 11pt;
   }
 }
 
 @media print {
+  .budget-print-document {
+    color: #000;
+    font-size: 18px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .budget-print-document table {
+    font-size: 18px;
+  }
+
+  .budget-print-document .text-muted-foreground {
+    color: #333;
+  }
+
+  .budget-print-document .budget-print-section .grid {
+    font-size: 18px;
+  }
+
+  .budget-print-document .budget-print-section h3 {
+    color: #000;
+    font-size: 20px;
+  }
+
+  .budget-print-document .budget-print-section > div:first-child {
+    border-color: #555;
+    background-color: #eee;
+  }
+
+  .budget-print-document .budget-print-cover {
+    font-size: 20px;
+  }
+
+  .budget-print-document .budget-print-cover dl {
+    font-size: 18px;
+  }
+
+  .budget-print-document .budget-print-cover h1 {
+    font-size: 34px;
+  }
+
+  .budget-print-document .budget-print-cover dt {
+    color: #333;
+    font-size: 15px;
+  }
+
+  .budget-print-document td,
+  .budget-print-document th {
+    line-height: 1.5;
+  }
+
   .grid-table thead {
     position: static;
     /* Repeat the column headings on every page a table runs onto. */
