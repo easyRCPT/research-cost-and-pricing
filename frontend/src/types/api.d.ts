@@ -55,6 +55,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/lookups/{table}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Create or update a lookup table.
+         *
+         *     Moved into the admin namespace from api/lookups/..
+         */
+        post: operations["admin_lookups_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description Create or update a lookup table.
+         *
+         *     Moved into the admin namespace from api/lookups/..
+         */
+        patch: operations["admin_lookups_partial_update"];
+        trace?: never;
+    };
     "/api/admin/lookups/versions/": {
         parameters: {
             query?: never;
@@ -492,22 +518,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/lookups/{table}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["lookups_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["lookups_partial_update"];
-        trace?: never;
-    };
     "/api/projects/": {
         parameters: {
             query?: never;
@@ -571,6 +581,145 @@ export interface components {
             /** Format: email */
             email: string;
             password: string;
+        };
+        AdminLookupsCreateError: components["schemas"]["AdminLookupsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsCreateValuesErrorComponent"] | components["schemas"]["AdminLookupsCreateValuesKEYErrorComponent"];
+        AdminLookupsCreateErrorResponse400: components["schemas"]["AdminLookupsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminLookupsCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminLookupsCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminLookupsCreateError"][];
+        };
+        AdminLookupsCreateValuesErrorComponent: {
+            /**
+             * @description * `values` - values (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "values";
+            /**
+             * @description * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "not_a_dict" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsCreateValuesKEYErrorComponent: {
+            /**
+             * @description * `values.KEY` - values.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "values.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsPartialUpdateError: components["schemas"]["AdminLookupsPartialUpdateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateLookupErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateLookupKEYErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateValuesErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateValuesKEYErrorComponent"];
+        AdminLookupsPartialUpdateErrorResponse400: components["schemas"]["AdminLookupsPartialUpdateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminLookupsPartialUpdateLookupErrorComponent: {
+            /**
+             * @description * `lookup` - lookup (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "lookup";
+            /**
+             * @description * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "not_a_dict" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsPartialUpdateLookupKEYErrorComponent: {
+            /**
+             * @description * `lookup.KEY` - lookup.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "lookup.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsPartialUpdateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminLookupsPartialUpdateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminLookupsPartialUpdateError"][];
+        };
+        AdminLookupsPartialUpdateValuesErrorComponent: {
+            /**
+             * @description * `values` - values (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "values";
+            /**
+             * @description * `empty` - empty
+             *     * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "empty" | "not_a_dict" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsPartialUpdateValuesKEYErrorComponent: {
+            /**
+             * @description * `values.KEY` - values.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "values.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
         };
         AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
@@ -2227,6 +2376,10 @@ export interface components {
             type: components["schemas"]["ServerErrorEnum"];
             errors: components["schemas"]["Error500"][];
         };
+        Faculty: {
+            code: string;
+            name: string;
+        };
         GroupCount: {
             group: string;
             count: number;
@@ -2259,6 +2412,7 @@ export interface components {
             };
         };
         LookupTables: {
+            faculties: components["schemas"]["Faculty"][];
             departments: components["schemas"]["Department"][];
             salary_rates: components["schemas"]["SalaryRate"][];
             salary_rate_multipliers: components["schemas"]["SalaryRateMultiplier"][];
@@ -2287,145 +2441,6 @@ export interface components {
             updated_by: string | null;
             budgets_priced: number;
             current: boolean;
-        };
-        LookupsCreateError: components["schemas"]["LookupsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["LookupsCreateValuesErrorComponent"] | components["schemas"]["LookupsCreateValuesKEYErrorComponent"];
-        LookupsCreateErrorResponse400: components["schemas"]["LookupsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
-        LookupsCreateNonFieldErrorsErrorComponent: {
-            /**
-             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "non_field_errors";
-            /**
-             * @description * `invalid` - invalid
-             *     * `null` - null
-             * @enum {string}
-             */
-            code: "invalid" | "null";
-            detail: string;
-        };
-        LookupsCreateValidationError: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "validation_error";
-            errors: components["schemas"]["LookupsCreateError"][];
-        };
-        LookupsCreateValuesErrorComponent: {
-            /**
-             * @description * `values` - values (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "values";
-            /**
-             * @description * `not_a_dict` - not_a_dict
-             *     * `null` - null
-             *     * `required` - required
-             * @enum {string}
-             */
-            code: "not_a_dict" | "null" | "required";
-            detail: string;
-        };
-        LookupsCreateValuesKEYErrorComponent: {
-            /**
-             * @description * `values.KEY` - values.KEY (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "values.KEY";
-            /**
-             * @description * `invalid` - invalid
-             *     * `null` - null
-             *     * `required` - required
-             * @enum {string}
-             */
-            code: "invalid" | "null" | "required";
-            detail: string;
-        };
-        LookupsPartialUpdateError: components["schemas"]["LookupsPartialUpdateNonFieldErrorsErrorComponent"] | components["schemas"]["LookupsPartialUpdateLookupErrorComponent"] | components["schemas"]["LookupsPartialUpdateLookupKEYErrorComponent"] | components["schemas"]["LookupsPartialUpdateValuesErrorComponent"] | components["schemas"]["LookupsPartialUpdateValuesKEYErrorComponent"];
-        LookupsPartialUpdateErrorResponse400: components["schemas"]["LookupsPartialUpdateValidationError"] | components["schemas"]["ParseErrorResponse"];
-        LookupsPartialUpdateLookupErrorComponent: {
-            /**
-             * @description * `lookup` - lookup (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "lookup";
-            /**
-             * @description * `not_a_dict` - not_a_dict
-             *     * `null` - null
-             *     * `required` - required
-             * @enum {string}
-             */
-            code: "not_a_dict" | "null" | "required";
-            detail: string;
-        };
-        LookupsPartialUpdateLookupKEYErrorComponent: {
-            /**
-             * @description * `lookup.KEY` - lookup.KEY (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "lookup.KEY";
-            /**
-             * @description * `invalid` - invalid
-             *     * `null` - null
-             *     * `required` - required
-             * @enum {string}
-             */
-            code: "invalid" | "null" | "required";
-            detail: string;
-        };
-        LookupsPartialUpdateNonFieldErrorsErrorComponent: {
-            /**
-             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "non_field_errors";
-            /**
-             * @description * `invalid` - invalid
-             *     * `null` - null
-             * @enum {string}
-             */
-            code: "invalid" | "null";
-            detail: string;
-        };
-        LookupsPartialUpdateValidationError: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "validation_error";
-            errors: components["schemas"]["LookupsPartialUpdateError"][];
-        };
-        LookupsPartialUpdateValuesErrorComponent: {
-            /**
-             * @description * `values` - values (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "values";
-            /**
-             * @description * `empty` - empty
-             *     * `not_a_dict` - not_a_dict
-             *     * `null` - null
-             *     * `required` - required
-             * @enum {string}
-             */
-            code: "empty" | "not_a_dict" | "null" | "required";
-            detail: string;
-        };
-        LookupsPartialUpdateValuesKEYErrorComponent: {
-            /**
-             * @description * `values.KEY` - values.KEY (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "values.KEY";
-            /**
-             * @description * `invalid` - invalid
-             *     * `null` - null
-             *     * `required` - required
-             * @enum {string}
-             */
-            code: "invalid" | "null" | "required";
-            detail: string;
         };
         LookupsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         /**
@@ -3309,6 +3324,186 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminGroupsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                table: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookupCreate"];
+                "application/x-www-form-urlencoded": components["schemas"]["LookupCreate"];
+                "multipart/form-data": components["schemas"]["LookupCreate"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                table: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookupUpdate"];
+                "application/x-www-form-urlencoded": components["schemas"]["LookupUpdate"];
+                "multipart/form-data": components["schemas"]["LookupUpdate"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsPartialUpdateErrorResponse400"];
                 };
             };
             401: {
@@ -5740,186 +5935,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse401"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse404"];
-                };
-            };
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse405"];
-                };
-            };
-            406: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse406"];
-                };
-            };
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse415"];
-                };
-            };
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse500"];
-                };
-            };
-        };
-    };
-    lookups_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                table: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LookupCreate"];
-                "application/x-www-form-urlencoded": components["schemas"]["LookupCreate"];
-                "multipart/form-data": components["schemas"]["LookupCreate"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LookupsCreateErrorResponse400"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse401"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse403"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse404"];
-                };
-            };
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse405"];
-                };
-            };
-            406: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse406"];
-                };
-            };
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse415"];
-                };
-            };
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse500"];
-                };
-            };
-        };
-    };
-    lookups_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                table: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LookupUpdate"];
-                "application/x-www-form-urlencoded": components["schemas"]["LookupUpdate"];
-                "multipart/form-data": components["schemas"]["LookupUpdate"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LookupsPartialUpdateErrorResponse400"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse401"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse403"];
                 };
             };
             404: {
