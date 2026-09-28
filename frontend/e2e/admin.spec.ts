@@ -50,3 +50,32 @@ test("the register finds anyone's costing, read-only, and the log has its submis
     page.getByRole('row').filter({ hasText: `budget #${project.budget_id}` }),
   ).toContainText(DEMO.researcher)
 })
+
+test('deactivating someone asks first, and the row says so afterwards (#69)', async ({ page }) => {
+  await signInAsAdmin(page)
+  const email = `deactivate-${Date.now()}@unimelb.edu.au`
+  const made = await page.request.post('/api/admin/users/', {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+    data: { email, first_name: 'Dee', last_name: 'Activate', password: 'demo12345', groups: ['researcher'] },
+  })
+  expect(made.status(), await made.text()).toBe(201)
+
+  await page.goto('/admin/users')
+  await page.getByLabel('Search accounts').fill(email)
+  await page.getByRole('button', { name: new RegExp(email) }).click()
+
+  // Nothing happens until it is confirmed, and Cancel leaves it active.
+  await page.getByRole('button', { name: 'Deactivate', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('Deactivate Dee Activate?')
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByRole('alert')).toHaveCount(0)
+  await expect(page.getByText('Deactivated', { exact: true })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Deactivate', exact: true }).click()
+  await page.getByRole('alert').getByRole('button', { name: 'Deactivate' }).click()
+  await expect(page.getByText('Deactivated', { exact: true })).toBeVisible()
+
+  // Giving access back needs no confirm.
+  await page.getByRole('button', { name: 'Reactivate' }).click()
+  await expect(page.getByText('Deactivated', { exact: true })).toHaveCount(0)
+})
