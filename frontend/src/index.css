@@ -207,9 +207,66 @@
 @page {
   size: A4;
   margin: 12mm;
+
+  @bottom-center {
+    content: "Page " counter(page) " of " counter(pages);
+    color: #111;
+    font-size: 11pt;
+  }
 }
 
 @media print {
+  .budget-print-document {
+    color: #000;
+    font-size: 18px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .budget-print-document table {
+    font-size: 18px;
+  }
+
+  .budget-print-document .text-muted-foreground {
+    color: #333;
+  }
+
+  .budget-print-document .budget-print-section .grid {
+    font-size: 18px;
+  }
+
+  .budget-print-document .budget-print-section h3 {
+    color: #000;
+    font-size: 20px;
+  }
+
+  .budget-print-document .budget-print-section > div:first-child {
+    border-color: #555;
+    background-color: #eee;
+  }
+
+  .budget-print-document .budget-print-cover {
+    font-size: 20px;
+  }
+
+  .budget-print-document .budget-print-cover dl {
+    font-size: 18px;
+  }
+
+  .budget-print-document .budget-print-cover h1 {
+    font-size: 34px;
+  }
+
+  .budget-print-document .budget-print-cover dt {
+    color: #333;
+    font-size: 15px;
+  }
+
+  .budget-print-document td,
+  .budget-print-document th {
+    line-height: 1.5;
+  }
+
   .grid-table thead {
     position: static;
     /* Repeat the column headings on every page a table runs onto. */
@@ -218,6 +275,22 @@
 
   /* A row split across a page boundary is unreadable on both halves. */
   .grid-table tr {
+    break-inside: avoid;
+  }
+
+  /* The standalone Budget Form template is what the browser prints. Keep its
+     compact sections together, while allowing a long deliverables table to
+     flow across pages with its own repeated heading. */
+  .budget-print-section:not(.budget-print-deliverables) {
+    break-inside: avoid;
+    margin-bottom: 0.5rem;
+  }
+
+  .budget-print-document thead {
+    display: table-header-group;
+  }
+
+  .budget-print-document tr {
     break-inside: avoid;
   }
 
