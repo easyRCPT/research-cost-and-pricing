@@ -17,6 +17,7 @@ from api.views.admin import (
 )
 
 urlpatterns = [
+    # Admin
     path("overview/", overview.OverviewView.as_view(), name="admin-overview"),
     path(
         "lookups/versions/",
@@ -27,6 +28,11 @@ urlpatterns = [
         "lookups/versions/<int:version_id>/restore/",
         lookups.LookupVersionRestoreView.as_view(),
         name="admin-lookup-version-restore",
+    ),
+    path(
+        "lookups/<str:table>/",
+        lookups.LookupTableView.as_view(http_method_names=["post", "patch"]),
+        name="lookup-table",
     ),
     # No route deletes a user: owners are PROTECTed, so deactivating is the
     # operation (#64).

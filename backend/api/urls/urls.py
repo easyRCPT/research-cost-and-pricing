@@ -5,7 +5,6 @@ from api.views.views import (
     BudgetDetailView,
     BudgetSubmitView,
     DeliverableView,
-    LookupTableView,
     LookupView,
     NonStaffLineView,
     ProjectView,
@@ -18,11 +17,6 @@ urlpatterns = [
         "lookups/",
         LookupView.as_view(http_method_names=["get"]),
         name="lookups",
-    ),
-    path(
-        "lookups/<str:table>/",
-        LookupTableView.as_view(http_method_names=["post", "patch"]),
-        name="lookup-table",
     ),
     # Projects
     path(
