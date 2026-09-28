@@ -8,8 +8,7 @@ export type EditorScreen =
   | 'adjust'
   | 'price'
   | 'budget'
-  // TODO: approvals — restore when auth lands.
-  // | 'approvals'
+  | 'approvals'
 
 export interface SidebarSection {
   label?: string

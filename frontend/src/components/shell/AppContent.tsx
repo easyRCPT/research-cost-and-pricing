@@ -1,7 +1,13 @@
 import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
 import type { EditorScreen } from './Sidebar'
-import { useBudget, useNonStaffLines, useUpdateProject } from '@/api/budget'
+import {
+  useBudget,
+  useEditable,
+  useNonStaffLines,
+  useUpdateProject,
+} from '@/api/budget'
+import { ReadOnlyNotice } from './ReadOnlyNotice'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
 import {
@@ -27,6 +33,7 @@ export type AppScreen = EditorScreen | typeof LOOKUP_SCREEN
 export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
+  const editable = useEditable()
   const updateProject = useUpdateProject()
 
   const project = budget.project_info
@@ -69,13 +76,25 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
         <LookupsScreen lookups={lookups} />
       ) : (
         <>
-          <EditorScreenContent
-            lookups={lookups}
-            screen={screen}
-            project={project}
-            onChange={updateProject}
-            nonStaff={nonStaff}
-          />
+          <ReadOnlyNotice />
+          {/*
+            One switch for every control on every screen: a disabled fieldset
+            disables each input, select, button and checkbox inside it. The
+            Approvals screen stays outside, because its Export PDF has to keep
+            working on a submitted costing and it handles its own fields.
+          */}
+          <fieldset
+            disabled={!editable && screen !== 'approvals'}
+            className="min-w-0"
+          >
+            <EditorScreenContent
+              lookups={lookups}
+              screen={screen}
+              project={project}
+              onChange={updateProject}
+              nonStaff={nonStaff}
+            />
+          </fieldset>
           <ScreenNav screen={screen} onSelect={setScreen} />
         </>
       )}

@@ -1,56 +1,65 @@
-import { useBudget, useField, useSetBudgetField } from '@/api/budget'
+import { useBudget, useEditable, useField } from '@/api/budget'
 import { Panel } from '@/components/shell'
-import type { LookupTables } from '@/types'
 import { ApprovalActions } from './approvals/ApprovalActions'
 import { ApprovalStatusBadge } from './approvals/ApprovalStatusBadge'
-import { JustificationFields } from './approvals/JustificationFields'
+import { shortDate } from '@/lib/format/dates'
 import { DepartmentSection } from './approvals/DepartmentSection'
 import { FacultySection } from './approvals/FacultySection'
+import { JustificationFields } from './approvals/JustificationFields'
 
-const fullRecoveryBasis = (lookups: LookupTables) =>
-  lookups.calculation_constants.find(
-    (constant) => constant.name === 'full_cost_recovery_multiplier',
-  )?.value
-
-export interface ApprovalsProps {
-  lookups: LookupTables
-}
-
-export function Approvals({ lookups }: ApprovalsProps) {
+/**
+ * Submitting a costing, and following it through review.
+ *
+ * Everything shown is what the server returned. Submitting asks the server,
+ * which creates the steps and decides whether a Dean is needed; the status,
+ * the decisions and the reasons for a Dean are then read back, never
+ * computed here (#83).
+ */
+export function Approvals() {
   const { data: budget } = useBudget()
+  const editable = useEditable()
   const justification = useField('justification')
   const notes = useField('justification_notes')
   const exemption = useField('dean_exemption_reason')
-  const setBudgetField = useSetBudgetField()
 
-  const info = budget.budget_info
-  const basis = fullRecoveryBasis(lookups)
+  const status = budget.budget_info.status
+  const { approval } = budget
+  const submitted = status !== 'draft'
+  const step = (level: 'department' | 'faculty') =>
+    approval.steps.find((candidate) => candidate.level === level)
 
-  const partDNote = basis
-    ? `Required if the cost recovery multiplier is less than ${basis.toFixed(2)}. The multiplier in use is ${info.cost_multiplier.toFixed(2)}.`
-    : undefined
+  // Frozen at submit once it has gone; for a draft, what the engine says now.
+  const triggers = submitted
+    ? approval.dean_triggers
+    : budget.budget_summary.dean_triggers
 
   return (
     <>
-      <ApprovalStatusBadge status={info.status} />
+      <div className="mb-4 flex items-center justify-end gap-3">
+        {approval.submitted_at && (
+          <span className="text-[13px] text-muted-foreground">
+            Submitted {shortDate(approval.submitted_at)}
+          </span>
+        )}
+        <ApprovalStatusBadge status={status} />
+      </div>
 
       <Panel>
-        <DepartmentSection />
+        <DepartmentSection step={step('department')} />
         <FacultySection
-          deanRequired={budget.budget_summary.dean_required}
-          note={partDNote}
+          step={step('faculty')}
+          triggers={triggers}
+          submitted={submitted}
         />
         <JustificationFields
           justification={justification}
           notes={notes}
           exemption={exemption}
+          disabled={!editable}
         />
       </Panel>
 
-      <ApprovalActions
-        status={info.status}
-        onSubmit={() => setBudgetField('status', 'submitted')}
-      />
+      <ApprovalActions status={status} canSubmit={editable} />
     </>
   )
 }

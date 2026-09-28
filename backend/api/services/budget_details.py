@@ -2,7 +2,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from ..calculation import pricing
 from ..models import Budget
-from . import data_loader, lookup_loader
+from . import approval_record, data_loader, lookup_loader
 
 
 def get_budget_details(budget: Budget) -> dict:
@@ -15,6 +15,7 @@ def get_budget_details(budget: Budget) -> dict:
         data_loader.load_budget_data(budget),
     )
     store_price(budget, details)
+    details["approval"] = approval_record.approval_record(budget)
     return details
 
 

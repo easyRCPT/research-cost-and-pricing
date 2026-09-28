@@ -58,6 +58,9 @@ def get_approval_steps(user: User) -> list[ApprovalStep]:
             "budget__project",
             "budget__project__department",
             "budget__project__department__faculty",
+            # The row names who submitted it; without this it is one more
+            # query per row.
+            "budget__project__created_by",
         )
     )
 

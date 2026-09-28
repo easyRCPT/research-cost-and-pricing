@@ -217,6 +217,11 @@ SPECTACULAR_SETTINGS = {
         "ErrorCode415Enum": "drf_standardized_errors.openapi_serializers.ErrorCode415Enum.choices",
         "ErrorCode429Enum": "drf_standardized_errors.openapi_serializers.ErrorCode429Enum.choices",
         "ErrorCode500Enum": "drf_standardized_errors.openapi_serializers.ErrorCode500Enum.choices",
+        # A budget's status and an approval step's status are both "status";
+        # left to itself the generator names one Status328Enum, and the
+        # frontend's `Status` type breaks whenever that number moves.
+        "StatusEnum": "api.models.Budget.Status",
+        "ApprovalStepStatusEnum": "api.models.ApprovalStep.Status",
         # Named enums for each project field
         "ProjectFieldEnum": "api.serializers.budget_update_serializer.PROJECT_FIELDS",
         "BudgetFieldEnum": "api.serializers.budget_update_serializer.BUDGET_FIELDS",

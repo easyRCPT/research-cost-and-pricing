@@ -16,6 +16,7 @@ import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
 import { EditorRoute } from '@/routes/editor'
 import { ProjectsRoute } from '@/routes/projects'
+import { ApprovalsRoute } from '@/routes/approvals'
 
 /**
  * Seven entries, written out rather than generated.
@@ -93,6 +94,13 @@ const projectsRoute = createRoute({
   component: ProjectsRoute,
 })
 
+const approvalsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/approvals',
+  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
+  component: ApprovalsRoute,
+})
+
 export const editorRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/$projectId/$screen',
@@ -138,6 +146,7 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   adminLoginRoute,
   projectsRoute,
+  approvalsRoute,
   editorRoute,
   catchAllRoute,
 ])

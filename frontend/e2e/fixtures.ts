@@ -18,9 +18,13 @@ export async function createProject(
   page: Page,
   title: string,
   years: { start: number; end: number } = { start: 2026, end: 2028 },
+  /** A specific one, when an approver has to be able to reach it. */
+  department?: string,
 ): Promise<Project> {
-  const lookups = await (await page.request.get('/api/lookups/')).json()
-  const department = lookups.departments[0].code
+  if (!department) {
+    const lookups = await (await page.request.get('/api/lookups/')).json()
+    department = lookups.departments[0].code as string
+  }
 
   const response = await page.request.post('/api/projects/', {
     headers: { 'X-CSRFToken': await csrfToken(page) },
@@ -126,12 +130,14 @@ async function chooseOption(page: Page, trigger: Locator, value: string) {
 export const uniqueTitle = (what: string) =>
   `${what} ${Date.now()}-${Math.floor(Math.random() * 1e4)}`
 
-async function csrfToken(page: Page) {
+export async function csrfToken(page: Page) {
   const cookies = await page.context().cookies()
   return cookies.find((c) => c.name === 'csrftoken')?.value ?? ''
 }
 
 export const DEMO = {
+  // The department create_demo_users makes hod@ head of.
+  hodDepartment: 'CCH_H1_5_39',
   researcher: 'researcher@unimelb.edu.au',
   hod: 'hod@unimelb.edu.au',
   dean: 'dean@unimelb.edu.au',

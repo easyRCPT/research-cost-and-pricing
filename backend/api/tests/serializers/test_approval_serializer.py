@@ -88,7 +88,10 @@ class ApprovalQueueSerializerTest(TestCase):
             "level": "faculty",
             "budget": {
                 "id": self.budget.id,
+                "project_id": self.budget.project.id,
+                "reference": self.budget.project.reference,
                 "project_title": "Test Project",
+                "submitted_by": self.budget.project.created_by.email,
                 "department": "Science",
                 "faculty": "Science Faculty",
                 "chief_investigator": "Test Investigator",

@@ -17,8 +17,8 @@ interface ApprovalStatusBadgeProps {
 
 export function ApprovalStatusBadge({ status }: ApprovalStatusBadgeProps) {
   return (
-    <div className="mb-4 flex justify-end">
-      <Badge variant="secondary">{STATUS_LABEL[status]}</Badge>
-    </div>
+    <Badge variant={status === 'rejected' ? 'destructive' : 'secondary'}>
+      {STATUS_LABEL[status]}
+    </Badge>
   )
 }

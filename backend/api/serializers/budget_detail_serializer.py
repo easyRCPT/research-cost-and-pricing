@@ -2,7 +2,9 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
-from api.models import OnCostRate, SalaryRate, StaffCostLine
+from api.models import ApprovalStep, OnCostRate, SalaryRate, StaffCostLine
+
+from ..services.approval_record import EMPTY_RECORD
 
 # ------------------------------------------------------------------
 # Rounding
@@ -33,6 +35,7 @@ class CostDecimalField(serializers.DecimalField):
 
 
 class ProjectInfoSerializer(serializers.Serializer):
+    owner_id = serializers.IntegerField()
     title = serializers.CharField(allow_blank=True)
     chief_investigator = serializers.CharField(allow_blank=True)
     funder = serializers.CharField(allow_blank=True)
@@ -76,7 +79,7 @@ class DeliverableResultSerializer(serializers.Serializer):
 
 
 class BudgetInfoSerializer(serializers.Serializer):
-    from ..models import Budget
+    from ..models import ApprovalStep, Budget
 
     mode = serializers.ChoiceField(choices=Budget.Mode.choices)
     cost_multiplier = serializers.DecimalField(
@@ -393,6 +396,26 @@ class BudgetSummarySerializer(serializers.Serializer):
     non_staff_budget = NonStaffBudgetSerializer()
     in_kind_costs = InKindCostsSerializer()
     dean_required = serializers.BooleanField()
+    # Why a dean is required, as the engine sees it now. The screen renders
+    # these instead of redoing the arithmetic (#83).
+    dean_triggers = serializers.ListField(child=serializers.CharField())
+
+
+class ApprovalStepRecordSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    level = serializers.ChoiceField(choices=ApprovalStep.Level.choices)
+    status = serializers.ChoiceField(choices=ApprovalStep.Status.choices)
+    decided_by = serializers.CharField(allow_null=True)
+    decided_at = serializers.DateTimeField(allow_null=True)
+    comment = serializers.CharField(allow_blank=True)
+    waiting_on = serializers.ListField(child=serializers.CharField())
+
+
+class ApprovalRecordSerializer(serializers.Serializer):
+    submitted_at = serializers.DateTimeField(allow_null=True)
+    # Frozen at submit: what the approvers were asked about.
+    dean_triggers = serializers.ListField(child=serializers.CharField())
+    steps = ApprovalStepRecordSerializer(many=True)
 
 
 # ------------------------------------------------------------------
@@ -413,6 +436,7 @@ class BudgetDetailSerializer(serializers.Serializer):
     non_staff_in_kind_cost = NonStaffCostSerializer()
 
     budget_summary = BudgetSummarySerializer()
+    approval = ApprovalRecordSerializer()
 
     def to_representation(self, instance):
         staff_table = instance["staff_table"]
@@ -460,6 +484,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 **self._build_non_staff_totals(non_staff_table["in_kind_cost_results"]),
             },
             "budget_summary": instance["budget_summary"],
+            "approval": instance.get("approval", EMPTY_RECORD),
         }
 
         return super().to_representation(data)

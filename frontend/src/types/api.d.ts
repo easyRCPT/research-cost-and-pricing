@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/api/admin/lookups/versions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every set of rates the tool has had, newest first (#137). */
+        get: operations["admin_lookups_versions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/restore/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Make an older set of rates current again, as a new version (#137). */
+        post: operations["admin_lookups_versions_restore_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/approvals/{step_id}/decide/": {
         parameters: {
             query?: never;
@@ -372,10 +406,16 @@ export interface components {
             email: string;
             password: string;
         };
+        AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         ApprovalDecide: {
             decision: components["schemas"]["DecisionEnum"];
             /** @default  */
             comment: string;
+        };
+        /** @description Where the budget went, so the screen says so rather than guessing. */
+        ApprovalDecisionResult: {
+            budget_status: string;
         };
         ApprovalQueue: {
             step_id: number;
@@ -385,7 +425,10 @@ export interface components {
         };
         ApprovalQueueBudget: {
             id: number;
+            project_id: number;
+            reference: string | null;
             project_title: string;
+            readonly submitted_by: string;
             department: string;
             faculty: string;
             chief_investigator: string;
@@ -396,6 +439,30 @@ export interface components {
             /** Format: date-time */
             submitted_at: string;
         };
+        ApprovalRecord: {
+            /** Format: date-time */
+            submitted_at: string | null;
+            dean_triggers: string[];
+            steps: components["schemas"]["ApprovalStepRecord"][];
+        };
+        ApprovalStepRecord: {
+            id: number;
+            level: components["schemas"]["LevelEnum"];
+            status: components["schemas"]["ApprovalStepStatusEnum"];
+            decided_by: string | null;
+            /** Format: date-time */
+            decided_at: string | null;
+            comment: string;
+            waiting_on: string[];
+        };
+        /**
+         * @description * `pending` - Pending
+         *     * `approved` - Approved
+         *     * `rejected` - Rejected
+         *     * `not_required` - Not required
+         * @enum {string}
+         */
+        ApprovalStepStatusEnum: "pending" | "approved" | "rejected" | "not_required";
         ApprovalsDecideCreateCommentErrorComponent: {
             /**
              * @description * `comment` - comment (enum property replaced by openapi-typescript)
@@ -720,6 +787,7 @@ export interface components {
             non_staff_cost: components["schemas"]["NonStaffCost"];
             non_staff_in_kind_cost: components["schemas"]["NonStaffCost"];
             budget_summary: components["schemas"]["BudgetSummary"];
+            approval: components["schemas"]["ApprovalRecord"];
         };
         /**
          * @description * `cash_co_contribution` - cash_co_contribution
@@ -768,6 +836,7 @@ export interface components {
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
             dean_required: boolean;
+            dean_triggers: string[];
         };
         BudgetUpdate: components["schemas"]["ProjectUpdate"] | components["schemas"]["BudgetFieldUpdate"] | components["schemas"]["StaffUpdate"] | components["schemas"]["NonStaffUpdate"] | components["schemas"]["DeliverableUpdate"];
         BudgetsCloneCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
@@ -1647,6 +1716,12 @@ export interface components {
             level: string;
             max_steps: number;
         };
+        /**
+         * @description * `department` - Head of Department
+         *     * `faculty` - Dean
+         * @enum {string}
+         */
+        LevelEnum: "department" | "faculty";
         Login: {
             /** Format: email */
             email: string;
@@ -1679,6 +1754,14 @@ export interface components {
             values: {
                 [key: string]: unknown;
             };
+        };
+        LookupVersion: {
+            id: number;
+            /** Format: date-time */
+            created_at: string;
+            updated_by: string | null;
+            budgets_priced: number;
+            current: boolean;
         };
         LookupsCreateError: components["schemas"]["LookupsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["LookupsCreateValuesErrorComponent"] | components["schemas"]["LookupsCreateValuesKEYErrorComponent"];
         LookupsCreateErrorResponse400: components["schemas"]["LookupsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
@@ -2055,6 +2138,7 @@ export interface components {
          */
         ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "other_funder" | "other_funder_category" | "region" | "scheme" | "start_month" | "start_year" | "title";
         ProjectInfo: {
+            owner_id: number;
             title: string;
             chief_investigator: string;
             funder: string;
@@ -2289,6 +2373,9 @@ export interface components {
             code: string;
             name: string;
         };
+        Restored: {
+            version_id: number;
+        };
         RevenueCategory: {
             budget_ledger_id: number;
             external_party: string;
@@ -2458,6 +2545,174 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_lookups_versions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupVersion"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_restore_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Restored"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsRestoreCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     approvals_decide_create: {
         parameters: {
             query?: never;
@@ -2475,12 +2730,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description No response body */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ApprovalDecisionResult"];
+                };
             };
             400: {
                 headers: {

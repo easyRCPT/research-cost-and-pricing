@@ -45,6 +45,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
     def _build_instance():
         return {
             "project_info": {
+                "owner_id": 1,
                 "title": "Test Project",
                 "chief_investigator": "",
                 "funder": "Test Funder",
@@ -234,6 +235,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "total_in_kind_costs": Decimal(0),
                 },
                 "dean_required": False,
+                "dean_triggers": [],
             },
         }
 

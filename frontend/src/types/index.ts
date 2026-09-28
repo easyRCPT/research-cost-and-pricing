@@ -22,6 +22,8 @@ export type Region = S['Region']
 
 // Response types
 export type BudgetDetail = S['BudgetDetail']
+export type ApprovalRecord = S['ApprovalRecord']
+export type ApprovalStepRecord = S['ApprovalStepRecord']
 export type StaffLine = S['StaffLine']
 export type NonStaffLine = S['NonStaffLine']
 export type StaffCost = S['StaffCost']
