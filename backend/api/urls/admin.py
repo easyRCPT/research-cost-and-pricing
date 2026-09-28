@@ -8,9 +8,16 @@ by walking these patterns rather than trusting each view to remember.
 
 from django.urls import path
 
-from .views_admin import audit, lookups, overview, projects, users
+from api.views.admin import (
+    audit,
+    lookups,
+    overview,
+    projects,
+    users,
+)
 
 urlpatterns = [
+    # Admin
     path("overview/", overview.OverviewView.as_view(), name="admin-overview"),
     path(
         "lookups/versions/",
@@ -21,6 +28,11 @@ urlpatterns = [
         "lookups/versions/<int:version_id>/restore/",
         lookups.LookupVersionRestoreView.as_view(),
         name="admin-lookup-version-restore",
+    ),
+    path(
+        "lookups/<str:table>/",
+        lookups.LookupTableView.as_view(http_method_names=["post", "patch"]),
+        name="lookup-table",
     ),
     # No route deletes a user: owners are PROTECTed, so deactivating is the
     # operation (#64).

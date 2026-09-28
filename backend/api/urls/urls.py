@@ -1,12 +1,10 @@
 from django.urls import path
 
-from . import views_approvals, views_auth
-from .views import (
+from api.views.views import (
     BudgetCloneView,
     BudgetDetailView,
     BudgetSubmitView,
     DeliverableView,
-    LookupTableView,
     LookupView,
     NonStaffLineView,
     ProjectView,
@@ -14,27 +12,11 @@ from .views import (
 )
 
 urlpatterns = [
-    # Approvals
-    path(
-        "approvals/queue/",
-        views_approvals.ApprovalView.as_view(http_method_names=["get"]),
-        name="approvals-queue",
-    ),
-    path(
-        "approvals/<int:step_id>/decide/",
-        views_approvals.ApprovalDecideView.as_view(http_method_names=["post"]),
-        name="approvals-decide",
-    ),
     # Lookups
     path(
         "lookups/",
         LookupView.as_view(http_method_names=["get"]),
         name="lookups",
-    ),
-    path(
-        "lookups/<str:table>/",
-        LookupTableView.as_view(http_method_names=["post", "patch"]),
-        name="lookup-table",
     ),
     # Projects
     path(
@@ -42,17 +24,6 @@ urlpatterns = [
         ProjectView.as_view(http_method_names=["get", "post"]),
         name="projects",
     ),
-    # Auth
-    path("auth/signup/", views_auth.SignupView.as_view(), name="signup"),
-    path("auth/login/", views_auth.LoginView.as_view(), name="login"),
-    path(
-        "auth/admin-login/",
-        views_auth.AdminLoginView.as_view(),
-        name="admin-login",
-    ),
-    path("auth/logout/", views_auth.LogoutView.as_view(), name="logout"),
-    path("auth/me/", views_auth.MeView.as_view(), name="me"),
-    path("auth/csrf/", views_auth.CsrfView.as_view(), name="csrf"),
     # Budget
     path(
         "budgets/<int:budget_id>/",

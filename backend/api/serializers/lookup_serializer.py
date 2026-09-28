@@ -6,6 +6,7 @@ from ..models import (
     DeliverableType,
     Department,
     EbaIncrease,
+    Faculty,
     IncrementCap,
     NonStaffCostCategory,
     OnCostRate,
@@ -14,6 +15,12 @@ from ..models import (
     SalaryRate,
     SalaryRateMultiplier,
 )
+
+
+class FacultySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Faculty
+        fields = ["code", "name"]
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -102,6 +109,7 @@ class RevenueCategorySerializer(serializers.ModelSerializer):
 
 
 LOOKUP_SERIALIZERS = {
+    "faculties": FacultySerializer,
     "departments": DepartmentSerializer,
     "salary_rates": SalaryRateSerializer,
     "salary_rate_multipliers": SalaryRateMultiplierSerializer,

@@ -8,8 +8,8 @@ added to it later without `IsSuperadmin` fails here instead of shipping open.
 from django.test import SimpleTestCase
 from django.urls import URLPattern, URLResolver
 
-from api import urls_admin
 from api.permissions import IsSuperadmin
+from api.urls import admin
 
 
 def views_in(patterns) -> list[type]:
@@ -26,7 +26,7 @@ def views_in(patterns) -> list[type]:
 
 class AdminNamespaceTest(SimpleTestCase):
     def test_every_admin_view_requires_the_superadmin_group(self):
-        views = views_in(urls_admin.urlpatterns)
+        views = views_in(admin.urlpatterns)
         self.assertTrue(views, "the admin namespace has no views to check")
 
         for view in views:

@@ -13,6 +13,7 @@ from ..models import (
     OnCostRate,
     SalaryRate,
     SalaryRateMultiplier,
+    User,
 )
 from .audit import write_audit
 from .lookup_loader import (
@@ -35,7 +36,10 @@ VERSIONED_MODELS = (
 )
 
 
-def create_lookup_version(config: LookupConfiguration, user=None) -> int:
+def create_lookup_version(
+    config: LookupConfiguration,
+    actor: User | None = None,
+) -> int:
     """
     Create a new Lookup Version and point current version to it.
     """
@@ -43,7 +47,7 @@ def create_lookup_version(config: LookupConfiguration, user=None) -> int:
 
     # Who made the change that needed a new version. The versions list shows
     # it, and without it every edited version read as though it were seeded.
-    new_version = LookupVersion.objects.create(updated_by=user)
+    new_version = LookupVersion.objects.create(updated_by=actor)
 
     for model in VERSIONED_MODELS:
         rows = model.objects.filter(version_id=old_version_id)
@@ -63,6 +67,20 @@ def create_lookup_version(config: LookupConfiguration, user=None) -> int:
     config.current_version = new_version
     config.referenced = False
     config.save(update_fields=["current_version", "referenced"])
+
+    # Audit lookup version creation only when triggered by a superadmin.
+    # Initial import creates versions without an actor and should not create audit records.
+    # A lookup edit can create both an edit log and a version creation log.
+    if actor is not None:
+        write_audit(
+            actor=actor,
+            action="admin.lookup_version.create",
+            object_type="lookup_version",
+            object_id=str(new_version.id),
+            detail={
+                "source_version_id": old_version_id,
+            },
+        )
 
     return new_version.id
 
@@ -89,7 +107,10 @@ def _get_model(table: str) -> type[models.Model]:
     return LOOKUP_MODELS[lookup_table]
 
 
-def _check_and_create_new_version(model: type[models.Model], user=None) -> int:
+def _check_and_create_new_version(
+    model: type[models.Model],
+    actor: User | None = None,
+) -> int:
     """
     Determines whether a new version should be created.
     Return id of current version or the created new version.
@@ -97,7 +118,7 @@ def _check_and_create_new_version(model: type[models.Model], user=None) -> int:
     config = LookupConfiguration.objects.select_for_update().get()
 
     if model in VERSIONED_MODELS and config.referenced:
-        return create_lookup_version(config, user)
+        return create_lookup_version(config, actor)
 
     return config.current_version_id
 
@@ -106,7 +127,7 @@ def _check_and_create_new_version(model: type[models.Model], user=None) -> int:
 def create(
     table: str,
     data: dict,
-    user=None,
+    actor: User | None = None,
 ) -> None:
     # Get model
     model = _get_model(table)
@@ -115,7 +136,7 @@ def create(
     # Determines whether a new version should be created
     # Validate the model before saving
     if model in VERSIONED_MODELS:
-        version_id = _check_and_create_new_version(model, user)
+        version_id = _check_and_create_new_version(model, actor)
         instance = model(
             **data,
             version_id=version_id,
@@ -126,7 +147,7 @@ def create(
     instance.full_clean()
     instance.save()
 
-    _audit(user, "admin.lookup.insert", table, instance, before=None, after=data)
+    _audit(actor, "admin.lookup.insert", table, instance, before=None, after=data)
     invalidate_lookup_cache()
 
 
@@ -135,7 +156,7 @@ def update(
     table: str,
     lookup: dict,
     data: dict,
-    user=None,
+    actor: User | None = None,
 ) -> None:
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
@@ -146,7 +167,7 @@ def update(
     try:
         if model in VERSIONED_MODELS:
             # Determines whether a new version should be created
-            version_id = _check_and_create_new_version(model, user)
+            version_id = _check_and_create_new_version(model, actor)
             instance = model.objects.get(
                 **lookup,
                 version_id=version_id,
@@ -171,7 +192,7 @@ def update(
     _update_instance(instance, lookup, data)
 
     _audit(
-        user,
+        actor,
         "admin.lookup.update",
         table,
         instance,
@@ -183,7 +204,7 @@ def update(
 
 
 def _audit(
-    user,
+    actor: User | None,
     action: str,
     table: str,
     instance: models.Model,
@@ -209,7 +230,7 @@ def _audit(
         )
 
     write_audit(
-        actor=user,
+        actor=actor,
         action=action,
         object_type=table,
         object_id=str(instance.pk),
@@ -243,7 +264,7 @@ def _update_instance(
 
 
 @transaction.atomic
-def restore_version(version_id: int, user) -> int:
+def restore_version(version_id: int, actor: User | None) -> int:
     """
     Put the rates back to how they were in an older version (#137).
 
@@ -266,7 +287,7 @@ def restore_version(version_id: int, user) -> int:
     if source.id == config.current_version_id:
         raise ValidationError(f"Version {version_id} is already the current rates.")
 
-    restored = LookupVersion.objects.create(updated_by=user)
+    restored = LookupVersion.objects.create(updated_by=actor)
     for model in VERSIONED_MODELS:
         for row in model.objects.filter(version_id=source.id):
             fields = {
@@ -283,7 +304,7 @@ def restore_version(version_id: int, user) -> int:
     config.save(update_fields=["current_version", "referenced"])
 
     write_audit(
-        actor=user,
+        actor=actor,
         action="admin.lookup.restore",
         object_type="lookup_version",
         object_id=str(restored.id),

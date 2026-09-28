@@ -843,6 +843,9 @@ class AuditLog(models.Model):
     what object was affected, and the details of the change.
     """
 
+    if TYPE_CHECKING:
+        actor_id: int
+
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,

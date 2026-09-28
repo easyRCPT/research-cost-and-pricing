@@ -22,16 +22,16 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .authentication import CsrfProtected
-from .models import User
-from .serializers.auth_serializer import (
+from api.authentication import CsrfProtected
+from api.models import User
+from api.serializers.auth_serializer import (
     AdminLoginSerializer,
     LoginSerializer,
     MeSerializer,
     SignupSerializer,
 )
-from .services import auth
-from .throttles import SignInThrottle
+from api.services import auth
+from api.throttles import SignInThrottle
 
 # One message for a wrong password, an unknown address, a deactivated account
 # and the wrong tab. Anything more specific says which accounts exist and what

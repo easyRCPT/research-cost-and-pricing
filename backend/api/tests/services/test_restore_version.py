@@ -211,7 +211,7 @@ class RestoreVersionTest(TestCase):
         # #73: the old rate survives in the log as well as in the old version.
         was = self.rate()
         LookupConfiguration.objects.update(referenced=True)
-        update("salary_rates", LEVEL_A1, {"rate": Decimal("1234.5")}, user=self.admin)
+        update("salary_rates", LEVEL_A1, {"rate": Decimal("1234.5")}, actor=self.admin)
 
         entry = AuditLog.objects.get(action="admin.lookup.update")
         self.assertEqual(entry.actor, self.admin)
@@ -223,7 +223,7 @@ class RestoreVersionTest(TestCase):
 
     def test_the_version_an_edit_mints_names_the_editor(self):
         LookupConfiguration.objects.update(referenced=True)
-        update("salary_rates", LEVEL_A1, {"rate": Decimal(90000)}, user=self.admin)
+        update("salary_rates", LEVEL_A1, {"rate": Decimal(90000)}, actor=self.admin)
 
         self.assertEqual(
             LookupVersion.objects.get(id=self.current()).updated_by, self.admin

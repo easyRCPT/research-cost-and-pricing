@@ -62,7 +62,7 @@ export function useUpdateRate() {
       key: Record<string, unknown>
       values: Record<string, unknown>
     }) => {
-      const { error, response } = await api.PATCH('/api/lookups/{table}/', {
+      const { error, response } = await api.PATCH('/api/admin/lookups/{table}/', {
         params: { path: { table } },
         body: { lookup: key, values },
       })
@@ -83,7 +83,7 @@ export function useAddRate() {
       table: RateTable
       values: Record<string, unknown>
     }) => {
-      const { error, response } = await api.POST('/api/lookups/{table}/', {
+      const { error, response } = await api.POST('/api/admin/lookups/{table}/', {
         params: { path: { table } },
         body: { values },
       })
