@@ -6,7 +6,6 @@ from api.exceptions import Conflict, UnprocessableEntity
 from api.models import (
     ApprovalStep,
     Budget,
-    LookupConfiguration,
     User,
     UserOrgAssignment,
 )
@@ -84,17 +83,9 @@ def decide(
         else:
             raise Conflict("The approval workflow is in an invalid state.")
 
-    # Record current lookup version as referenced version
-    config = LookupConfiguration.objects.select_for_update().get()
-    budget.lookup_version_id = config.current_version_id
-
-    budget.save(update_fields=["lookup_version", "status"])
-
-    # Mark current lookup version as referenced
-    # After a change to versioned lookup tables, a new lookup version
-    # will be created. This budget will continue using its recorded version
-    config.referenced = True
-    config.save(update_fields=["referenced"])
+    # The rates were stamped at submit and are not touched here: a decision
+    # is on the price that was submitted, not on whatever the rates are now.
+    budget.save(update_fields=["status"])
 
     # Notify budget owner that a decision is made
     notify_budget_decision(budget, decision=decision, comment=comment, approver=user)

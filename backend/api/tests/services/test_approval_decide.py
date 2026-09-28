@@ -103,12 +103,15 @@ class ApprovalDecideTest(TestCase):
         *,
         dean_required: bool = True,
     ) -> Budget:
+        # As submit leaves it: in review, and stamped with the rates it was
+        # priced on (#57). Decide must not move that stamp.
         budget = Budget.objects.create(
             project=self.project,
             status=Budget.Status.HOD_REVIEW,
             cost_multiplier=Decimal("1.00"),
             in_kind_multiplier=Decimal("1.00"),
             margin=Decimal("0.3000"),
+            lookup_version=self.lookup_version,
         )
 
         ApprovalStep.objects.create(
@@ -157,8 +160,6 @@ class ApprovalDecideTest(TestCase):
         step.refresh_from_db()
         budget.refresh_from_db()
 
-        config = LookupConfiguration.objects.get()
-
         self.assertEqual(
             step.status,
             ApprovalStep.Status.APPROVED,
@@ -178,8 +179,6 @@ class ApprovalDecideTest(TestCase):
             budget.lookup_version_id,
             self.lookup_version.id,
         )
-
-        self.assertTrue(config.referenced)
 
     def test_hod_can_reject_department_step(self) -> None:
         budget = self.create_budget()
@@ -204,8 +203,6 @@ class ApprovalDecideTest(TestCase):
             ApprovalStep.Level.FACULTY,
         )
 
-        config = LookupConfiguration.objects.get()
-
         self.assertEqual(
             step.status,
             ApprovalStep.Status.REJECTED,
@@ -225,8 +222,6 @@ class ApprovalDecideTest(TestCase):
             budget.lookup_version_id,
             self.lookup_version.id,
         )
-
-        self.assertTrue(config.referenced)
 
     def test_dean_can_approve_faculty_step(self) -> None:
         budget = self.create_budget()
