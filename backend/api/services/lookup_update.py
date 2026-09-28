@@ -11,6 +11,7 @@ from ..models import (
     SalaryRate,
     SalaryRateMultiplier,
 )
+from .audit import write_audit
 from .lookup_loader import (
     LOOKUP_MODELS,
     LookupTable,
@@ -181,3 +182,76 @@ def _update_instance(
 
     instance.full_clean()
     instance.save(update_fields=list(data))
+
+
+@transaction.atomic
+def restore_version(version_id: int, user) -> int:
+    """
+    Put the rates back to how they were in an older version (#137).
+
+    Restores forward: mints a new version as a copy of the old one and makes
+    that current, rather than pointing current_version back at it. The old
+    version is left exactly as it is, every budget keeps the version it was
+    stamped with, and the restore shows up as the newest version, by whom and
+    when, like any other edit. Pointing back would make an old version current
+    again, and whether the next edit then copied it or wrote into it would
+    depend on `referenced` -- priced history must never depend on that flag.
+
+    Possible at all because each version holds every row, not a diff: the old
+    version's rows are the whole answer.
+    """
+    config = LookupConfiguration.objects.select_for_update().get()
+    try:
+        source = LookupVersion.objects.get(id=version_id)
+    except LookupVersion.DoesNotExist:
+        raise ValidationError(f"There is no lookup version {version_id}.")
+    if source.id == config.current_version_id:
+        raise ValidationError(f"Version {version_id} is already the current rates.")
+
+    restored = LookupVersion.objects.create(updated_by=user)
+    for model in VERSIONED_MODELS:
+        for row in model.objects.filter(version_id=source.id):
+            fields = {
+                field.name: getattr(row, field.name)
+                for field in model._meta.concrete_fields
+                if not field.primary_key and field.name != "version"
+            }
+            model.objects.create(**fields, version=restored)
+
+    config.current_version = restored
+    # Nothing has been priced on the copy yet, so the next edit may write
+    # into it rather than minting another.
+    config.referenced = False
+    config.save(update_fields=["current_version", "referenced"])
+
+    write_audit(
+        actor=user,
+        action="lookups.restore",
+        object_type="lookup_version",
+        object_id=str(restored.id),
+        detail={"restored_from": source.id},
+    )
+    invalidate_lookup_cache()
+    return restored.id
+
+
+def list_versions() -> list[dict]:
+    """Every version, newest first, with who made it and what it priced."""
+    from django.db.models import Count
+
+    current = LookupConfiguration.objects.get().current_version_id
+    versions = (
+        LookupVersion.objects.order_by("-id")
+        .values("id", "created_at", "updated_by__email")
+        .annotate(budgets_priced=Count("budget"))
+    )
+    return [
+        {
+            "id": version["id"],
+            "created_at": version["created_at"],
+            "updated_by": version["updated_by__email"],
+            "budgets_priced": version["budgets_priced"],
+            "current": version["id"] == current,
+        }
+        for version in versions
+    ]
