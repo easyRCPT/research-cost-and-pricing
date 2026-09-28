@@ -6,6 +6,7 @@ from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
 from api.models import (
+    AuditLog,
     CalculationConstant,
     Department,
     Faculty,
@@ -13,6 +14,7 @@ from api.models import (
     LookupVersion,
     SalaryRate,
     SalaryRateMultiplier,
+    User,
 )
 from api.services.lookup_update import create, update
 
@@ -96,6 +98,45 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             )
 
         self.assertEqual(Department.objects.count(), 0)
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_creates_audit_log_when_lookup_row_created(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.create_faculty()
+
+        actor = User.objects.create(
+            email="admin@unimelb.edu.au",
+            is_superuser=True,
+        )
+
+        create(
+            "departments",
+            {
+                "code": "SCI",
+                "name": "Science",
+                "school": "Science School",
+                "school_code": "SCI",
+                "faculty_id": "SCI",
+            },
+            actor=actor,
+        )
+
+        audit = AuditLog.objects.get(
+            action="admin.lookup.insert",
+        )
+
+        self.assertEqual(audit.actor_id, actor.id)
+        self.assertEqual(audit.object_type, "departments")
+
+        self.assertEqual(
+            audit.detail["after"]["name"],
+            "Science",
+        )
+        self.assertIsNone(audit.detail["before"])
+
+        mock_invalidate_cache.assert_called_once()
 
 
 class TestUpdate(TestCase, LookupUpdateTestMixin):
@@ -231,6 +272,48 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         self.assertEqual(department.name, "Science")
         mock_invalidate_cache.assert_not_called()
 
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_creates_audit_log_when_lookup_row_updated(
+        self,
+        mock_invalidate_cache,
+    ):
+        department = self.create_department()
+
+        actor = User.objects.create(
+            email="admin@unimelb.edu.au",
+            is_superuser=True,
+        )
+
+        update(
+            "departments",
+            {"code": department.code},
+            {"name": "Engineering"},
+            actor=actor,
+        )
+
+        audit = AuditLog.objects.get(
+            action="admin.lookup.update",
+        )
+
+        self.assertEqual(audit.actor_id, actor.id)
+        self.assertEqual(audit.object_type, "departments")
+
+        self.assertEqual(
+            audit.detail["before"]["name"],
+            "Science",
+        )
+        self.assertEqual(
+            audit.detail["after"]["name"],
+            "Engineering",
+        )
+
+        self.assertEqual(
+            audit.detail["lookup"]["code"],
+            "SCI",
+        )
+
+        mock_invalidate_cache.assert_called_once()
+
 
 class TestVersionedCreate(TestCase):
     def setUp(self):
@@ -305,6 +388,60 @@ class TestVersionedCreate(TestCase):
         self.assertEqual(LookupVersion.objects.count(), 1)
         self.assertEqual(SalaryRate.objects.count(), 0)
         mock_invalidate_cache.assert_not_called()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_creates_version_audit_when_version_created_by_actor(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        actor = User.objects.create(
+            email="admin@unimelb.edu.au",
+            is_superuser=True,
+        )
+
+        create(
+            "salary_rates",
+            {
+                "payroll_type": "Fortnight",
+                "category": "Academic",
+                "classification": "A",
+                "rate": Decimal(100000),
+            },
+            actor=actor,
+        )
+
+        version_audit = AuditLog.objects.get(
+            action="admin.lookup_version.create",
+        )
+
+        self.assertEqual(
+            version_audit.actor_id,
+            actor.id,
+        )
+
+        self.assertEqual(
+            version_audit.object_type,
+            "lookup_version",
+        )
+
+        self.assertEqual(
+            version_audit.detail["source_version_id"],
+            self.version.id,
+        )
+
+        edit_audit = AuditLog.objects.get(
+            action="admin.lookup.insert",
+        )
+
+        self.assertEqual(
+            edit_audit.actor_id,
+            actor.id,
+        )
+
+        mock_invalidate_cache.assert_called_once()
 
 
 class TestVersionedUpdate(TestCase):
@@ -464,6 +601,69 @@ class TestVersionedUpdate(TestCase):
         self.assertTrue(self.config.referenced)
         self.assertEqual(LookupVersion.objects.count(), 1)
         mock_invalidate_cache.assert_not_called()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_creates_both_version_and_update_audit_logs(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.create_salary_rate()
+
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        actor = User.objects.create(
+            email="admin@unimelb.edu.au",
+            is_superuser=True,
+        )
+
+        update(
+            "salary_rates",
+            {
+                "payroll_type": "Fortnight",
+                "category": "Academic",
+                "classification": "A",
+            },
+            {"rate": Decimal(120000)},
+            actor=actor,
+        )
+
+        self.config.refresh_from_db()
+
+        version_audit = AuditLog.objects.get(
+            action="admin.lookup_version.create",
+        )
+
+        update_audit = AuditLog.objects.get(
+            action="admin.lookup.update",
+        )
+
+        self.assertEqual(
+            version_audit.detail["source_version_id"],
+            self.version.id,
+        )
+
+        self.assertEqual(
+            Decimal(update_audit.detail["before"]["rate"]),
+            Decimal(100000),
+        )
+
+        self.assertEqual(
+            Decimal(update_audit.detail["after"]["rate"]),
+            Decimal(120000),
+        )
+
+        self.assertEqual(
+            update_audit.detail["version"],
+            self.config.current_version_id,
+        )
+
+        self.assertEqual(
+            AuditLog.objects.count(),
+            2,
+        )
+
+        mock_invalidate_cache.assert_called_once()
 
 
 class TestFixedConstants(TestCase):

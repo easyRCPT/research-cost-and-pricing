@@ -68,6 +68,20 @@ def create_lookup_version(
     config.referenced = False
     config.save(update_fields=["current_version", "referenced"])
 
+    # Audit lookup version creation only when triggered by a superadmin.
+    # Initial import creates versions without an actor and should not create audit records.
+    # A lookup edit can create both an edit log and a version creation log.
+    if actor is not None:
+        write_audit(
+            actor=actor,
+            action="admin.lookup_version.create",
+            object_type="lookup_version",
+            object_id=str(new_version.id),
+            detail={
+                "source_version_id": old_version_id,
+            },
+        )
+
     return new_version.id
 
 

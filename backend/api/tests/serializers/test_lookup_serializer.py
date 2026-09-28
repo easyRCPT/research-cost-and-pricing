@@ -15,6 +15,7 @@ from .serializer_utils import get_errors
 class LookupSerializersTestCase(SimpleTestCase):
     def test_all_lookup_serializers_are_registered(self):
         expected = {
+            "faculties",
             "departments",
             "salary_rates",
             "salary_rate_multipliers",

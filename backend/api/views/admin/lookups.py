@@ -57,6 +57,7 @@ class LookupTableView(APIView):
 
     Moved into the admin namespace from api/lookups/..
     """
+
     # Only superadmins are allowed to create/update lookup tables
     permission_classes = [IsSuperadmin]
 

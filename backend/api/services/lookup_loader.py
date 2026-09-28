@@ -11,6 +11,7 @@ from ..models import (
     DeliverableType,
     Department,
     EbaIncrease,
+    Faculty,
     IncrementCap,
     LookupConfiguration,
     NonStaffCostCategory,
@@ -35,6 +36,7 @@ REQUIRED_CONSTANTS = {
 
 
 class LookupTable(models.TextChoices):
+    FACULTIES = "faculties"
     DEPARTMENTS = "departments"
     SALARY_RATES = "salary_rates"
     SALARY_RATE_MULTIPLIERS = "salary_rate_multipliers"
@@ -51,6 +53,7 @@ class LookupTable(models.TextChoices):
 
 # Mapping tables to models for lookup update
 LOOKUP_MODELS: dict = {
+    LookupTable.FACULTIES: Faculty,
     LookupTable.DEPARTMENTS: Department,
     LookupTable.SALARY_RATES: SalaryRate,
     LookupTable.SALARY_RATE_MULTIPLIERS: SalaryRateMultiplier,
@@ -71,6 +74,7 @@ def _get_unversioned_lookup_models() -> dict[LookupTable, QuerySet]:
     Every unversioned table's rows, in a stable order. The keys are the response's keys.
     """
     return {
+        LookupTable.FACULTIES: Faculty.objects.order_by("code"),
         LookupTable.DEPARTMENTS: Department.objects.order_by("code"),
         LookupTable.INCREMENT_CAPS: IncrementCap.objects.order_by("level"),
         LookupTable.NON_STAFF_COST_CATEGORIES: NonStaffCostCategory.objects.order_by(
