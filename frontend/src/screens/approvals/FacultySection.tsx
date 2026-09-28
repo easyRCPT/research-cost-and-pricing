@@ -1,30 +1,50 @@
 import { PartBar } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { SignatureBlock } from './SignatureBlock'
+import type { ApprovalStepRecord } from '@/types'
+import { DecisionRecord } from './DecisionRecord'
+import { describeTrigger } from './triggers'
 
 interface FacultySectionProps {
-  deanRequired: boolean
-  note: string | undefined
+  step: ApprovalStepRecord | undefined
+  /** The server's reasons: frozen at submit, or the live ones for a draft. */
+  triggers: string[]
+  submitted: boolean
 }
 
-export function FacultySection({ deanRequired, note }: FacultySectionProps) {
+/**
+ * Part D. One faculty step produces one decision, so there is one record --
+ * there is no school in the approval model, and no second signature (#83).
+ */
+export function FacultySection({ step, triggers, submitted }: FacultySectionProps) {
   return (
     <>
-      <PartBar description={note}>
-        PART D — Authorisation by Faculty / School
-      </PartBar>
+      <PartBar>PART D — Authorisation by Faculty</PartBar>
 
-      {deanRequired && (
-        <Alert className="mb-4">
+      {triggers.length > 0 ? (
+        <Alert className="my-4">
           <AlertDescription>
-            <b>Dean's authorisation is required for this project.</b> The cost
-            recovery multiplier is below the University default.
+            <b>
+              {submitted
+                ? "The Dean's authorisation is required because"
+                : "If submitted now, this costing will also need the Dean's authorisation, because"}
+            </b>
+            <ul className="mt-1 list-disc pl-5">
+              {triggers.map((code) => (
+                <li key={code}>{describeTrigger(code)}.</li>
+              ))}
+            </ul>
           </AlertDescription>
         </Alert>
+      ) : (
+        !submitted && (
+          <p className="my-3 text-[13px] text-muted-foreground">
+            As it stands, this costing needs no Dean: the Head of Department's
+            authorisation will finish it.
+          </p>
+        )
       )}
 
-      <SignatureBlock title="Faculty / School Authorisation #1:" />
-      <SignatureBlock title="Faculty / School Authorisation #2:" />
+      {submitted && <DecisionRecord title="Dean or delegate" step={step} />}
     </>
   )
 }

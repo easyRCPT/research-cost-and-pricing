@@ -5,8 +5,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.models import ApprovalStep
 from api.serializers.approval_serializer import (
     ApprovalDecideSerializer,
+    ApprovalDecisionResultSerializer,
     ApprovalQueueSerializer,
 )
 from api.services import approval_decide, approval_queue
@@ -23,7 +25,10 @@ class ApprovalView(APIView):
 
 
 class ApprovalDecideView(APIView):
-    @extend_schema(request=ApprovalDecideSerializer, responses={204: None})
+    @extend_schema(
+        request=ApprovalDecideSerializer,
+        responses={200: ApprovalDecisionResultSerializer},
+    )
     def post(self, request: Request, step_id: int) -> Response:
         serializer = ApprovalDecideSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -36,4 +41,10 @@ class ApprovalDecideView(APIView):
             comment=validated_data.get("comment", ""),
         )
 
-        return Response(status=204)
+        # The status the decision moved the budget to: dean_review, approved or
+        # rejected. The decision panel reports it; the rule that picked it lives
+        # in approval_decide alone.
+        step = ApprovalStep.objects.select_related("budget").get(id=step_id)
+        return Response(
+            ApprovalDecisionResultSerializer({"budget_status": step.budget.status}).data
+        )

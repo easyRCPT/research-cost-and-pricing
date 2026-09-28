@@ -4,6 +4,189 @@
  */
 
 export interface paths {
+    "/api/admin/audit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The audit log, newest first (#67). Read-only: nothing edits an entry. */
+        get: operations["admin_audit_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/audit/actions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every action the log holds, for the filter. */
+        get: operations["admin_audit_actions_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/groups/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The group names, so the screen offers these and cannot invent one. */
+        get: operations["admin_groups_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every set of rates the tool has had, newest first (#137). */
+        get: operations["admin_lookups_versions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/restore/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Make an older set of rates current again, as a new version (#137). */
+        post: operations["admin_lookups_versions_restore_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/overview/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The console's landing screen, in one request (#94). */
+        get: operations["admin_overview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/projects/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every project, whoever owns it. Read-only (#66). */
+        get: operations["admin_projects_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_users_list"];
+        put?: never;
+        post: operations["admin_users_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_users_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["admin_users_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}/assignments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_users_assignments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}/assignments/{assignment_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["admin_users_assignments_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/approvals/{step_id}/decide/": {
         parameters: {
             query?: never;
@@ -363,19 +546,380 @@ export interface components {
          * @enum {string}
          */
         AccountTypeEnum: "researcher" | "staff";
+        AccountsSummary: {
+            total: number;
+            inactive: number;
+            by_group: components["schemas"]["GroupCount"][];
+            no_group: number;
+        };
         Activity: {
             code: string;
             name: string;
         };
+        AdminAssignment: {
+            id: number;
+            role: components["schemas"]["RoleEnum"];
+            department: string | null;
+            department_name?: string | null;
+            faculty: string | null;
+            faculty_name?: string | null;
+        };
+        AdminAuditActionsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminAuditListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminGroupsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLogin: {
             /** Format: email */
             email: string;
             password: string;
         };
+        AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminOverviewRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminProject: {
+            id: number;
+            reference: string | null;
+            title: string;
+            owner: components["schemas"]["ProjectOwner"];
+            department: string;
+            faculty: string;
+            budget_id: number | null;
+            status: (components["schemas"]["StatusEnum"] | components["schemas"]["NullEnum"]) | null;
+            budget_count: number;
+            /** Format: double */
+            total_price_inc_gst: number;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        AdminProjectsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminUser: {
+            id: number;
+            /** Format: email */
+            email: string;
+            first_name: string;
+            last_name: string;
+            is_active: boolean;
+            /** Format: date-time */
+            date_joined: string;
+            /** Format: date-time */
+            last_login: string | null;
+            readonly groups: string[];
+            readonly assignments: components["schemas"]["AdminAssignment"][];
+        };
+        AdminUsersAssignmentsCreateDepartmentErrorComponent: {
+            /**
+             * @description * `department` - department (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "department";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersAssignmentsCreateError: components["schemas"]["AdminUsersAssignmentsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminUsersAssignmentsCreateRoleErrorComponent"] | components["schemas"]["AdminUsersAssignmentsCreateDepartmentErrorComponent"] | components["schemas"]["AdminUsersAssignmentsCreateFacultyErrorComponent"];
+        AdminUsersAssignmentsCreateErrorResponse400: components["schemas"]["AdminUsersAssignmentsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminUsersAssignmentsCreateFacultyErrorComponent: {
+            /**
+             * @description * `faculty` - faculty (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "faculty";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersAssignmentsCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminUsersAssignmentsCreateRoleErrorComponent: {
+            /**
+             * @description * `role` - role (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "role";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AdminUsersAssignmentsCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminUsersAssignmentsCreateError"][];
+        };
+        AdminUsersAssignmentsDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminUsersCreateEmailErrorComponent: {
+            /**
+             * @description * `email` - email (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "email";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersCreateError: components["schemas"]["AdminUsersCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminUsersCreateEmailErrorComponent"] | components["schemas"]["AdminUsersCreatePasswordErrorComponent"] | components["schemas"]["AdminUsersCreateFirstNameErrorComponent"] | components["schemas"]["AdminUsersCreateLastNameErrorComponent"] | components["schemas"]["AdminUsersCreateGroupsErrorComponent"] | components["schemas"]["AdminUsersCreateGroupsINDEXErrorComponent"];
+        AdminUsersCreateErrorResponse400: components["schemas"]["AdminUsersCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminUsersCreateFirstNameErrorComponent: {
+            /**
+             * @description * `first_name` - first_name (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "first_name";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersCreateGroupsErrorComponent: {
+            /**
+             * @description * `groups` - groups (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "groups";
+            /**
+             * @description * `not_a_list` - not_a_list
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_list" | "null";
+            detail: string;
+        };
+        AdminUsersCreateGroupsINDEXErrorComponent: {
+            /**
+             * @description * `groups.INDEX` - groups.INDEX (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "groups.INDEX";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersCreateLastNameErrorComponent: {
+            /**
+             * @description * `last_name` - last_name (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "last_name";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminUsersCreatePasswordErrorComponent: {
+            /**
+             * @description * `password` - password (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "password";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `min_length` - min_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "min_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminUsersCreateError"][];
+        };
+        AdminUsersListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminUsersPartialUpdateError: components["schemas"]["AdminUsersPartialUpdateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminUsersPartialUpdateFirstNameErrorComponent"] | components["schemas"]["AdminUsersPartialUpdateLastNameErrorComponent"] | components["schemas"]["AdminUsersPartialUpdateIsActiveErrorComponent"] | components["schemas"]["AdminUsersPartialUpdateGroupsErrorComponent"] | components["schemas"]["AdminUsersPartialUpdateGroupsINDEXErrorComponent"];
+        AdminUsersPartialUpdateErrorResponse400: components["schemas"]["AdminUsersPartialUpdateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminUsersPartialUpdateFirstNameErrorComponent: {
+            /**
+             * @description * `first_name` - first_name (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "first_name";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersPartialUpdateGroupsErrorComponent: {
+            /**
+             * @description * `groups` - groups (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "groups";
+            /**
+             * @description * `not_a_list` - not_a_list
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_list" | "null";
+            detail: string;
+        };
+        AdminUsersPartialUpdateGroupsINDEXErrorComponent: {
+            /**
+             * @description * `groups.INDEX` - groups.INDEX (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "groups.INDEX";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersPartialUpdateIsActiveErrorComponent: {
+            /**
+             * @description * `is_active` - is_active (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "is_active";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminUsersPartialUpdateLastNameErrorComponent: {
+            /**
+             * @description * `last_name` - last_name (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "last_name";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminUsersPartialUpdateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminUsersPartialUpdateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminUsersPartialUpdateError"][];
+        };
+        AdminUsersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         ApprovalDecide: {
             decision: components["schemas"]["DecisionEnum"];
             /** @default  */
             comment: string;
+        };
+        /** @description Where the budget went, so the screen says so rather than guessing. */
+        ApprovalDecisionResult: {
+            budget_status: string;
         };
         ApprovalQueue: {
             step_id: number;
@@ -385,7 +929,10 @@ export interface components {
         };
         ApprovalQueueBudget: {
             id: number;
+            project_id: number;
+            reference: string | null;
             project_title: string;
+            readonly submitted_by: string;
             department: string;
             faculty: string;
             chief_investigator: string;
@@ -396,6 +943,31 @@ export interface components {
             /** Format: date-time */
             submitted_at: string;
         };
+        ApprovalRecord: {
+            /** Format: date-time */
+            submitted_at: string | null;
+            lookup_version: number | null;
+            dean_triggers: string[];
+            steps: components["schemas"]["ApprovalStepRecord"][];
+        };
+        ApprovalStepRecord: {
+            id: number;
+            level: components["schemas"]["LevelEnum"];
+            status: components["schemas"]["ApprovalStepStatusEnum"];
+            decided_by: string | null;
+            /** Format: date-time */
+            decided_at: string | null;
+            comment: string;
+            waiting_on: string[];
+        };
+        /**
+         * @description * `pending` - Pending
+         *     * `approved` - Approved
+         *     * `rejected` - Rejected
+         *     * `not_required` - Not required
+         * @enum {string}
+         */
+        ApprovalStepStatusEnum: "pending" | "approved" | "rejected" | "not_required";
         ApprovalsDecideCreateCommentErrorComponent: {
             /**
              * @description * `comment` - comment (enum property replaced by openapi-typescript)
@@ -457,6 +1029,22 @@ export interface components {
             role: string;
             department: string | null;
             faculty: string | null;
+        };
+        AssignmentCreate: {
+            role: components["schemas"]["RoleEnum"];
+            department?: string | null;
+            faculty?: string | null;
+        };
+        AuditEntry: {
+            id: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: email */
+            actor_email?: string | null;
+            action: string;
+            object_type: string;
+            object_id: string;
+            detail: unknown;
         };
         AuthAdminLoginCreateEmailErrorComponent: {
             /**
@@ -720,6 +1308,7 @@ export interface components {
             non_staff_cost: components["schemas"]["NonStaffCost"];
             non_staff_in_kind_cost: components["schemas"]["NonStaffCost"];
             budget_summary: components["schemas"]["BudgetSummary"];
+            approval: components["schemas"]["ApprovalRecord"];
         };
         /**
          * @description * `cash_co_contribution` - cash_co_contribution
@@ -768,6 +1357,7 @@ export interface components {
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
             dean_required: boolean;
+            dean_triggers: string[];
         };
         BudgetUpdate: components["schemas"]["ProjectUpdate"] | components["schemas"]["BudgetFieldUpdate"] | components["schemas"]["StaffUpdate"] | components["schemas"]["NonStaffUpdate"] | components["schemas"]["DeliverableUpdate"];
         BudgetsCloneCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
@@ -1637,6 +2227,10 @@ export interface components {
             type: components["schemas"]["ServerErrorEnum"];
             errors: components["schemas"]["Error500"][];
         };
+        GroupCount: {
+            group: string;
+            count: number;
+        };
         InKindCosts: {
             in_kind_staff_budget: components["schemas"]["StaffBudget"];
             in_kind_non_staff_budget: components["schemas"]["NonStaffBudget"];
@@ -1647,6 +2241,12 @@ export interface components {
             level: string;
             max_steps: number;
         };
+        /**
+         * @description * `department` - Head of Department
+         *     * `faculty` - Dean
+         * @enum {string}
+         */
+        LevelEnum: "department" | "faculty";
         Login: {
             /** Format: email */
             email: string;
@@ -1679,6 +2279,14 @@ export interface components {
             values: {
                 [key: string]: unknown;
             };
+        };
+        LookupVersion: {
+            id: number;
+            /** Format: date-time */
+            created_at: string;
+            updated_by: string | null;
+            budgets_priced: number;
+            current: boolean;
         };
         LookupsCreateError: components["schemas"]["LookupsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["LookupsCreateValuesErrorComponent"] | components["schemas"]["LookupsCreateValuesKEYErrorComponent"];
         LookupsCreateErrorResponse400: components["schemas"]["LookupsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
@@ -1954,6 +2562,12 @@ export interface components {
          * @enum {string}
          */
         OnCostTypeEnum: "superannuation" | "workcover" | "leave_loading" | "long_service_leave" | "parental_leave" | "annual_leave_provision";
+        Overview: {
+            accounts: components["schemas"]["AccountsSummary"];
+            projects: components["schemas"]["ProjectsSummary"];
+            versions: components["schemas"]["VersionsSummary"];
+            recent: components["schemas"]["AuditEntry"][];
+        };
         ParseError: {
             code: components["schemas"]["ParseErrorCodeEnum"];
             detail: string;
@@ -2055,6 +2669,7 @@ export interface components {
          */
         ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "other_funder" | "other_funder_category" | "region" | "scheme" | "start_month" | "start_year" | "title";
         ProjectInfo: {
+            owner_id: number;
             title: string;
             chief_investigator: string;
             funder: string;
@@ -2073,6 +2688,12 @@ export interface components {
             additional_information: string;
             other_funder: string;
             other_funder_category: string;
+        };
+        ProjectOwner: {
+            id: number;
+            /** Format: email */
+            email: string;
+            name: string;
         };
         /** @description One line of the projects list. */
         ProjectRow: {
@@ -2285,15 +2906,30 @@ export interface components {
             errors: components["schemas"]["ProjectsCreateError"][];
         };
         ProjectsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        ProjectsSummary: {
+            total: number;
+            by_status: components["schemas"]["StatusCount"][];
+            faculties: number;
+        };
         Region: {
             code: string;
             name: string;
+        };
+        Restored: {
+            version_id: number;
         };
         RevenueCategory: {
             budget_ledger_id: number;
             external_party: string;
             description: string;
         };
+        /**
+         * @description * `member` - Member
+         *     * `hod` - Head of Department
+         *     * `dean` - Dean
+         * @enum {string}
+         */
+        RoleEnum: "member" | "hod" | "dean";
         SalaryRate: {
             payroll_type: components["schemas"]["PayrollTypeEnum"];
             category: components["schemas"]["CategoryEnum"];
@@ -2409,6 +3045,11 @@ export interface components {
             /** Format: double */
             cost: number;
         };
+        StatusCount: {
+            status: components["schemas"]["StatusEnum"];
+            label: string;
+            count: number;
+        };
         /**
          * @description * `draft` - Draft
          *     * `submitted` - Submitted
@@ -2434,11 +3075,29 @@ export interface components {
             first_name: string;
             last_name: string;
         };
+        UserCreate: {
+            /** Format: email */
+            email: string;
+            password: string;
+            first_name: string;
+            last_name: string;
+            groups?: string[];
+        };
+        UserUpdate: {
+            first_name?: string;
+            last_name?: string;
+            is_active?: boolean;
+            groups?: string[];
+        };
         /**
          * @description * `validation_error` - Validation Error
          * @enum {string}
          */
         ValidationErrorEnum: "validation_error";
+        VersionsSummary: {
+            total: number;
+            latest: components["schemas"]["LookupVersion"][];
+        };
         YearAllocation: {
             year: number;
             /** Format: double */
@@ -2458,6 +3117,1131 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_audit_list: {
+        parameters: {
+            query?: {
+                action?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEntry"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAuditListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_audit_actions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAuditActionsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_groups_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminGroupsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupVersion"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_restore_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Restored"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsRestoreCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_overview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Overview"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverviewRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_projects_list: {
+        parameters: {
+            query?: {
+                q?: string;
+                /**
+                 * @description * `draft` - Draft
+                 *     * `submitted` - Submitted
+                 *     * `hod_review` - Head of Department review
+                 *     * `dean_review` - Dean review
+                 *     * `approved` - Approved
+                 *     * `rejected` - Rejected
+                 *     * `withdrawn` - Withdrawn
+                 */
+                status?: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminProject"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminProjectsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_users_list: {
+        parameters: {
+            query?: {
+                active?: boolean;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUser"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_users_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreate"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserCreate"];
+                "multipart/form-data": components["schemas"]["UserCreate"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUser"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_users_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUser"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_users_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserUpdate"];
+                "multipart/form-data": components["schemas"]["UserUpdate"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUser"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersPartialUpdateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_users_assignments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCreate"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCreate"];
+                "multipart/form-data": components["schemas"]["AssignmentCreate"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUser"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersAssignmentsCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_users_assignments_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_id: number;
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersAssignmentsDestroyErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     approvals_decide_create: {
         parameters: {
             query?: never;
@@ -2475,12 +4259,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description No response body */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ApprovalDecisionResult"];
+                };
             };
             400: {
                 headers: {

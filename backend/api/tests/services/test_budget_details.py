@@ -271,6 +271,7 @@ def details_with_price(price: Decimal) -> dict:
 
 
 class TestGetBudgetDetails(SimpleTestCase):
+    @patch("api.services.budget_details.approval_record.approval_record")
     @patch("api.services.budget_details.build_budget_details")
     @patch("api.services.budget_details.data_loader.load_budget_data")
     @patch("api.services.budget_details.lookup_loader.constants_for")
@@ -279,6 +280,7 @@ class TestGetBudgetDetails(SimpleTestCase):
         mock_constants_for,
         mock_load_budget_data,
         mock_build_budget_details,
+        mock_approval_record,
     ):
         budget = Mock(spec=Budget)
         budget.total_price_inc_gst = Decimal("0.00")
@@ -289,6 +291,7 @@ class TestGetBudgetDetails(SimpleTestCase):
         mock_constants_for.return_value = constants
         mock_load_budget_data.return_value = budget_data
         mock_build_budget_details.return_value = expected
+        mock_approval_record.return_value = {"steps": []}
 
         result = get_budget_details(budget)
 
@@ -300,6 +303,9 @@ class TestGetBudgetDetails(SimpleTestCase):
         )
 
         self.assertEqual(result, expected)
+        # The review record rides along, from the budget itself.
+        mock_approval_record.assert_called_once_with(budget)
+        self.assertEqual(result["approval"], {"steps": []})
 
 
 class TestStorePrice(SimpleTestCase):

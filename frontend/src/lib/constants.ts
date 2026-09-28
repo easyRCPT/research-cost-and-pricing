@@ -32,6 +32,8 @@ const year = now.getFullYear()
 const month = now.getMonth() + 1
 
 export const EMPTY_PROJECT: ProjectInfo = {
+  // No account has id 0, so an empty project is nobody's to edit.
+  owner_id: 0,
   title: '',
   chief_investigator: '',
   funder: '',

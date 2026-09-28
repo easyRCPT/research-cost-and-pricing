@@ -27,5 +27,7 @@ def health(request):
 urlpatterns = [
     path("health/", health, name="health"),
     path("admin/", admin.site.urls),
+    # Before api/, so the superadmin namespace is matched as its own include.
+    path("api/admin/", include("api.urls_admin")),
     path("api/", include("api.urls")),
 ]

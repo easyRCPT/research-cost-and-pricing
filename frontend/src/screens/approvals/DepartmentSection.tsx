@@ -1,12 +1,16 @@
 import { PartBar } from '@/components/shell'
-import { SignatureBlock } from './SignatureBlock'
+import type { ApprovalStepRecord } from '@/types'
+import { DecisionRecord } from './DecisionRecord'
 
-export function DepartmentSection() {
+export function DepartmentSection({
+  step,
+}: {
+  step: ApprovalStepRecord | undefined
+}) {
   return (
     <>
       <PartBar>PART C — Authorisation by Department</PartBar>
-      <SignatureBlock title="Budget Form completed by:" />
-      <SignatureBlock title="Head of Department Authorisation:" />
+      <DecisionRecord title="Head of Department" step={step} />
     </>
   )
 }

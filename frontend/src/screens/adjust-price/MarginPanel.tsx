@@ -1,4 +1,4 @@
-import { useBudget, useField } from '@/api/budget'
+import { useBudget, useEditable, useField } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
 import { toastOutOfRange } from '@/lib/range'
@@ -17,6 +17,7 @@ export function MarginPanel() {
   const summary = budget.budget_summary.price_summary
   const deanRequired = budget.budget_summary.dean_required
   const percent = asPercent(margin.value)
+  const editable = useEditable()
   const setPercent = (next: number) => margin.onChange(asFraction(next))
 
   return (
@@ -29,6 +30,8 @@ export function MarginPanel() {
           step={1}
           value={[percent]}
           onValueChange={([next]) => setPercent(next)}
+          // Not a native control, so the read-only fieldset cannot reach it.
+          disabled={!editable}
         />
         <NumberInput
           min={0}

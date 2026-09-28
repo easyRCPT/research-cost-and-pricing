@@ -8,24 +8,39 @@ export type EditorScreen =
   | 'adjust'
   | 'price'
   | 'budget'
-  // TODO: approvals — restore when auth lands.
-  // | 'approvals'
+  | 'approvals'
 
-export interface SidebarSection {
+/**
+ * One rail for the calculator and the admin console, so the two read as one
+ * product. Generic over the item id: the calculator's ids are its screens, the
+ * console's are route segments. Defaults to the calculator's, so existing call
+ * sites type-check as before.
+ */
+export interface SidebarSection<Id extends string = EditorScreen> {
   label?: string
-  items: readonly { id: EditorScreen; label: string }[]
+  items: readonly { id: Id; label: string }[]
 }
 
-interface SideBarProps {
-  sections: readonly SidebarSection[]
-  current: EditorScreen | null
-  onSelect: (screen: EditorScreen) => void
+interface SideBarProps<Id extends string> {
+  sections: readonly SidebarSection<Id>[]
+  current: Id | null
+  onSelect: (id: Id) => void
+  /** What a screen reader announces the rail as. */
+  label?: string
+  /** Below the sections: a link out, rather than a screen of this rail. */
+  footer?: React.ReactNode
 }
 
-export function SideBar({ sections, current, onSelect }: SideBarProps) {
+export function SideBar<Id extends string = EditorScreen>({
+  sections,
+  current,
+  onSelect,
+  label = 'Costing sections',
+  footer,
+}: SideBarProps<Id>) {
   return (
     <nav
-      aria-label="Costing sections"
+      aria-label={label}
       className="hidden md:block sticky top-15 h-[calc(100vh-3.75rem)] overflow-y-auto border-r bg-card px-3 py-5 print:hidden"
     >
       {sections.map((section, sectionIndex) => (
@@ -71,6 +86,7 @@ export function SideBar({ sections, current, onSelect }: SideBarProps) {
           </ol>
         </div>
       ))}
+      {footer && <div className="mt-6 border-t px-3 pt-4">{footer}</div>}
     </nav>
   )
 }

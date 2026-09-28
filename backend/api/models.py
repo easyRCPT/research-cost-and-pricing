@@ -179,6 +179,7 @@ class UserOrgAssignment(models.Model):
         id: int
         department_id: str | None
         faculty_id: str | None
+        user_id: int
 
         def get_role_display(self) -> str: ...
 
@@ -543,6 +544,7 @@ class Project(models.Model):
     if TYPE_CHECKING:
         id: int
         department_id: str
+        created_by_id: int
         activity_id: str | None
         region_id: str | None
         budgets: RelatedManager["Budget"]
@@ -624,6 +626,8 @@ class Budget(models.Model):
     """
 
     if TYPE_CHECKING:
+        id: int
+        project_id: int
 
         def get_status_display(self) -> str: ...
 
@@ -765,6 +769,7 @@ class ApprovalStep(models.Model):
 
     if TYPE_CHECKING:
         id: int
+        budget_id: int
 
         def get_level_display(self) -> str: ...
 

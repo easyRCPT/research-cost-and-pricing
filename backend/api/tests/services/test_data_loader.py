@@ -42,6 +42,7 @@ class TestBuildProjectInfo(SimpleTestCase):
         self.region.code = "REG01"
 
         self.project = Mock(spec=Project)
+        self.project.created_by_id = 7
         self.project.title = "Test Project"
         self.project.chief_investigator = "John Smith"
         self.project.funder = "Test Funder"
@@ -83,6 +84,7 @@ class TestBuildProjectInfo(SimpleTestCase):
                 "additional_information": "Additional information",
                 "other_funder": "Other Funder",
                 "other_funder_category": "Other Category",
+                "owner_id": 7,
             },
         )
 

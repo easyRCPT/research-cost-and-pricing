@@ -57,6 +57,10 @@ def build_project_info(project: Project) -> dict:
         "additional_information": project.additional_information,
         "other_funder": project.other_funder,
         "other_funder_category": project.other_funder_category,
+        # So the screen can tell "yours, and still a draft" from everything
+        # else and render read-only, rather than offering edits the server will
+        # refuse (#83).
+        "owner_id": project.created_by_id,
     }
 
 

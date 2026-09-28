@@ -74,11 +74,12 @@ class SubmitBudgetTest(TestCase):
             cash_co_contribution=Decimal(0),
         )
 
-    def test_submit_budget_creates_pending_faculty_step(self) -> None:
+    def test_submit_budget_always_creates_a_pending_department_step(self) -> None:
+        # The head of department signs every budget, dean or no dean.
         submit_budget(self.user, self.budget)
 
         step = self.budget.approval_steps.get(
-            level=ApprovalStep.Level.FACULTY,
+            level=ApprovalStep.Level.DEPARTMENT,
         )
 
         self.assertEqual(
@@ -86,7 +87,7 @@ class SubmitBudgetTest(TestCase):
             ApprovalStep.Status.PENDING,
         )
 
-    def test_submit_budget_marks_department_not_required_when_dean_not_required(
+    def test_submit_budget_marks_faculty_not_required_when_dean_not_required(
         self,
     ) -> None:
         self.budget.margin = Decimal("0.30")
@@ -95,7 +96,7 @@ class SubmitBudgetTest(TestCase):
         submit_budget(self.user, self.budget)
 
         step = self.budget.approval_steps.get(
-            level=ApprovalStep.Level.DEPARTMENT,
+            level=ApprovalStep.Level.FACULTY,
         )
 
         self.assertEqual(
@@ -103,7 +104,7 @@ class SubmitBudgetTest(TestCase):
             ApprovalStep.Status.NOT_REQUIRED,
         )
 
-    def test_submit_budget_creates_pending_department_step_when_margin_below_minimum(
+    def test_submit_budget_creates_pending_faculty_step_when_margin_below_minimum(
         self,
     ) -> None:
         self.budget.margin = Decimal("0.10")
@@ -112,7 +113,7 @@ class SubmitBudgetTest(TestCase):
         submit_budget(self.user, self.budget)
 
         step = self.budget.approval_steps.get(
-            level=ApprovalStep.Level.DEPARTMENT,
+            level=ApprovalStep.Level.FACULTY,
         )
 
         self.assertEqual(

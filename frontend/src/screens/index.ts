@@ -12,6 +12,5 @@ export {
   BudgetPrintDocument,
   type BudgetPrintDocumentProps,
 } from './budget-form/BudgetPrintDocument'
-// TODO: approvals — restore when auth lands.
-// export { Approvals, type ApprovalsProps } from './Approvals'
+export { Approvals } from './Approvals'
 export { EmptyStateScreen } from './EmptyStateScreen'

@@ -153,6 +153,17 @@ export function rowLabel(
  * to know what the row is called.
  */
 export function reportWriteError(error: unknown, where?: string) {
+  // A 409 is a budget that left draft in another tab or at someone else's
+  // hand. Nothing the user typed was wrong, so it is not an error to them:
+  // the refetch that follows turns the screen read-only, and this says why.
+  if (error instanceof ApiError && error.status === 409) {
+    toast.info('This costing has been submitted', {
+      id: 'budget-write',
+      description: 'It is read-only now, so that edit was not saved.',
+    })
+    return
+  }
+
   const description = describe(error)
   const title = where
     ? `${where}: some of your changes were not saved`

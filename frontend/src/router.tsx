@@ -16,6 +16,14 @@ import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
 import { EditorRoute } from '@/routes/editor'
 import { ProjectsRoute } from '@/routes/projects'
+import { ApprovalsRoute } from '@/routes/approvals'
+import { AdminShell } from '@/screens/admin/AdminShell'
+import { LookupEditor } from '@/screens/admin/LookupEditor'
+import { Users } from '@/screens/admin/Users'
+import { Overview } from '@/screens/admin/Overview'
+import { Projects as ProjectRegister } from '@/screens/admin/Projects'
+import { Audit } from '@/screens/admin/Audit'
+import { SUPERADMIN } from '@/api/auth'
 
 /**
  * Seven entries, written out rather than generated.
@@ -93,6 +101,61 @@ const projectsRoute = createRoute({
   component: ProjectsRoute,
 })
 
+/**
+ * The admin console (#62). Guarded once, on the parent, so a screen added
+ * beneath it cannot arrive unguarded. Signed out goes to the admin door; signed
+ * in without the superadmin group goes home, since there is nothing here for
+ * them and the server would refuse every call anyway.
+ */
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  beforeLoad: async ({ context, location }) => {
+    const me = await context.queryClient.ensureQueryData(meQuery)
+    if (!me) throw redirect({ to: '/admin/login', search: { redirect: location.href } })
+    if (!me.groups.includes(SUPERADMIN)) throw redirect({ to: homeFor(me) })
+  },
+  component: AdminShell,
+})
+
+// The front door (#94), where a superadmin signing in lands.
+const adminIndexRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/',
+  component: Overview,
+})
+
+const adminLookupsRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'lookups',
+  component: LookupEditor,
+})
+
+const adminUsersRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'users',
+  component: Users,
+})
+
+const adminProjectsRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'projects',
+  component: ProjectRegister,
+})
+
+const adminAuditRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: 'audit',
+  component: Audit,
+})
+
+const approvalsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/approvals',
+  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
+  component: ApprovalsRoute,
+})
+
 export const editorRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/$projectId/$screen',
@@ -138,6 +201,14 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   adminLoginRoute,
   projectsRoute,
+  approvalsRoute,
+  adminRoute.addChildren([
+    adminIndexRoute,
+    adminLookupsRoute,
+    adminUsersRoute,
+    adminProjectsRoute,
+    adminAuditRoute,
+  ]),
   editorRoute,
   catchAllRoute,
 ])
