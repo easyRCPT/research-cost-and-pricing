@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { useApprovalQueue, type QueueRow } from '@/api/approvals'
 import { PageHead, Panel } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { Badge } from '@/components/ui/badge'
 import { shortDate } from '@/lib/format/dates'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { DecisionPanel, type Decided } from './DecisionPanel'
+import { money } from '@/lib/format/utils'
 
 /**
  * Grouped by the authorisation being asked for, rather than a level column to
  * decode: one person can hold both a head-of-department and a dean assignment,
  * and the heading is what says which hat each row is under (#84).
+ *
+ * A row opens the costing itself. The approver reads it through the
+ * calculator's own screens, read-only, and decides on its Approvals screen.
  */
 const GROUPS = [
   {
@@ -24,40 +26,12 @@ const GROUPS = [
   },
 ]
 
-const WHERE_IT_WENT: Record<string, string> = {
-  dean_review: 'It has gone to the Dean for the second authorisation.',
-  approved: 'It is approved. The price is final and can go to the funder.',
-  rejected: 'It has gone back to the researcher, who can revise it as a new draft.',
-}
-
 export function ApprovalQueue() {
   const { data: rows } = useApprovalQueue()
-  const [open, setOpen] = useState<number | null>(null)
-  const [last, setLast] = useState<Decided | null>(null)
-
-  const decided = (outcome: Decided) => {
-    setLast(outcome)
-    setOpen(null)
-  }
 
   return (
     <>
-      <PageHead
-        title="Approvals"
-        subtitle="Costings waiting on your authorisation"
-      />
-
-      {last && (
-        <Alert className="mb-4" role="status">
-          <AlertDescription>
-            <b>
-              You {last.decision === 'reject' ? 'rejected' : 'approved'}{' '}
-              {last.title}.
-            </b>{' '}
-            {WHERE_IT_WENT[last.status] ?? `It is now ${last.status}.`}
-          </AlertDescription>
-        </Alert>
-      )}
+      <PageHead title="Approvals" subtitle="Costings waiting on your authorisation" />
 
       {rows.length === 0 && (
         <Panel title="Nothing is waiting on you">
@@ -76,13 +50,7 @@ export function ApprovalQueue() {
           <Panel key={group.level} title={group.title} description={group.note} className="mb-4">
             <div className="divide-y rounded-md border">
               {mine.map((row) => (
-                <Row
-                  key={row.step_id}
-                  row={row}
-                  open={open === row.step_id}
-                  onOpen={() => setOpen(open === row.step_id ? null : row.step_id)}
-                  onDecided={decided}
-                />
+                <Row key={row.step_id} row={row} />
               ))}
             </div>
           </Panel>
@@ -92,38 +60,28 @@ export function ApprovalQueue() {
   )
 }
 
-function Row({
-  row,
-  open,
-  onOpen,
-  onDecided,
-}: {
-  row: QueueRow
-  open: boolean
-  onOpen: () => void
-  onDecided: (outcome: Decided) => void
-}) {
+function Row({ row }: { row: QueueRow }) {
   const { budget } = row
   return (
-    <div className="px-4 py-3">
-      <button
-        type="button"
-        onClick={onOpen}
-        aria-expanded={open}
-        className="grid w-full grid-cols-[1fr_auto] items-baseline gap-4 text-left"
-      >
-        <span>
-          <span className="font-medium">{budget.project_title}</span>
-          <span className="block text-[12.5px] text-muted-foreground">
-            {budget.submitted_by} · {budget.department} · submitted{' '}
-            {shortDate(budget.submitted_at)}
-          </span>
+    <Link
+      to="/projects/$projectId/$screen"
+      params={{ projectId: budget.project_id, screen: 'approvals' }}
+      className="grid grid-cols-[1fr_auto] items-baseline gap-4 px-4 py-3 hover:bg-muted/50"
+    >
+      <span>
+        <span className="font-medium">{budget.project_title}</span>
+        {row.dean_triggers.length > 0 && row.level === 'department' && (
+          <Badge variant="secondary" className="ml-2 align-middle">Dean after you</Badge>
+        )}
+        <span className="block text-[12.5px] text-muted-foreground">
+          {budget.reference ? `${budget.reference} · ` : ''}
+          {budget.submitted_by} · {budget.department} · submitted {shortDate(budget.submitted_at)}
         </span>
-        <span className="tabular text-[14px] font-semibold">
-          {money(budget.total_price_inc_gst)}
-        </span>
-      </button>
-      {open && <DecisionPanel row={row} onDecided={onDecided} />}
-    </div>
+      </span>
+      <span className="text-right">
+        <span className="tabular block text-[14px] font-semibold">{money(budget.total_price_inc_gst)}</span>
+        <span className="text-[12.5px] font-medium text-primary">Review →</span>
+      </span>
+    </Link>
   )
 }

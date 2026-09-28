@@ -1,9 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useLocation, useNavigate } from '@tanstack/react-router'
-import { ClipboardCheckIcon, FolderIcon, LogOutIcon } from 'lucide-react'
+import { ClipboardCheckIcon, FolderIcon, LogOutIcon, SettingsIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { isApprover, useLogout, useMe } from '@/api/auth'
+import { isApprover, SUPERADMIN, useLogout, useMe } from '@/api/auth'
 
 const BAR_BUTTON =
   'border-primary-foreground/55 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'
@@ -17,7 +17,12 @@ export function AccountMenu() {
   const logout = useLogout()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const onQueue = useLocation({ select: (l) => l.pathname.startsWith('/approvals') })
+  const path = useLocation({ select: (l) => l.pathname })
+  const onQueue = path.startsWith('/approvals')
+  const onConsole = path.startsWith('/admin')
+  // Inside a costing the top bar's back button is the way out, so the switch
+  // would only be a second button to the same place.
+  const inCosting = /^\/projects\/\d+\//.test(path)
 
   if (!me.data) return null
 
@@ -37,7 +42,18 @@ export function AccountMenu() {
         places to be -- their own costings and the ones waiting on them -- and
         this moves between the two.
       */}
-      {isApprover(me.data) && (
+      {me.data.groups.includes(SUPERADMIN) && (
+        <Button
+          variant="outline"
+          size="lg"
+          className={BAR_BUTTON}
+          onClick={() => navigate({ to: onConsole ? '/projects' : '/admin' })}
+        >
+          {onConsole ? <FolderIcon /> : <SettingsIcon />}
+          {onConsole ? 'My projects' : 'Admin'}
+        </Button>
+      )}
+      {isApprover(me.data) && !inCosting && (
         <Button
           variant="outline"
           size="lg"

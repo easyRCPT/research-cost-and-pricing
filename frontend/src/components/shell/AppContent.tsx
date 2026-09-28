@@ -8,6 +8,8 @@ import {
   useUpdateProject,
 } from '@/api/budget'
 import { ReadOnlyNotice } from './ReadOnlyNotice'
+import { useNavigate } from '@tanstack/react-router'
+import { isApprover, SUPERADMIN, useMe } from '@/api/auth'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
 import {
@@ -34,6 +36,17 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
   const editable = useEditable()
+  const { data: me } = useMe()
+  const navigate = useNavigate()
+  const someoneElses = !!me && me.user.id !== budget.project_info.owner_id
+  // Back to where they came from: an administrator from the register, an
+  // approver from their queue (#98), the owner from their projects.
+  const back =
+    someoneElses && me.groups.includes(SUPERADMIN)
+      ? { label: 'Project register', to: '/admin/projects' as const }
+      : someoneElses && isApprover(me)
+        ? { label: 'Approvals', to: '/approvals' as const }
+        : null
   const updateProject = useUpdateProject()
 
   const project = budget.project_info
@@ -48,7 +61,11 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
     <AppShell
       topBarRight={
         <>
-          <BackToProjectsButton onClick={onLeave} />
+          {back ? (
+            <BackToProjectsButton label={back.label} onClick={() => navigate({ to: back.to })} />
+          ) : (
+            <BackToProjectsButton onClick={onLeave} />
+          )}
           <LookupButton open={lookupsOpen} handleClick={setScreen} />
         </>
       }

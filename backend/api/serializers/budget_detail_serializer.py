@@ -413,6 +413,7 @@ class ApprovalStepRecordSerializer(serializers.Serializer):
 
 class ApprovalRecordSerializer(serializers.Serializer):
     submitted_at = serializers.DateTimeField(allow_null=True)
+    lookup_version = serializers.IntegerField(allow_null=True)
     # Frozen at submit: what the approvers were asked about.
     dean_triggers = serializers.ListField(child=serializers.CharField())
     steps = ApprovalStepRecordSerializer(many=True)

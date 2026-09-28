@@ -50,6 +50,9 @@ def approval_record(budget: Budget) -> dict:
     )
     return {
         "submitted_at": budget.submitted_at,
+        # The rates it was priced on, stamped at submit. What an approver signs
+        # is this version, whatever the rates have become since.
+        "lookup_version": budget.lookup_version_id,
         # Frozen at submit, so it says what the approvers were asked about
         # even if the rates behind the live figure have moved since.
         "dean_triggers": list(budget.dean_triggers or []),
@@ -72,4 +75,9 @@ def approval_record(budget: Budget) -> dict:
     }
 
 
-EMPTY_RECORD = {"submitted_at": None, "dean_triggers": [], "steps": []}
+EMPTY_RECORD = {
+    "submitted_at": None,
+    "lookup_version": None,
+    "dean_triggers": [],
+    "steps": [],
+}

@@ -145,7 +145,7 @@ class RestoreVersionTest(TestCase):
         restored = restore_version(original, self.admin)
 
         self.assertEqual(LookupVersion.objects.get(id=restored).updated_by, self.admin)
-        entry = AuditLog.objects.get(action="lookups.restore")
+        entry = AuditLog.objects.get(action="admin.lookup.restore")
         self.assertEqual(entry.detail, {"restored_from": original})
 
     def test_the_list_marks_the_current_one_newest_first(self):
@@ -158,6 +158,28 @@ class RestoreVersionTest(TestCase):
         self.assertEqual(listed[0]["id"], restored)
         self.assertTrue(listed[0]["current"])
         self.assertEqual(sum(v["current"] for v in listed), 1)
+
+    def test_an_edit_records_who_and_what_it_said_before(self):
+        # #73: the old rate survives in the log as well as in the old version.
+        was = self.rate()
+        LookupConfiguration.objects.update(referenced=True)
+        update("salary_rates", LEVEL_A1, {"rate": Decimal("1234.5")}, user=self.admin)
+
+        entry = AuditLog.objects.get(action="admin.lookup.update")
+        self.assertEqual(entry.actor, self.admin)
+        self.assertEqual(entry.object_type, "salary_rates")
+        self.assertEqual(entry.detail["lookup"], LEVEL_A1)
+        self.assertEqual(entry.detail["version"], self.current())
+        self.assertEqual(Decimal(entry.detail["before"]["rate"]), was)
+        self.assertEqual(Decimal(entry.detail["after"]["rate"]), Decimal("1234.5"))
+
+    def test_the_version_an_edit_mints_names_the_editor(self):
+        LookupConfiguration.objects.update(referenced=True)
+        update("salary_rates", LEVEL_A1, {"rate": Decimal(90000)}, user=self.admin)
+
+        self.assertEqual(
+            LookupVersion.objects.get(id=self.current()).updated_by, self.admin
+        )
 
 
 class RestoreRoutesTest(TestCase):

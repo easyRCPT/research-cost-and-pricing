@@ -4,39 +4,11 @@ import {
   createProject,
   csrfToken,
   DEMO,
+  makeReady,
   signIn,
   uniqueTitle,
 } from './fixtures'
 import type { Page } from '@playwright/test'
-
-/** Everything submission checks for, filled through the same API the screens use. */
-async function makeReady(page: Page, budgetId: number) {
-  const headers = { 'X-CSRFToken': await csrfToken(page) }
-  for (const [field, value] of [
-    ['chief_investigator', 'Dr Ruth Researcher'],
-    ['funder', 'Australian Research Council'],
-  ]) {
-    const response = await page.request.patch(`/api/budgets/${budgetId}/`, {
-      headers,
-      data: { section: 'project', field, value },
-    })
-    expect(response.ok(), await response.text()).toBe(true)
-  }
-  const line = await page.request.post(`/api/budgets/${budgetId}/staff-lines/`, {
-    headers,
-    data: {
-      name_role: 'Dr Chen',
-      employment_type: 'Continuing',
-      category: 'Academic',
-      classification: 'Level A.1',
-      time_basis: 'FTE',
-      in_kind: false,
-      in_kind_reason: '',
-      allocations: [{ year: 2026, time: 0.5 }],
-    },
-  })
-  expect(line.status(), await line.text()).toBe(201)
-}
 
 async function switchTo(page: Page, email: string, type: 'researcher' | 'staff') {
   await page.context().clearCookies()
@@ -57,10 +29,21 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByText(/^Waiting on /)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Submit for approval' })).toHaveCount(0)
 
-  // The head of department decides from their queue.
+  // The head of department opens it from their queue, into the costing itself.
   await switchTo(page, DEMO.hod, 'staff')
   await page.goto('/approvals')
-  await page.getByRole('button', { name: new RegExp(title) }).click()
+  await page.getByRole('link', { name: new RegExp(title) }).click()
+  await expect(page).toHaveURL(`/projects/${project.id}/approvals`)
+  await expect(page.getByText('This costing is waiting on your authorisation')).toBeVisible()
+
+  // They can read the whole calculation, and change none of it.
+  await page
+    .getByRole('navigation', { name: 'Costing sections' })
+    .getByRole('button', { name: 'Staff Costs', exact: true })
+    .click()
+  await expect(page.getByRole('button', { name: /Add row/ }).first()).toBeDisabled()
+  await page.getByRole('link', { name: 'Decide on the Approvals screen' }).click()
+
   await page.getByRole('button', { name: 'Approve', exact: true }).click()
   await page.getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByText('No Dean is needed')).toBeVisible()
@@ -68,8 +51,12 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(
     page.getByRole('status').filter({ hasText: 'You approved' }),
   ).toContainText('It is approved')
-  // Gone from the queue as the confirmation appears, not a moment later.
-  await expect(page.getByRole('button', { name: new RegExp(title) })).toHaveCount(0)
+  await expect(page.getByText(/Approved\s+by Hana Head/)).toBeVisible()
+
+  // Back in the queue, it is gone.
+  await page.locator('header').getByRole('button', { name: 'Approvals' }).click()
+  await expect(page).toHaveURL('/approvals')
+  await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
 
   // The owner sees who decided.
   await switchTo(page, DEMO.researcher, 'researcher')

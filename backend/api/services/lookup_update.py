@@ -1,3 +1,6 @@
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
@@ -32,13 +35,15 @@ VERSIONED_MODELS = (
 )
 
 
-def create_lookup_version(config: LookupConfiguration) -> int:
+def create_lookup_version(config: LookupConfiguration, user=None) -> int:
     """
     Create a new Lookup Version and point current version to it.
     """
     old_version_id = config.current_version_id
 
-    new_version = LookupVersion.objects.create()
+    # Who made the change that needed a new version. The versions list shows
+    # it, and without it every edited version read as though it were seeded.
+    new_version = LookupVersion.objects.create(updated_by=user)
 
     for model in VERSIONED_MODELS:
         rows = model.objects.filter(version_id=old_version_id)
@@ -84,7 +89,7 @@ def _get_model(table: str) -> type[models.Model]:
     return LOOKUP_MODELS[lookup_table]
 
 
-def _check_and_create_new_version(model: type[models.Model]) -> int:
+def _check_and_create_new_version(model: type[models.Model], user=None) -> int:
     """
     Determines whether a new version should be created.
     Return id of current version or the created new version.
@@ -92,7 +97,7 @@ def _check_and_create_new_version(model: type[models.Model]) -> int:
     config = LookupConfiguration.objects.select_for_update().get()
 
     if model in VERSIONED_MODELS and config.referenced:
-        return create_lookup_version(config)
+        return create_lookup_version(config, user)
 
     return config.current_version_id
 
@@ -101,6 +106,7 @@ def _check_and_create_new_version(model: type[models.Model]) -> int:
 def create(
     table: str,
     data: dict,
+    user=None,
 ) -> None:
     # Get model
     model = _get_model(table)
@@ -109,7 +115,7 @@ def create(
     # Determines whether a new version should be created
     # Validate the model before saving
     if model in VERSIONED_MODELS:
-        version_id = _check_and_create_new_version(model)
+        version_id = _check_and_create_new_version(model, user)
         instance = model(
             **data,
             version_id=version_id,
@@ -120,6 +126,7 @@ def create(
     instance.full_clean()
     instance.save()
 
+    _audit(user, "admin.lookup.insert", table, instance, before=None, after=data)
     invalidate_lookup_cache()
 
 
@@ -128,6 +135,7 @@ def update(
     table: str,
     lookup: dict,
     data: dict,
+    user=None,
 ) -> None:
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
@@ -138,7 +146,7 @@ def update(
     try:
         if model in VERSIONED_MODELS:
             # Determines whether a new version should be created
-            version_id = _check_and_create_new_version(model)
+            version_id = _check_and_create_new_version(model, user)
             instance = model.objects.get(
                 **lookup,
                 version_id=version_id,
@@ -159,9 +167,59 @@ def update(
     # The lookup may name the row by id rather than by name.
     _reject_fixed_constant(model, model_to_dict(instance))
 
+    before = {field: getattr(instance, field, None) for field in data}
     _update_instance(instance, lookup, data)
 
+    _audit(
+        user,
+        "admin.lookup.update",
+        table,
+        instance,
+        before=before,
+        after=data,
+        lookup=lookup,
+    )
     invalidate_lookup_cache()
+
+
+def _audit(
+    user,
+    action: str,
+    table: str,
+    instance: models.Model,
+    before: dict | None,
+    after: dict,
+    lookup: dict | None = None,
+) -> None:
+    """
+    Who changed a lookup row and what it said before (#73), for every table.
+
+    Only the fields the write touched, so a rate change reads as that rate's
+    old and new value rather than two copies of the row. The versioned tables
+    also keep their old rows in the older version; the in-place ones (a
+    department renamed, a category re-coded) have nothing but this.
+    """
+
+    def plain(values: dict | None) -> dict | None:
+        # Decimals and dates, as the log's JSON column can hold them.
+        return (
+            None
+            if values is None
+            else json.loads(json.dumps(values, cls=DjangoJSONEncoder))
+        )
+
+    write_audit(
+        actor=user,
+        action=action,
+        object_type=table,
+        object_id=str(instance.pk),
+        detail={
+            "lookup": plain(lookup),
+            "version": getattr(instance, "version_id", None),
+            "before": plain(before),
+            "after": plain(after),
+        },
+    )
 
 
 def _update_instance(
@@ -226,7 +284,7 @@ def restore_version(version_id: int, user) -> int:
 
     write_audit(
         actor=user,
-        action="lookups.restore",
+        action="admin.lookup.restore",
         object_type="lookup_version",
         object_id=str(restored.id),
         detail={"restored_from": source.id},

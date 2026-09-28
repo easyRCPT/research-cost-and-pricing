@@ -2,7 +2,14 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 /** Matches the outline treatment LookupButton uses against the primary bar. */
-export function BackToProjectsButton({ onClick }: { onClick: () => void }) {
+export function BackToProjectsButton({
+  onClick,
+  label = 'Projects',
+}: {
+  onClick: () => void
+  /** "Approvals" for someone reviewing a costing rather than writing it. */
+  label?: string
+}) {
   return (
     <Button
       variant="outline"
@@ -11,7 +18,7 @@ export function BackToProjectsButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
     >
       <ArrowLeftIcon />
-      Projects
+      {label}
     </Button>
   )
 }

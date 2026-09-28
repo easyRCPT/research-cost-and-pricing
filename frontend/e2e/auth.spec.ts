@@ -92,7 +92,9 @@ test('a superadmin is admitted at the admin door', async ({ page }) => {
   await page.getByLabel('Password').fill(DEMO.password)
   await page.getByRole('button', { name: 'Sign in' }).click()
 
-  await expect(page).toHaveURL('/projects')
+  // The console's front door (#94), not the researcher's projects.
+  await expect(page).toHaveURL('/admin')
+  await expect(page.getByRole('heading', { name: 'Administration' })).toBeVisible()
 })
 
 test('signing out ends the session', async ({ page }) => {

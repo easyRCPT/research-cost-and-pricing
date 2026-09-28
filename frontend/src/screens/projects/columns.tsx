@@ -67,7 +67,7 @@ export const projectColumns = (
       meta: { className: 'w-[220px]' },
     }),
     col.accessor('total_price_inc_gst', {
-      header: 'Total price (exc. GST)',
+      header: 'Total price (inc. GST)',
       meta: {
         align: 'right',
         className: 'w-[180px] whitespace-nowrap tabular',

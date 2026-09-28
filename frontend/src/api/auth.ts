@@ -124,11 +124,10 @@ export const isApprover = (me: Me) =>
  * Where signing in lands someone.
  *
  * A superadmin on the console (#62), an approver on their queue (#84),
- * everyone else on their projects. The console does not exist yet, so a
- * superadmin lands on projects for now.
+ * everyone else on their projects.
  */
-export function homeFor(me: Me): '/projects' | '/approvals' {
-  if (me.groups.includes(SUPERADMIN)) return '/projects' // #62 → /admin
+export function homeFor(me: Me): '/projects' | '/approvals' | '/admin' {
+  if (me.groups.includes(SUPERADMIN)) return '/admin'
   // Approving is an assignment, not a group, so this reads assignments.
   if (isApprover(me)) return '/approvals'
   return '/projects'

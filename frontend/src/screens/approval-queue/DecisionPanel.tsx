@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
 import { useMe } from '@/api/auth'
 import { useDecide, type Decision, type QueueRow } from '@/api/approvals'
 import { Panel } from '@/components/shell'
@@ -66,8 +65,8 @@ export function DecisionPanel({
 
   return (
     <Panel
-      title={`${budget.reference ?? ''} ${budget.project_title}`.trim()}
-      className="mt-4"
+      title={row.level === 'faculty' ? 'Your authorisation, as Dean' : 'Your authorisation, as Head of Department'}
+      className="mt-6"
     >
       <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1.5 text-[13.5px]">
         <dt className="text-muted-foreground">Submitted by</dt>
@@ -102,14 +101,8 @@ export function DecisionPanel({
       <p className="mt-4 text-[13px] text-muted-foreground">
         The rates were locked when this was submitted. A later change to a
         salary rate or an on-cost reprices new work only, so what you decide
-        on is what it stays.{' '}
-        <Link
-          to="/projects/$projectId/$screen"
-          params={{ projectId: budget.project_id, screen: 'details' }}
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          View the full budget
-        </Link>
+        on is what it stays. Every screen of the costing is open to you in the
+        rail, read-only.
       </p>
 
       {tooLate && (

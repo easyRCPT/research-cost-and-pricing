@@ -135,6 +135,35 @@ export async function csrfToken(page: Page) {
   return cookies.find((c) => c.name === 'csrftoken')?.value ?? ''
 }
 
+/** Everything submission checks for, filled through the same API the screens use. */
+export async function makeReady(page: Page, budgetId: number) {
+  const headers = { 'X-CSRFToken': await csrfToken(page) }
+  for (const [field, value] of [
+    ['chief_investigator', 'Dr Ruth Researcher'],
+    ['funder', 'Australian Research Council'],
+  ]) {
+    const response = await page.request.patch(`/api/budgets/${budgetId}/`, {
+      headers,
+      data: { section: 'project', field, value },
+    })
+    expect(response.ok(), await response.text()).toBe(true)
+  }
+  const line = await page.request.post(`/api/budgets/${budgetId}/staff-lines/`, {
+    headers,
+    data: {
+      name_role: 'Dr Chen',
+      employment_type: 'Continuing',
+      category: 'Academic',
+      classification: 'Level A.1',
+      time_basis: 'FTE',
+      in_kind: false,
+      in_kind_reason: '',
+      allocations: [{ year: 2026, time: 0.5 }],
+    },
+  })
+  expect(line.status(), await line.text()).toBe(201)
+}
+
 export const DEMO = {
   // The department create_demo_users makes hod@ head of.
   hodDepartment: 'CCH_H1_5_39',

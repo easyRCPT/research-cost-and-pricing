@@ -150,6 +150,7 @@ class ApprovalRecordTest(FlowFixture):
         record = self.record(self.a_budget("0.30"))
 
         self.assertIsNone(record["submitted_at"])
+        self.assertIsNone(record["lookup_version"])
         self.assertEqual(record["steps"], [])
 
     def test_an_open_step_says_who_it_is_waiting_on(self):
