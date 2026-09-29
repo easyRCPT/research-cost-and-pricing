@@ -89,33 +89,16 @@ class LookupTableView(APIView):
         serializer = LookupUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        try:
-            serializer_class = LOOKUP_SERIALIZERS[table]
-        except KeyError:
-            raise ValidationError(f"Invalid lookup table: {table}")
-
         validated_data = cast(dict, serializer.validated_data)
 
-        # Validate lookup and data fields against model serializer
+        # Model serializers cannot be used in lookup field validation.
+        # Field validation is operated in service level.
         # Lookup dict does not require full model information.
         # 0 or >1 lookup matches raise ValidationError in the service.
-        lookup_serializer = serializer_class(
-            data=validated_data["lookup"],
-            partial=True,
-        )
-        lookup_serializer.is_valid(raise_exception=True)
-        lookup_data = cast(dict, lookup_serializer.validated_data)
-        values_serializer = serializer_class(
-            data=validated_data["values"],
-            partial=True,
-        )
-        values_serializer.is_valid(raise_exception=True)
-        values_data = cast(dict, values_serializer.validated_data)
-
         lookup_update.update(
             table=table,
-            lookup=lookup_data,
-            data=values_data,
+            lookup=cast(dict, validated_data["lookup"]),
+            data=cast(dict, validated_data["values"]),
             actor=request.user,
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

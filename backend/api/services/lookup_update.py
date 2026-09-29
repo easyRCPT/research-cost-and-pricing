@@ -9,7 +9,9 @@ from rest_framework.exceptions import ValidationError
 from ..exceptions import Conflict
 from ..models import (
     CalculationConstant,
+    Department,
     EbaIncrease,
+    Faculty,
     LookupConfiguration,
     LookupVersion,
     OnCostRate,
@@ -142,6 +144,27 @@ def _save_validated_instance(
         raise Conflict("Lookup write conflicts with an existing lookup entry.") from exc
 
 
+def _validate_fields(model: type[models.Model], data: dict) -> None:
+    # Process foreign key data fields
+    if model is Department:
+        # Convert faculty code to a Faculty instance
+        faculty_code = data.pop("faculty_code", None)
+        if faculty_code is not None:
+            faculty = Faculty.objects.filter(code=faculty_code).first()
+            if faculty is None:
+                raise ValidationError(
+                    f"Faculty with code {faculty_code} does not exist."
+                )
+            data.update({"faculty": faculty})
+
+    valid_fields = {field.name for field in model._meta.fields}
+
+    invalid_fields = set(data) - valid_fields
+
+    if invalid_fields:
+        raise ValidationError(f"Invalid fields: {', '.join(sorted(invalid_fields))}")
+
+
 @transaction.atomic
 def create(
     table: str,
@@ -185,6 +208,9 @@ def update(
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
 
+    _validate_fields(model, lookup)
+    _validate_fields(model, data)
+
     try:
         if model in VERSIONED_MODELS:
             # Determines whether a new version should be created
@@ -211,7 +237,7 @@ def update(
 
     before = model_to_dict(instance, fields=data.keys())
 
-    # Fields in lookup may also be updated
+    # Lookup fields may also be included in data and updated.
     for field, value in data.items():
         setattr(instance, field, value)
     _save_validated_instance(instance, update_fields=list(data))

@@ -645,12 +645,13 @@ export interface components {
              */
             attr: "lookup";
             /**
-             * @description * `not_a_dict` - not_a_dict
+             * @description * `empty` - empty
+             *     * `not_a_dict` - not_a_dict
              *     * `null` - null
              *     * `required` - required
              * @enum {string}
              */
-            code: "not_a_dict" | "null" | "required";
+            code: "empty" | "not_a_dict" | "null" | "required";
             detail: string;
         };
         AdminLookupsPartialUpdateLookupKEYErrorComponent: {
@@ -2248,7 +2249,7 @@ export interface components {
             school: string;
             school_code: string;
             readonly faculty: string;
-            readonly faculty_code: string;
+            faculty_code: string;
             budget_unit?: string;
         };
         EbaIncrease: {

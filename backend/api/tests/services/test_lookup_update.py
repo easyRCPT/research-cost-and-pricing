@@ -172,13 +172,35 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         update(
             "departments",
             {"code": department.code},
-            {"faculty": engineering},
+            {"faculty_code": "ENG"},
         )
 
         department.refresh_from_db()
 
         self.assertEqual(department.faculty, engineering)
         mock_invalidate_cache.assert_called_once()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_raises_error_when_faculty_does_not_exist(
+        self,
+        mock_invalidate_cache,
+    ):
+        department = self.create_department()
+
+        with self.assertRaisesRegex(
+            ValidationError,
+            "Faculty with code UNKNOWN does not exist.",
+        ):
+            update(
+                "departments",
+                {"code": department.code},
+                {"faculty_code": "UNKNOWN"},
+            )
+
+        department.refresh_from_db()
+
+        self.assertEqual(department.faculty.code, "SCI")
+        mock_invalidate_cache.assert_not_called()
 
     def test_raises_error_for_invalid_lookup_table(self):
         with self.assertRaisesRegex(
@@ -258,6 +280,28 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
                 "departments",
                 {"code": "SCI"},
                 {"name": ""},
+            )
+
+        department = Department.objects.get(code="SCI")
+
+        self.assertEqual(department.name, "Science")
+        mock_invalidate_cache.assert_not_called()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_raises_error_for_invalid_update_field(
+        self,
+        mock_invalidate_cache,
+    ):
+        self.create_department()
+
+        with self.assertRaisesRegex(
+            ValidationError,
+            "Invalid fields: invalid_field",
+        ):
+            update(
+                "departments",
+                {"code": "SCI"},
+                {"invalid_field": "value"},
             )
 
         department = Department.objects.get(code="SCI")

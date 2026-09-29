@@ -178,6 +178,7 @@ class DepartmentSerializerTestCase(TestCase):
                 "budget_unit": "BU002",
             }
         )
+        serializer.is_valid()
         validated_data = get_validated_data(serializer)
 
         self.assertTrue(serializer.is_valid(), get_errors(serializer))
@@ -198,6 +199,7 @@ class DepartmentSerializerTestCase(TestCase):
                 "budget_unit": "BU002",
             }
         )
+        serializer.is_valid()
         validated_data = get_validated_data(serializer)
 
         self.assertTrue(serializer.is_valid(), get_errors(serializer))
