@@ -26,8 +26,14 @@ class FacultySerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     # Faculty is a table now. It is still echoed as the two strings it used to
     # be, so the org units tab and the department picker read the same shape.
+    # Faculty name is read-only on department. It is not required when creating
+    # or updating a department. Edit the Faculty directly if the name needs
+    # to change.
     faculty = serializers.CharField(source="faculty.name", read_only=True)
-    faculty_code = serializers.CharField(source="faculty.code", read_only=True)
+    faculty_code = serializers.PrimaryKeyRelatedField(
+        source="faculty",
+        queryset=Faculty.objects.all(),
+    )
 
     class Meta:
         model = Department
@@ -144,6 +150,7 @@ class LookupCreateSerializer(serializers.Serializer):
 class LookupUpdateSerializer(serializers.Serializer):
     lookup = serializers.DictField(
         child=serializers.JSONField(),
+        allow_empty=False,
     )
     values = serializers.DictField(
         child=serializers.JSONField(),

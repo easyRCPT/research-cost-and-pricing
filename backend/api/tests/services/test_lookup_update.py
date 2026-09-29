@@ -47,13 +47,13 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_creates_lookup_row(self, mock_invalidate_cache):
         # A department names its faculty by code; the row has to exist first.
-        self.create_faculty()
+        faculty = self.create_faculty()
         data = {
             "code": "SCI",
             "name": "Science",
             "school": "Science School",
             "school_code": "SCI",
-            "faculty_id": "SCI",
+            "faculty": faculty,
         }
 
         create("departments", data)
@@ -70,13 +70,13 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_validates_data_before_saving(self, mock_invalidate_cache):
-        self.create_faculty()
+        faculty = self.create_faculty()
         data = {
             "code": "SCI",
             "name": "",
             "school": "Science School",
             "school_code": "SCI",
-            "faculty_id": "SCI",
+            "faculty": faculty,
         }
 
         with self.assertRaises(DjangoValidationError):
@@ -104,7 +104,7 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
         self,
         mock_invalidate_cache,
     ):
-        self.create_faculty()
+        faculty = self.create_faculty()
 
         actor = User.objects.create(
             email="admin@unimelb.edu.au",
@@ -118,7 +118,7 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
                 "name": "Science",
                 "school": "Science School",
                 "school_code": "SCI",
-                "faculty_id": "SCI",
+                "faculty": faculty,
             },
             actor=actor,
         )
@@ -133,6 +133,10 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
         self.assertEqual(
             audit.detail["after"]["name"],
             "Science",
+        )
+        self.assertEqual(
+            audit.detail["after"]["faculty"],
+            "SCI",
         )
         self.assertIsNone(audit.detail["before"])
 
@@ -156,14 +160,25 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         mock_invalidate_cache.assert_called_once()
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_refuses_empty_data(self, mock_invalidate_cache):
-        department = self.create_department()
+    def test_updates_faculty(self, mock_invalidate_cache):
+        department = self.create_department(
+            faculty_code="SCI",
+        )
+        engineering = self.create_faculty(
+            code="ENG",
+            name="Engineering Faculty",
+        )
 
-        with self.assertRaises(ValidationError):
-            update("departments", {"code": department.code}, {})
+        update(
+            "departments",
+            {"code": department.code},
+            {"faculty": engineering},
+        )
 
-        self.assertTrue(Department.objects.filter(code=department.code).exists())
-        mock_invalidate_cache.assert_not_called()
+        department.refresh_from_db()
+
+        self.assertEqual(department.faculty, engineering)
+        mock_invalidate_cache.assert_called_once()
 
     def test_raises_error_for_invalid_lookup_table(self):
         with self.assertRaisesRegex(
@@ -232,28 +247,6 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         mock_invalidate_cache.assert_not_called()
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_raises_error_when_lookup_field_is_updated(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.create_department()
-
-        with self.assertRaisesRegex(
-            ValidationError,
-            "Lookup fields cannot be updated: code",
-        ):
-            update(
-                "departments",
-                {"code": "SCI"},
-                {"code": "ENG"},
-            )
-
-        department = Department.objects.get(code="SCI")
-
-        self.assertEqual(department.code, "SCI")
-        mock_invalidate_cache.assert_not_called()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_raises_error_when_updated_data_is_invalid(
         self,
         mock_invalidate_cache,
@@ -310,6 +303,46 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
         self.assertEqual(
             audit.detail["lookup"]["code"],
             "SCI",
+        )
+
+        mock_invalidate_cache.assert_called_once()
+
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_audit_log_uses_faculty_code_for_update(
+        self,
+        mock_invalidate_cache,
+    ):
+        department = self.create_department(
+            faculty_code="SCI",
+        )
+        engineering = self.create_faculty(
+            code="ENG",
+            name="Engineering Faculty",
+        )
+
+        actor = User.objects.create(
+            email="admin@unimelb.edu.au",
+            is_superuser=True,
+        )
+
+        update(
+            "departments",
+            {"code": department.code},
+            {"faculty": engineering},
+            actor=actor,
+        )
+
+        audit = AuditLog.objects.get(
+            action="admin.lookup.update",
+        )
+
+        self.assertEqual(
+            audit.detail["before"]["faculty"],
+            "SCI",
+        )
+        self.assertEqual(
+            audit.detail["after"]["faculty"],
+            "ENG",
         )
 
         mock_invalidate_cache.assert_called_once()

@@ -2,9 +2,11 @@ import json
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
+from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
 
+from ..exceptions import Conflict
 from ..models import (
     CalculationConstant,
     EbaIncrease,
@@ -27,6 +29,7 @@ from .lookup_loader import (
 # margin and in-kind costs (calculation/pricing.py).
 FIXED_CONSTANTS = frozenset({"full_cost_recovery_multiplier"})
 
+# Writes to these tables create a new lookup version
 VERSIONED_MODELS = (
     SalaryRate,
     SalaryRateMultiplier,
@@ -123,6 +126,22 @@ def _check_and_create_new_version(
     return config.current_version_id
 
 
+def _save_validated_instance(
+    instance: models.Model,
+    update_fields: list[str] | None = None,
+) -> None:
+    # Validate the model before saving
+    # Return django validation error with model validation.
+    # ExceptionHandler convert django validation error to 400
+    instance.full_clean()
+
+    try:
+        instance.save(update_fields=update_fields)
+    except IntegrityError as exc:
+        # Return 409 for database integrity conflicts
+        raise Conflict("Lookup write conflicts with an existing lookup entry.") from exc
+
+
 @transaction.atomic
 def create(
     table: str,
@@ -133,9 +152,8 @@ def create(
     model = _get_model(table)
     _reject_fixed_constant(model, data)
 
-    # Determines whether a new version should be created
-    # Validate the model before saving
     if model in VERSIONED_MODELS:
+        # Determines whether a new version should be created
         version_id = _check_and_create_new_version(model, actor)
         instance = model(
             **data,
@@ -144,10 +162,16 @@ def create(
     else:
         instance = model(**data)
 
-    instance.full_clean()
-    instance.save()
+    _save_validated_instance(instance)
 
-    _audit(actor, "admin.lookup.insert", table, instance, before=None, after=data)
+    _audit(
+        actor,
+        "admin.lookup.insert",
+        table,
+        instance,
+        before=None,
+        after=data,
+    )
     invalidate_lookup_cache()
 
 
@@ -160,9 +184,6 @@ def update(
 ) -> None:
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
-
-    if not data:
-        raise ValidationError("Nothing to update.")
 
     try:
         if model in VERSIONED_MODELS:
@@ -188,16 +209,24 @@ def update(
     # The lookup may name the row by id rather than by name.
     _reject_fixed_constant(model, model_to_dict(instance))
 
-    before = {field: getattr(instance, field, None) for field in data}
-    _update_instance(instance, lookup, data)
+    before = model_to_dict(instance, fields=data.keys())
 
+    # Fields in lookup may also be updated
+    for field, value in data.items():
+        setattr(instance, field, value)
+    _save_validated_instance(instance, update_fields=list(data))
+
+    after = model_to_dict(instance, fields=data.keys())
+
+    # Audit records use the service/model layer representation rather than the
+    # original API field names. ForeignKey values are recorded as primary keys.
     _audit(
         actor,
         "admin.lookup.update",
         table,
         instance,
         before=before,
-        after=data,
+        after=after,
         lookup=lookup,
     )
     invalidate_lookup_cache()
@@ -222,12 +251,17 @@ def _audit(
     """
 
     def plain(values: dict | None) -> dict | None:
+        if values is None:
+            return None
+
+        # Convert model instances to their primary keys
+        values = {
+            key: value.pk if isinstance(value, models.Model) else value
+            for key, value in values.items()
+        }
+
         # Decimals and dates, as the log's JSON column can hold them.
-        return (
-            None
-            if values is None
-            else json.loads(json.dumps(values, cls=DjangoJSONEncoder))
-        )
+        return json.loads(json.dumps(values, cls=DjangoJSONEncoder))
 
     write_audit(
         actor=actor,
@@ -241,26 +275,6 @@ def _audit(
             "after": plain(after),
         },
     )
-
-
-def _update_instance(
-    instance: models.Model,
-    lookup: dict,
-    data: dict,
-) -> None:
-    # Lookup fields are used to identify the row and cannot be updated.
-    immutable_fields = lookup.keys() & data.keys()
-
-    if immutable_fields:
-        raise ValidationError(
-            "Lookup fields cannot be updated: " + ", ".join(sorted(immutable_fields)),
-        )
-
-    for field, value in data.items():
-        setattr(instance, field, value)
-
-    instance.full_clean()
-    instance.save(update_fields=list(data))
 
 
 @transaction.atomic

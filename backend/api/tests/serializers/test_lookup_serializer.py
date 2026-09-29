@@ -1,15 +1,17 @@
 from typing import cast
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
+from api.models import Department, Faculty
 from api.serializers.lookup_serializer import (
     LOOKUP_SERIALIZERS,
+    DepartmentSerializer,
     LookupCreateSerializer,
     LookupTablesSerializer,
     LookupUpdateSerializer,
 )
 
-from .serializer_utils import get_errors
+from .serializer_utils import get_data, get_errors, get_validated_data
 
 
 class LookupSerializersTestCase(SimpleTestCase):
@@ -139,3 +141,82 @@ class LookupUpdateSerializerTestCase(SimpleTestCase):
         )
 
         self.assertFalse(serializer.is_valid())
+
+
+class DepartmentSerializerTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.faculty = Faculty.objects.create(
+            code="SCI",
+            name="Science",
+        )
+
+        cls.department = Department.objects.create(
+            code="D001",
+            name="Computer Science",
+            school="School of Computing",
+            school_code="COMP",
+            faculty=cls.faculty,
+            budget_unit="BU001",
+        )
+
+    def test_serializes_faculty_name_and_code(self):
+        serializer = DepartmentSerializer(self.department)
+        data = get_data(serializer)
+
+        self.assertEqual(data["faculty"], "Science")
+        self.assertEqual(data["faculty_code"], "SCI")
+
+    def test_faculty_code_sets_faculty(self):
+        serializer = DepartmentSerializer(
+            data={
+                "code": "D002",
+                "name": "Physics",
+                "school": "School of Physics",
+                "school_code": "PHYS",
+                "faculty_code": "SCI",
+                "budget_unit": "BU002",
+            }
+        )
+        validated_data = get_validated_data(serializer)
+
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        self.assertEqual(
+            validated_data["faculty"].pk,
+            self.faculty.pk,
+        )
+
+    def test_faculty_is_read_only(self):
+        serializer = DepartmentSerializer(
+            data={
+                "code": "D002",
+                "name": "Physics",
+                "school": "School of Physics",
+                "school_code": "PHYS",
+                "faculty": "Other Faculty",
+                "faculty_code": "SCI",
+                "budget_unit": "BU002",
+            }
+        )
+        validated_data = get_validated_data(serializer)
+
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+        self.assertEqual(
+            validated_data["faculty"].pk,
+            self.faculty.pk,
+        )
+
+    def test_invalid_faculty_code(self):
+        serializer = DepartmentSerializer(
+            data={
+                "code": "D002",
+                "name": "Physics",
+                "school": "School of Physics",
+                "school_code": "PHYS",
+                "faculty_code": "UNKNOWN",
+                "budget_unit": "BU002",
+            }
+        )
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("faculty_code", get_errors(serializer))
