@@ -22,9 +22,9 @@ from .lookup_loader import (
     invalidate_lookup_cache,
 )
 
-# Fixed by the University, not a rate that gets corrected. It decides whether a
-# budget needs a Dean (calculation/pricing.py), so editing it changes who has to
-# approve every budget in the system rather than what any of them cost.
+# Fixed by the University at its full cost recovery rate (#60). It sets the
+# price of every budget; it no longer decides Dean review, which reads the
+# margin and in-kind costs (calculation/pricing.py).
 FIXED_CONSTANTS = frozenset({"full_cost_recovery_multiplier"})
 
 VERSIONED_MODELS = (

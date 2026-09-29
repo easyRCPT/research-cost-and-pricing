@@ -31,8 +31,8 @@ interface ConstantsTabProps {
 /**
  * The "Minimum cost recovery by year" table is gone with its model: it was
  * served over /api/lookups/, had no rows in any environment, and nothing read
- * it. The dean rule reads the full_cost_recovery_multiplier constant, which is
- * in the table above.
+ * it. The dean rule reads the minimum_margin constant, which is in the table
+ * above.
  */
 export function ConstantsTab({ data }: ConstantsTabProps) {
   return (

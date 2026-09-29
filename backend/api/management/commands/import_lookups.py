@@ -74,10 +74,15 @@ CONSTANTS = {
 LITERAL_CONSTANTS = {
     "in_kind_multiplier": (Decimal("1.7"), "Matches full cost recovery."),
     "gst_rate": (Decimal("0.10"), "Goods and Services Tax Amount"),
-    "default_margin": (Decimal("0.30"), "Default margin"),
+    "default_margin": (
+        Decimal("0.30"),
+        "The margin a new budget starts at. Editable per budget.",
+    ),
+    # Matches backend/seeds/lookups.json. Held at the default margin until
+    # Frank sets the floor (#87), so an import doesn't drop Dean review.
     "minimum_margin": (
-        Decimal("0.00"),
-        "Minimum margin that not requires dean approval",
+        Decimal("0.30"),
+        "A budget priced below this margin needs the Dean as well as the HoD.",
     ),
 }
 
