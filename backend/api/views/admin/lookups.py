@@ -9,11 +9,11 @@ from rest_framework.views import APIView
 
 from api.permissions import IsSuperadmin
 from api.serializers.lookup_serializer import (
-    LOOKUP_SERIALIZERS,
     LookupCreateSerializer,
     LookupUpdateSerializer,
 )
 from api.services import lookup_update
+from api.services.lookup_definitions import LOOKUP_DEFINITIONS
 
 
 class LookupVersionSerializer(serializers.Serializer):
@@ -67,7 +67,7 @@ class LookupTableView(APIView):
         serializer.is_valid(raise_exception=True)
 
         try:
-            serializer_class = LOOKUP_SERIALIZERS[table]
+            serializer_class = LOOKUP_DEFINITIONS[table].serializer
         except KeyError:
             raise ValidationError(f"Invalid lookup table: {table}")
 

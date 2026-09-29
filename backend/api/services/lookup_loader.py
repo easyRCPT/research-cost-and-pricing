@@ -5,22 +5,15 @@ from django.db import models
 from django.db.models import QuerySet
 
 from ..models import (
-    Activity,
     Budget,
     CalculationConstant,
-    DeliverableType,
-    Department,
     EbaIncrease,
-    Faculty,
-    IncrementCap,
     LookupConfiguration,
-    NonStaffCostCategory,
     OnCostRate,
-    Region,
-    RevenueCategory,
     SalaryRate,
     SalaryRateMultiplier,
 )
+from .lookup_definitions import LOOKUP_DEFINITIONS
 
 MODELS_CACHE_KEY = "lookup_models"
 CACHE_TIMEOUT = 3600
@@ -35,92 +28,18 @@ REQUIRED_CONSTANTS = {
 }
 
 
-class LookupTable(models.TextChoices):
-    FACULTIES = "faculties"
-    DEPARTMENTS = "departments"
-    SALARY_RATES = "salary_rates"
-    SALARY_RATE_MULTIPLIERS = "salary_rate_multipliers"
-    INCREMENT_CAPS = "increment_caps"
-    EBA_INCREASES = "eba_increases"
-    ON_COST_RATES = "on_cost_rates"
-    NON_STAFF_COST_CATEGORIES = "non_staff_cost_categories"
-    CALCULATION_CONSTANTS = "calculation_constants"
-    ACTIVITIES = "activities"
-    REGIONS = "regions"
-    DELIVERABLE_TYPES = "deliverable_types"
-    REVENUE_CATEGORIES = "revenue_categories"
-
-
-# Mapping tables to models for lookup update
-LOOKUP_MODELS: dict = {
-    LookupTable.FACULTIES: Faculty,
-    LookupTable.DEPARTMENTS: Department,
-    LookupTable.SALARY_RATES: SalaryRate,
-    LookupTable.SALARY_RATE_MULTIPLIERS: SalaryRateMultiplier,
-    LookupTable.INCREMENT_CAPS: IncrementCap,
-    LookupTable.EBA_INCREASES: EbaIncrease,
-    LookupTable.ON_COST_RATES: OnCostRate,
-    LookupTable.NON_STAFF_COST_CATEGORIES: NonStaffCostCategory,
-    LookupTable.CALCULATION_CONSTANTS: CalculationConstant,
-    LookupTable.ACTIVITIES: Activity,
-    LookupTable.REGIONS: Region,
-    LookupTable.DELIVERABLE_TYPES: DeliverableType,
-    LookupTable.REVENUE_CATEGORIES: RevenueCategory,
-}
-
-
-def _get_unversioned_lookup_models() -> dict[LookupTable, QuerySet]:
-    """
-    Every unversioned table's rows, in a stable order. The keys are the response's keys.
-    """
-    return {
-        LookupTable.FACULTIES: Faculty.objects.order_by("code"),
-        LookupTable.DEPARTMENTS: Department.objects.order_by("code"),
-        LookupTable.INCREMENT_CAPS: IncrementCap.objects.order_by("level"),
-        LookupTable.NON_STAFF_COST_CATEGORIES: NonStaffCostCategory.objects.order_by(
-            "cost_category", "cost_subcategory"
-        ),
-        LookupTable.ACTIVITIES: Activity.objects.order_by("code"),
-        LookupTable.REGIONS: Region.objects.order_by("code"),
-        LookupTable.DELIVERABLE_TYPES: DeliverableType.objects.order_by("code"),
-        LookupTable.REVENUE_CATEGORIES: RevenueCategory.objects.order_by(
-            "budget_ledger_id"
-        ),
-    }
-
-
-def _get_versioned_lookup_models(version_id: int) -> dict[LookupTable, QuerySet]:
-    """
-    Every versioned table's rows, in a stable order. The keys are the response's keys.
-    Only include lookups belonging to the specified version.
-    """
-    return {
-        LookupTable.SALARY_RATES: SalaryRate.objects.filter(
-            version_id=version_id,
-        ).order_by("payroll_type", "category", "classification"),
-        LookupTable.SALARY_RATE_MULTIPLIERS: SalaryRateMultiplier.objects.filter(
-            version_id=version_id,
-        ).order_by("time_basis"),
-        LookupTable.EBA_INCREASES: EbaIncrease.objects.filter(
-            version_id=version_id,
-        ).order_by("year"),
-        LookupTable.ON_COST_RATES: OnCostRate.objects.filter(
-            version_id=version_id,
-        ).order_by("on_cost_type", "employment_type", "year"),
-        LookupTable.CALCULATION_CONSTANTS: CalculationConstant.objects.filter(
-            version_id=version_id,
-        ).order_by("name"),
-    }
-
-
 def _get_lookup_models(version_id: int) -> dict[str, list[models.Model]]:
-    tables = _get_unversioned_lookup_models()
-    tables.update(_get_versioned_lookup_models(version_id))
-    lookup_models = {
-        # Pyright infers TextChoices.value as a callable; it is a string at runtime.
-        cast(str, table.value): list(queryset.all())
-        for table, queryset in tables.items()
-    }
+    lookup_models = {}
+
+    for table, definition in LOOKUP_DEFINITIONS.items():
+        queryset = definition.model.objects.all()
+
+        if definition.versioned:
+            queryset = queryset.filter(version_id=version_id)
+
+        queryset = queryset.order_by(*definition.order_by)
+        lookup_models[table] = list(queryset)
+
     return lookup_models
 
 
@@ -133,8 +52,8 @@ def get_lookup_tables() -> dict[str, list[models.Model]]:
     """
     lookup_models = cache.get(MODELS_CACHE_KEY)
     if lookup_models is None:
-        current_version_id = LookupConfiguration.objects.get().current_version_id
-        lookup_models = _get_lookup_models(current_version_id)
+        version_id = LookupConfiguration.objects.get().current_version_id
+        lookup_models = _get_lookup_models(version_id)
         cache.set(MODELS_CACHE_KEY, lookup_models, CACHE_TIMEOUT)
     return lookup_models
 
@@ -151,6 +70,16 @@ def validate_constants(constants: dict) -> None:
         )
 
 
+def _get_versioned_lookup_querysets(version_id: int) -> dict[str, QuerySet]:
+    return {
+        table: definition.model.objects.filter(
+            version_id=version_id,
+        ).order_by(*definition.order_by)
+        for table, definition in LOOKUP_DEFINITIONS.items()
+        if definition.versioned
+    }
+
+
 def get_constants(version_id: int) -> dict:
     """
     Get lookup tables from cache and convert them into calculation dictionaries.
@@ -162,11 +91,11 @@ def get_constants(version_id: int) -> dict:
     if constants is not None:
         return constants
 
-    query_sets = _get_versioned_lookup_models(version_id)
+    querysets = _get_versioned_lookup_querysets(version_id)
     tables = {
         # Pyright infers TextChoices.value as a callable; it is a string at runtime.
-        cast(str, table.value): list(queryset.all())
-        for table, queryset in query_sets.items()
+        table: list(queryset)
+        for table, queryset in querysets.items()
     }
 
     # Cast each table to its concrete model type for Pyright.

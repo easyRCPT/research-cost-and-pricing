@@ -3,13 +3,13 @@ from typing import cast
 from django.test import SimpleTestCase, TestCase
 
 from api.models import Department, Faculty
+from api.serializers.lookup_model_serializer import DepartmentSerializer
 from api.serializers.lookup_serializer import (
-    LOOKUP_SERIALIZERS,
-    DepartmentSerializer,
     LookupCreateSerializer,
     LookupTablesSerializer,
     LookupUpdateSerializer,
 )
+from api.services.lookup_definitions import LOOKUP_DEFINITIONS
 
 from .serializer_utils import get_data, get_errors, get_validated_data
 
@@ -32,25 +32,25 @@ class LookupSerializersTestCase(SimpleTestCase):
             "revenue_categories",
         }
 
-        self.assertEqual(set(LOOKUP_SERIALIZERS), expected)
+        self.assertEqual(set(LOOKUP_DEFINITIONS), expected)
 
     def test_lookup_tables_serializer_contains_all_tables(self):
         serializer = cast(LookupTablesSerializer, LookupTablesSerializer())
 
         self.assertEqual(
             set(serializer.fields),
-            set(LOOKUP_SERIALIZERS),
+            set(LOOKUP_DEFINITIONS),
         )
 
         for name, field in serializer.fields.items():
             self.assertTrue(field.many)
             self.assertIs(
                 field.child.__class__,
-                LOOKUP_SERIALIZERS[name],
+                LOOKUP_DEFINITIONS[name].serializer,
             )
 
     def test_lookup_tables_serializer_serializes_empty_tables(self):
-        data = {name: [] for name in LOOKUP_SERIALIZERS}
+        data = {name: [] for name in LOOKUP_DEFINITIONS}
 
         serializer = LookupTablesSerializer(data=data)
 

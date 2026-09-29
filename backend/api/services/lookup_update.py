@@ -10,35 +10,27 @@ from ..exceptions import Conflict
 from ..models import (
     CalculationConstant,
     Department,
-    EbaIncrease,
     Faculty,
     LookupConfiguration,
     LookupVersion,
-    OnCostRate,
-    SalaryRate,
-    SalaryRateMultiplier,
     User,
 )
 from .audit import write_audit
-from .lookup_loader import (
-    LOOKUP_MODELS,
-    LookupTable,
-    invalidate_lookup_cache,
-)
+from .lookup_definitions import LOOKUP_DEFINITIONS
+from .lookup_loader import invalidate_lookup_cache
 
 # Fixed by the University at its full cost recovery rate (#60). It sets the
 # price of every budget; it no longer decides Dean review, which reads the
 # margin and in-kind costs (calculation/pricing.py).
 FIXED_CONSTANTS = frozenset({"full_cost_recovery_multiplier"})
 
-# Writes to these tables create a new lookup version
-VERSIONED_MODELS = (
-    SalaryRate,
-    SalaryRateMultiplier,
-    EbaIncrease,
-    OnCostRate,
-    CalculationConstant,
-)
+
+def get_versioned_models() -> list[type[models.Model]]:
+    return [
+        definition.model
+        for definition in LOOKUP_DEFINITIONS.values()
+        if definition.versioned
+    ]
 
 
 def create_lookup_version(
@@ -54,7 +46,7 @@ def create_lookup_version(
     # it, and without it every edited version read as though it were seeded.
     new_version = LookupVersion.objects.create(updated_by=actor)
 
-    for model in VERSIONED_MODELS:
+    for model in get_versioned_models():
         rows = model.objects.filter(version_id=old_version_id)
 
         for row in rows:
@@ -104,12 +96,12 @@ def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
 
 
 def _get_model(table: str) -> type[models.Model]:
-    try:
-        lookup_table = LookupTable(table)
-    except ValueError:
+    definition = LOOKUP_DEFINITIONS.get(table)
+
+    if definition is None:
         raise ValidationError(f"Invalid lookup table: {table}")
 
-    return LOOKUP_MODELS[lookup_table]
+    return definition.model
 
 
 def _check_and_create_new_version(
@@ -122,7 +114,7 @@ def _check_and_create_new_version(
     """
     config = LookupConfiguration.objects.select_for_update().get()
 
-    if model in VERSIONED_MODELS and config.referenced:
+    if model in get_versioned_models() and config.referenced:
         return create_lookup_version(config, actor)
 
     return config.current_version_id
@@ -175,7 +167,7 @@ def create(
     model = _get_model(table)
     _reject_fixed_constant(model, data)
 
-    if model in VERSIONED_MODELS:
+    if model in get_versioned_models():
         # Determines whether a new version should be created
         version_id = _check_and_create_new_version(model, actor)
         instance = model(
@@ -212,7 +204,7 @@ def update(
     _validate_fields(model, data)
 
     try:
-        if model in VERSIONED_MODELS:
+        if model in get_versioned_models():
             # Determines whether a new version should be created
             version_id = _check_and_create_new_version(model, actor)
             instance = model.objects.get(
@@ -328,7 +320,7 @@ def restore_version(version_id: int, actor: User | None) -> int:
         raise ValidationError(f"Version {version_id} is already the current rates.")
 
     restored = LookupVersion.objects.create(updated_by=actor)
-    for model in VERSIONED_MODELS:
+    for model in get_versioned_models():
         for row in model.objects.filter(version_id=source.id):
             fields = {
                 field.name: getattr(row, field.name)
