@@ -24,7 +24,7 @@ from api.services.lookup_loader import (
 )
 
 
-class TestGetVersionedLookupModels(SimpleTestCase):
+class TestGetVersionedLookupQuerySets(SimpleTestCase):
     @patch("api.services.lookup_loader.CalculationConstant.objects")
     @patch("api.services.lookup_loader.OnCostRate.objects")
     @patch("api.services.lookup_loader.EbaIncrease.objects")
@@ -57,16 +57,16 @@ class TestGetVersionedLookupModels(SimpleTestCase):
         constants = Mock()
         mock_constant_objects.filter.return_value.order_by.return_value = constants
 
-        result = lookup_loader._get_versioned_lookup_models(version_id)
+        result = lookup_loader._get_versioned_lookup_querysets(version_id)
 
         self.assertEqual(
             result,
             {
-                lookup_loader.LookupTable.SALARY_RATES: salary_rates,
-                lookup_loader.LookupTable.SALARY_RATE_MULTIPLIERS: multipliers,
-                lookup_loader.LookupTable.EBA_INCREASES: eba_increases,
-                lookup_loader.LookupTable.ON_COST_RATES: on_cost_rates,
-                lookup_loader.LookupTable.CALCULATION_CONSTANTS: constants,
+                "salary_rates": salary_rates,
+                "salary_rate_multipliers": multipliers,
+                "eba_increases": eba_increases,
+                "on_cost_rates": on_cost_rates,
+                "calculation_constants": constants,
             },
         )
 
@@ -110,50 +110,8 @@ class TestGetVersionedLookupModels(SimpleTestCase):
         )
 
 
-class TestGetLookupModels(SimpleTestCase):
-    @patch("api.services.lookup_loader._get_versioned_lookup_models")
-    @patch("api.services.lookup_loader._get_unversioned_lookup_models")
-    def test_combines_unversioned_and_versioned_lookup_models(
-        self,
-        mock_get_unversioned,
-        mock_get_versioned,
-    ):
-        version_id = 7
-
-        department_queryset = Mock()
-        department_rows = ["department"]
-        department_queryset.all.return_value = department_rows
-
-        salary_rate_queryset = Mock()
-        salary_rate_rows = ["salary_rate"]
-        salary_rate_queryset.all.return_value = salary_rate_rows
-
-        mock_get_unversioned.return_value = {
-            lookup_loader.LookupTable.DEPARTMENTS: department_queryset,
-        }
-
-        mock_get_versioned.return_value = {
-            lookup_loader.LookupTable.SALARY_RATES: salary_rate_queryset,
-        }
-
-        result = lookup_loader._get_lookup_models(version_id)
-
-        self.assertEqual(
-            result,
-            {
-                "departments": department_rows,
-                "salary_rates": salary_rate_rows,
-            },
-        )
-
-        mock_get_unversioned.assert_called_once_with()
-        mock_get_versioned.assert_called_once_with(version_id)
-
-        department_queryset.all.assert_called_once_with()
-        salary_rate_queryset.all.assert_called_once_with()
-
-
 class TestGetLookupTables(SimpleTestCase):
+    @patch("api.services.lookup_loader.cache.get")
     @patch("api.services.lookup_loader.cache.set")
     @patch("api.services.lookup_loader.LookupConfiguration.objects.get")
     @patch("api.services.lookup_loader._get_lookup_models")
@@ -162,7 +120,10 @@ class TestGetLookupTables(SimpleTestCase):
         mock_get_lookup_models,
         mock_config_get,
         mock_cache_set,
+        mock_cache_get,
     ):
+        mock_cache_get.return_value = None
+
         config = Mock()
         config.current_version_id = 3
         mock_config_get.return_value = config
@@ -289,40 +250,27 @@ class TestGetConstants(SimpleTestCase):
             ],
         }
 
-    def _mock_querysets(self, tables):
-        return {
-            lookup_loader.LookupTable.SALARY_RATES: self._mock_queryset(
-                tables["salary_rates"]
-            ),
-            lookup_loader.LookupTable.SALARY_RATE_MULTIPLIERS: self._mock_queryset(
-                tables["salary_rate_multipliers"]
-            ),
-            lookup_loader.LookupTable.EBA_INCREASES: self._mock_queryset(
-                tables["eba_increases"]
-            ),
-            lookup_loader.LookupTable.ON_COST_RATES: self._mock_queryset(
-                tables["on_cost_rates"]
-            ),
-            lookup_loader.LookupTable.CALCULATION_CONSTANTS: self._mock_queryset(
-                tables["calculation_constants"]
-            ),
-        }
+    @staticmethod
+    def _mock_querysets(tables):
+        return tables
 
     @staticmethod
     def _mock_queryset(rows):
-        queryset = Mock()
-        queryset.all.return_value = rows
-        return queryset
+        return rows
 
+    @patch("api.services.lookup_loader.cache.get")
     @patch("api.services.lookup_loader.cache.set")
-    @patch("api.services.lookup_loader._get_versioned_lookup_models")
+    @patch("api.services.lookup_loader._get_versioned_lookup_querysets")
     def test_converts_lookup_tables_to_constants(
         self,
-        mock_get_versioned_lookup_models,
+        mock_get_versioned_lookup_querysets,
         mock_cache_set,
+        mock_cache_get,
     ):
+        mock_cache_get.return_value = None
+
         tables = self._build_tables()
-        mock_get_versioned_lookup_models.return_value = self._mock_querysets(tables)
+        mock_get_versioned_lookup_querysets.return_value = self._mock_querysets(tables)
 
         result = get_constants(3)
 
@@ -380,19 +328,19 @@ class TestGetConstants(SimpleTestCase):
             },
         )
 
-        mock_get_versioned_lookup_models.assert_called_once_with(3)
+        mock_get_versioned_lookup_querysets.assert_called_once_with(3)
         mock_cache_set.assert_called_once_with(
             "lookup_version_3",
             result,
             CACHE_TIMEOUT,
         )
 
-    @patch("api.services.lookup_loader._get_versioned_lookup_models")
+    @patch("api.services.lookup_loader._get_versioned_lookup_querysets")
     @patch("api.services.lookup_loader.cache.get")
     def test_returns_cached_constants_without_loading_tables(
         self,
         mock_cache_get,
-        mock_get_versioned_lookup_models,
+        mock_get_versioned_lookup_querysets,
     ):
         cached_constants = {
             "salary_rate": {},
@@ -408,12 +356,12 @@ class TestGetConstants(SimpleTestCase):
 
         self.assertEqual(result, cached_constants)
         mock_cache_get.assert_called_once_with("lookup_version_3")
-        mock_get_versioned_lookup_models.assert_not_called()
+        mock_get_versioned_lookup_querysets.assert_not_called()
 
-    @patch("api.services.lookup_loader._get_versioned_lookup_models")
+    @patch("api.services.lookup_loader._get_versioned_lookup_querysets")
     def test_raises_error_when_on_cost_default_rate_is_missing(
         self,
-        mock_get_versioned_lookup_models,
+        mock_get_versioned_lookup_querysets,
     ):
         on_cost = Mock(spec=OnCostRate)
         on_cost.on_cost_type = "superannuation"
@@ -424,7 +372,7 @@ class TestGetConstants(SimpleTestCase):
         tables = self._build_tables()
         tables["on_cost_rates"] = [on_cost]
 
-        mock_get_versioned_lookup_models.return_value = self._mock_querysets(tables)
+        mock_get_versioned_lookup_querysets.return_value = self._mock_querysets(tables)
 
         with self.assertRaisesRegex(
             ValueError,
@@ -432,10 +380,10 @@ class TestGetConstants(SimpleTestCase):
         ):
             get_constants(3)
 
-    @patch("api.services.lookup_loader._get_versioned_lookup_models")
+    @patch("api.services.lookup_loader._get_versioned_lookup_querysets")
     def test_raises_error_when_required_constant_is_missing(
         self,
-        mock_get_versioned_lookup_models,
+        mock_get_versioned_lookup_querysets,
     ):
         tables = self._build_tables()
         tables["calculation_constants"] = [
@@ -446,7 +394,7 @@ class TestGetConstants(SimpleTestCase):
             self.constant_6,
         ]
 
-        mock_get_versioned_lookup_models.return_value = self._mock_querysets(tables)
+        mock_get_versioned_lookup_querysets.return_value = self._mock_querysets(tables)
 
         with self.assertRaisesRegex(
             KeyError,

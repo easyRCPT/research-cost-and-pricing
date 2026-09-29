@@ -8,7 +8,7 @@ from rest_framework.fields import get_error_detail
 
 class ExceptionHandler(StandardizedHandler):
     """
-    Treat model validation as a bad request rather than a server error.
+    Treat model validation as a bad request (400) rather than a server error.
 
     The services validate with full_clean() before saving, which raises
     Django's ValidationError. DRF does not recognise that one, so a blank title

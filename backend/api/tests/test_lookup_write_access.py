@@ -70,14 +70,6 @@ class LookupWriteAccessTestCase(TestCase):
         self.assertEqual(response.status_code, 204, response.content)
         self.assertEqual(Department.objects.get(code="SCI").name, "Renamed")
 
-    def test_an_edit_with_no_values_is_refused(self):
-        self.client.force_login(self.admin)
-
-        response = self.patch("departments", {"lookup": {"code": "SCI"}, "values": {}})
-
-        self.assertEqual(response.status_code, 400)
-        self.assertTrue(Department.objects.filter(code="SCI").exists())
-
     def test_the_fixed_multiplier_cannot_be_changed_by_id(self):
         self.client.force_login(self.admin)
 

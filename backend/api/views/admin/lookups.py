@@ -9,11 +9,11 @@ from rest_framework.views import APIView
 
 from api.permissions import IsSuperadmin
 from api.serializers.lookup_serializer import (
-    LOOKUP_SERIALIZERS,
     LookupCreateSerializer,
     LookupUpdateSerializer,
 )
 from api.services import lookup_update
+from api.services.lookup_definitions import LOOKUP_DEFINITIONS
 
 
 class LookupVersionSerializer(serializers.Serializer):
@@ -67,7 +67,7 @@ class LookupTableView(APIView):
         serializer.is_valid(raise_exception=True)
 
         try:
-            serializer_class = LOOKUP_SERIALIZERS[table]
+            serializer_class = LOOKUP_DEFINITIONS[table].serializer
         except KeyError:
             raise ValidationError(f"Invalid lookup table: {table}")
 
@@ -91,6 +91,10 @@ class LookupTableView(APIView):
 
         validated_data = cast(dict, serializer.validated_data)
 
+        # Model serializers cannot be used in lookup field validation.
+        # Field validation is operated in service level.
+        # Lookup dict does not require full model information.
+        # 0 or >1 lookup matches raise ValidationError in the service.
         lookup_update.update(
             table=table,
             lookup=cast(dict, validated_data["lookup"]),

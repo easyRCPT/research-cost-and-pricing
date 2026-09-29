@@ -23,7 +23,7 @@ from api.models import (
     User,
 )
 from api.services.lookup_update import (
-    VERSIONED_MODELS,
+    get_versioned_models,
     list_versions,
     restore_version,
     update,
@@ -39,7 +39,7 @@ LEVEL_A1 = {
 def rows(version_id: int) -> dict:
     """Every versioned row of one version, comparable across versions."""
     out = {}
-    for model in VERSIONED_MODELS:
+    for model in get_versioned_models():
         out[model.__name__] = sorted(
             (
                 tuple(

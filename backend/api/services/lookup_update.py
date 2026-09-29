@@ -2,38 +2,35 @@ import json
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
+from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
 
+from ..exceptions import Conflict
 from ..models import (
     CalculationConstant,
-    EbaIncrease,
+    Department,
+    Faculty,
     LookupConfiguration,
     LookupVersion,
-    OnCostRate,
-    SalaryRate,
-    SalaryRateMultiplier,
     User,
 )
 from .audit import write_audit
-from .lookup_loader import (
-    LOOKUP_MODELS,
-    LookupTable,
-    invalidate_lookup_cache,
-)
+from .lookup_definitions import LOOKUP_DEFINITIONS
+from .lookup_loader import invalidate_lookup_cache
 
 # Fixed by the University at its full cost recovery rate (#60). It sets the
 # price of every budget; it no longer decides Dean review, which reads the
 # margin and in-kind costs (calculation/pricing.py).
 FIXED_CONSTANTS = frozenset({"full_cost_recovery_multiplier"})
 
-VERSIONED_MODELS = (
-    SalaryRate,
-    SalaryRateMultiplier,
-    EbaIncrease,
-    OnCostRate,
-    CalculationConstant,
-)
+
+def get_versioned_models() -> list[type[models.Model]]:
+    return [
+        definition.model
+        for definition in LOOKUP_DEFINITIONS.values()
+        if definition.versioned
+    ]
 
 
 def create_lookup_version(
@@ -49,7 +46,7 @@ def create_lookup_version(
     # it, and without it every edited version read as though it were seeded.
     new_version = LookupVersion.objects.create(updated_by=actor)
 
-    for model in VERSIONED_MODELS:
+    for model in get_versioned_models():
         rows = model.objects.filter(version_id=old_version_id)
 
         for row in rows:
@@ -99,12 +96,12 @@ def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
 
 
 def _get_model(table: str) -> type[models.Model]:
-    try:
-        lookup_table = LookupTable(table)
-    except ValueError:
+    definition = LOOKUP_DEFINITIONS.get(table)
+
+    if definition is None:
         raise ValidationError(f"Invalid lookup table: {table}")
 
-    return LOOKUP_MODELS[lookup_table]
+    return definition.model
 
 
 def _check_and_create_new_version(
@@ -117,10 +114,47 @@ def _check_and_create_new_version(
     """
     config = LookupConfiguration.objects.select_for_update().get()
 
-    if model in VERSIONED_MODELS and config.referenced:
+    if model in get_versioned_models() and config.referenced:
         return create_lookup_version(config, actor)
 
     return config.current_version_id
+
+
+def _save_validated_instance(
+    instance: models.Model,
+    update_fields: list[str] | None = None,
+) -> None:
+    # Validate the model before saving
+    # Return django validation error with model validation.
+    # ExceptionHandler convert django validation error to 400
+    instance.full_clean()
+
+    try:
+        instance.save(update_fields=update_fields)
+    except IntegrityError as exc:
+        # Return 409 for database integrity conflicts
+        raise Conflict("Lookup write conflicts with an existing lookup entry.") from exc
+
+
+def _validate_fields(model: type[models.Model], data: dict) -> None:
+    # Process foreign key data fields
+    if model is Department:
+        # Convert faculty code to a Faculty instance
+        faculty_code = data.pop("faculty_code", None)
+        if faculty_code is not None:
+            faculty = Faculty.objects.filter(code=faculty_code).first()
+            if faculty is None:
+                raise ValidationError(
+                    f"Faculty with code {faculty_code} does not exist."
+                )
+            data.update({"faculty": faculty})
+
+    valid_fields = {field.name for field in model._meta.fields}
+
+    invalid_fields = set(data) - valid_fields
+
+    if invalid_fields:
+        raise ValidationError(f"Invalid fields: {', '.join(sorted(invalid_fields))}")
 
 
 @transaction.atomic
@@ -133,9 +167,8 @@ def create(
     model = _get_model(table)
     _reject_fixed_constant(model, data)
 
-    # Determines whether a new version should be created
-    # Validate the model before saving
-    if model in VERSIONED_MODELS:
+    if model in get_versioned_models():
+        # Determines whether a new version should be created
         version_id = _check_and_create_new_version(model, actor)
         instance = model(
             **data,
@@ -144,10 +177,16 @@ def create(
     else:
         instance = model(**data)
 
-    instance.full_clean()
-    instance.save()
+    _save_validated_instance(instance)
 
-    _audit(actor, "admin.lookup.insert", table, instance, before=None, after=data)
+    _audit(
+        actor,
+        "admin.lookup.insert",
+        table,
+        instance,
+        before=None,
+        after=data,
+    )
     invalidate_lookup_cache()
 
 
@@ -161,11 +200,11 @@ def update(
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
 
-    if not data:
-        raise ValidationError("Nothing to update.")
+    _validate_fields(model, lookup)
+    _validate_fields(model, data)
 
     try:
-        if model in VERSIONED_MODELS:
+        if model in get_versioned_models():
             # Determines whether a new version should be created
             version_id = _check_and_create_new_version(model, actor)
             instance = model.objects.get(
@@ -188,16 +227,24 @@ def update(
     # The lookup may name the row by id rather than by name.
     _reject_fixed_constant(model, model_to_dict(instance))
 
-    before = {field: getattr(instance, field, None) for field in data}
-    _update_instance(instance, lookup, data)
+    before = model_to_dict(instance, fields=data.keys())
 
+    # Lookup fields may also be included in data and updated.
+    for field, value in data.items():
+        setattr(instance, field, value)
+    _save_validated_instance(instance, update_fields=list(data))
+
+    after = model_to_dict(instance, fields=data.keys())
+
+    # Audit records use the service/model layer representation rather than the
+    # original API field names. ForeignKey values are recorded as primary keys.
     _audit(
         actor,
         "admin.lookup.update",
         table,
         instance,
         before=before,
-        after=data,
+        after=after,
         lookup=lookup,
     )
     invalidate_lookup_cache()
@@ -222,12 +269,17 @@ def _audit(
     """
 
     def plain(values: dict | None) -> dict | None:
+        if values is None:
+            return None
+
+        # Convert model instances to their primary keys
+        values = {
+            key: value.pk if isinstance(value, models.Model) else value
+            for key, value in values.items()
+        }
+
         # Decimals and dates, as the log's JSON column can hold them.
-        return (
-            None
-            if values is None
-            else json.loads(json.dumps(values, cls=DjangoJSONEncoder))
-        )
+        return json.loads(json.dumps(values, cls=DjangoJSONEncoder))
 
     write_audit(
         actor=actor,
@@ -241,26 +293,6 @@ def _audit(
             "after": plain(after),
         },
     )
-
-
-def _update_instance(
-    instance: models.Model,
-    lookup: dict,
-    data: dict,
-) -> None:
-    # Lookup fields are used to identify the row and cannot be updated.
-    immutable_fields = lookup.keys() & data.keys()
-
-    if immutable_fields:
-        raise ValidationError(
-            "Lookup fields cannot be updated: " + ", ".join(sorted(immutable_fields)),
-        )
-
-    for field, value in data.items():
-        setattr(instance, field, value)
-
-    instance.full_clean()
-    instance.save(update_fields=list(data))
 
 
 @transaction.atomic
@@ -288,7 +320,7 @@ def restore_version(version_id: int, actor: User | None) -> int:
         raise ValidationError(f"Version {version_id} is already the current rates.")
 
     restored = LookupVersion.objects.create(updated_by=actor)
-    for model in VERSIONED_MODELS:
+    for model in get_versioned_models():
         for row in model.objects.filter(version_id=source.id):
             fields = {
                 field.name: getattr(row, field.name)
