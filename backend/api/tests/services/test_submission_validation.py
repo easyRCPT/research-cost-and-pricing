@@ -6,6 +6,7 @@ from api.models import (
     Budget,
     Department,
     Faculty,
+    LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
@@ -42,6 +43,7 @@ class ValidateSubmissionTests(TestCase):
             ledger_id=1000,
             cost_category="Test Category",
             cost_subcategory="Test Subcategory",
+            version=LookupVersion.objects.create(),
         )
 
     def create_project(self, **overrides):

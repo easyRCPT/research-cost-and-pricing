@@ -25,88 +25,104 @@ from api.services.lookup_loader import (
 
 
 class TestGetVersionedLookupQuerySets(SimpleTestCase):
-    @patch("api.services.lookup_loader.CalculationConstant.objects")
-    @patch("api.services.lookup_loader.OnCostRate.objects")
-    @patch("api.services.lookup_loader.EbaIncrease.objects")
-    @patch("api.services.lookup_loader.SalaryRateMultiplier.objects")
-    @patch("api.services.lookup_loader.SalaryRate.objects")
+    @patch("api.services.lookup_loader.LOOKUP_DEFINITIONS")
     def test_returns_versioned_lookup_querysets(
         self,
-        mock_salary_rate_objects,
-        mock_multiplier_objects,
-        mock_eba_objects,
-        mock_on_cost_objects,
-        mock_constant_objects,
+        mock_lookup_definitions,
     ):
         version_id = 7
 
         salary_rates = Mock()
-        mock_salary_rate_objects.filter.return_value.order_by.return_value = (
-            salary_rates
-        )
-
         multipliers = Mock()
-        mock_multiplier_objects.filter.return_value.order_by.return_value = multipliers
-
         eba_increases = Mock()
-        mock_eba_objects.filter.return_value.order_by.return_value = eba_increases
-
         on_cost_rates = Mock()
-        mock_on_cost_objects.filter.return_value.order_by.return_value = on_cost_rates
-
         constants = Mock()
-        mock_constant_objects.filter.return_value.order_by.return_value = constants
+
+        def definition(model, order_by):
+            item = Mock()
+            item.versioned = True
+            item.model = model
+            item.order_by = order_by
+            return item
+
+        salary_model = Mock()
+        salary_model.objects.filter.return_value.order_by.return_value = salary_rates
+
+        multiplier_model = Mock()
+        multiplier_model.objects.filter.return_value.order_by.return_value = multipliers
+
+        eba_model = Mock()
+        eba_model.objects.filter.return_value.order_by.return_value = eba_increases
+
+        on_cost_model = Mock()
+        on_cost_model.objects.filter.return_value.order_by.return_value = on_cost_rates
+
+        constant_model = Mock()
+        constant_model.objects.filter.return_value.order_by.return_value = constants
+
+        mock_lookup_definitions.items.return_value = [
+            (
+                "salary_rates",
+                definition(
+                    salary_model,
+                    ("payroll_type", "category", "classification"),
+                ),
+            ),
+            (
+                "salary_rate_multipliers",
+                definition(
+                    multiplier_model,
+                    ("time_basis",),
+                ),
+            ),
+            (
+                "eba_increases",
+                definition(
+                    eba_model,
+                    ("year",),
+                ),
+            ),
+            (
+                "on_cost_rates",
+                definition(
+                    on_cost_model,
+                    (
+                        "on_cost_type",
+                        "employment_type",
+                        "year",
+                    ),
+                ),
+            ),
+            (
+                "calculation_constants",
+                definition(
+                    constant_model,
+                    ("name",),
+                ),
+            ),
+        ]
 
         result = lookup_loader._get_versioned_lookup_querysets(version_id)
 
-        self.assertEqual(
-            result,
-            {
-                "salary_rates": salary_rates,
-                "salary_rate_multipliers": multipliers,
-                "eba_increases": eba_increases,
-                "on_cost_rates": on_cost_rates,
-                "calculation_constants": constants,
-            },
+        self.assertIs(
+            result["salary_rates"],
+            salary_rates,
         )
-
-        mock_salary_rate_objects.filter.assert_called_once_with(
-            version_id=version_id,
+        self.assertIs(
+            result["salary_rate_multipliers"],
+            multipliers,
         )
-        mock_salary_rate_objects.filter.return_value.order_by.assert_called_once_with(
-            "payroll_type",
-            "category",
-            "classification",
+        self.assertIs(
+            result["eba_increases"],
+            eba_increases,
         )
-
-        mock_multiplier_objects.filter.assert_called_once_with(
-            version_id=version_id,
+        self.assertIs(
+            result["on_cost_rates"],
+            on_cost_rates,
         )
-        mock_multiplier_objects.filter.return_value.order_by.assert_called_once_with(
-            "time_basis",
-        )
-
-        mock_eba_objects.filter.assert_called_once_with(
-            version_id=version_id,
-        )
-        mock_eba_objects.filter.return_value.order_by.assert_called_once_with(
-            "year",
-        )
-
-        mock_on_cost_objects.filter.assert_called_once_with(
-            version_id=version_id,
-        )
-        mock_on_cost_objects.filter.return_value.order_by.assert_called_once_with(
-            "on_cost_type",
-            "employment_type",
-            "year",
-        )
-
-        mock_constant_objects.filter.assert_called_once_with(
-            version_id=version_id,
-        )
-        mock_constant_objects.filter.return_value.order_by.assert_called_once_with(
-            "name",
+        self.assertIs(
+            result["calculation_constants"],
+            constants,
         )
 
 
@@ -186,7 +202,7 @@ class TestGetConstants(SimpleTestCase):
 
         self.eba = Mock(spec=EbaIncrease)
         self.eba.year = 2026
-        self.eba.multiplier = Decimal("1.03")
+        self.eba.rate = Decimal("0.03")
 
         self.on_cost_1 = Mock(spec=OnCostRate)
         self.on_cost_1.on_cost_type = "superannuation"
@@ -224,6 +240,10 @@ class TestGetConstants(SimpleTestCase):
         self.constant_6.name = "minimum_margin"
         self.constant_6.value = Decimal("0.00")
 
+        self.constant_7 = Mock(spec=CalculationConstant)
+        self.constant_7.name = "salary_rate_year"
+        self.constant_7.value = Decimal(2025)
+
     def _build_tables(self):
         return {
             "salary_rates": [
@@ -247,6 +267,7 @@ class TestGetConstants(SimpleTestCase):
                 self.constant_4,
                 self.constant_5,
                 self.constant_6,
+                self.constant_7,
             ],
         }
 
@@ -300,7 +321,7 @@ class TestGetConstants(SimpleTestCase):
         self.assertEqual(
             result["eba"],
             {
-                2026: Decimal("1.03"),
+                2026: Decimal("0.03"),
             },
         )
 
@@ -325,6 +346,7 @@ class TestGetConstants(SimpleTestCase):
                 "gst_rate": Decimal("0.10"),
                 "default_margin": Decimal("0.30"),
                 "minimum_margin": Decimal("0.00"),
+                "salary_rate_year": Decimal(2025),
             },
         )
 
@@ -431,6 +453,7 @@ class TestValidateConstants(SimpleTestCase):
             "gst_rate": Decimal("0.10"),
             "default_margin": Decimal("0.30"),
             "minimum_margin": Decimal("0.00"),
+            "salary_rate_year": Decimal(2025),
         }
 
         validate_constants(constants)
@@ -444,7 +467,7 @@ class TestValidateConstants(SimpleTestCase):
         with self.assertRaisesRegex(
             KeyError,
             "Missing required calculation constants: "
-            "default_margin,gst_rate,minimum_margin,override_uom_oncosts",
+            "default_margin,gst_rate,minimum_margin,override_uom_oncosts,salary_rate_year",
         ):
             validate_constants(constants)
 

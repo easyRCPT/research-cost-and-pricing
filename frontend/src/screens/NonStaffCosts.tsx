@@ -1,7 +1,7 @@
 import type { LookupTables } from '@/types'
 import { Panel } from '@/components/shell'
 import { NonStaffTable } from './nonstaff/NonStaffTable'
-import type { NonStaffLines } from '@/api/budget'
+import { type NonStaffLines, useBudget } from '@/api/budget'
 
 export interface NonStaffCostsProps extends NonStaffLines {
   lookups: LookupTables
@@ -15,12 +15,15 @@ export function NonStaffCosts({
   removeLine,
   lookups,
 }: NonStaffCostsProps) {
+  const { data: budget } = useBudget()
+
   return (
     <Panel>
       <NonStaffTable
         years={years}
         lines={lines}
         categories={lookups.non_staff_cost_categories}
+        columnTotal={budget.non_staff_cost.column_total}
         patchLine={patchLine}
         removeLine={removeLine}
         addLine={addLine}

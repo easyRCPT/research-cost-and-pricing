@@ -95,6 +95,7 @@ def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
             "position": line.position,
             "cost_group": line.category.cost_category,
             "expense_type": line.category.cost_subcategory,
+            "excludes_additional_rate": line.category.excludes_additional_rate,
             "description": line.description,
             "in_kind": line.in_kind,
             "in_kind_reason": line.in_kind_reason,
@@ -125,6 +126,7 @@ def build_budget_info(budget: Budget) -> dict:
         "justification_notes": budget.justification_notes,
         "dean_exemption_reason": budget.dean_exemption_reason,
         "status": budget.status,
+        "cloned_from_id": budget.cloned_from_id,
         "deliverables": [
             {
                 # The row id, so an edit can name the row it is editing. The

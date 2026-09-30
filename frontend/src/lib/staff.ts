@@ -122,7 +122,7 @@ export const emptyStaffLine = (
   time_basis: '',
   in_kind: false,
   in_kind_reason: '',
-  rate_2025: 0,
+  rate: 0,
   by_year: years.map((year) => ({ year, time: 0, cost: 0 })),
   total: 0,
 })
@@ -167,7 +167,7 @@ export const withCosts = (lines: EditableStaffLine[], budget: BudgetDetail) => {
     if (!cost) return line
     return {
       ...line,
-      rate_2025: cost.rate_2025,
+      rate: cost.rate,
       total: cost.total,
       by_year: line.by_year.map((entry) => ({
         ...entry,

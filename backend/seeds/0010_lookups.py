@@ -1,9 +1,11 @@
 """
 Seeds RCPT lookup table data.
 
-Run `manage.py import_lookups` against the
-excel wotkbook, then re-export with 'dumpdata'.
+To update the lookup fixture, run:
+    make fixture
 
+This resets the database, imports lookup data from the Excel workbook,
+and regenerates `lookups.json`.
 """
 
 from pathlib import Path

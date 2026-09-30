@@ -16,11 +16,11 @@ export function NonStaffTableHeader({ years }: NonStaffTableHeaderProps) {
             Year {i + 1} ({year})
           </Th>
         ))}
-        <Th align="right" className="w-28">
-          Total (AUD)
-        </Th>
         <Th align="center" className="w-24">
           Additional 10%
+        </Th>
+        <Th align="right" className="w-28">
+          Total (AUD)
         </Th>
         <Th className="w-8" />
       </tr>

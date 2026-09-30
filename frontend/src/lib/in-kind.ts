@@ -1,5 +1,4 @@
 import type { NonStaffLines, StaffLines } from '@/api/budget'
-import { lineTotal } from '@/lib/non-staff'
 import { withCosts } from '@/lib/staff'
 import type { BudgetDetail, EditableStaffLine } from '@/types'
 import type { CostRow } from '@/screens/inkind/InKindFlagsTable'
@@ -35,7 +34,7 @@ export const costRows = (
       kind: 'non-staff' as const,
       label: line.description || line.cost_group || '(untitled cost)',
       detail: line.cost_group || '—',
-      cost: lineTotal(line, nonStaff.years),
+      cost: line.total,
       inKind: line.in_kind,
       toggle: (value: boolean) =>
         nonStaff.patchLine(line.id, { in_kind: value }),

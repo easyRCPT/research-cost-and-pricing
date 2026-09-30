@@ -12,6 +12,7 @@ from api.models import (
     DeliverableType,
     Department,
     Faculty,
+    LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
@@ -81,6 +82,7 @@ class BudgetUpdateTestMixin:
             ledger_id=1001,
             cost_category="Equipment",
             cost_subcategory="Equipment",
+            version=LookupVersion.objects.create(),
         )
 
     def create_non_staff_line(self, budget=None):

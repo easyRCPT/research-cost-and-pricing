@@ -6,13 +6,16 @@ the HTTP write path: never edit a version a budget is pinned to.
 from decimal import Decimal
 from io import StringIO
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 
+from api.management.commands.import_lookups import import_eba_increases
 from api.models import (
     CalculationConstant,
+    EbaIncrease,
     LookupConfiguration,
     LookupVersion,
     SalaryRate,
@@ -100,3 +103,47 @@ class TestImportLookups(TestCase):
             ).values_list("name", flat=True)
         )
         self.assertLessEqual({"default_margin", "minimum_margin"}, names)
+
+
+class TestImportEbaIncreases(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+
+    def test_only_stores_years_when_rate_changes(self):
+        workbook = MagicMock()
+
+        # Mock rows(workbook, "tEBA") output:
+        # year, annual_rate, multiplier
+        rows = [
+            (2025, None, 1.00),  # header / invalid
+            (2026, 0.03, 1.03),  # first rate, store
+            (2027, 0.03, 1.0609),  # same rate, skip
+            (2028, 0.03, 1.092727),  # same rate, skip
+            (2029, 0.04, 1.136436),  # changed rate, store
+            (2030, 0.04, 1.181893),  # same rate, skip
+        ]
+
+        # Patch rows function because importer uses module-level rows()
+        from unittest.mock import patch
+
+        with patch(
+            "api.management.commands.import_lookups.rows",
+            return_value=rows,
+        ):
+            count = import_eba_increases(workbook, self.version)
+
+        self.assertEqual(count, 2)
+
+        eba = list(
+            EbaIncrease.objects.filter(version=self.version)
+            .order_by("year")
+            .values("year", "rate")
+        )
+
+        self.assertEqual(
+            eba,
+            [
+                {"year": 2026, "rate": Decimal("0.03")},
+                {"year": 2029, "rate": Decimal("0.04")},
+            ],
+        )

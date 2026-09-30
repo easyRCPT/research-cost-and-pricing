@@ -163,12 +163,12 @@ export function StaffTableBody({
             </CellTd>
             <Calc
               className={
-                !excluded && line.rate_2025
+                !excluded && line.rate
                   ? undefined
                   : 'text-muted-foreground'
               }
             >
-              <Derived>{dash(excluded ? 0 : line.rate_2025)}</Derived>
+              <Derived>{dash(excluded ? 0 : line.rate)}</Derived>
             </Calc>
             {years.map((year) => [
               <CellTd key={`${year}-time`}>

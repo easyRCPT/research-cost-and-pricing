@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.test import SimpleTestCase
 
+from api.calculation import staff
 from api.calculation.staff import (
     calculate_column_total,
     calculate_staff_cost,
@@ -59,6 +60,78 @@ class TestCalculateYearFractions(SimpleTestCase):
             calculate_year_fractions(2025, 6, 2025, 3)
 
 
+class TestFindEbaMultiplier(SimpleTestCase):
+    def setUp(self):
+        # EBA stores the increase rate from the previous year.
+        # 2026: 3% means 2026 salary = 2025 salary * 1.03
+        self.eba = {
+            2026: Decimal("0.03"),
+            2027: Decimal("0.04"),
+        }
+
+    def test_same_year_as_salary_rate_year_returns_one(self):
+        result = staff._find_eba_multiplier(
+            self.eba,
+            salary_rate_year=2025,
+            year=2025,
+        )
+
+        self.assertEqual(result, Decimal(1))
+
+    def test_future_year_applies_eba_increase(self):
+        result = staff._find_eba_multiplier(
+            self.eba,
+            salary_rate_year=2025,
+            year=2026,
+        )
+
+        self.assertEqual(result, Decimal("1.03"))
+
+    def test_multiple_future_years_apply_compound_increases(self):
+        result = staff._find_eba_multiplier(
+            self.eba,
+            salary_rate_year=2025,
+            year=2027,
+        )
+
+        expected = Decimal("1.03") * Decimal("1.04")
+
+        self.assertEqual(result, expected)
+
+    def test_previous_year_removes_future_eba_increase(self):
+        result = staff._find_eba_multiplier(
+            self.eba,
+            salary_rate_year=2026,
+            year=2025,
+        )
+
+        expected = Decimal(1) / Decimal("1.03")
+
+        self.assertEqual(result, expected)
+
+    def test_year_before_tool_initiation_returns_one(self):
+        result = staff._find_eba_multiplier(
+            self.eba,
+            salary_rate_year=2025,
+            year=2024,
+        )
+
+        self.assertEqual(result, Decimal(1))
+
+    def test_missing_eba_year_uses_latest_available_rate(self):
+        result = staff._find_eba_multiplier(
+            {
+                2026: Decimal("0.03"),
+            },
+            salary_rate_year=2025,
+            year=2027,
+        )
+
+        expected = Decimal("1.03") * Decimal("1.03")
+
+        self.assertEqual(result, expected)
+
+
 class TestFindSalaryRate(SimpleTestCase):
     def setUp(self):
         self.constants = {
@@ -67,15 +140,12 @@ class TestFindSalaryRate(SimpleTestCase):
                 ("Fortnight", "Academic", "Level A.2"): Decimal(65000),
                 ("Fortnight", "Academic", "Level A.3"): Decimal(70000),
                 ("Casual", "Academic", "RA Grade 1.1"): Decimal(50000),
+                ("Casual", "Academic", "RA Grade 1.2"): Decimal(55000),
             },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
                 "Daily": Decimal("0.2"),
                 "Hourly": Decimal("0.9"),
-            },
-            "eba": {
-                2025: Decimal(1),
-                2026: Decimal("1.03"),
             },
         }
 
@@ -87,7 +157,12 @@ class TestFindSalaryRate(SimpleTestCase):
             "time_basis": "FTE",
         }
 
-        result = find_salary_rate(info, self.constants, 0, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            0,
+        )
 
         self.assertEqual(result, Decimal(60000))
 
@@ -99,7 +174,12 @@ class TestFindSalaryRate(SimpleTestCase):
             "time_basis": "Daily",
         }
 
-        result = find_salary_rate(info, self.constants, 0, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            0,
+        )
 
         expected = Decimal(60000) * Decimal("0.2")
         self.assertEqual(result, expected)
@@ -112,7 +192,12 @@ class TestFindSalaryRate(SimpleTestCase):
             "time_basis": "Hourly",
         }
 
-        result = find_salary_rate(info, self.constants, 0, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            0,
+        )
 
         expected = Decimal(50000) * Decimal("0.9")
         self.assertEqual(result, expected)
@@ -125,7 +210,12 @@ class TestFindSalaryRate(SimpleTestCase):
             "time_basis": "FTE",
         }
 
-        result = find_salary_rate(info, self.constants, 1, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            1,
+        )
 
         self.assertEqual(result, Decimal(65000))
 
@@ -138,7 +228,12 @@ class TestFindSalaryRate(SimpleTestCase):
         }
 
         # A.4 is missing, so it should fall back to A.3.
-        result = find_salary_rate(info, self.constants, 3, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            3,
+        )
 
         self.assertEqual(result, Decimal(70000))
 
@@ -154,7 +249,12 @@ class TestFindSalaryRate(SimpleTestCase):
             "time_basis": "FTE",
         }
 
-        result = find_salary_rate(info, self.constants, 5, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            5,
+        )
 
         self.assertEqual(result, Decimal(80000))
 
@@ -166,21 +266,31 @@ class TestFindSalaryRate(SimpleTestCase):
             "time_basis": "FTE",
         }
 
-        result = find_salary_rate(info, self.constants, 0, 2025)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            0,
+        )
 
         self.assertEqual(result, Decimal(0))
 
-    def test_eba_multiplier_is_applied(self):
+    def test_casual_classification_does_not_progress_by_year_employed(self):
         info = {
-            "employment_type": "Continuing",
+            "employment_type": "Casual",
             "category": "Academic",
-            "classification": "Level A.1",
-            "time_basis": "FTE",
+            "classification": "RA Grade 1.1",
+            "time_basis": "Hourly",
         }
 
-        result = find_salary_rate(info, self.constants, 0, 2026)
+        result = find_salary_rate(
+            info,
+            self.constants,
+            Decimal(1),
+            1,
+        )
 
-        expected = Decimal(60000) * Decimal("1.03")
+        expected = Decimal(50000) * Decimal("0.9")
         self.assertEqual(result, expected)
 
 
@@ -361,8 +471,7 @@ class TestCalculateStaffRow(SimpleTestCase):
                 "FTE": Decimal(1),
             },
             "eba": {
-                2025: Decimal(1),
-                2026: Decimal("1.05"),
+                2026: Decimal("0.05"),
             },
             "on_cost_components": {
                 "superannuation": {
@@ -400,6 +509,7 @@ class TestCalculateStaffRow(SimpleTestCase):
                 "max_leave_loading": Decimal(10000),
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
+                "salary_rate_year": Decimal(2025),
             },
         }
 
@@ -533,10 +643,33 @@ class TestCalculateStaffRow(SimpleTestCase):
             self.multiplier,
         )
 
-        self.assertIn("rate_2025", result)
+        self.assertIn("rate", result)
         self.assertIn("results", result)
         self.assertIn("total", result)
         self.assertEqual(result["total"], sum(result["results"].values()))
+
+    def test_applies_eba_multiplier_for_future_year(self):
+        num_data = {
+            2025: Decimal(1),
+            2026: Decimal(1),
+        }
+
+        result = calculate_staff_row(
+            self.info,
+            num_data,
+            self.constants,
+            {
+                **self.project_duration,
+                "first_year_fraction": Decimal(1),
+                "last_year_fraction": Decimal(1),
+            },
+            self.multiplier,
+        )
+
+        self.assertEqual(
+            result["results"][2026],
+            result["results"][2025] * Decimal("1.05"),
+        )
 
 
 class TestCalculateColumnTotal(SimpleTestCase):
@@ -648,7 +781,7 @@ class TestCalculateStaffTable(SimpleTestCase):
                 "FTE": Decimal(1),
             },
             "eba": {
-                2025: Decimal(1),
+                2026: Decimal("0.00"),
             },
             "on_cost_components": {
                 "superannuation": {
@@ -686,6 +819,7 @@ class TestCalculateStaffTable(SimpleTestCase):
                 "max_leave_loading": Decimal(10000),
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
+                "salary_rate_year": Decimal(2025),
             },
         }
 

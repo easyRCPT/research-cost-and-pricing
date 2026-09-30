@@ -15,7 +15,6 @@ import {
   amountFor,
   costGroups,
   expenseTypesFor,
-  lineTotal,
   tenPercentAllowed,
   withAmount,
 } from '@/lib/non-staff'
@@ -44,14 +43,14 @@ export function NonStaffTableBody({
     patchLine(line.id, {
       cost_group,
       expense_type: '',
-      add_ten_percent: line.add_ten_percent && tenPercentAllowed(cost_group),
+      add_ten_percent: line.add_ten_percent && tenPercentAllowed(categories, cost_group),
     })
   }
 
   return (
     <tbody>
       {lines.map((line) => {
-        const rowTotal = lineTotal(line, years)
+        const rowTotal = line.direct_total
 
         return (
           <tr key={line.id}>
@@ -99,19 +98,19 @@ export function NonStaffTableBody({
                 />
               </CellTd>
             ))}
-            <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
-              {dash(rowTotal)}
-            </Calc>
             <Td align="center">
               <Checkbox
                 className="mx-auto"
                 checked={line.add_ten_percent}
-                disabled={!tenPercentAllowed(line.cost_group)}
+                disabled={!tenPercentAllowed(categories, line.cost_group)}
                 onCheckedChange={(checked) =>
                   patchLine(line.id, { add_ten_percent: checked === true })
                 }
               />
             </Td>
+            <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
+              {dash(rowTotal)}
+            </Calc>
             <Td align="center">
               <Button
                 variant="ghost"

@@ -6,6 +6,7 @@ from api.models import (
     Budget,
     Department,
     Faculty,
+    LookupConfiguration,
     NonStaffCostCategory,
     Project,
     User,
@@ -38,6 +39,8 @@ class NonStaffLineSerializerTestCase(TestCase):
             created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
 
+        self.lookup_version = LookupConfiguration.objects.get().current_version
+
         self.budget = Budget.objects.create(
             project=self.project,
             cost_multiplier=Decimal("1.00"),
@@ -49,6 +52,7 @@ class NonStaffLineSerializerTestCase(TestCase):
             ledger_id=1001,
             cost_category="Travel",
             cost_subcategory="Domestic",
+            version=self.lookup_version,
         )
 
     @staticmethod

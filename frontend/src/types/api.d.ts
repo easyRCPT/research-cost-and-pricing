@@ -1499,6 +1499,7 @@ export interface components {
             justification_notes: string;
             dean_exemption_reason: string;
             status: components["schemas"]["StatusEnum"];
+            cloned_from_id?: number | null;
             deliverables: components["schemas"]["DeliverableResult"][];
         };
         BudgetSummary: {
@@ -2255,7 +2256,7 @@ export interface components {
         EbaIncrease: {
             year: number;
             /** Format: double */
-            multiplier: number;
+            rate: number;
         };
         /**
          * @description * `Continuing` - Continuing
@@ -2482,6 +2483,7 @@ export interface components {
             ledger_id: number;
             cost_category: string;
             cost_subcategory: string;
+            excludes_additional_rate?: boolean;
         };
         /**
          * @description * `add_ten_percent` - add_ten_percent
@@ -3013,7 +3015,7 @@ export interface components {
             in_kind: boolean;
             in_kind_reason: string;
             /** Format: double */
-            rate_2025: number;
+            rate: number;
             by_year: components["schemas"]["StaffYear"][];
             /** Format: double */
             total: number;

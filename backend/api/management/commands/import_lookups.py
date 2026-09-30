@@ -42,6 +42,12 @@ from api.services.lookup_update import create_lookup_version
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
 
+# Cost groups that do not apply additional direct rate or indirect rate
+EXCLUDED_NON_STAFF_GROUPS = {
+    "Student Support",
+    "Shared Grant Payments",
+}
+
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
 EMPLOYMENT_TYPES = {"Continuing", "Fixed-Term", "Casual"}
@@ -83,6 +89,10 @@ LITERAL_CONSTANTS = {
     "minimum_margin": (
         Decimal("0.30"),
         "A budget priced below this margin needs the Dean as well as the HoD.",
+    ),
+    "salary_rate_year": (
+        Decimal(2025),
+        "The year of recorded salary rate that eba increase starts from.",
     ),
 }
 
@@ -140,7 +150,7 @@ def import_departments(workbook):
     # AC3:AH207 is tb_Org_Units. Budget unit sits at AJ, past an empty AI,
     # so the range is widened rather than read through the defined name.
     for row in workbook["Lookup Tables"]["AC3:AJ207"]:
-        # the spreadsheet's header row lavels
+        # the spreadsheet's header row labels
         # last two columns "faculty code" and
         # "faculty" when they should be swapped around
         # depending on the data stored
@@ -232,26 +242,30 @@ def import_increment_caps(workbook):
 
 def import_eba_increases(workbook, version):
     """
-    Salary inflation by calendar year, as a compounding multipler.
+    Salary inflation by calendar year.
+    Only store years when the EBA rate changes.
     """
     count = 0
+    last_rate = None
 
-    for year, _annual_rate, multiplier in rows(workbook, "tEBA"):
-        # The middle column is the yearly percentaage
-        # the multiplier was built from. Engine only needs
-        # compounded figure, but it is nice to have
-        # the annual rate for sync purposes.
+    for year, annual_rate, _multiplier in rows(workbook, "tEBA"):
+        # Multiplier is calculated in engine using eba increase rate.
 
         # Skip headers
-        if not is_number(year) or multiplier is None:
+        if not is_number(year) or not is_number(annual_rate):
+            continue
+        rate = dec(annual_rate)
+        # Only store changes in rate
+        if rate == last_rate:
             continue
         # Store EBA Rates
         EbaIncrease.objects.update_or_create(
             version=version,
             year=int(year),
-            defaults={"multiplier": dec(multiplier)},
+            defaults={"rate": rate},
         )
 
+        last_rate = rate
         count += 1
 
     return count
@@ -325,7 +339,7 @@ def import_on_costs(workbook, version):
     return count
 
 
-def import_non_staff_categories(workbook):
+def import_non_staff_categories(workbook, version):
     """
     Import function for non-staff expense types and finance ledger IDs.
     """
@@ -342,32 +356,40 @@ def import_non_staff_categories(workbook):
         if not is_number(ledger_id):
             continue
 
-        # Avoids key errpr
+        # Avoids key error
         if subcategory not in categories:
             raise CommandError(
                 f"no cost category found for '{subcategory}' "
                 f"(ledger {int(ledger_id)}) - the two lookup ranges disagree"
             )
 
+        category = categories[subcategory]
+        excludes_additional_rate = category in EXCLUDED_NON_STAFF_GROUPS
+
         NonStaffCostCategory.objects.update_or_create(
             ledger_id=int(ledger_id),
+            version=version,
             defaults={
-                "cost_category": categories.get(subcategory, ""),
+                "cost_category": category,
                 "cost_subcategory": subcategory,
+                "excludes_additional_rate": excludes_additional_rate,
             },
         )
 
         count += 1
 
-        # Contingency is handled separately in the Excel workbook,
-        # but is a category option in RCPT.
-        NonStaffCostCategory.objects.update_or_create(
-            ledger_id=CONTINGENCY_LEDGER_ID,
-            defaults={
-                "cost_category": "Contingency",
-                "cost_subcategory": "Contingency",
-            },
-        )
+    # Contingency is handled separately in the Excel workbook,
+    # but is a category option in RCPT.
+    NonStaffCostCategory.objects.update_or_create(
+        ledger_id=CONTINGENCY_LEDGER_ID,
+        version=version,
+        defaults={
+            "cost_category": "Contingency",
+            "cost_subcategory": "Contingency",
+            # Contingency does not apply additional direct rate or indirect rate
+            "excludes_additional_rate": True,
+        },
+    )
 
     return count
 
@@ -481,10 +503,11 @@ def import_revenue_categories(workbook):
 
 def version_to_import_into() -> LookupVersion:
     """The current version, or a fresh copy of it if a budget is pinned to it."""
-    config = LookupConfiguration.objects.select_for_update().get()
 
-    # Create the lookup configuration singleton on the first run of import_lookups
-    if config is None:
+    try:
+        config = LookupConfiguration.objects.select_for_update().get()
+    except LookupConfiguration.DoesNotExist:
+        # Create the lookup configuration singleton on the first run of import_lookups
         version = LookupVersion.objects.create()
         LookupConfiguration.objects.create(current_version=version)
         return version
@@ -522,7 +545,6 @@ class Command(BaseCommand):
         unversioned_importers = (
             ("departments", import_departments),
             ("increment caps", import_increment_caps),
-            ("non-staff categories", import_non_staff_categories),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
@@ -535,6 +557,7 @@ class Command(BaseCommand):
             ("on-cost rates", import_on_costs),
             ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
+            ("non-staff categories", import_non_staff_categories),
         )
 
         # One transaction, a failure halfway leaves no partial lookup

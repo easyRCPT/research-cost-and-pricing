@@ -1,15 +1,44 @@
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
-from api.models import Budget
+from api.models import Budget, LookupConfiguration, LookupVersion
 from api.services.budget_details import (
     build_budget_details,
     get_budget_details,
+    get_lookup_version_for_budget,
     merge_staff_table_with_result,
     store_price,
 )
+
+
+class TestGetLookupVersionForBudget(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+
+        LookupConfiguration.objects.update_or_create(
+            id=1,
+            defaults={"current_version": self.version},
+        )
+
+    def test_returns_budget_lookup_version_when_available(self):
+        budget_version = LookupVersion.objects.create()
+
+        budget = Mock()
+        budget.lookup_version = budget_version
+
+        result = get_lookup_version_for_budget(budget)
+
+        self.assertEqual(result, budget_version)
+
+    def test_returns_current_lookup_version_when_budget_has_no_version(self):
+        budget = Mock()
+        budget.lookup_version = None
+
+        result = get_lookup_version_for_budget(budget)
+
+        self.assertEqual(result, self.version)
 
 
 class TestMergeStaffTableWithResult(SimpleTestCase):
@@ -34,7 +63,7 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
     def test_merges_staff_input_and_calculation_result(self):
         staff_result_table = {
             "staff_1": {
-                "rate_2025": Decimal(60000),
+                "rate": Decimal(60000),
                 "results": {
                     2025: Decimal(1000),
                     2026: Decimal(2000),
@@ -59,7 +88,7 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
         expected = {
             "staff_1": {
                 "info": {},
-                "rate_2025": Decimal(60000),
+                "rate": Decimal(60000),
                 "numeric": {
                     2025: {
                         "input": Decimal(1),
@@ -95,7 +124,7 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
 
         staff_result_table = {
             "staff_1": {
-                "rate_2025": Decimal(60000),
+                "rate": Decimal(60000),
                 "results": {
                     2025: Decimal(1000),
                     2026: Decimal(2000),
@@ -125,7 +154,7 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
     def test_missing_calculation_result_year_defaults_to_zero(self):
         staff_result_table = {
             "staff_1": {
-                "rate_2025": Decimal(60000),
+                "rate": Decimal(60000),
                 "results": {
                     2025: Decimal(1000),
                 },
@@ -179,7 +208,7 @@ class TestBuildBudgetDetails(SimpleTestCase):
             "staff_result": {
                 "cost_results": {
                     "staff_1": {
-                        "rate_2025": Decimal(60000),
+                        "rate": Decimal(60000),
                         "results": {
                             2025: Decimal(1000),
                             2026: Decimal(2000),
@@ -226,7 +255,7 @@ class TestBuildBudgetDetails(SimpleTestCase):
             "cost_results": {
                 "staff_1": {
                     "info": {},
-                    "rate_2025": Decimal(60000),
+                    "rate": Decimal(60000),
                     "numeric": {
                         2025: {
                             "input": 0,

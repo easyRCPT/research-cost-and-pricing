@@ -14,6 +14,7 @@ from api.models import (
     Budget,
     Department,
     Faculty,
+    LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
@@ -60,6 +61,7 @@ class InKindReasonTestCase(TestCase):
             ledger_id="9000",
             cost_category="Equipment",
             cost_subcategory="General",
+            version=LookupVersion.objects.create(),
         )
         self.non_staff = NonStaffCostLine.objects.create(
             budget=self.budget, category=self.category

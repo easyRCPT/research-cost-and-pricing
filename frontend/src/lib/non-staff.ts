@@ -17,11 +17,16 @@ export const allExpenseTypes = (categories: readonly NonStaffCategory[]) => [
   ...new Set(categories.map((c) => c.cost_subcategory)),
 ]
 
-// TODO: Convert into a flag in lookup table
-const NO_TEN_PERCENT = new Set(['Student Support', 'Shared Grant Payments'])
-
-export const tenPercentAllowed = (costGroup: string) =>
-  costGroup !== '' && !NO_TEN_PERCENT.has(costGroup)
+export const tenPercentAllowed = (
+  categories: readonly NonStaffCategory[],
+  costGroup: string,
+) =>
+  costGroup !== '' &&
+  !categories.some(
+    (c) =>
+      c.cost_category === costGroup &&
+      c.excludes_additional_rate,
+  )
 
 /** Returns the cost amount for a given year in a NonStaffLine  */
 export const amountFor = (line: NonStaffLine, year: number) =>
@@ -37,9 +42,6 @@ export const withAmount = (
     year: y,
     amount: y === year ? amount : amountFor(line, y),
   }))
-
-export const lineTotal = (line: NonStaffLine, years: number[]) =>
-  years.reduce((sum, year) => sum + amountFor(line, year), 0)
 
 export const emptyNonStaffLine = (
   id: string,

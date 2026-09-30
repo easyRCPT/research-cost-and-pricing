@@ -95,6 +95,71 @@ def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
             )
 
 
+def _reject_invalid_salary_rate_year(
+    model: type[models.Model], lookup: dict, data: dict
+) -> None:
+    """Salary rate year must be a positive integer."""
+    if model is not CalculationConstant:
+        return
+
+    name = lookup.get("name")
+    value = data.get("value")
+    if name != "salary_rate_year" or value is None:
+        return
+
+    if value <= 0 or value != value.to_integral_value():
+        raise ValidationError("Salary Rate Year must be a positive small integer.")
+
+
+def _reject_update_to_constant_name(
+    model: type[models.Model], lookup: dict, data: dict
+) -> None:
+    """
+    Names of calculation constant are used in the engine and cannot be updated by admin.
+    """
+
+    if model is not CalculationConstant:
+        return
+
+    name = data.get("name")
+
+    if name is not None:
+        raise ValidationError("Name of calculation constant cannot be updated.")
+
+
+def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
+    for source in sources:
+        # Process foreign key fields
+        if model is Department:
+            # Convert faculty code to a Faculty instance
+            faculty_code = source.pop("faculty_code", None)
+            if faculty_code is not None:
+                faculty = Faculty.objects.filter(code=faculty_code).first()
+                if faculty is None:
+                    raise ValidationError(
+                        f"Faculty with code {faculty_code} does not exist."
+                    )
+                source.update({"faculty": faculty})
+
+        # Model fields validation
+        valid_fields = {field.name for field in model._meta.fields}
+
+        invalid_fields = set(source) - valid_fields
+
+        if invalid_fields:
+            raise ValidationError(
+                f"Invalid fields: {', '.join(sorted(invalid_fields))}"
+            )
+
+
+def _validate_update(model: type[models.Model], lookup: dict, data: dict) -> None:
+    _reject_fixed_constant(model, lookup, data)
+    _reject_invalid_salary_rate_year(model, lookup, data)
+    _reject_update_to_constant_name(model, lookup, data)
+
+    _validate_model_fields(model, lookup, data)
+
+
 def _get_model(table: str) -> type[models.Model]:
     definition = LOOKUP_DEFINITIONS.get(table)
 
@@ -136,27 +201,6 @@ def _save_validated_instance(
         raise Conflict("Lookup write conflicts with an existing lookup entry.") from exc
 
 
-def _validate_fields(model: type[models.Model], data: dict) -> None:
-    # Process foreign key data fields
-    if model is Department:
-        # Convert faculty code to a Faculty instance
-        faculty_code = data.pop("faculty_code", None)
-        if faculty_code is not None:
-            faculty = Faculty.objects.filter(code=faculty_code).first()
-            if faculty is None:
-                raise ValidationError(
-                    f"Faculty with code {faculty_code} does not exist."
-                )
-            data.update({"faculty": faculty})
-
-    valid_fields = {field.name for field in model._meta.fields}
-
-    invalid_fields = set(data) - valid_fields
-
-    if invalid_fields:
-        raise ValidationError(f"Invalid fields: {', '.join(sorted(invalid_fields))}")
-
-
 @transaction.atomic
 def create(
     table: str,
@@ -165,7 +209,11 @@ def create(
 ) -> None:
     # Get model
     model = _get_model(table)
-    _reject_fixed_constant(model, data)
+
+    # Calculation constants are part of application logic and cannot be
+    # created dynamically after deployment.
+    if model == CalculationConstant:
+        raise ValidationError("Calculation Constant cannot be created.")
 
     if model in get_versioned_models():
         # Determines whether a new version should be created
@@ -198,10 +246,8 @@ def update(
     actor: User | None = None,
 ) -> None:
     model = _get_model(table)
-    _reject_fixed_constant(model, lookup, data)
 
-    _validate_fields(model, lookup)
-    _validate_fields(model, data)
+    _validate_update(model, lookup, data)
 
     try:
         if model in get_versioned_models():

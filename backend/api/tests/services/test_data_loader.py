@@ -205,6 +205,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
         category = Mock()
         category.cost_category = "Equipment"
         category.cost_subcategory = "Equipment"
+        category.excludes_additional_rate = False
 
         line = Mock(spec=NonStaffCostLine)
         line.id = 1
@@ -225,6 +226,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
                     "position": 0,
                     "cost_group": "Equipment",
                     "expense_type": "Equipment",
+                    "excludes_additional_rate": False,
                     "description": "Computer",
                     "in_kind": False,
                     "in_kind_reason": "",
@@ -310,6 +312,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.budget.justification = "Justification"
         self.budget.justification_notes = "Notes"
         self.budget.dean_exemption_reason = ""
+        self.budget.cloned_from_id = 123
         self.budget.status = "draft"
         self.budget.deliverables.order_by.return_value = [self.deliverable]
 
@@ -329,6 +332,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
                 "justification": "Justification",
                 "justification_notes": "Notes",
                 "dean_exemption_reason": "",
+                "cloned_from_id": 123,
                 "status": "draft",
                 "deliverables": [
                     {

@@ -292,11 +292,13 @@ class IncrementCap(models.Model):
     max_steps = models.PositiveSmallIntegerField()
 
 
-# TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
-# Salary increases by EBA miltiplier
+# Salary increases by EBA rate
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField()
-    multiplier = models.DecimalField(
+    # Eba increase rate
+    # In Excel workbook default 0.03 each year
+    # Multiplier is calculated in engine and not displayed in screen
+    rate = models.DecimalField(
         max_digits=8,
         decimal_places=6,
         validators=[MinValueValidator(Decimal(0))],
@@ -443,9 +445,26 @@ class NonStaffCostCategory(models.Model):
     what lets Finance code the spend. Source: Lookup Tables H132:J149.
     """
 
-    ledger_id = models.PositiveIntegerField(primary_key=True)
+    # Category with ledger id 0 is Contingency
+    ledger_id = models.IntegerField()
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
+
+    # Excluded cost groups should not apply additional direct rate and indirect rate
+    excludes_additional_rate = models.BooleanField(default=False)
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ledger_id", "version"],
+                name="unique_non_staff_category",
+            )
+        ]
 
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
@@ -628,6 +647,7 @@ class Budget(models.Model):
     if TYPE_CHECKING:
         id: int
         project_id: int
+        cloned_from_id: int
 
         def get_status_display(self) -> str: ...
 
@@ -1038,7 +1058,9 @@ class NonStaffCostLine(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        validators=[MinValueValidator(Decimal(0))],
+        # Negative indirect rate is not allowed.
+        # The minimum multiplier is 1
+        validators=[MinValueValidator(Decimal(1))],
     )
 
     class Meta:
