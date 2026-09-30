@@ -143,6 +143,26 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
 
         mock_invalidate_cache.assert_called_once()
 
+    def test_cannot_create_calculation_constant(self):
+        with self.assertRaises(ValidationError) as refused:
+            create(
+                "calculation_constants",
+                {
+                    "name": "new_constant",
+                    "description": "Created by admin",
+                    "value": Decimal("1.000000"),
+                },
+            )
+
+        self.assertIn(
+            "Calculation Constant cannot be created",
+            str(refused.exception),
+        )
+
+        self.assertFalse(
+            CalculationConstant.objects.filter(name="new_constant").exists()
+        )
+
 
 class TestUpdate(TestCase, LookupUpdateTestMixin):
     @patch("api.services.lookup_update.invalidate_lookup_cache")
@@ -743,6 +763,36 @@ class TestVersionedUpdate(TestCase):
 
         mock_invalidate_cache.assert_called_once()
 
+    @patch("api.services.lookup_update.invalidate_lookup_cache")
+    def test_cannot_update_calculation_constant_name(
+        self,
+        mock_invalidate_cache,
+    ):
+        constant = CalculationConstant.objects.create(
+            version=self.version,
+            name="default_margin",
+            description="Default margin",
+            value=Decimal("0.30"),
+        )
+
+        with self.assertRaisesRegex(
+            ValidationError,
+            "Name of calculation constant cannot be updated.",
+        ):
+            update(
+                "calculation_constants",
+                {"name": constant.name},
+                {"name": "new_constant_name"},
+            )
+
+        constant.refresh_from_db()
+
+        self.assertEqual(
+            constant.name,
+            "default_margin",
+        )
+        mock_invalidate_cache.assert_not_called()
+
 
 class TestFixedConstants(TestCase):
     """
@@ -788,24 +838,6 @@ class TestFixedConstants(TestCase):
 
         self.constant.refresh_from_db()
         self.assertEqual(self.constant.name, self.FIXED)
-
-    def test_it_cannot_be_put_back_at_another_value(self):
-        # Removed behind the service's back, so what is under test is the guard
-        # and not the unique constraint a duplicate would have hit anyway.
-        CalculationConstant.objects.filter(name=self.FIXED).delete()
-
-        with self.assertRaises(ValidationError) as refused:
-            create(
-                self.TABLE,
-                {
-                    "name": self.FIXED,
-                    "description": "Sneaking one in",
-                    "value": Decimal("2.000000"),
-                },
-            )
-
-        self.assertIn(self.FIXED, str(refused.exception))
-        self.assertFalse(CalculationConstant.objects.filter(name=self.FIXED).exists())
 
     def test_a_refused_edit_mints_no_version(self):
         # The refusal comes before the copy-on-write check, so a rejected write
