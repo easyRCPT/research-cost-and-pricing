@@ -67,6 +67,7 @@ class TestFindSalaryRate(SimpleTestCase):
                 ("Fortnight", "Academic", "Level A.2"): Decimal(65000),
                 ("Fortnight", "Academic", "Level A.3"): Decimal(70000),
                 ("Casual", "Academic", "RA Grade 1.1"): Decimal(50000),
+                ("Casual", "Academic", "RA Grade 1.2"): Decimal(55000),
             },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
@@ -181,6 +182,19 @@ class TestFindSalaryRate(SimpleTestCase):
         result = find_salary_rate(info, self.constants, 0, 2026)
 
         expected = Decimal(60000) * Decimal("1.03")
+        self.assertEqual(result, expected)
+
+    def test_casual_classification_does_not_progress_by_year_employed(self):
+        info = {
+            "employment_type": "Casual",
+            "category": "Academic",
+            "classification": "RA Grade 1.1",
+            "time_basis": "Hourly",
+        }
+
+        result = find_salary_rate(info, self.constants, 1, 2026)
+
+        expected = Decimal(50000) * Decimal("0.9") * Decimal("1.03")
         self.assertEqual(result, expected)
 
 

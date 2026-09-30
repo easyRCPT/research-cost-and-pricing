@@ -199,9 +199,10 @@ def find_salary_rate(
     }
     payroll_type = mapping.get(employment_type, employment_type)
 
-    # Get new classification based on years employed
+    # Continuing and Fixed-term staff progress based on years employed
+    # Casual staff do not progress classification.
     # Assume classification level is in the range from 1 to 10
-    if classification.endswith("10"):
+    if employment_type == "Casual" or classification.endswith("10"):
         new_classification = classification
     else:
         prefix = classification[:-1]
