@@ -48,29 +48,16 @@ class TestFindDirectRateMultiplier(SimpleTestCase):
         info = {
             "excludes_additional_rate": False,
             "add_ten_percent": True,
-            "indirect_rate_multiplier": Decimal(1),
         }
 
         result = find_direct_rate_multiplier(info)
 
         self.assertEqual(result, Decimal("1.1"))
 
-    def test_does_not_add_ten_percent_when_indirect_rate_exceeds_one(self):
-        info = {
-            "excludes_additional_rate": False,
-            "add_ten_percent": True,
-            "indirect_rate_multiplier": Decimal("1.2"),
-        }
-
-        result = find_direct_rate_multiplier(info)
-
-        self.assertEqual(result, Decimal(1))
-
     def test_does_not_add_ten_percent_for_excluded_cost_group(self):
         info = {
             "excludes_additional_rate": True,
             "add_ten_percent": True,
-            "indirect_rate_multiplier": Decimal(1),
         }
 
         result = find_direct_rate_multiplier(info)
@@ -81,7 +68,6 @@ class TestFindDirectRateMultiplier(SimpleTestCase):
         info = {
             "excludes_additional_rate": False,
             "add_ten_percent": False,
-            "indirect_rate_multiplier": Decimal(1),
         }
 
         result = find_direct_rate_multiplier(info)
@@ -165,28 +151,28 @@ class TestCalculateNonStaffColumn(SimpleTestCase):
         self.assertEqual(
             result["direct_total"]["numeric"],
             {
-                2025: Decimal(1550),
-                2026: Decimal(2550),
+                2025: Decimal(1650),
+                2026: Decimal(2750),
             },
         )
         self.assertEqual(
             result["indirect_total"]["numeric"],
             {
-                2025: Decimal(200),
-                2026: Decimal(400),
+                2025: Decimal(220),
+                2026: Decimal(440),
             },
         )
         self.assertEqual(
             result["column_total"]["numeric"],
             {
-                2025: Decimal(1750),
-                2026: Decimal(2950),
+                2025: Decimal(1870),
+                2026: Decimal(3190),
             },
         )
 
-        self.assertEqual(result["direct_total"]["total"], Decimal(4100))
-        self.assertEqual(result["indirect_total"]["total"], Decimal(600))
-        self.assertEqual(result["column_total"]["total"], Decimal(4700))
+        self.assertEqual(result["direct_total"]["total"], Decimal(4400))
+        self.assertEqual(result["indirect_total"]["total"], Decimal(660))
+        self.assertEqual(result["column_total"]["total"], Decimal(5060))
 
     def test_excluded_cost_group_does_not_apply_direct_or_indirect_rate(self):
         data = {

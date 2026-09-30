@@ -1,12 +1,5 @@
 from decimal import Decimal
 
-# Cost groups that should not apply additional direct rate and indirect rate
-EXCLUDED_COST_GROUPS = {
-    "contingency",
-    "student_support",
-    "shared_grant_payments",
-}
-
 
 def calculate_non_staff_table(
     table_data: dict,
@@ -62,7 +55,7 @@ def calculate_non_staff_row(
     Return input with row total and direct total.
     Not consider indirect cost rate multiplier
     """
-    total = sum(num_data.get(year) or 0 for year in range(start_year, end_year + 1))
+    total = sum(num_data.get(year) or Decimal(0) for year in range(start_year, end_year + 1))
 
     direct_total = total * find_direct_rate_multiplier(info_data)
 
@@ -100,8 +93,6 @@ def calculate_non_staff_column(
 
             # indirect rate
             indirect_rate_multiplier = find_indirect_rate_multiplier(row["info"])
-            if row["info"]["excludes_additional_rate"]:
-                indirect_rate_multiplier = 1
             total += value * indirect_rate_multiplier
 
         direct_total[year] = direct
@@ -128,16 +119,15 @@ def find_direct_rate_multiplier(
     info_data: dict,
 ) -> Decimal:
     """
-    Find direct rate multiplier according to selected additional direct rate and input indirect rate
-    If add_ten_percent and indirect_rate_multiplier coexist, only consider indirect_rate_multiplier
+    Find direct rate multiplier according to selected additional direct rate.
+
+    Indirect rate does not suppress direct rate.
     """
     has_additional_direct_rate = info_data.get("add_ten_percent", False)
-    indirect_rate_multiplier = find_indirect_rate_multiplier(info_data)
 
     if (
         not info_data["excludes_additional_rate"]
         and has_additional_direct_rate
-        and indirect_rate_multiplier <= 1
     ):
         return Decimal("1.1")
     else:
@@ -147,7 +137,11 @@ def find_direct_rate_multiplier(
 def find_indirect_rate_multiplier(
     info_data: dict,
 ) -> Decimal:
-    """A blank rate means no indirect recovery, so it reads as 1."""
+    """
+    Find indirect rate multiplier according to input indirect rate multiplier.
+
+    Blank or excluded indirect rate reads as 1.
+    """
     multiplier = info_data.get("indirect_rate_multiplier")
     if not info_data["excludes_additional_rate"] and multiplier is not None:
         return multiplier
