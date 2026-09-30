@@ -11,9 +11,26 @@ const CONSTANT_FORMAT: Record<string, (value: number) => string> = {
   max_leave_loading: money,
 }
 
+const UPPERCASE_WORDS = new Set(['uom', 'gst', 'eba'])
+
+const formatName = (name: string) =>
+  name
+    .split('_')
+    .map((word) =>
+      UPPERCASE_WORDS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1),
+    )
+    .join(' ')
+
 const constant = columnHelper<Constant>()
 const CONSTANT_COLUMNS = constant.columns([
-  constant.accessor('description', { header: 'Constant' }),
+  // TODO: `name` is not editable via the API, but it should still be displayed.
+  // `description` alone is ambiguous and hard to read.
+  // The frontend must also block editing `name`.
+  constant.accessor('name', {
+    header: 'Constant',
+    cell: ({ getValue }) => formatName(getValue()),
+  }),
+  constant.accessor('description', { header: 'Description' }),
   constant.accessor('value', {
     header: 'Value',
     cell: ({ row, getValue }) =>
