@@ -2483,6 +2483,7 @@ export interface components {
             ledger_id: number;
             cost_category: string;
             cost_subcategory: string;
+            excludes_additional_rate?: boolean;
         };
         /**
          * @description * `add_ten_percent` - add_ten_percent

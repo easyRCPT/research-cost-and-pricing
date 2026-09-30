@@ -81,7 +81,9 @@ class OnCostRateSerializer(serializers.ModelSerializer):
 class NonStaffCostCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NonStaffCostCategory
-        fields = ["ledger_id", "cost_category", "cost_subcategory"]
+        fields = [
+            "ledger_id", "cost_category", "cost_subcategory", "excludes_additional_rate"
+        ]
 
 
 class CalculationConstantSerializer(serializers.ModelSerializer):

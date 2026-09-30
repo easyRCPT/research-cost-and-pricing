@@ -43,7 +43,7 @@ export function NonStaffTableBody({
     patchLine(line.id, {
       cost_group,
       expense_type: '',
-      add_ten_percent: line.add_ten_percent && tenPercentAllowed(cost_group),
+      add_ten_percent: line.add_ten_percent && tenPercentAllowed(categories, cost_group),
     })
   }
 
@@ -102,7 +102,7 @@ export function NonStaffTableBody({
               <Checkbox
                 className="mx-auto"
                 checked={line.add_ten_percent}
-                disabled={!tenPercentAllowed(line.cost_group)}
+                disabled={!tenPercentAllowed(categories, line.cost_group)}
                 onCheckedChange={(checked) =>
                   patchLine(line.id, { add_ten_percent: checked === true })
                 }
