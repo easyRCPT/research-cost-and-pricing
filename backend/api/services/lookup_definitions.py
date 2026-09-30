@@ -97,7 +97,7 @@ LOOKUP_DEFINITIONS = {
     "non_staff_cost_categories": LookupDefinition(
         model=NonStaffCostCategory,
         serializer=NonStaffCostCategorySerializer,
-        versioned=False,
+        versioned=True,
         order_by=(
             "cost_category",
             "cost_subcategory",

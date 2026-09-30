@@ -14,7 +14,7 @@ from api.calculation.non_staff import (
 class TestFindIndirectRateMultiplier(SimpleTestCase):
     def test_returns_rate_when_provided(self):
         info = {
-            "cost_group": "equipment",
+            "excludes_additional_rate": False,
             "indirect_rate_multiplier": Decimal("1.2"),
         }
 
@@ -24,7 +24,7 @@ class TestFindIndirectRateMultiplier(SimpleTestCase):
 
     def test_returns_one_when_rate_is_none(self):
         info = {
-            "cost_group": "equipment",
+            "excludes_additional_rate": False,
             "indirect_rate_multiplier": None,
         }
 
@@ -34,7 +34,7 @@ class TestFindIndirectRateMultiplier(SimpleTestCase):
 
     def test_returns_one_for_excluded_cost_group(self):
         info = {
-            "cost_group": "contingency",
+            "excludes_additional_rate": True,
             "indirect_rate_multiplier": Decimal("1.2"),
         }
 
@@ -46,7 +46,7 @@ class TestFindIndirectRateMultiplier(SimpleTestCase):
 class TestFindDirectRateMultiplier(SimpleTestCase):
     def test_adds_ten_percent_when_allowed(self):
         info = {
-            "cost_group": "equipment",
+            "excludes_additional_rate": False,
             "add_ten_percent": True,
             "indirect_rate_multiplier": Decimal(1),
         }
@@ -57,7 +57,7 @@ class TestFindDirectRateMultiplier(SimpleTestCase):
 
     def test_does_not_add_ten_percent_when_indirect_rate_exceeds_one(self):
         info = {
-            "cost_group": "equipment",
+            "excludes_additional_rate": False,
             "add_ten_percent": True,
             "indirect_rate_multiplier": Decimal("1.2"),
         }
@@ -68,7 +68,7 @@ class TestFindDirectRateMultiplier(SimpleTestCase):
 
     def test_does_not_add_ten_percent_for_excluded_cost_group(self):
         info = {
-            "cost_group": "contingency",
+            "excludes_additional_rate": True,
             "add_ten_percent": True,
             "indirect_rate_multiplier": Decimal(1),
         }
@@ -79,7 +79,7 @@ class TestFindDirectRateMultiplier(SimpleTestCase):
 
     def test_does_not_add_ten_percent_when_disabled(self):
         info = {
-            "cost_group": "equipment",
+            "excludes_additional_rate": False,
             "add_ten_percent": False,
             "indirect_rate_multiplier": Decimal(1),
         }
@@ -92,7 +92,7 @@ class TestFindDirectRateMultiplier(SimpleTestCase):
 class TestCalculateNonStaffRow(SimpleTestCase):
     def setUp(self):
         self.info = {
-            "cost_group": "equipment",
+            "excludes_additional_rate": False,
             "add_ten_percent": True,
             "indirect_rate_multiplier": Decimal(1),
         }
@@ -134,7 +134,7 @@ class TestCalculateNonStaffColumn(SimpleTestCase):
         data = {
             "row_1": {
                 "info": {
-                    "cost_group": "equipment",
+                    "excludes_additional_rate": False,
                     "add_ten_percent": True,
                     "indirect_rate_multiplier": Decimal("1.2"),
                 },
@@ -147,7 +147,7 @@ class TestCalculateNonStaffColumn(SimpleTestCase):
             },
             "row_2": {
                 "info": {
-                    "cost_group": "travel",
+                    "excludes_additional_rate": False,
                     "add_ten_percent": True,
                     "indirect_rate_multiplier": Decimal(1),
                 },
@@ -192,7 +192,7 @@ class TestCalculateNonStaffColumn(SimpleTestCase):
         data = {
             "row_1": {
                 "info": {
-                    "cost_group": "contingency",
+                    "excludes_additional_rate": True,
                     "add_ten_percent": True,
                     "indirect_rate_multiplier": Decimal("1.2"),
                 },
@@ -225,13 +225,13 @@ class TestCalculateNonStaffTable(SimpleTestCase):
         table_data = {
             "info_table": {
                 "row_1": {
-                    "cost_group": "equipment",
+                    "excludes_additional_rate": False,
                     "add_ten_percent": False,
                     "indirect_rate_multiplier": Decimal(1),
                     "in_kind": False,
                 },
                 "row_2": {
-                    "cost_group": "travel",
+                    "excludes_additional_rate": False,
                     "add_ten_percent": False,
                     "indirect_rate_multiplier": Decimal(1),
                     "in_kind": True,

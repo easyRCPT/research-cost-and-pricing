@@ -205,6 +205,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
         category = Mock()
         category.cost_category = "Equipment"
         category.cost_subcategory = "Equipment"
+        category.excludes_additional_rate = False
 
         line = Mock(spec=NonStaffCostLine)
         line.id = 1
@@ -225,6 +226,7 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
                     "position": 0,
                     "cost_group": "Equipment",
                     "expense_type": "Equipment",
+                    "excludes_additional_rate": False,
                     "description": "Computer",
                     "in_kind": False,
                     "in_kind_reason": "",

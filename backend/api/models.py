@@ -447,6 +447,14 @@ class NonStaffCostCategory(models.Model):
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
 
+    # Excluded cost groups should not apply additional direct rate and indirect rate
+    excludes_additional_rate = models.BooleanField(default=False)
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
 
@@ -628,6 +636,7 @@ class Budget(models.Model):
     if TYPE_CHECKING:
         id: int
         project_id: int
+        cloned_from_id: int
 
         def get_status_display(self) -> str: ...
 

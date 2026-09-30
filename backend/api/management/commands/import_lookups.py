@@ -42,6 +42,12 @@ from api.services.lookup_update import create_lookup_version
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
 
+# Cost groups that do not apply additional direct rate or indirect rate
+EXCLUDED_NON_STAFF_GROUPS = {
+    "Student Support",
+    "Shared Grant Payments",
+}
+
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
 EMPLOYMENT_TYPES = {"Continuing", "Fixed-Term", "Casual"}
@@ -140,7 +146,7 @@ def import_departments(workbook):
     # AC3:AH207 is tb_Org_Units. Budget unit sits at AJ, past an empty AI,
     # so the range is widened rather than read through the defined name.
     for row in workbook["Lookup Tables"]["AC3:AJ207"]:
-        # the spreadsheet's header row lavels
+        # the spreadsheet's header row labels
         # last two columns "faculty code" and
         # "faculty" when they should be swapped around
         # depending on the data stored
@@ -325,7 +331,7 @@ def import_on_costs(workbook, version):
     return count
 
 
-def import_non_staff_categories(workbook):
+def import_non_staff_categories(workbook, version):
     """
     Import function for non-staff expense types and finance ledger IDs.
     """
@@ -342,32 +348,40 @@ def import_non_staff_categories(workbook):
         if not is_number(ledger_id):
             continue
 
-        # Avoids key errpr
+        # Avoids key error
         if subcategory not in categories:
             raise CommandError(
                 f"no cost category found for '{subcategory}' "
                 f"(ledger {int(ledger_id)}) - the two lookup ranges disagree"
             )
 
+        category = categories[subcategory]
+        excludes_additional_rate = category in EXCLUDED_NON_STAFF_GROUPS
+
         NonStaffCostCategory.objects.update_or_create(
             ledger_id=int(ledger_id),
             defaults={
-                "cost_category": categories.get(subcategory, ""),
+                "cost_category": category,
                 "cost_subcategory": subcategory,
+                "excludes_additional_rate": excludes_additional_rate,
+                "version": version,
             },
         )
 
         count += 1
 
-        # Contingency is handled separately in the Excel workbook,
-        # but is a category option in RCPT.
-        NonStaffCostCategory.objects.update_or_create(
-            ledger_id=CONTINGENCY_LEDGER_ID,
-            defaults={
-                "cost_category": "Contingency",
-                "cost_subcategory": "Contingency",
-            },
-        )
+    # Contingency is handled separately in the Excel workbook,
+    # but is a category option in RCPT.
+    NonStaffCostCategory.objects.update_or_create(
+        ledger_id=CONTINGENCY_LEDGER_ID,
+        defaults={
+            "cost_category": "Contingency",
+            "cost_subcategory": "Contingency",
+            # Contingency does not apply additional direct rate or indirect rate
+            "excludes_additional_rate": True,
+            "version": version,
+        },
+    )
 
     return count
 
@@ -481,10 +495,11 @@ def import_revenue_categories(workbook):
 
 def version_to_import_into() -> LookupVersion:
     """The current version, or a fresh copy of it if a budget is pinned to it."""
-    config = LookupConfiguration.objects.select_for_update().get()
 
-    # Create the lookup configuration singleton on the first run of import_lookups
-    if config is None:
+    try:
+        config = LookupConfiguration.objects.select_for_update().get()
+    except LookupConfiguration.DoesNotExist:
+        # Create the lookup configuration singleton on the first run of import_lookups
         version = LookupVersion.objects.create()
         LookupConfiguration.objects.create(current_version=version)
         return version
@@ -522,7 +537,6 @@ class Command(BaseCommand):
         unversioned_importers = (
             ("departments", import_departments),
             ("increment caps", import_increment_caps),
-            ("non-staff categories", import_non_staff_categories),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
@@ -535,6 +549,7 @@ class Command(BaseCommand):
             ("on-cost rates", import_on_costs),
             ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
+            ("non-staff categories", import_non_staff_categories),
         )
 
         # One transaction, a failure halfway leaves no partial lookup

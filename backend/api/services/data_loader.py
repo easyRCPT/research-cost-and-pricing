@@ -95,6 +95,7 @@ def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
             "position": line.position,
             "cost_group": line.category.cost_category,
             "expense_type": line.category.cost_subcategory,
+            "excludes_additional_rate": line.category.excludes_additional_rate,
             "description": line.description,
             "in_kind": line.in_kind,
             "in_kind_reason": line.in_kind_reason,

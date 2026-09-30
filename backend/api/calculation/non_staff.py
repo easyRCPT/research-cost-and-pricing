@@ -100,7 +100,7 @@ def calculate_non_staff_column(
 
             # indirect rate
             indirect_rate_multiplier = find_indirect_rate_multiplier(row["info"])
-            if row["info"]["cost_group"] in EXCLUDED_COST_GROUPS:
+            if row["info"]["excludes_additional_rate"]:
                 indirect_rate_multiplier = 1
             total += value * indirect_rate_multiplier
 
@@ -133,10 +133,9 @@ def find_direct_rate_multiplier(
     """
     has_additional_direct_rate = info_data.get("add_ten_percent", False)
     indirect_rate_multiplier = find_indirect_rate_multiplier(info_data)
-    cost_group = info_data["cost_group"]
 
     if (
-        cost_group not in EXCLUDED_COST_GROUPS
+        not info_data["excludes_additional_rate"]
         and has_additional_direct_rate
         and indirect_rate_multiplier <= 1
     ):
@@ -150,8 +149,7 @@ def find_indirect_rate_multiplier(
 ) -> Decimal:
     """A blank rate means no indirect recovery, so it reads as 1."""
     multiplier = info_data.get("indirect_rate_multiplier")
-    cost_group = info_data["cost_group"]
-    if cost_group not in EXCLUDED_COST_GROUPS and multiplier is not None:
+    if not info_data["excludes_additional_rate"] and multiplier is not None:
         return multiplier
     else:
         return Decimal(1)
