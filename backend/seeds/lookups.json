@@ -3,8 +3,8 @@
   "model": "api.lookupversion",
   "pk": 1,
   "fields": {
-    "created_at": "2026-09-30T17:00:50.922Z",
-    "updated_at": "2026-09-30T17:00:50.922Z",
+    "created_at": "2026-09-30T22:58:06.633Z",
+    "updated_at": "2026-09-30T22:58:06.633Z",
     "updated_by": null
   }
 },

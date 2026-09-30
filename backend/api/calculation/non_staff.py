@@ -55,7 +55,9 @@ def calculate_non_staff_row(
     Return input with row total and direct total.
     Not consider indirect cost rate multiplier
     """
-    total = sum(num_data.get(year) or Decimal(0) for year in range(start_year, end_year + 1))
+    total = sum(
+        num_data.get(year) or Decimal(0) for year in range(start_year, end_year + 1)
+    )
 
     direct_total = total * find_direct_rate_multiplier(info_data)
 
@@ -125,10 +127,7 @@ def find_direct_rate_multiplier(
     """
     has_additional_direct_rate = info_data.get("add_ten_percent", False)
 
-    if (
-        not info_data["excludes_additional_rate"]
-        and has_additional_direct_rate
-    ):
+    if not info_data["excludes_additional_rate"] and has_additional_direct_rate:
         return Decimal("1.1")
     else:
         return Decimal(1)

@@ -292,8 +292,7 @@ class IncrementCap(models.Model):
     max_steps = models.PositiveSmallIntegerField()
 
 
-# TODO: (later sprint) Consider storing annual increase rate eg. 3%, and calculate the multiplier in engine rather than storing the multiplier directly.
-# Salary increases by EBA miltiplier
+# Salary increases by EBA rate
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField()
     # Eba increase rate
