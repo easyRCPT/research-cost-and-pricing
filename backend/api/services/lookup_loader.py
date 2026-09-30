@@ -25,6 +25,7 @@ REQUIRED_CONSTANTS = {
     "gst_rate",
     "default_margin",
     "minimum_margin",
+    "salary_rate_year",
 }
 
 
@@ -124,7 +125,7 @@ def get_constants(version_id: int) -> dict:
         list[EbaIncrease],
         tables["eba_increases"],
     )
-    eba_multiplier = {row.year: row.multiplier for row in eba_increases}
+    eba_rate = {row.year: row.rate for row in eba_increases}
 
     on_cost_rates = cast(
         list[OnCostRate],
@@ -157,7 +158,7 @@ def get_constants(version_id: int) -> dict:
     result = {
         "salary_rate": salary_rate,
         "salary_rate_multiplier": salary_rate_multiplier,
-        "eba": eba_multiplier,
+        "eba": eba_rate,
         "on_cost_components": on_cost_components,
         "constants": constants,
     }

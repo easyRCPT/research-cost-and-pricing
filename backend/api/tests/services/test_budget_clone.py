@@ -60,7 +60,7 @@ class BudgetCloneTest(TestCase):
             ledger_id=1001,
             cost_category="Travel",
             cost_subcategory="Domestic Travel",
-            version=LookupVersion.objects.create()
+            version=LookupVersion.objects.create(),
         )
 
         cls.deliverable_type = DeliverableType.objects.create(

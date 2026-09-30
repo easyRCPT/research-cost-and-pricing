@@ -3,8 +3,8 @@
   "model": "api.lookupversion",
   "pk": 1,
   "fields": {
-    "created_at": "2026-09-30T11:51:41.730Z",
-    "updated_at": "2026-09-30T11:51:41.730Z",
+    "created_at": "2026-09-30T17:00:50.922Z",
+    "updated_at": "2026-09-30T17:00:50.922Z",
     "updated_by": null
   }
 },
@@ -3923,170 +3923,8 @@
   "model": "api.ebaincrease",
   "pk": 1,
   "fields": {
-    "year": 2025,
-    "multiplier": "1.000000",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2,
-  "fields": {
     "year": 2026,
-    "multiplier": "1.030000",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 3,
-  "fields": {
-    "year": 2027,
-    "multiplier": "1.060900",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 4,
-  "fields": {
-    "year": 2028,
-    "multiplier": "1.092727",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 5,
-  "fields": {
-    "year": 2029,
-    "multiplier": "1.125509",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 6,
-  "fields": {
-    "year": 2030,
-    "multiplier": "1.159274",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 7,
-  "fields": {
-    "year": 2031,
-    "multiplier": "1.194052",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 8,
-  "fields": {
-    "year": 2032,
-    "multiplier": "1.229874",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 9,
-  "fields": {
-    "year": 2033,
-    "multiplier": "1.266770",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 10,
-  "fields": {
-    "year": 2034,
-    "multiplier": "1.304773",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 11,
-  "fields": {
-    "year": 2035,
-    "multiplier": "1.343916",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 12,
-  "fields": {
-    "year": 2036,
-    "multiplier": "1.384234",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 13,
-  "fields": {
-    "year": 2037,
-    "multiplier": "1.425761",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 14,
-  "fields": {
-    "year": 2038,
-    "multiplier": "1.468534",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 15,
-  "fields": {
-    "year": 2039,
-    "multiplier": "1.512590",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 16,
-  "fields": {
-    "year": 2040,
-    "multiplier": "1.557967",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 17,
-  "fields": {
-    "year": 2041,
-    "multiplier": "1.604706",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 18,
-  "fields": {
-    "year": 2042,
-    "multiplier": "1.652848",
-    "version": 1
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 19,
-  "fields": {
-    "year": 2043,
-    "multiplier": "1.702433",
+    "rate": "0.030000",
     "version": 1
   }
 },
@@ -4739,6 +4577,16 @@
     "name": "minimum_margin",
     "description": "A budget priced below this margin needs the Dean as well as the HoD.",
     "value": "0.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 9,
+  "fields": {
+    "name": "salary_rate_year",
+    "description": "The year of recorded salary rate that eba increase starts from.",
+    "value": "2025.000000",
     "version": 1
   }
 },

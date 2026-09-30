@@ -104,7 +104,7 @@ def merge_staff_table_with_result(
 
         result_table[row_id] = {
             "info": staff_info,
-            "rate_2025": staff_result["rate_2025"],
+            "rate": staff_result["rate"],
             "numeric": {
                 year: {
                     "input": staff_numeric.get(year, 0),

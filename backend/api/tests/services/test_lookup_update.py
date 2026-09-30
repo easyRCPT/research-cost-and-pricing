@@ -16,6 +16,7 @@ from api.models import (
     SalaryRateMultiplier,
     User,
 )
+from api.services import lookup_update
 from api.services.lookup_update import create, update
 
 
@@ -830,3 +831,43 @@ class TestFixedConstants(TestCase):
 
         other.refresh_from_db()
         self.assertEqual(other.value, Decimal("0.250000"))
+
+
+class TestSalaryRateYearValidation(TestCase):
+    def test_salary_rate_year_accepts_positive_integer(self):
+        lookup_update._reject_invalid_salary_rate_year(
+            CalculationConstant,
+            {"name": "salary_rate_year"},
+            {"value": Decimal(2025)},
+        )
+
+    def test_salary_rate_year_rejects_zero(self):
+        with self.assertRaises(ValidationError):
+            lookup_update._reject_invalid_salary_rate_year(
+                CalculationConstant,
+                {"name": "salary_rate_year"},
+                {"value": Decimal(0)},
+            )
+
+    def test_salary_rate_year_rejects_negative_value(self):
+        with self.assertRaises(ValidationError):
+            lookup_update._reject_invalid_salary_rate_year(
+                CalculationConstant,
+                {"name": "salary_rate_year"},
+                {"value": Decimal(-1)},
+            )
+
+    def test_salary_rate_year_rejects_decimal(self):
+        with self.assertRaises(ValidationError):
+            lookup_update._reject_invalid_salary_rate_year(
+                CalculationConstant,
+                {"name": "salary_rate_year"},
+                {"value": Decimal("2025.5")},
+            )
+
+    def test_other_constants_are_not_validated(self):
+        lookup_update._reject_invalid_salary_rate_year(
+            CalculationConstant,
+            {"name": "default_margin"},
+            {"value": Decimal(-1)},
+        )

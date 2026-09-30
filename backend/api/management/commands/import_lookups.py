@@ -90,6 +90,10 @@ LITERAL_CONSTANTS = {
         Decimal("0.30"),
         "A budget priced below this margin needs the Dean as well as the HoD.",
     ),
+    "salary_rate_year": (
+        Decimal(2025),
+        "The year of recorded salary rate that eba increase starts from.",
+    ),
 }
 
 
@@ -238,26 +242,30 @@ def import_increment_caps(workbook):
 
 def import_eba_increases(workbook, version):
     """
-    Salary inflation by calendar year, as a compounding multipler.
+    Salary inflation by calendar year.
+    Only store years when the EBA rate changes.
     """
     count = 0
+    last_rate = None
 
-    for year, _annual_rate, multiplier in rows(workbook, "tEBA"):
-        # The middle column is the yearly percentaage
-        # the multiplier was built from. Engine only needs
-        # compounded figure, but it is nice to have
-        # the annual rate for sync purposes.
+    for year, annual_rate, _multiplier in rows(workbook, "tEBA"):
+        # Multiplier is calculated in engine using eba increase rate.
 
         # Skip headers
-        if not is_number(year) or multiplier is None:
+        if not is_number(year) or not is_number(annual_rate):
+            continue
+        rate = dec(annual_rate)
+        # Only store changes in rate
+        if rate == last_rate:
             continue
         # Store EBA Rates
         EbaIncrease.objects.update_or_create(
             version=version,
             year=int(year),
-            defaults={"multiplier": dec(multiplier)},
+            defaults={"rate": rate},
         )
 
+        last_rate = rate
         count += 1
 
     return count

@@ -69,7 +69,7 @@ class IncrementCapSerializer(serializers.ModelSerializer):
 class EbaIncreaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = EbaIncrease
-        fields = ["year", "multiplier"]
+        fields = ["year", "rate"]
 
 
 class OnCostRateSerializer(serializers.ModelSerializer):
@@ -88,6 +88,14 @@ class CalculationConstantSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalculationConstant
         fields = ["name", "description", "value"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.name == "salary_rate_year":
+            data["value"] = int(instance.value)
+
+        return data
 
 
 class ActivitySerializer(serializers.ModelSerializer):

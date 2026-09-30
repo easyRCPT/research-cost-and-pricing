@@ -2,7 +2,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
-from api.models import ApprovalStep, OnCostRate, SalaryRate, StaffCostLine
+from api.models import ApprovalStep, Budget, OnCostRate, SalaryRate, StaffCostLine
 
 from ..services.approval_record import EMPTY_RECORD
 
@@ -79,8 +79,6 @@ class DeliverableResultSerializer(serializers.Serializer):
 
 
 class BudgetInfoSerializer(serializers.Serializer):
-    from ..models import ApprovalStep, Budget
-
     mode = serializers.ChoiceField(choices=Budget.Mode.choices)
     cost_multiplier = serializers.DecimalField(
         max_digits=4,
@@ -148,7 +146,7 @@ class StaffLineSerializer(serializers.Serializer):
     in_kind = serializers.BooleanField()
     in_kind_reason = serializers.CharField(allow_blank=True)
 
-    rate_2025 = serializers.DecimalField(
+    rate = serializers.DecimalField(
         max_digits=12,
         decimal_places=4,
     )
@@ -508,7 +506,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "time_basis": row["info"]["time_basis"],
                 "in_kind": row["info"]["in_kind"],
                 "in_kind_reason": row["info"]["in_kind_reason"],
-                "rate_2025": row["rate_2025"],
+                "rate": row["rate"],
                 "by_year": [
                     {
                         "year": year,

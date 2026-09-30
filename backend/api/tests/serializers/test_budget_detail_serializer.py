@@ -93,7 +93,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "in_kind": False,
                             "in_kind_reason": "",
                         },
-                        "rate_2025": Decimal("50000.0000"),
+                        "rate": Decimal("50000.0000"),
                         "numeric": {
                             2025: {
                                 "input": Decimal("0.5000"),
@@ -267,7 +267,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "time_basis": "FTE",
                     "in_kind": False,
                     "in_kind_reason": "",
-                    "rate_2025": Decimal("50000.0000"),
+                    "rate": Decimal("50000.0000"),
                     "by_year": [
                         {
                             "year": 2025,

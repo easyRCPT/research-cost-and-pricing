@@ -13,7 +13,6 @@ from api.models import (
     SalaryRateMultiplier,
 )
 from api.services import lookup_loader
-from api.services.lookup_definitions import LOOKUP_DEFINITIONS
 from api.services.lookup_loader import (
     CACHE_TIMEOUT,
     MODELS_CACHE_KEY,
@@ -203,7 +202,7 @@ class TestGetConstants(SimpleTestCase):
 
         self.eba = Mock(spec=EbaIncrease)
         self.eba.year = 2026
-        self.eba.multiplier = Decimal("1.03")
+        self.eba.rate = Decimal("0.03")
 
         self.on_cost_1 = Mock(spec=OnCostRate)
         self.on_cost_1.on_cost_type = "superannuation"
@@ -241,6 +240,10 @@ class TestGetConstants(SimpleTestCase):
         self.constant_6.name = "minimum_margin"
         self.constant_6.value = Decimal("0.00")
 
+        self.constant_7 = Mock(spec=CalculationConstant)
+        self.constant_7.name = "salary_rate_year"
+        self.constant_7.value = Decimal(2025)
+
     def _build_tables(self):
         return {
             "salary_rates": [
@@ -264,6 +267,7 @@ class TestGetConstants(SimpleTestCase):
                 self.constant_4,
                 self.constant_5,
                 self.constant_6,
+                self.constant_7,
             ],
         }
 
@@ -317,7 +321,7 @@ class TestGetConstants(SimpleTestCase):
         self.assertEqual(
             result["eba"],
             {
-                2026: Decimal("1.03"),
+                2026: Decimal("0.03"),
             },
         )
 
@@ -342,6 +346,7 @@ class TestGetConstants(SimpleTestCase):
                 "gst_rate": Decimal("0.10"),
                 "default_margin": Decimal("0.30"),
                 "minimum_margin": Decimal("0.00"),
+                "salary_rate_year": Decimal(2025),
             },
         )
 
@@ -448,6 +453,7 @@ class TestValidateConstants(SimpleTestCase):
             "gst_rate": Decimal("0.10"),
             "default_margin": Decimal("0.30"),
             "minimum_margin": Decimal("0.00"),
+            "salary_rate_year": Decimal(2025),
         }
 
         validate_constants(constants)
@@ -461,7 +467,7 @@ class TestValidateConstants(SimpleTestCase):
         with self.assertRaisesRegex(
             KeyError,
             "Missing required calculation constants: "
-            "default_margin,gst_rate,minimum_margin,override_uom_oncosts",
+            "default_margin,gst_rate,minimum_margin,override_uom_oncosts,salary_rate_year",
         ):
             validate_constants(constants)
 

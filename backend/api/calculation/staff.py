@@ -23,7 +23,7 @@ def calculate_staff_table(
     The caller is responsible for combining the calculation results with the source data.
     Output format: {
         'cost_results': {
-            '<row_id>': {'rate_2025': number, 'results': {}, 'total': number},
+            '<row_id>': {'rate': number, 'results': {}, 'total': number},
             'column_total': {'results': {}, 'total': number},
         },
         'in_kind_cost_results': {...}
@@ -116,6 +116,45 @@ def calculate_column_total(
     return data
 
 
+def _get_salary_rate_year(constants: dict) -> int:
+    salary_rate_year = constants["constants"]["salary_rate_year"]
+    return int(salary_rate_year)
+
+
+def _get_eba_rate(eba: dict, year: int) -> Decimal:
+    # First eba increase rate year is the next year of the tool's initiation.
+    # First record is 2026: 3% in Excel workbook.
+    available_years = [eba_year for eba_year in eba if eba_year <= year]
+
+    # EBA changes before the tool's initiation year are not handled by
+    # either the RCPT web tool or the Excel workbook.
+    if not available_years:
+        return Decimal(0)
+
+    return eba[max(available_years)]
+
+
+def _find_eba_multiplier(eba: dict, salary_rate_year: int, year: int) -> Decimal:
+    """
+    Find the eba multiplier for the given year.
+
+    eba multiplier may be smaller than 1 if year is before salary_rate_year.
+    """
+    multiplier = Decimal(1)
+
+    while year != salary_rate_year:
+        if year < salary_rate_year:
+            rate = _get_eba_rate(eba, salary_rate_year)
+            multiplier /= Decimal(1) + rate
+            salary_rate_year -= 1
+        else:
+            rate = _get_eba_rate(eba, salary_rate_year + 1)
+            multiplier *= Decimal(1) + rate
+            salary_rate_year += 1
+
+    return multiplier
+
+
 def calculate_staff_row(
     info_data: dict,
     num_data: dict,
@@ -127,8 +166,10 @@ def calculate_staff_row(
     Calculate the cost of a staff in each year of the project
     Return a dictionary for cost in each year {'year': cost}
     """
-    # salary rate as at 1-NOV-2025
-    rate_2025 = find_salary_rate(info_data, constants, 0, 2025)
+    # salary rate in recorded salary rate year
+    rate = find_salary_rate(
+        info_data, constants, eba_multiplier=Decimal(1), year_employed=0
+    )
 
     # The cost dictionary for each year
     costs = {}
@@ -149,7 +190,11 @@ def calculate_staff_row(
                 year_fraction = project_duration["last_year_fraction"]
 
         # Calculate cost
-        salary_rate = find_salary_rate(info_data, constants, year_employed, year)
+        salary_rate_year = _get_salary_rate_year(constants)
+        eba_multiplier = _find_eba_multiplier(constants["eba"], salary_rate_year, year)
+        salary_rate = find_salary_rate(
+            info_data, constants, eba_multiplier, year_employed
+        )
         employment_type = info_data["employment_type"]
         on_costs = get_on_cost_rates(
             constants["on_cost_components"], employment_type, year
@@ -171,7 +216,7 @@ def calculate_staff_row(
     total = sum(costs.values())
 
     return {
-        "rate_2025": rate_2025,
+        "rate": rate,
         "results": costs,
         "total": total,
     }
@@ -180,8 +225,8 @@ def calculate_staff_row(
 def find_salary_rate(
     info_data: dict,
     constants: dict,
+    eba_multiplier: Decimal,
     year_employed: int,
-    year: int,
 ) -> Decimal:
     """
     Find the salary rate for a staff in the specified year
@@ -225,7 +270,6 @@ def find_salary_rate(
 
     # Calculate salary rate
     salary_rate_multiplier = constants["salary_rate_multiplier"][time_basis]
-    eba_multiplier = constants["eba"][year]
     return base_salary_rate * salary_rate_multiplier * eba_multiplier
 
 

@@ -95,6 +95,22 @@ def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
             )
 
 
+def _reject_invalid_salary_rate_year(
+    model: type[models.Model], lookup: dict, data: dict
+) -> None:
+    """Salary rate year must be a positive integer."""
+    if model is not CalculationConstant:
+        return
+
+    name = lookup.get("name")
+    if name != "salary_rate_year":
+        return
+
+    value = data["value"]
+    if value <= 0 or value != value.to_integral_value():
+        raise ValidationError("Salary Rate Year must be a positive small integer.")
+
+
 def _get_model(table: str) -> type[models.Model]:
     definition = LOOKUP_DEFINITIONS.get(table)
 
@@ -199,6 +215,7 @@ def update(
 ) -> None:
     model = _get_model(table)
     _reject_fixed_constant(model, lookup, data)
+    _reject_invalid_salary_rate_year(model, lookup, data)
 
     _validate_fields(model, lookup)
     _validate_fields(model, data)

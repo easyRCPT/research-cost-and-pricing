@@ -296,7 +296,10 @@ class IncrementCap(models.Model):
 # Salary increases by EBA miltiplier
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField()
-    multiplier = models.DecimalField(
+    # Eba increase rate
+    # In Excel workbook default 0.03 each year
+    # Multiplier is calculated in engine and not displayed in screen
+    rate = models.DecimalField(
         max_digits=8,
         decimal_places=6,
         validators=[MinValueValidator(Decimal(0))],
@@ -1056,7 +1059,9 @@ class NonStaffCostLine(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        validators=[MinValueValidator(Decimal(0))],
+        # Negative indirect rate is not allowed.
+        # The minimum multiplier is 1
+        validators=[MinValueValidator(Decimal(1))],
     )
 
     class Meta:
