@@ -125,6 +125,7 @@ def build_budget_info(budget: Budget) -> dict:
         "justification_notes": budget.justification_notes,
         "dean_exemption_reason": budget.dean_exemption_reason,
         "status": budget.status,
+        "cloned_from_id": budget.cloned_from_id,
         "deliverables": [
             {
                 # The row id, so an edit can name the row it is editing. The

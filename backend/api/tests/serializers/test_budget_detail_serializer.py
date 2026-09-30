@@ -77,6 +77,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 "justification_notes": "",
                 "dean_exemption_reason": "",
                 "status": "draft",
+                "cloned_from_id": 123,
                 "deliverables": [],
             },
             "staff_table": {

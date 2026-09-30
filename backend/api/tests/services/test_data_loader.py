@@ -310,6 +310,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.budget.justification = "Justification"
         self.budget.justification_notes = "Notes"
         self.budget.dean_exemption_reason = ""
+        self.budget.cloned_from_id = 123
         self.budget.status = "draft"
         self.budget.deliverables.order_by.return_value = [self.deliverable]
 
@@ -329,6 +330,7 @@ class TestBuildBudgetInfo(SimpleTestCase):
                 "justification": "Justification",
                 "justification_notes": "Notes",
                 "dean_exemption_reason": "",
+                "cloned_from_id": 123,
                 "status": "draft",
                 "deliverables": [
                     {

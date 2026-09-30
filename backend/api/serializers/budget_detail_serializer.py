@@ -110,6 +110,11 @@ class BudgetInfoSerializer(serializers.Serializer):
     dean_exemption_reason = serializers.CharField(allow_blank=True)
     status = serializers.ChoiceField(choices=Budget.Status.choices)
 
+    cloned_from_id = serializers.IntegerField(
+        allow_null=True,
+        required=False,
+    )
+
     deliverables = DeliverableResultSerializer(many=True)
 
 
