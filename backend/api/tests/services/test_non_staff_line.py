@@ -8,6 +8,7 @@ from api.models import (
     Budget,
     Department,
     Faculty,
+    LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
@@ -58,6 +59,7 @@ class NonStaffLineTestMixin:
             ledger_id=1000,
             cost_category="Equipment",
             cost_subcategory="Equipment",
+            version=LookupVersion.objects.create(),
         )
 
     def create_non_staff_line(

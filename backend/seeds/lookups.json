@@ -3,8 +3,8 @@
   "model": "api.lookupversion",
   "pk": 1,
   "fields": {
-    "created_at": "2026-09-19T10:16:05.078Z",
-    "updated_at": "2026-09-19T10:16:05.078Z",
+    "created_at": "2026-09-30T11:51:41.730Z",
+    "updated_at": "2026-09-30T11:51:41.730Z",
     "updated_by": null
   }
 },
@@ -4455,154 +4455,211 @@
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 0,
+  "pk": 1,
   "fields": {
-    "cost_category": "Contingency",
-    "cost_subcategory": "Contingency"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 1640,
-  "fields": {
-    "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Property Plant and Equipment - Cost"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5040,
-  "fields": {
-    "cost_category": "Expert Services and Consultants and Contractors",
-    "cost_subcategory": "Consultants"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5041,
-  "fields": {
-    "cost_category": "Expert Services and Consultants and Contractors",
-    "cost_subcategory": "Contracted Services (ex. ICA)"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5042,
-  "fields": {
-    "cost_category": "Expert Services and Consultants and Contractors",
-    "cost_subcategory": "Other Expert Services"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5060,
-  "fields": {
+    "ledger_id": 5060,
     "cost_category": "Advertising and marketing",
-    "cost_subcategory": "Advertising, Marketing and Promotional Expenses"
+    "cost_subcategory": "Advertising, Marketing and Promotional Expenses",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5061,
+  "pk": 2,
   "fields": {
+    "ledger_id": 5061,
     "cost_category": "Consumable Goods and Supplies",
-    "cost_subcategory": "Library"
+    "cost_subcategory": "Library",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5062,
+  "pk": 3,
   "fields": {
+    "ledger_id": 5062,
     "cost_category": "Consumable Goods and Supplies",
-    "cost_subcategory": "Consumable Service"
+    "cost_subcategory": "Consumable Service",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5063,
+  "pk": 4,
   "fields": {
+    "ledger_id": 5063,
     "cost_category": "Consumable Goods and Supplies",
-    "cost_subcategory": "Consumable Goods"
+    "cost_subcategory": "Consumable Goods",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5100,
+  "pk": 5,
   "fields": {
-    "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Minor Assets and Equipment (Asset < $10,000) Non-Capitalised Equipment"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5101,
-  "fields": {
+    "ledger_id": 5101,
     "cost_category": "Data Management",
-    "cost_subcategory": "Computer Software and Services"
+    "cost_subcategory": "Computer Software and Services",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5181,
+  "pk": 6,
   "fields": {
-    "cost_category": "Shared Grant Payments",
-    "cost_subcategory": "Contributions to HEPS"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5182,
-  "fields": {
-    "cost_category": "Shared Grant Payments",
-    "cost_subcategory": "Other Grants"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5201,
-  "fields": {
+    "ledger_id": 1640,
     "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Rental and Hire"
+    "cost_subcategory": "Property Plant and Equipment - Cost",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5220,
+  "pk": 7,
   "fields": {
+    "ledger_id": 5100,
     "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Repairs and Maintenance"
+    "cost_subcategory": "Minor Assets and Equipment (Asset < $10,000) Non-Capitalised Equipment",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5240,
+  "pk": 8,
   "fields": {
+    "ledger_id": 5201,
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Rental and Hire",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 9,
+  "fields": {
+    "ledger_id": 5220,
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Repairs and Maintenance",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 10,
+  "fields": {
+    "ledger_id": 5040,
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Consultants",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 11,
+  "fields": {
+    "ledger_id": 5041,
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Contracted Services (ex. ICA)",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 12,
+  "fields": {
+    "ledger_id": 5042,
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Other Expert Services",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 13,
+  "fields": {
+    "ledger_id": 5181,
+    "cost_category": "Shared Grant Payments",
+    "cost_subcategory": "Contributions to HEPS",
+    "excludes_additional_rate": true,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 14,
+  "fields": {
+    "ledger_id": 5182,
+    "cost_category": "Shared Grant Payments",
+    "cost_subcategory": "Other Grants",
+    "excludes_additional_rate": true,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 15,
+  "fields": {
+    "ledger_id": 5240,
     "cost_category": "Student Support",
-    "cost_subcategory": "Scholarships"
+    "cost_subcategory": "Scholarships",
+    "excludes_additional_rate": true,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5241,
+  "pk": 16,
   "fields": {
+    "ledger_id": 5241,
     "cost_category": "Student Support",
-    "cost_subcategory": "Other Student Support"
+    "cost_subcategory": "Other Student Support",
+    "excludes_additional_rate": true,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5260,
+  "pk": 17,
   "fields": {
+    "ledger_id": 5260,
     "cost_category": "Travel and entertainment",
-    "cost_subcategory": "Travel, Staff Development, and Conference Expense"
+    "cost_subcategory": "Travel, Staff Development, and Conference Expense",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5261,
+  "pk": 18,
   "fields": {
+    "ledger_id": 5261,
     "cost_category": "Travel and entertainment",
-    "cost_subcategory": "Entertainment"
+    "cost_subcategory": "Entertainment",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 19,
+  "fields": {
+    "ledger_id": 0,
+    "cost_category": "Contingency",
+    "cost_subcategory": "Contingency",
+    "excludes_additional_rate": true,
+    "version": 1
   }
 },
 {

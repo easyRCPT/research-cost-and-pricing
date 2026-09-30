@@ -1,7 +1,8 @@
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
-from ..models import NonStaffCostCategory
+from api.models import NonStaffCostCategory
+from api.services.budget_details import get_lookup_version_for_budget
 from .line_id import validate_new_line_id
 
 
@@ -44,11 +45,13 @@ class NonStaffLineSerializer(serializers.Serializer):
     def validate(self, attrs):
         cost_group = attrs.pop("cost_group")
         expense_type = attrs.pop("expense_type")
+        version = get_lookup_version_for_budget(self.context["budget"])
 
         try:
             category = NonStaffCostCategory.objects.get(
                 cost_category=cost_group,
                 cost_subcategory=expense_type,
+                version=version,
             )
         except NonStaffCostCategory.DoesNotExist:
             raise serializers.ValidationError("Invalid cost group or expense type.")

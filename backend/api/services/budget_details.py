@@ -1,8 +1,14 @@
 from decimal import ROUND_HALF_UP, Decimal
 
 from ..calculation import pricing
-from ..models import Budget
+from ..models import Budget, LookupVersion
 from . import approval_record, data_loader, lookup_loader
+
+
+def get_lookup_version_for_budget(budget: Budget) -> LookupVersion:
+    return budget.lookup_version or LookupVersion.objects.get(
+        id=lookup_loader.current_version_id()
+    )
 
 
 def get_budget_details(budget: Budget) -> dict:

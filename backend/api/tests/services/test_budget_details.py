@@ -1,15 +1,44 @@
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
-from api.models import Budget
+from api.models import Budget, LookupConfiguration, LookupVersion
 from api.services.budget_details import (
     build_budget_details,
     get_budget_details,
+    get_lookup_version_for_budget,
     merge_staff_table_with_result,
     store_price,
 )
+
+
+class TestGetLookupVersionForBudget(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+
+        LookupConfiguration.objects.update_or_create(
+            id=1,
+            defaults={"current_version": self.version},
+        )
+
+    def test_returns_budget_lookup_version_when_available(self):
+        budget_version = LookupVersion.objects.create()
+
+        budget = Mock()
+        budget.lookup_version = budget_version
+
+        result = get_lookup_version_for_budget(budget)
+
+        self.assertEqual(result, budget_version)
+
+    def test_returns_current_lookup_version_when_budget_has_no_version(self):
+        budget = Mock()
+        budget.lookup_version = None
+
+        result = get_lookup_version_for_budget(budget)
+
+        self.assertEqual(result, self.version)
 
 
 class TestMergeStaffTableWithResult(SimpleTestCase):

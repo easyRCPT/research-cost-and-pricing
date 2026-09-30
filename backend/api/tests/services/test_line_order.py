@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from django.test import TestCase
 
-from api.models import NonStaffCostCategory
+from api.models import LookupVersion, NonStaffCostCategory
 from api.serializers.staff_line_serializer import StaffLineSerializer
 from api.services import budget_update, non_staff_line, staff_line
 from api.services.data_loader import load_budget_data
@@ -107,7 +107,10 @@ class TestLineOrder(StaffLineTestMixin, TestCase):
 
     def test_non_staff_lines_are_ordered_too(self, *_):
         category = NonStaffCostCategory.objects.create(
-            ledger_id=1, cost_category="Travel", cost_subcategory="Domestic"
+            ledger_id=1,
+            cost_category="Travel",
+            cost_subcategory="Domestic",
+            version=LookupVersion.objects.create(),
         )
         for description in ("first", "second"):
             non_staff_line.create(

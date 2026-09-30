@@ -360,11 +360,11 @@ def import_non_staff_categories(workbook, version):
 
         NonStaffCostCategory.objects.update_or_create(
             ledger_id=int(ledger_id),
+            version=version,
             defaults={
                 "cost_category": category,
                 "cost_subcategory": subcategory,
                 "excludes_additional_rate": excludes_additional_rate,
-                "version": version,
             },
         )
 
@@ -374,12 +374,12 @@ def import_non_staff_categories(workbook, version):
     # but is a category option in RCPT.
     NonStaffCostCategory.objects.update_or_create(
         ledger_id=CONTINGENCY_LEDGER_ID,
+        version=version,
         defaults={
             "cost_category": "Contingency",
             "cost_subcategory": "Contingency",
             # Contingency does not apply additional direct rate or indirect rate
             "excludes_additional_rate": True,
-            "version": version,
         },
     )
 

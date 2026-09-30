@@ -443,7 +443,8 @@ class NonStaffCostCategory(models.Model):
     what lets Finance code the spend. Source: Lookup Tables H132:J149.
     """
 
-    ledger_id = models.PositiveIntegerField(primary_key=True)
+    # Category with ledger id 0 is Contingency
+    ledger_id = models.IntegerField()
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
 
@@ -454,6 +455,14 @@ class NonStaffCostCategory(models.Model):
         "LookupVersion",
         on_delete=models.PROTECT,
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ledger_id", "version"],
+                name="unique_non_staff_category",
+            )
+        ]
 
     def __str__(self):
         return f"{self.cost_subcategory} ({self.ledger_id})"
