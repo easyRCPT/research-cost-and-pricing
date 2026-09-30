@@ -15,7 +15,6 @@ import {
   amountFor,
   costGroups,
   expenseTypesFor,
-  lineTotal,
   tenPercentAllowed,
   withAmount,
 } from '@/lib/non-staff'
@@ -51,7 +50,7 @@ export function NonStaffTableBody({
   return (
     <tbody>
       {lines.map((line) => {
-        const rowTotal = lineTotal(line, years)
+        const rowTotal = line.direct_total
 
         return (
           <tr key={line.id}>
@@ -99,9 +98,6 @@ export function NonStaffTableBody({
                 />
               </CellTd>
             ))}
-            <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
-              {dash(rowTotal)}
-            </Calc>
             <Td align="center">
               <Checkbox
                 className="mx-auto"
@@ -112,6 +108,9 @@ export function NonStaffTableBody({
                 }
               />
             </Td>
+            <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
+              {dash(rowTotal)}
+            </Calc>
             <Td align="center">
               <Button
                 variant="ghost"

@@ -38,9 +38,6 @@ export const withAmount = (
     amount: y === year ? amount : amountFor(line, y),
   }))
 
-export const lineTotal = (line: NonStaffLine, years: number[]) =>
-  years.reduce((sum, year) => sum + amountFor(line, year), 0)
-
 export const emptyNonStaffLine = (
   id: string,
   years: number[],
