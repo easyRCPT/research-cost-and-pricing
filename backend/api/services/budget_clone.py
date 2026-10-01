@@ -12,6 +12,7 @@ from api.models import (
     YearAmount,
 )
 from api.services.audit import write_audit
+from api.services.lookup_update import current_categories
 
 from .budget_state import require_rejected
 
@@ -92,16 +93,23 @@ def _clone_staff_lines(source_budget: Budget, target_budget: Budget) -> None:
 
 def _clone_non_staff_lines(source_budget: Budget, target_budget: Budget) -> None:
     """Clone non-staff cost lines and their year amounts to a new budget."""
-    non_staff_lines = NonStaffCostLine.objects.filter(
-        budget=source_budget,
-    ).prefetch_related("amounts")
+    non_staff_lines = (
+        NonStaffCostLine.objects.filter(budget=source_budget)
+        .select_related("category")
+        .prefetch_related("amounts")
+    )
 
     new_amounts: list[YearAmount] = []
+    # A new draft prices on the current rates, so its lines point at the
+    # current version's categories, as repoint_drafts keeps every draft's do.
+    current = current_categories()
 
     for non_staff_line in non_staff_lines:
         new_non_staff_line = NonStaffCostLine.objects.create(
             budget=target_budget,
-            category=non_staff_line.category,
+            category_id=current.get(
+                non_staff_line.category.ledger_id, non_staff_line.category_id
+            ),
             description=non_staff_line.description,
             in_kind=non_staff_line.in_kind,
             in_kind_reason=non_staff_line.in_kind_reason,

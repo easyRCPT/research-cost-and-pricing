@@ -42,8 +42,13 @@ urlpatterns = [
     ),
     path(
         "lookups/<str:table>/",
-        lookups.LookupTableView.as_view(http_method_names=["post", "patch"]),
+        lookups.LookupTableView.as_view(http_method_names=["post", "patch", "delete"]),
         name="lookup-table",
+    ),
+    path(
+        "lookups/<str:table>/<str:key>/",
+        lookups.LookupRowView.as_view(),
+        name="lookup-row",
     ),
     # No route deletes a user: owners are PROTECTed, so deactivating is the
     # operation (#64).

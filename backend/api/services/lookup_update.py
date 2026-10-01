@@ -2,7 +2,7 @@ import json
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, ProtectedError
 from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
@@ -15,6 +15,8 @@ from ..models import (
     LookupChangeSet,
     LookupConfiguration,
     LookupVersion,
+    NonStaffCostCategory,
+    NonStaffCostLine,
     User,
 )
 from .audit import write_audit
@@ -72,8 +74,52 @@ def create_lookup_version(
     config.current_version = new_version
     config.referenced = False
     config.save(update_fields=["current_version", "referenced"])
+    repoint_drafts(new_version.id)
 
     return new_version.id
+
+
+def current_categories() -> dict[int, int]:
+    """The current version's non-staff categories, by ledger ID: {ledger: row id}."""
+    version_id = LookupConfiguration.objects.get().current_version_id
+    return dict(
+        NonStaffCostCategory.objects.filter(version_id=version_id).values_list(
+            "ledger_id", "id"
+        )
+    )
+
+
+def repoint_drafts(version_id: int) -> None:
+    """
+    Keep drafts' non-staff lines on the version drafts price against.
+
+    A line points at one version's category row, and the engine reads the
+    category's excluded flag off that row (data_loader), as the budget form
+    reads its ledger ID and names. A draft prices on the current rates, so
+    when the current version changes its lines move to the same category in
+    it, matched by ledger ID. Without this, a category's flag changed in a new
+    version never reached the drafts already using it. A category the new
+    version no longer has leaves the line where it was. Submitted costings
+    keep the rows of the version they were stamped with.
+    """
+    by_ledger = dict(
+        NonStaffCostCategory.objects.filter(version_id=version_id).values_list(
+            "ledger_id", "id"
+        )
+    )
+    lines = (
+        NonStaffCostLine.objects.filter(budget__lookup_version__isnull=True)
+        .exclude(category__version_id=version_id)
+        .select_related("category")
+    )
+    moved = []
+    for line in lines:
+        target = by_ledger.get(line.category.ledger_id)
+        if target is not None:
+            line.category_id = target
+            moved.append(line)
+    # Not a save: re-pointing is not an edit to the draft, so updated_at stays.
+    NonStaffCostLine.objects.bulk_update(moved, ["category"])
 
 
 def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
@@ -110,9 +156,10 @@ def get_definition(table: str) -> LookupDefinition:
     return definition
 
 
-def _get_unversioned_model(table: str) -> type[models.Model]:
+def _get_unversioned(table: str) -> LookupDefinition:
     """
-    The tables a single-row write may change.
+    The tables a single-row write may change: the reference tables, which
+    don't price a costing and are changed in place (#70, #144).
 
     The versioned ones price a costing, so they change only as a reviewed set
     (lookup_changes.apply_changes, #138). A row at a time, a costing submitted
@@ -126,7 +173,44 @@ def _get_unversioned_model(table: str) -> type[models.Model]:
             "of changes: POST /api/admin/lookups/changes/."
         )
 
-    return definition.model
+    return definition
+
+
+def _reject_a_new_key(definition: LookupDefinition, data: dict) -> None:
+    """
+    A code or ledger ID is what other records point at, so it never changes.
+    A different code is a different row.
+    """
+    label = definition.model._meta.verbose_name
+    for field in definition.key:
+        if field in data:
+            message = (
+                f"A {label}'s {field} can't be changed: other records point at "
+                "it. Add a new one instead."
+            )
+            raise ValidationError({field: [message]})
+
+
+# Faculties and departments are never removed (#70): projects, approvers and
+# costings waiting on a dean all point at them.
+NOT_REMOVED = {
+    "faculties": "Faculties aren't removed: departments and deans point at them.",
+    "departments": "Departments aren't removed: projects and heads of department "
+    "point at them.",
+}
+
+
+def _in_use(error: ProtectedError) -> str:
+    """'3 projects and 1 deliverable use', from what PROTECT found."""
+    counts: dict[str, int] = {}
+    for record in error.protected_objects:
+        name = str(record._meta.verbose_name)
+        counts[name] = counts.get(name, 0) + 1
+    users = [
+        f"{n} {name if n == 1 else name + 's'}" for name, n in sorted(counts.items())
+    ]
+    verb = "uses" if sum(counts.values()) == 1 else "use"
+    return f"{' and '.join(users)} {verb}"
 
 
 def save_validated_instance(
@@ -151,7 +235,7 @@ def create(
     data: dict,
     actor: User | None = None,
 ) -> None:
-    model = _get_unversioned_model(table)
+    model = _get_unversioned(table).model
 
     instance = model(**data)
     save_validated_instance(instance)
@@ -160,7 +244,7 @@ def create(
         actor,
         "admin.lookup.insert",
         table,
-        instance,
+        str(instance.pk),
         before=None,
         after=data,
     )
@@ -174,8 +258,10 @@ def update(
     data: dict,
     actor: User | None = None,
 ) -> None:
-    model = _get_unversioned_model(table)
+    definition = _get_unversioned(table)
+    model = definition.model
 
+    _reject_a_new_key(definition, data)
     _validate_model_fields(model, lookup, data)
 
     try:
@@ -206,7 +292,7 @@ def update(
         actor,
         "admin.lookup.update",
         table,
-        instance,
+        str(instance.pk),
         before=before,
         after=after,
         lookup=lookup,
@@ -229,13 +315,53 @@ def plain(values: dict | None) -> dict | None:
     return json.loads(json.dumps(values, cls=DjangoJSONEncoder))
 
 
+@transaction.atomic
+def delete(table: str, key: str, actor: User | None = None) -> None:
+    """
+    Remove a reference row nothing uses (#144), named by its key. One in use
+    is refused, saying what uses it, because PROTECT would refuse it anyway.
+    """
+    definition = _get_unversioned(table)
+    model = definition.model
+    if table in NOT_REMOVED:
+        raise ValidationError(NOT_REMOVED[table])
+
+    # Every reference table is keyed on one field: a code or a ledger ID.
+    [field] = definition.key
+    lookup = {field: key}
+    try:
+        instance = model.objects.get(**lookup)
+    except (model.DoesNotExist, ValueError):
+        raise ValidationError(f"There is no {model._meta.verbose_name} {key}.")
+
+    object_id = str(instance.pk)
+    before = model_to_dict(instance)
+    try:
+        instance.delete()
+    except ProtectedError as exc:
+        raise ValidationError(
+            f"{_in_use(exc)} this {model._meta.verbose_name}, so it can't be removed."
+        ) from exc
+
+    _audit(
+        actor,
+        "admin.lookup.delete",
+        table,
+        object_id,
+        before=before,
+        after=None,
+        lookup=lookup,
+    )
+    invalidate_lookup_cache()
+
+
 def _audit(
     actor: User | None,
     action: str,
     table: str,
-    instance: models.Model,
+    object_id: str,
     before: dict | None,
-    after: dict,
+    after: dict | None,
     lookup: dict | None = None,
 ) -> None:
     """
@@ -251,10 +377,9 @@ def _audit(
         actor=actor,
         action=action,
         object_type=table,
-        object_id=str(instance.pk),
+        object_id=object_id,
         detail={
             "lookup": plain(lookup),
-            "version": getattr(instance, "version_id", None),
             "before": plain(before),
             "after": plain(after),
         },
@@ -352,6 +477,7 @@ def restore_version(version_id: int, actor: User | None) -> dict:
     # into it rather than minting another.
     config.referenced = False
     config.save(update_fields=["current_version", "referenced"])
+    repoint_drafts(restored.id)
 
     write_audit(
         actor=actor,

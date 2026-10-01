@@ -41,6 +41,7 @@ def register(status: str = "", q: str = "") -> list[dict]:
     return [
         {
             **build_row(project),
+            "department_code": project.department.code,
             "owner": {
                 "id": project.created_by.id,
                 "email": project.created_by.email,

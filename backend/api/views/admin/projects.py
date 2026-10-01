@@ -23,6 +23,8 @@ class AdminProjectSerializer(serializers.Serializer):
     title = serializers.CharField(allow_blank=True)
     owner = ProjectOwnerSerializer()
     department = serializers.CharField()
+    # So a department's move can say how many of its costings wait on a dean (#70).
+    department_code = serializers.CharField()
     faculty = serializers.CharField()
     budget_id = serializers.IntegerField(allow_null=True)
     status = serializers.ChoiceField(choices=Budget.Status.choices, allow_null=True)

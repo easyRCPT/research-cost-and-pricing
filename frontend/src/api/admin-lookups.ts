@@ -8,6 +8,7 @@ import {
 import { api, ApiError } from '@/lib/api'
 import { lookupsQuery } from '@/api/lookups'
 import type { components } from '@/types/api'
+import type { ReferenceTable } from '@/screens/admin/referenceTables'
 
 export type LookupVersion = components['schemas']['LookupVersion']
 export type LookupChange = components['schemas']['LookupChange']
@@ -16,8 +17,8 @@ export type PricedOn = components['schemas']['PricedOn']
 export type VersionBudget = components['schemas']['VersionBudget']
 
 /**
- * The tables an administrator edits here: the versioned ones with one figure
- * per row, which are the ones that price a costing. They change only as a
+ * The rate tables an administrator edits here: the versioned ones, which are
+ * the ones that price a costing. They change only as a
  * reviewed set (#138), and a set saved once a costing has been submitted on
  * the current rates copies them into a new version first, so nothing already
  * priced moves.
@@ -27,6 +28,7 @@ export type RateTable =
   | 'salary_rate_multipliers'
   | 'eba_increases'
   | 'on_cost_rates'
+  | 'non_staff_cost_categories'
   | 'calculation_constants'
 
 export const versionsQuery = queryOptions({
@@ -102,5 +104,36 @@ export function useRestoreVersion() {
       return data
     },
     onSettled: refresh,
+  })
+}
+
+/**
+ * A reference table's row, written in place (#70, #144): no set, no version.
+ * A refusal comes back on the field it is about, such as a duplicate code.
+ */
+export type ReferenceWrite =
+  | { op: 'create'; table: ReferenceTable; values: Record<string, unknown> }
+  | { op: 'update'; table: ReferenceTable; lookup: Record<string, unknown>; values: Record<string, unknown> }
+  | { op: 'delete'; table: ReferenceTable; key: string }
+
+export function useReferenceWrite() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (write: ReferenceWrite) => {
+      const params = { path: { table: write.table } }
+      const { error, response } =
+        write.op === 'create'
+          ? await api.POST('/api/admin/lookups/{table}/', { params, body: { values: write.values } })
+          : write.op === 'update'
+            ? await api.PATCH('/api/admin/lookups/{table}/', {
+                params,
+                body: { lookup: write.lookup, values: write.values },
+              })
+            : await api.DELETE('/api/admin/lookups/{table}/{key}/', {
+                params: { path: { table: write.table, key: write.key } },
+              })
+      if (!response.ok) throw new ApiError(response.status, error)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: lookupsQuery.queryKey }),
   })
 }

@@ -66,8 +66,8 @@ export interface paths {
         put?: never;
         /**
          * @description Create or update a row of a table that does not price costings: the
-         *     faculties, departments and reference lists. The rate tables are changed
-         *     only as a set, through LookupChangesView.
+         *     faculties, departments and reference lists, changed in place (#70, #144). The rate tables are changed only as a set, through
+         *     LookupChangesView.
          *
          *     Moved into the admin namespace from api/lookups/..
          */
@@ -77,12 +77,32 @@ export interface paths {
         head?: never;
         /**
          * @description Create or update a row of a table that does not price costings: the
-         *     faculties, departments and reference lists. The rate tables are changed
-         *     only as a set, through LookupChangesView.
+         *     faculties, departments and reference lists, changed in place (#70, #144). The rate tables are changed only as a set, through
+         *     LookupChangesView.
          *
          *     Moved into the admin namespace from api/lookups/..
          */
         patch: operations["admin_lookups_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/lookups/{table}/{key}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Remove a reference row nothing uses (#144), named by its key: a code, or
+         *     a revenue category's ledger ID. Refused, saying what uses it, otherwise.
+         */
+        delete: operations["admin_lookups_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/admin/lookups/changes/": {
@@ -839,6 +859,7 @@ export interface components {
             code: "invalid" | "null" | "required";
             detail: string;
         };
+        AdminLookupsDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsPartialUpdateError: components["schemas"]["AdminLookupsPartialUpdateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateLookupErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateLookupKEYErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateValuesErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateValuesKEYErrorComponent"];
         AdminLookupsPartialUpdateErrorResponse400: components["schemas"]["AdminLookupsPartialUpdateValidationError"] | components["schemas"]["ParseErrorResponse"];
         AdminLookupsPartialUpdateLookupErrorComponent: {
@@ -935,6 +956,7 @@ export interface components {
             title: string;
             owner: components["schemas"]["ProjectOwner"];
             department: string;
+            department_code: string;
             faculty: string;
             budget_id: number | null;
             status: (components["schemas"]["StatusEnum"] | components["schemas"]["NullEnum"]) | null;
@@ -3783,6 +3805,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsPartialUpdateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+                table: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsDestroyErrorResponse400"];
                 };
             };
             401: {

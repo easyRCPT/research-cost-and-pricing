@@ -39,6 +39,23 @@ async function removeOurYears(page: Page) {
   expect(response.status(), await response.text()).toBe(201)
 }
 
+const LEDGER = 99901
+
+/** Takes out the non-staff category a failed run left behind. */
+async function removeOurCategory(page: Page) {
+  const lookups = await (await page.request.get('/api/lookups/')).json()
+  const left = (lookups.non_staff_cost_categories as { ledger_id: number }[]).some((row) => row.ledger_id === LEDGER)
+  if (!left) return
+  const response = await page.request.post('/api/admin/lookups/changes/', {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+    data: {
+      note: 'e2e clean-up',
+      changes: [{ table: 'non_staff_cost_categories', op: 'delete', lookup: { ledger_id: LEDGER } }],
+    },
+  })
+  expect(response.status(), await response.text()).toBe(201)
+}
+
 async function ebaYears(page: Page): Promise<number[]> {
   const lookups = await (await page.request.get('/api/lookups/')).json()
   return (lookups.eba_increases as { year: number }[]).map((row) => row.year)
@@ -65,12 +82,14 @@ async function reviewAndSave(page: Page, note: string) {
 test.beforeEach(async ({ page }) => {
   await signInAsAdmin(page)
   await removeOurYears(page)
+  await removeOurCategory(page)
 })
 
 test.afterAll(async ({ browser }) => {
   const page = await browser.newPage()
   await signInAsAdmin(page)
   await removeOurYears(page)
+  await removeOurCategory(page)
   await page.close()
 })
 
@@ -198,4 +217,35 @@ test('a set that starts a new version says who was priced on the old one, and li
 
   await listed.getByRole('link', { name: title }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/details`)
+})
+
+test('a non-staff category is a rate: added, changed and removed through sets (#144)', async ({ page }) => {
+  await openEditor(page)
+  await page.getByRole('tablist', { name: 'Rate tables' }).getByRole('tab', { name: /Non-staff categories/ }).click()
+  await page.getByLabel('Ledger ID', { exact: true }).fill(String(LEDGER))
+  await page.getByLabel('Cost group', { exact: true }).fill('E2E group')
+  await page.getByLabel('Expense type', { exact: true }).fill('E2E expense')
+  await page.getByLabel('No 10% or indirect rate', { exact: true }).check()
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await reviewAndSave(page, 'e2e: a category')
+  await expect(page.getByRole('status').filter({ hasText: '1 change saved' })).toBeVisible()
+
+  // Its flag prices a costing, so it is changed in a set too.
+  const row = page.getByRole('row').filter({ hasText: String(LEDGER) })
+  await row.getByRole('checkbox', { name: `No 10% or indirect rate for ${LEDGER}` }).uncheck()
+  await expect(row).toContainText('was Yes')
+  await page.getByRole('button', { name: 'Review changes' }).click()
+  await expect(page.getByRole('region', { name: 'Non-staff categories' })).toContainText('No 10% or indirect rate Yes → No')
+  await page.getByRole('button', { name: 'Save changes' }).click()
+  await expect(page.getByRole('region', { name: 'Unsaved changes' })).toHaveCount(0)
+  const flag = async () =>
+    ((await (await page.request.get('/api/lookups/')).json()).non_staff_cost_categories as {
+      ledger_id: number
+      excludes_additional_rate: boolean
+    }[]).find((category) => category.ledger_id === LEDGER)?.excludes_additional_rate
+  await expect.poll(flag).toBe(false)
+
+  await row.getByRole('button', { name: `Remove ${LEDGER}` }).click()
+  await reviewAndSave(page, 'e2e: the category again')
+  await expect.poll(flag).toBeUndefined()
 })

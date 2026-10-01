@@ -161,8 +161,8 @@ class LookupChangesView(APIView):
 class LookupTableView(APIView):
     """
     Create or update a row of a table that does not price costings: the
-    faculties, departments and reference lists. The rate tables are changed
-    only as a set, through LookupChangesView.
+    faculties, departments and reference lists, changed in place (#70, #144). The rate tables are changed only as a set, through
+    LookupChangesView.
 
     Moved into the admin namespace from api/lookups/..
     """
@@ -206,4 +206,18 @@ class LookupTableView(APIView):
             data=cast(dict, validated_data["values"]),
             actor=request.user,
         )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LookupRowView(APIView):
+    """
+    Remove a reference row nothing uses (#144), named by its key: a code, or
+    a revenue category's ledger ID. Refused, saying what uses it, otherwise.
+    """
+
+    permission_classes = [IsSuperadmin]
+
+    @extend_schema(request=None, responses={204: None})
+    def delete(self, request: Request, table: str, key: str) -> Response:
+        lookup_update.delete(table=table, key=key, actor=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

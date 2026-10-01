@@ -1,6 +1,7 @@
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
+from django.core.cache import cache
 from django.test import SimpleTestCase, TestCase
 
 from api.models import (
@@ -184,6 +185,10 @@ class TestGetLookupTables(SimpleTestCase):
 
 class TestGetConstants(SimpleTestCase):
     def setUp(self):
+        # The cache outlives every other test's rolled-back database, so a
+        # version priced elsewhere in this process could answer from it.
+        cache.clear()
+        self.addCleanup(cache.clear)
         self.salary_rate_1 = Mock(spec=SalaryRate)
         self.salary_rate_1.payroll_type = "Fortnight"
         self.salary_rate_1.category = "Academic"
