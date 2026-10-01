@@ -1,4 +1,4 @@
-import { apiWrite, DEMO, expect, readyProject, signIn, submitBudget, test } from './fixtures'
+import { apiWrite, expect, readyProject, signIn, submitBudget, test } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,
@@ -32,7 +32,7 @@ test("the register finds anyone's costing, read-only, and the log has its submis
   await page.getByRole('checkbox', { name: /^budget\.submit/ }).click()
   await expect(
     page.getByRole('row').filter({ hasText: `budget #${project.budget_id}` }),
-  ).toContainText(DEMO.researcher)
+  ).toContainText('Ruth Researcher')
 })
 
 test('deactivating someone asks first, and the row says so afterwards (#69)', async ({ page }) => {

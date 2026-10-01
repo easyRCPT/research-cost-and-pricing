@@ -136,7 +136,7 @@ test("an approver's register lists their area at any status, and Back returns to
   await expect(row).toContainText('HoD review')
 
   // The status filter is the table's own, and keeps the row while it matches.
-  await page.getByRole('button', { name: 'Status' }).click()
+  await page.getByRole('button', { name: 'Status' }).first().click()
   await page.getByRole('checkbox', { name: /^HoD review/ }).click()
   await page.keyboard.press('Escape')
   await expect(row).toBeVisible()
