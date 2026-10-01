@@ -1,14 +1,12 @@
 import {
-  keepPreviousData,
   queryOptions,
   useMutation,
-  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
 import { api, unwrap } from '@/lib/api'
-import type { ProjectCreate, Status } from '@/types'
+import type { ProjectCreate } from '@/types'
 
 export const projectsQuery = queryOptions({
   queryKey: ['projects'] as const,
@@ -19,25 +17,6 @@ export const projectsQuery = queryOptions({
 
 export function useProjects() {
   return useSuspenseQuery(projectsQuery)
-}
-
-/**
- * The same list, narrowed by status on the server (#98). The previous rows stay
- * on screen while another status loads, so switching filters doesn't flash
- * empty.
- */
-export function useProjectsWithStatus(status: Status | null) {
-  return useQuery({
-    queryKey: [...projectsQuery.queryKey, { status }] as const,
-    queryFn: async () => {
-      return unwrap(
-        await api.GET('/api/projects/', {
-          params: { query: status ? { status } : {} },
-        }),
-      )
-    },
-    placeholderData: keepPreviousData,
-  })
 }
 
 export function useCreateProject() {

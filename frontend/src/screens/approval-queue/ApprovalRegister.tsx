@@ -1,25 +1,24 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 
-import { useProjectsWithStatus } from '@/api/projects'
-import { DataTable } from '@/components/data-table'
-import { PageHead, Panel } from '@/components/shell'
-import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
-import { STATUS_LABELS } from '@/lib/status'
-import { cn } from '@/lib/utils'
+import { useProjects } from '@/api/projects'
+import { DataTable, type DataTableFilter } from '@/components/data-table'
+import { PageHead } from '@/components/shell'
+import { ownerName, statusLabel } from '@/lib/status'
 import { projectColumns } from '@/screens/projects/columns'
-import type { ProjectRow, Status } from '@/types'
+import type { ProjectRow } from '@/types'
 
 import { ApprovalsNav } from './ApprovalsNav'
 import { rememberApprovalsPage } from './returnTo'
 
-// Every status the schema has, drafts aside: an approver never sees someone
-// else's draft. Typed against the schema's enum (STATUS_LABELS is a
-// Record<Status, string>), so a new status breaks the build here rather than
-// going missing from the chips.
-const STATUSES = (Object.keys(STATUS_LABELS) as Status[]).filter(
-  (status) => status !== 'draft' && status !== 'submitted',
-)
+const FILTERS: DataTableFilter<ProjectRow>[] = [
+  { id: 'status', label: 'Status', value: (row) => statusLabel(row.status) },
+  { id: 'faculty', label: 'Faculty', value: (row) => row.faculty },
+  { id: 'department', label: 'Department', value: (row) => row.department },
+  { id: 'owner', label: 'Submitted by', value: ownerName },
+]
+
+const byId = (row: ProjectRow) => String(row.id)
 
 /**
  * Everything in the approver's area, decided or not (#98). The queue answers
@@ -29,12 +28,7 @@ const STATUSES = (Object.keys(STATUS_LABELS) as Status[]).filter(
  * sees nothing. A row opens the costing itself, read-only.
  */
 export function ApprovalRegister() {
-  const [status, setStatus] = useState<Status | null>(null)
-  const {
-    data: rows,
-    isPending,
-    isPlaceholderData,
-  } = useProjectsWithStatus(status)
+  const { data: rows } = useProjects()
   const navigate = useNavigate()
   useEffect(() => rememberApprovalsPage('/approvals/register'), [])
 
@@ -54,72 +48,24 @@ export function ApprovalRegister() {
   return (
     <>
       <PageHead
-        title="Approval register"
+        title="Project register"
         subtitle="Every costing in your area, decided or not"
         right={<ApprovalsNav current="register" />}
       />
 
-      <div
-        role="group"
-        aria-label="Status"
-        className="mb-4 flex flex-wrap gap-2"
-      >
-        {[null, ...STATUSES].map((value) => (
-          <button
-            key={value ?? 'all'}
-            type="button"
-            aria-pressed={status === value}
-            onClick={() => setStatus(value)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-[13px]',
-              status === value
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-muted',
-            )}
-          >
-            {value === null ? 'All' : STATUS_LABELS[value]}
-          </button>
-        ))}
-      </div>
-
-      {isPending ? (
-        <RowsSkeleton
-          label="Loading the register"
-          className="rounded-lg border bg-card p-4"
+      <section className="overflow-hidden rounded-lg border bg-card">
+        <DataTable
+          columns={table}
+          rows={rows}
+          getRowId={byId}
+          emptyMessage="Costings submitted from a department or faculty you are responsible for are listed here, whatever became of them."
+          sortable
+          searchable
+          hideable
+          filters={FILTERS}
+          flush
         />
-      ) : rows && rows.length === 0 ? (
-        <Panel
-          title={
-            status === null
-              ? 'Nothing has been decided in your area yet'
-              : `Nothing is ${STATUS_LABELS[status].toLowerCase()}`
-          }
-        >
-          <p className="max-w-[70ch] text-[13.5px] text-muted-foreground">
-            {status === null
-              ? 'Costings submitted from a department or faculty you are responsible for are listed here, whatever became of them.'
-              : 'No costing in your area has this status right now.'}
-          </p>
-        </Panel>
-      ) : (
-        <section
-          className={cn(
-            'overflow-hidden rounded-lg border bg-card',
-            isPlaceholderData && 'opacity-70',
-          )}
-        >
-          <DataTable
-            columns={table}
-            rows={rows ?? []}
-            getRowId={(row) => String(row.id)}
-            emptyMessage="Nothing here."
-            sortable
-            searchable
-            hideable
-            flush
-          />
-        </section>
-      )}
+      </section>
     </>
   )
 }
