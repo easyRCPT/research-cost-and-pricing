@@ -38,15 +38,13 @@ export function Signup() {
 
   return (
     <AuthShell
-      title="Create an account"
-      intro="Use your University email address."
       footer={
-        <p className="text-muted-foreground">
-          Already have one?{' '}
-          <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+        <>
+          Already have an account?{' '}
+          <Link to="/login" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
-        </p>
+        </>
       }
     >
       <AccountTabs value={accountType} onChange={setAccountType} />
@@ -74,7 +72,7 @@ export function Signup() {
         </div>
         <Field
           id="email"
-          label="Email"
+          label="Email address"
           type="email"
           value={email}
           onChange={setEmail}
@@ -90,8 +88,13 @@ export function Signup() {
           error={fields.password}
           autoComplete="new-password"
         />
-        <Button type="submit" disabled={signup.isPending}>
-          {signup.isPending ? 'Creating…' : 'Create account'}
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-1 w-full"
+          disabled={signup.isPending}
+        >
+          {signup.isPending ? 'Creating account…' : 'Create account'}
         </Button>
       </form>
     </AuthShell>

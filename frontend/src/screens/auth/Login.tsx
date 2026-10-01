@@ -27,15 +27,13 @@ export function Login() {
 
   return (
     <AuthShell
-      title="Sign in"
-      intro="Use your University email address."
       footer={
-        <p className="text-muted-foreground">
+        <>
           No account yet?{' '}
-          <Link to="/signup" className="font-medium text-primary underline-offset-4 hover:underline">
+          <Link to="/signup" className="font-medium text-primary hover:underline">
             Create one
           </Link>
-        </p>
+        </>
       }
     >
       <AccountTabs value={accountType} onChange={setAccountType} />
