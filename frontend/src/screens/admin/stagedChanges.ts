@@ -2,7 +2,8 @@ import type { LookupChange, RateTable } from '@/api/admin-lookups'
 import { fieldErrors } from '@/lib/api'
 
 import { KINDS } from './fieldKinds'
-import { type RateTableSpec, tableSpec, type ValueField } from './rateTables'
+import type { Refused } from './rates/types'
+import { type KeyField, type RateTableSpec, tableSpec, type ValueField } from './rateTables'
 
 export type Row = Record<string, unknown>
 export type Key = Record<string, unknown>
@@ -33,9 +34,15 @@ export const typed = (field: ValueField, raw: unknown) => KINDS[field.kind].pars
 /** A field's value as the review and the "was" line show it. */
 export const shown = (field: ValueField, value: unknown) => KINDS[field.kind].show(value)
 
+/** One key field's value as a person reads it. */
+export const keyShown = (k: KeyField, value: unknown) => {
+  if (value === null || value === undefined || value === '') return '—'
+  return k.format ? k.format(String(value)) : String(value)
+}
+
 /** "Fortnight · Academic · Level A.1", as a person reads a row's name. */
 export const keyText = (spec: RateTableSpec, key: Key) =>
-  spec.key.map((k) => (key[k.field] === null || key[k.field] === '' ? '—' : String(key[k.field]))).join(' · ')
+  spec.key.map((k) => keyShown(k, key[k.field])).join(' · ')
 
 /** One row of one table, whichever change is staged against it. */
 export const stagedId = (table: RateTable, key: Key) =>
@@ -87,17 +94,27 @@ export function toRequest(change: Staged): LookupChange {
 }
 
 /**
- * Which staged change the server refused, read off the error's
- * `changes.<index>` field, and what it said. The index is the change's place
- * in the request, which is its place in `staged`.
+ * Which staged change the server refused, read off `changes.<index>[.<field>]`.
+ * A message on a value field is kept against it; any other is the row's.
  */
-export function refusedChange(error: unknown, staged: Staged[]): { id: string; message: string } | null {
-  for (const [attr, message] of Object.entries(fieldErrors(error))) {
-    const index = /^changes\.(\d+)/.exec(attr)?.[1]
-    const change = index === undefined ? undefined : staged[Number(index)]
-    if (change) return { id: idOf(change), message }
+export function refusedChange(error: unknown, staged: Staged[]): Refused {
+  const refusals = Object.entries(fieldErrors(error)).flatMap(([attr, text]) => {
+    const match = /^changes\.(\d+)(?:\.(.+))?$/.exec(attr)
+    const change = match ? staged[Number(match[1])] : undefined
+    return match && change ? [{ change, path: match[2], text }] : []
+  })
+  if (refusals.length === 0) return null
+
+  const { change } = refusals[0]
+  const valueFields = new Set(tableSpec(change.table).values.map((v) => v.field))
+  const refused: NonNullable<Refused> = { id: idOf(change), message: null, fields: {} }
+  for (const { change: other, path, text } of refusals) {
+    if (other !== change) continue
+    const field = path?.split('.').find((part) => valueFields.has(part))
+    if (field) refused.fields[field] ??= text
+    else refused.message ??= text
   }
-  return null
+  return refused
 }
 
 /** "12 changes across 2 tables". */

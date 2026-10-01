@@ -29,7 +29,7 @@ class ProjectRoutesTestCase(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()["results"], [])
 
     def test_create_returns_the_row_the_list_screen_needs(self):
         response = self.client.post(
@@ -49,6 +49,21 @@ class ProjectRoutesTestCase(TestCase):
         self.assertEqual(body["budget_id"], budget.id)
         self.assertEqual(body["reference"], f"RCP-2026-{body['id']:04d}")
 
+    def test_an_empty_project_opens_and_prices_at_nothing(self):
+        response = self.client.post(self.url, {}, content_type="application/json")
+
+        self.assertEqual(response.status_code, 201, response.content)
+
+        body = response.json()
+        self.assertEqual(body["title"], "")
+        self.assertEqual(body["department"], "")
+        self.assertIsNone(body["end_year"])
+
+        detail = self.client.get(reverse("budget-detail", args=[body["budget_id"]]))
+
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertEqual(detail.json()["project_info"]["cost_centre"], "")
+
     def test_a_created_project_turns_up_in_the_list(self):
         self.client.post(
             self.url,
@@ -56,7 +71,7 @@ class ProjectRoutesTestCase(TestCase):
             content_type="application/json",
         )
 
-        body = self.client.get(self.url).json()
+        body = self.client.get(self.url).json()["results"]
 
         self.assertEqual(len(body), 1)
         self.assertEqual(body[0]["title"], "Test Project")
@@ -71,7 +86,7 @@ class ProjectRoutesTestCase(TestCase):
             total_price_inc_gst=Decimal("98765.43")
         )
 
-        body = self.client.get(self.url).json()
+        body = self.client.get(self.url).json()["results"]
 
         self.assertEqual(body[0]["total_price_inc_gst"], 98765.43)
 

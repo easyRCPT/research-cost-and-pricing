@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { columnHelper, type DataTableFilter } from '@/components/data-table'
-import { constantName } from '@/lib/format/constants'
-import { money, money2 } from '@/lib/format/utils'
+import { displayName, money, money2 } from '@/lib/format/utils'
 import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { LookupTables } from '@/types'
 
@@ -31,7 +30,7 @@ const CONSTANT_COLUMNS = constant.columns([
   // Read-only here, as everywhere: the engine reads each constant by name.
   constant.accessor('name', {
     header: 'Constant',
-    cell: ({ getValue }) => constantName(getValue()),
+    cell: ({ getValue }) => displayName(getValue()),
   }),
   constant.accessor('description', { header: 'Description' }),
   constant.accessor('value', {
@@ -141,9 +140,10 @@ export interface LookupTab {
   value: string
   title: string
   notice?: (lookups: LookupTables) => ReactNode
-  tables: LookupTable[]
+  tables: readonly LookupTable[]
 }
 
+/** The tabs of both lookup screens: the costing one reads them, the admin one edits them. */
 export const LOOKUP_TABS = [
   {
     value: 'constants',
@@ -296,4 +296,6 @@ export const LOOKUP_TABS = [
       }),
     ],
   },
-] satisfies readonly LookupTab[]
+] as const satisfies readonly LookupTab[]
+
+export type LookupTabValue = (typeof LOOKUP_TABS)[number]['value']

@@ -1,16 +1,25 @@
 import { PlusIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import { useLookups } from '@/api/lookups'
-import { useProjects } from '@/api/projects'
-import { DataTable, type DataTableFilter } from '@/components/data-table'
+import {
+  useCreateProject,
+  useProjectFilters,
+  useProjects,
+} from '@/api/projects'
+import {
+  DataTable,
+  type DataTableFilter,
+  useRemote,
+} from '@/components/data-table'
 import { PageHead } from '@/components/shell'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { Button } from '@/components/ui/button'
 import { statusLabel } from '@/lib/status'
+import { cn } from '@/lib/utils'
 import type { ProjectRow } from '@/types'
 
 import { projectColumns } from './columns'
-import { NewProjectForm } from './NewProjectForm'
+import { projectFilterOptions, projectFilterQuery } from './filters'
 
 const FILTERS: DataTableFilter<ProjectRow>[] = [
   { id: 'department', label: 'Department', value: (row) => row.department },
@@ -21,18 +30,26 @@ const FILTERS: DataTableFilter<ProjectRow>[] = [
 const byId = (row: ProjectRow) => String(row.id)
 
 interface ProjectsScreenProps {
-  onOpen: (budgetId: number) => void
+  onOpen: (projectId: number) => void
 }
 
 export function ProjectsScreen({ onOpen }: ProjectsScreenProps) {
-  const { data: projects } = useProjects()
-  const { data: lookups } = useLookups()
-  const [creating, setCreating] = useState(false)
+  const paged = useRemote()
+  const projects = useProjects({
+    ...projectFilterQuery(paged.filters),
+    ...paged.query,
+  })
+  const values = useProjectFilters({
+    ...projectFilterQuery(paged.filters),
+    q: paged.query.q,
+  }).data
+  const options = useMemo(() => projectFilterOptions(values), [values])
+  const create = useCreateProject()
 
   const columns = useMemo(
     () =>
       projectColumns<ProjectRow>({
-        open: (row) => row.budget_id !== null && onOpen(row.budget_id),
+        open: (row) => onOpen(row.id),
         openable: (row) => row.budget_id !== null,
       }),
     [onOpen],
@@ -46,37 +63,50 @@ export function ProjectsScreen({ onOpen }: ProjectsScreenProps) {
         title="Projects"
         subtitle="Every costing started here, and what it is priced at."
         right={
-          <Button onClick={() => setCreating(true)} disabled={creating}>
+          // Starts empty and opens on Project Details, which asks for the rest.
+          <Button
+            onClick={() =>
+              create.mutate(
+                {},
+                { onSuccess: (project) => onOpen(project.id) },
+              )
+            }
+            disabled={create.isPending}
+          >
             <PlusIcon />
-            New project
+            {create.isPending ? 'Creating…' : 'New project'}
           </Button>
         }
       />
 
-      {creating && (
-        <div className="mb-6">
-          <NewProjectForm
-            departments={lookups.departments}
-            onCreated={(project) => {
-              setCreating(false)
-              if (project.budget_id !== null) onOpen(project.budget_id)
-            }}
-            onCancel={() => setCreating(false)}
-          />
-        </div>
+      {create.error && (
+        <p className="mb-4 text-[13px] text-destructive">
+          {create.error.message}
+        </p>
       )}
 
-      <section className="overflow-hidden rounded-lg border bg-card">
-        <DataTable
-          columns={columns}
-          rows={projects}
-          getRowId={byId}
-          emptyMessage="No projects yet. Start one with New project."
-          sortable
-          searchable
-          filters={FILTERS}
-          flush
-        />
+      <section
+        className={cn(
+          'overflow-hidden rounded-lg border bg-card',
+          projects.isPlaceholderData && 'opacity-70',
+        )}
+      >
+        {projects.data ? (
+          <DataTable
+            columns={columns}
+            rows={projects.data.results}
+            getRowId={byId}
+            emptyMessage="No projects yet. Start one with New project."
+            sortable
+            searchable
+            hideable
+            filters={FILTERS}
+            flush
+            remote={paged.remote(projects.data, options)}
+          />
+        ) : (
+          <RowsSkeleton label="Loading projects" className="p-4" />
+        )}
       </section>
     </>
   )

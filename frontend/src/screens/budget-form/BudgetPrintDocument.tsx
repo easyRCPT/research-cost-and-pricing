@@ -28,7 +28,7 @@ export function BudgetPrintDocument({
   const { budget_info: info, budget_summary: summary } = budget
   const project = budget.project_info
   const duration =
-    budget.years.length > 0
+    budget.years.length > 0 && project.end_month !== null
       ? `${MONTHS[project.start_month - 1]} ${budget.years[0]} to ${
           MONTHS[project.end_month - 1]
         } ${budget.years[budget.years.length - 1]}`

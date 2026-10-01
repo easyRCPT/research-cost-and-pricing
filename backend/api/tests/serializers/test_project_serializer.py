@@ -38,15 +38,26 @@ class ProjectCreateSerializerTestCase(TestCase):
         self.assertEqual(validated_data["title"], "Test Project")
         self.assertEqual(validated_data["department"], self.department)
 
-    def test_optional_fields_default_to_blank(self):
+    def test_optional_fields_are_left_to_the_model(self):
         serializer = ProjectCreateSerializer(data=self.valid_data())
 
         self.assertTrue(serializer.is_valid(), get_errors(serializer))
 
         validated_data = get_validated_data(serializer)
 
-        self.assertEqual(validated_data["chief_investigator"], "")
-        self.assertEqual(validated_data["scheme"], "")
+        self.assertNotIn("chief_investigator", validated_data)
+        self.assertNotIn("scheme", validated_data)
+
+    def test_nothing_is_required(self):
+        serializer = ProjectCreateSerializer(data={})
+
+        self.assertTrue(serializer.is_valid(), get_errors(serializer))
+
+        validated_data = get_validated_data(serializer)
+
+        self.assertNotIn("department", validated_data)
+        self.assertNotIn("end_year", validated_data)
+        self.assertEqual(validated_data["start_month"], 1)
 
     def test_unknown_department(self):
         serializer = ProjectCreateSerializer(

@@ -14,14 +14,19 @@ export function ChangeBar({
     <div
       role="region"
       aria-label="Unsaved changes"
-      className="sticky bottom-4 z-10 mt-4 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-4 py-3 text-[13px] shadow-lg"
+      className="fixed bottom-6 left-1/2 z-40 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border bg-card py-1.5 pr-1.5 pl-4 text-[13px] shadow-lg print:hidden"
     >
       <span className="font-medium">{countText(staged)}</span>
-      <div className="ml-auto flex gap-2">
-        <Button size="sm" variant="ghost" onClick={onDiscard}>
+      <div className="flex shrink-0 gap-1">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="rounded-full"
+          onClick={onDiscard}
+        >
           Discard all
         </Button>
-        <Button size="sm" onClick={onReview}>
+        <Button size="sm" className="rounded-full" onClick={onReview}>
           Review changes
         </Button>
       </div>

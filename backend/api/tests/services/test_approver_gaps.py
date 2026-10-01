@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from api.models import ApprovalStep, Budget, UserOrgAssignment
+from api.services.admin_users import update_user
 from api.services.approval_decide import decide
 from api.services.approval_queue import get_approval_steps
 from api.services.approver_gaps import gaps, stranded
@@ -48,6 +49,17 @@ class ApproverGapsTest(FlowFixture):
 
         self.assertEqual(self.stranded_ids(), [])
         self.assertEqual([s.id for s in get_approval_steps(self.hod)], [step.id])
+        step.refresh_from_db()
+        self.assertEqual(step.status, ApprovalStep.Status.PENDING)
+
+    def test_a_head_who_loses_staff_leaves_the_costing_waiting(self):
+        budget = self.submitted()
+        step = budget.approval_steps.get(level=ApprovalStep.Level.DEPARTMENT)
+
+        update_user(self.dean, self.hod, {"groups": ["researcher"]})
+
+        self.assertEqual(self.stranded_ids(), [budget.id])
+        self.assertEqual(get_approval_steps(self.hod), [])
         step.refresh_from_db()
         self.assertEqual(step.status, ApprovalStep.Status.PENDING)
 

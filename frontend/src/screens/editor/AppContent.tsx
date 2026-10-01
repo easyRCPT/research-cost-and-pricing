@@ -1,22 +1,21 @@
 import { useNavigate } from '@tanstack/react-router'
+import { ArrowLeftIcon } from 'lucide-react'
 import { type ComponentType, createElement } from 'react'
 
-import { useEditable } from '@/api/budget'
+import { useEditable, useMissingDetails } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
-import {
-  LOOKUP_SCREEN,
-  LookupButton,
-} from '@/components/lookups-tabs/LookupButton'
+import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppShell } from '@/components/shell/AppShell'
-import { BackToProjectsButton } from '@/components/shell/BackToProjectsButton'
+import { DetailsNeededNotice } from '@/components/shell/DetailsNeededNotice'
 import { ExportPdfButton } from '@/components/shell/ExportPdfButton'
-import { MobileNav } from '@/components/shell/MobileNav'
+import { MobileNav, NavPill } from '@/components/shell/MobileNav'
 import { PageHead } from '@/components/shell/PageHead'
 import { ReadOnlyNotice } from '@/components/shell/ReadOnlyNotice'
 import { ScreenNav } from '@/components/shell/ScreenNav'
 import { SECTIONS } from '@/components/shell/sections'
 import {
   type EditorScreen,
+  RailItem,
   SideBar as Sidebar,
 } from '@/components/shell/Sidebar'
 import { useBackTarget } from '@/components/shell/useBackTarget'
@@ -53,9 +52,25 @@ const EDITOR_SCREENS: Record<EditorScreen, ComponentType> = {
   approvals: Approvals,
 }
 
-export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
+/** The rail while Project Details is incomplete: every other screen greyed out. */
+const DETAILS_ONLY = SECTIONS.map((section) => ({
+  ...section,
+  items: section.items.map((item) => ({
+    ...item,
+    disabled: item.id !== 'details',
+  })),
+}))
+
+export function AppContent({
+  screen: requested,
+  setScreen,
+  onLeave,
+}: AppContentProps) {
   const { data: lookups } = useLookups()
   const editable = useEditable()
+  const locked = useMissingDetails().length > 0
+  const sections = locked ? DETAILS_ONLY : SECTIONS
+  const screen = locked && requested !== LOOKUP_SCREEN ? 'details' : requested
   const navigate = useNavigate()
   const back = useBackTarget()
 
@@ -63,33 +78,47 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
   const pageHeading = lookupsOpen
     ? { title: 'Lookup Tables', subtitle: 'Read-only' }
     : SCREEN_HEADINGS[screen]
+  const backLabel = `Back to ${back?.label ?? 'Projects'}`
+  const goBack = back ? () => navigate({ to: back.to }) : onLeave
+  const openLookups = () => setScreen(LOOKUP_SCREEN)
   return (
     <AppShell
-      topBarRight={
-        <>
-          {back ? (
-            <BackToProjectsButton
-              label={back.label}
-              onClick={() => navigate({ to: back.to })}
-            />
-          ) : (
-            <BackToProjectsButton onClick={onLeave} />
-          )}
-          <LookupButton open={lookupsOpen} handleClick={setScreen} />
-        </>
-      }
       sidebar={
         <Sidebar
-          sections={SECTIONS}
+          sections={sections}
           current={lookupsOpen ? null : screen}
           onSelect={setScreen}
+          head={
+            <>
+              <RailItem
+                icon={<ArrowLeftIcon className="-mx-[4.5px] size-4 shrink-0" />}
+                onClick={goBack}
+              >
+                {backLabel}
+              </RailItem>
+              <RailItem active={lookupsOpen} onClick={openLookups}>
+                Lookup Tables
+              </RailItem>
+            </>
+          }
         />
       }
       mobileNav={
         <MobileNav
-          sections={SECTIONS}
+          sections={sections}
           current={lookupsOpen ? null : screen}
           onSelect={setScreen}
+          head={
+            <>
+              <NavPill onClick={goBack}>
+                <ArrowLeftIcon />
+                {backLabel}
+              </NavPill>
+              <NavPill active={lookupsOpen} onClick={openLookups}>
+                Lookup Tables
+              </NavPill>
+            </>
+          }
         />
       }
     >
@@ -103,6 +132,7 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
       ) : (
         <>
           <ReadOnlyNotice />
+          <DetailsNeededNotice />
           {/*
             One switch for every control on every screen: a disabled fieldset
             disables each input, select, button and checkbox inside it. The
@@ -115,7 +145,7 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
           >
             {createElement(EDITOR_SCREENS[screen])}
           </fieldset>
-          <ScreenNav screen={screen} onSelect={setScreen} />
+          <ScreenNav screen={screen} onSelect={setScreen} locked={locked} />
         </>
       )}
     </AppShell>

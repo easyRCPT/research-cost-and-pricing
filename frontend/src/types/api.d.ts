@@ -28,7 +28,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The audit log, newest first (#67). Read-only: nothing edits an entry. */
+        /** @description The audit log, newest first, a cursor page at a time (#67). Read-only. */
         get: operations["admin_audit_list"];
         put?: never;
         post?: never;
@@ -38,15 +38,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/audit/actions/": {
+    "/api/admin/audit/filters/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** @description Every action the log holds, for the filter. */
-        get: operations["admin_audit_actions_retrieve"];
+        /** @description Every value the log's filters can take. */
+        get: operations["admin_audit_filters_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -151,8 +151,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Every set of rates the tool has had, newest first (#137). */
+        /** @description Every set of rates the tool has had, a cursor page at a time (#137). */
         get: operations["admin_lookups_versions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One version, by id or the current one, for a dialog its page may not hold. */
+        get: operations["admin_lookups_versions_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -178,6 +195,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/lookups/versions/{version_id}/changes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The sets saved into one version, with what each change did (#138). */
+        get: operations["admin_lookups_versions_changes_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/lookups/versions/{version_id}/restore/": {
         parameters: {
             query?: never;
@@ -189,6 +223,40 @@ export interface paths {
         put?: never;
         /** @description Make an older set of rates current again, as a new version (#137). */
         post: operations["admin_lookups_versions_restore_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/current/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One version, by id or the current one, for a dialog its page may not hold. */
+        get: operations["admin_lookups_versions_current_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/filters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every value the history's filters can take. */
+        get: operations["admin_lookups_versions_filters_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -219,8 +287,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Every project, whoever owns it. Read-only (#66). */
+        /** @description Every project, whoever owns it, a cursor page at a time. Read-only (#66). */
         get: operations["admin_projects_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/projects/filters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every value the register's filters can take. */
+        get: operations["admin_projects_filters_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -599,6 +684,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/departments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Departments whose name or code contains `q`, a page at a time by name. */
+        get: operations["departments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/faculties/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["faculties_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/lookups/": {
         parameters: {
             query?: never;
@@ -623,7 +741,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description The list of projects, and the way to start one.
+         * @description The list of projects, a cursor page at a time, and the way to start one.
          *
          *     Who may see which project is decided one level down, in
          *     services/project.visible_projects.
@@ -631,12 +749,46 @@ export interface paths {
         get: operations["projects_list"];
         put?: never;
         /**
-         * @description The list of projects, and the way to start one.
+         * @description The list of projects, a cursor page at a time, and the way to start one.
          *
          *     Who may see which project is decided one level down, in
          *     services/project.visible_projects.
          */
         post: operations["projects_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{project_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One project as its list row, so a link to it needs no page of the list. */
+        get: operations["projects_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/filters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every value the list's filters can take, across the projects you can see. */
+        get: operations["projects_filters_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -672,7 +824,7 @@ export interface components {
             faculty: string | null;
             faculty_name?: string | null;
         };
-        AdminAuditActionsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminAuditFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminAuditListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminGroupsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLogin: {
@@ -980,8 +1132,12 @@ export interface components {
             detail: string;
         };
         AdminLookupsVersionsBudgetsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsChangesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsCurrentRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminOverviewRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminProject: {
             id: number;
@@ -999,6 +1155,7 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        AdminProjectsFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminProjectsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminUser: {
             id: number;
@@ -1461,10 +1618,16 @@ export interface components {
             created_at: string;
             /** Format: email */
             actor_email?: string | null;
+            actor_name?: string | null;
             action: string;
             object_type: string;
             object_id: string;
             detail: unknown;
+        };
+        AuditFilters: {
+            actor: components["schemas"]["FilterOption"][];
+            action: components["schemas"]["FilterOption"][];
+            object_type: components["schemas"]["FilterOption"][];
         };
         AuthAdminLoginCreateEmailErrorComponent: {
             /**
@@ -2462,6 +2625,7 @@ export interface components {
             id: number;
             note: string;
             saved_by: string | null;
+            saved_by_name: string | null;
             /** Format: date-time */
             saved_at: string;
             change_count: number;
@@ -2538,6 +2702,7 @@ export interface components {
             faculty_code: string;
             budget_unit?: string;
         };
+        DepartmentsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         EbaIncrease: {
             year: number;
             /** Format: double */
@@ -2663,9 +2828,16 @@ export interface components {
             type: components["schemas"]["ServerErrorEnum"];
             errors: components["schemas"]["Error500"][];
         };
+        FacultiesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         Faculty: {
             code: string;
             name: string;
+        };
+        /** @description One value a filter can take, and how many rows the other filters leave with it. */
+        FilterOption: {
+            value: string;
+            label?: string;
+            count: number;
         };
         GroupCount: {
             group: string;
@@ -2735,6 +2907,7 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             updated_by: string | null;
+            updated_by_name: string | null;
             budgets_priced: number;
             current: boolean;
             accepts_changes: boolean;
@@ -2890,6 +3063,84 @@ export interface components {
             versions: components["schemas"]["VersionsSummary"];
             recent: components["schemas"]["AuditEntry"][];
         };
+        PaginatedAdminProjectList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminProject"][];
+        };
+        PaginatedAuditEntryList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["AuditEntry"][];
+        };
+        PaginatedDepartmentList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["Department"][];
+        };
+        PaginatedFacultyList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["Faculty"][];
+        };
+        PaginatedLookupVersionList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["LookupVersion"][];
+        };
+        PaginatedProjectRowList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["ProjectRow"][];
+        };
         ParseError: {
             code: components["schemas"]["ParseErrorCodeEnum"];
             detail: string;
@@ -2957,26 +3208,19 @@ export interface components {
             approved: number;
         };
         /**
-         * @description What it takes to start a project.
-         *
-         *     Only the fields a project cannot exist without: a title for the list to
-         *     show and a department for the engine to cost against. Everything else --
-         *     external party, duration, scheme, activity, region -- is edited afterwards
-         *     on Project Details, so the create form does not ask for it twice.
+         * @description What it takes to start a project: nothing. New project opens the costing
+         *     straight away, and Project Details asks for the rest.
          */
         ProjectCreate: {
-            title: string;
-            department: string;
-            /** @default  */
-            funder: string;
-            /** @default  */
-            chief_investigator: string;
-            /** @default  */
-            scheme: string;
-            start_year: number;
-            start_month: number;
-            end_year: number;
-            end_month: number;
+            title?: string;
+            department?: string | null;
+            funder?: string;
+            chief_investigator?: string;
+            scheme?: string;
+            start_year?: number;
+            start_month?: number;
+            end_year?: number | null;
+            end_month?: number | null;
         };
         /**
          * @description * `activity` - activity
@@ -2996,6 +3240,12 @@ export interface components {
          * @enum {string}
          */
         ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "other_funder" | "other_funder_category" | "region" | "scheme" | "start_month" | "start_year" | "title";
+        ProjectFilters: {
+            status: components["schemas"]["FilterOption"][];
+            faculty: components["schemas"]["FilterOption"][];
+            department: components["schemas"]["FilterOption"][];
+            owner: components["schemas"]["FilterOption"][];
+        };
         ProjectInfo: {
             owner_id: number;
             title: string;
@@ -3006,8 +3256,8 @@ export interface components {
             scheme: string;
             start_year: number;
             start_month: number;
-            end_year: number;
-            end_month: number;
+            end_year: number | null;
+            end_month: number | null;
             company: string;
             cost_centre: string;
             activity: string | null;
@@ -3033,7 +3283,7 @@ export interface components {
             department: string;
             faculty: string;
             start_year: number;
-            end_year: number;
+            end_year: number | null;
             budget_id: number | null;
             status: (components["schemas"]["StatusEnum"] | components["schemas"]["NullEnum"]) | null;
             budget_count: number;
@@ -3078,11 +3328,9 @@ export interface components {
             /**
              * @description * `does_not_exist` - does_not_exist
              *     * `incorrect_type` - incorrect_type
-             *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "does_not_exist" | "incorrect_type" | "null" | "required";
+            code: "does_not_exist" | "incorrect_type";
             detail: string;
         };
         ProjectsCreateEndMonthErrorComponent: {
@@ -3096,11 +3344,9 @@ export interface components {
              *     * `max_string_length` - max_string_length
              *     * `max_value` - max_value
              *     * `min_value` - min_value
-             *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value";
             detail: string;
         };
         ProjectsCreateEndYearErrorComponent: {
@@ -3114,11 +3360,9 @@ export interface components {
              *     * `max_string_length` - max_string_length
              *     * `max_value` - max_value
              *     * `min_value` - min_value
-             *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value";
             detail: string;
         };
         ProjectsCreateError: components["schemas"]["ProjectsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["ProjectsCreateTitleErrorComponent"] | components["schemas"]["ProjectsCreateDepartmentErrorComponent"] | components["schemas"]["ProjectsCreateFunderErrorComponent"] | components["schemas"]["ProjectsCreateChiefInvestigatorErrorComponent"] | components["schemas"]["ProjectsCreateSchemeErrorComponent"] | components["schemas"]["ProjectsCreateStartYearErrorComponent"] | components["schemas"]["ProjectsCreateStartMonthErrorComponent"] | components["schemas"]["ProjectsCreateEndYearErrorComponent"] | components["schemas"]["ProjectsCreateEndMonthErrorComponent"];
@@ -3183,10 +3427,9 @@ export interface components {
              *     * `max_value` - max_value
              *     * `min_value` - min_value
              *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null";
             detail: string;
         };
         ProjectsCreateStartYearErrorComponent: {
@@ -3201,10 +3444,9 @@ export interface components {
              *     * `max_value` - max_value
              *     * `min_value` - min_value
              *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null";
             detail: string;
         };
         ProjectsCreateTitleErrorComponent: {
@@ -3214,16 +3456,14 @@ export interface components {
              */
             attr: "title";
             /**
-             * @description * `blank` - blank
-             *     * `invalid` - invalid
+             * @description * `invalid` - invalid
              *     * `max_length` - max_length
              *     * `null` - null
              *     * `null_characters_not_allowed` - null_characters_not_allowed
-             *     * `required` - required
              *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
              * @enum {string}
              */
-            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
             detail: string;
         };
         ProjectsCreateValidationError: {
@@ -3234,7 +3474,9 @@ export interface components {
             type: "validation_error";
             errors: components["schemas"]["ProjectsCreateError"][];
         };
+        ProjectsFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         ProjectsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        ProjectsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         ProjectsSummary: {
             total: number;
             by_status: components["schemas"]["StatusCount"][];
@@ -3470,6 +3712,33 @@ export interface components {
             email: string;
             name: string;
         };
+        /** @description One change in a set: the row it named, and the values before and after. */
+        VersionChange: {
+            table: string;
+            op: string;
+            key: {
+                [key: string]: unknown;
+            };
+            before: {
+                [key: string]: unknown;
+            } | null;
+            after: {
+                [key: string]: unknown;
+            } | null;
+        };
+        VersionChangeSet: {
+            id: number;
+            note: string;
+            saved_by: string | null;
+            saved_by_name: string | null;
+            /** Format: date-time */
+            saved_at: string;
+            change_count: number;
+            changes: components["schemas"]["VersionChange"][];
+        };
+        VersionFilters: {
+            by: components["schemas"]["FilterOption"][];
+        };
         VersionsSummary: {
             total: number;
             latest: components["schemas"]["LookupVersion"][];
@@ -3579,8 +3848,15 @@ export interface operations {
     admin_audit_list: {
         parameters: {
             query?: {
-                action?: string;
+                action?: string[];
+                actor?: string[];
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
                 limit?: number;
+                object_type?: string[];
+                since?: string;
+                until?: string;
             };
             header?: never;
             path?: never;
@@ -3593,7 +3869,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditEntry"][];
+                    "application/json": components["schemas"]["PaginatedAuditEntryList"];
                 };
             };
             400: {
@@ -3662,9 +3938,15 @@ export interface operations {
             };
         };
     };
-    admin_audit_actions_retrieve: {
+    admin_audit_filters_retrieve: {
         parameters: {
-            query?: never;
+            query?: {
+                action?: string[];
+                actor?: string[];
+                object_type?: string[];
+                since?: string;
+                until?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3676,7 +3958,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["AuditFilters"];
                 };
             };
             400: {
@@ -3684,7 +3966,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminAuditActionsRetrieveErrorResponse400"];
+                    "application/json": components["schemas"]["AdminAuditFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -4184,7 +4466,17 @@ export interface operations {
     };
     admin_lookups_versions_list: {
         parameters: {
-            query?: never;
+            query?: {
+                by?: string[];
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                ordering?: string;
+                q?: string;
+                since?: string;
+                until?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4196,7 +4488,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LookupVersion"][];
+                    "application/json": components["schemas"]["PaginatedLookupVersionList"];
                 };
             };
             400: {
@@ -4205,6 +4497,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsVersionsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupVersion"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -4350,6 +4727,91 @@ export interface operations {
             };
         };
     };
+    admin_lookups_versions_changes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionChangeSet"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsChangesListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     admin_lookups_versions_restore_create: {
         parameters: {
             query?: never;
@@ -4375,6 +4837,178 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsVersionsRestoreCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_current_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupVersion"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsCurrentRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_filters_retrieve: {
+        parameters: {
+            query?: {
+                by?: string[];
+                ordering?: string;
+                q?: string;
+                since?: string;
+                until?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionFilters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -4521,17 +5155,18 @@ export interface operations {
     admin_projects_list: {
         parameters: {
             query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                department?: string[];
+                department_code?: string;
+                faculty?: string[];
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
                 q?: string;
-                /**
-                 * @description * `draft` - Draft
-                 *     * `submitted` - Submitted
-                 *     * `hod_review` - Head of Department review
-                 *     * `dean_review` - Dean review
-                 *     * `approved` - Approved
-                 *     * `rejected` - Rejected
-                 *     * `withdrawn` - Withdrawn
-                 */
-                status?: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "";
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
             };
             header?: never;
             path?: never;
@@ -4544,7 +5179,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminProject"][];
+                    "application/json": components["schemas"]["PaginatedAdminProjectList"];
                 };
             };
             400: {
@@ -4553,6 +5188,97 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminProjectsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_projects_filters_retrieve: {
+        parameters: {
+            query?: {
+                department?: string[];
+                faculty?: string[];
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
+                q?: string;
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectFilters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminProjectsFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -6684,6 +7410,168 @@ export interface operations {
             };
         };
     };
+    departments_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDepartmentList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepartmentsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    faculties_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedFacultyList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacultiesListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     lookups_retrieve: {
         parameters: {
             query?: never;
@@ -6762,16 +7650,17 @@ export interface operations {
     projects_list: {
         parameters: {
             query?: {
-                /**
-                 * @description * `draft` - Draft
-                 *     * `submitted` - Submitted
-                 *     * `hod_review` - Head of Department review
-                 *     * `dean_review` - Dean review
-                 *     * `approved` - Approved
-                 *     * `rejected` - Rejected
-                 *     * `withdrawn` - Withdrawn
-                 */
-                status?: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "";
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                department?: string[];
+                faculty?: string[];
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
+                q?: string;
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
             };
             header?: never;
             path?: never;
@@ -6784,7 +7673,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProjectRow"][];
+                    "application/json": components["schemas"]["PaginatedProjectRowList"];
                 };
             };
             400: {
@@ -6852,7 +7741,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["ProjectCreate"];
                 "application/x-www-form-urlencoded": components["schemas"]["ProjectCreate"];
@@ -6874,6 +7763,166 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectsCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    projects_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRow"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    projects_filters_retrieve: {
+        parameters: {
+            query?: {
+                department?: string[];
+                faculty?: string[];
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
+                q?: string;
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectFilters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectsFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {

@@ -1,10 +1,12 @@
 import type { RateTable } from '@/api/admin-lookups'
-import { constantName } from '@/lib/format/constants'
+import { displayName } from '@/lib/format/utils'
 
 export interface KeyField {
   field: string
   label: string
   kind: 'text' | 'number'
+  /** How a stored value reads, when it is a code name. */
+  format?: (value: string) => string
 }
 
 export interface ValueField {
@@ -52,7 +54,7 @@ export const RATE_TABLES: RateTableSpec[] = [
     id: 'on_cost_rates',
     label: 'On-costs',
     key: [
-      { field: 'on_cost_type', label: 'On-cost', kind: 'text' },
+      { field: 'on_cost_type', label: 'On-cost', kind: 'text', format: displayName },
       { field: 'employment_type', label: 'Employment', kind: 'text' },
       { field: 'year', label: 'Year', kind: 'number' },
     ],
@@ -94,7 +96,7 @@ export const RATE_TABLES: RateTableSpec[] = [
     addable: false,
     removable: false,
     about: (row) => ({
-      name: constantName(String(row.name)),
+      name: displayName(String(row.name)),
       detail: row.description ? String(row.description) : undefined,
     }),
   },

@@ -26,6 +26,9 @@ export interface InputProps {
   step?: number
   /** The constant's name, for a `constant`. */
   constant: string
+  /** The server's complaint about this value, shown under it with `errorId`. */
+  error?: string
+  errorId?: string
   onChange: (value: unknown) => void
 }
 
@@ -62,12 +65,14 @@ const rawEntry = (type: 'text' | 'number') =>
 /** What a field of each kind does. A new kind is one more entry. */
 export const KINDS: Record<FieldKind, Kind> = {
   text: {
-    input: ({ value, label, onChange }) => (
+    input: ({ value, label, error, errorId, onChange }) => (
       <Input
-        className="h-8 min-w-48"
+        className="h-7 w-full min-w-48"
         value={String(value ?? '')}
         onChange={(event) => onChange(event.target.value)}
         aria-label={label}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
       />
     ),
     entry: rawEntry('text'),
@@ -76,14 +81,16 @@ export const KINDS: Record<FieldKind, Kind> = {
     show: dashed,
   },
   number: {
-    input: ({ value, label, step, onChange }) => (
+    input: ({ value, label, step, error, errorId, onChange }) => (
       <NumberInput
-        className="tabular ml-auto h-8 w-36 text-right"
+        className="tabular ml-auto h-7 w-32 text-right"
         step={step}
         min={0}
         value={Number(value)}
         onChange={onChange}
         aria-label={label}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
       />
     ),
     entry: rawEntry('number'),
@@ -93,11 +100,13 @@ export const KINDS: Record<FieldKind, Kind> = {
     align: 'text-right',
   },
   boolean: {
-    input: ({ value, label, onChange }) => (
+    input: ({ value, label, error, errorId, onChange }) => (
       <Checkbox
         checked={Boolean(value)}
         onCheckedChange={(next) => onChange(next === true)}
         aria-label={label}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
       />
     ),
     entry: ({ value, label, onChange }) => (
@@ -113,11 +122,13 @@ export const KINDS: Record<FieldKind, Kind> = {
     show: (value) => (value ? 'Yes' : 'No'),
   },
   constant: {
-    input: ({ value, label, constant, onChange }) => (
+    input: ({ value, label, constant, error, errorId, onChange }) => (
       <ConstantInput
         name={constant}
         value={Number(value)}
         label={label}
+        refusal={error}
+        refusalId={errorId}
         onChange={onChange}
       />
     ),

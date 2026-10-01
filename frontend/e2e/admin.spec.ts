@@ -1,4 +1,4 @@
-import { apiWrite, DEMO, expect, readyProject, signIn, submitBudget, test } from './fixtures'
+import { apiWrite, expect, readyProject, signIn, submitBudget, test } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,
@@ -17,22 +17,22 @@ test("the register finds anyone's costing, read-only, and the log has its submis
   await rail.getByRole('button', { name: 'Project register' }).click()
   await page.getByPlaceholder('Search').fill(title)
   const row = page.getByRole('row').filter({ hasText: title })
-  await expect(row).toContainText(DEMO.researcher)
-  await expect(row).toContainText('Head of Department review')
+  await expect(row).toContainText('Ruth Researcher')
+  await expect(row).toContainText('HoD review')
 
   await row.getByRole('button', { name: title }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/details`)
   await expect(page.getByText('This costing is with the Head of Department, so it is read-only.')).toBeVisible()
-  await page.locator('header').getByRole('button', { name: 'Project register' }).click()
+  await page.getByRole('navigation', { name: 'Costing sections' }).getByRole('button', { name: 'Project register' }).click()
   await expect(page).toHaveURL('/admin/projects')
 
   // The submission is in the log, found through a filter built from the log.
   await rail.getByRole('button', { name: 'Audit log' }).click()
-  await page.getByRole('combobox', { name: 'Action' }).click()
-  await page.getByRole('option', { name: 'budget.submit' }).click()
+  await page.getByRole('button', { name: 'Action' }).click()
+  await page.getByRole('checkbox', { name: /^budget\.submit/ }).click()
   await expect(
     page.getByRole('row').filter({ hasText: `budget #${project.budget_id}` }),
-  ).toContainText(DEMO.researcher)
+  ).toContainText('Ruth Researcher')
 })
 
 test('deactivating someone asks first, and the row says so afterwards (#69)', async ({ page }) => {
@@ -99,6 +99,72 @@ test('a costing waiting on a role nobody holds is shown to RIC and named to its 
     `Unheaded ${code} has no head of department`,
   )
   await page.goto('/admin/lookups')
-  await page.getByRole('tablist', { name: 'Reference tables' }).getByRole('tab', { name: 'Departments' }).click()
-  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('No head of department')
+  await page.getByRole('tablist', { name: 'Lookup tables' }).getByRole('tab', { name: 'Org Units', exact: true }).click()
+  await page.getByRole('tab', { name: 'Departments', exact: true }).click()
+  await page.getByRole('searchbox', { name: 'Search' }).fill(code)
+  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('Unassigned')
+})
+
+test('a head of department is found by searching, not scrolling (#69)', async ({ page }) => {
+  await signIn(page, 'admin')
+  const code = `E2E${Date.now().toString(36).toUpperCase()}`.slice(0, 20)
+  const name = `Searchable ${code}`
+  const lookups = await (await page.request.get('/api/lookups/')).json()
+  await apiWrite(page, 'post', '/api/admin/lookups/departments/', {
+    status: 201,
+    data: {
+      values: {
+        code,
+        name,
+        school: 'School of Testing',
+        school_code: 'SCH',
+        budget_unit: '',
+        faculty_code: lookups.faculties[0].code,
+      },
+    },
+  })
+  const email = `searcher-${Date.now()}@unimelb.edu.au`
+  await apiWrite(page, 'post', '/api/admin/users/', {
+    status: 201,
+    data: { email, first_name: 'Sam', last_name: 'Searcher', password: 'demo12345', groups: ['staff'] },
+  })
+
+  await page.goto('/admin/users')
+  await page.getByLabel('Search accounts').fill(email)
+  await page.getByRole('button', { name: new RegExp(email) }).click()
+
+  await page.getByRole('combobox', { name: 'Department' }).click()
+  const box = page.getByRole('combobox', { name: 'Search' })
+
+  // The list is offered on open, and typing narrows it.
+  await expect(page.getByRole('option').first()).toBeVisible()
+  await box.fill(name)
+  await expect(page.getByRole('option')).toHaveCount(1)
+  await page.getByRole('option', { name: new RegExp(name) }).click()
+  await expect(page.getByRole('combobox', { name: 'Department' })).toHaveText(name)
+
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await expect(page.getByText(`Head of Department, ${name}`)).toBeVisible()
+})
+
+test('a researcher cannot be given anything to approve (#69)', async ({ page }) => {
+  await signIn(page, 'admin')
+  const email = `researcher-${Date.now()}@unimelb.edu.au`
+  await apiWrite(page, 'post', '/api/admin/users/', {
+    status: 201,
+    data: { email, first_name: 'Rae', last_name: 'Searcher', password: 'demo12345', groups: ['researcher'] },
+  })
+
+  await page.goto('/admin/users')
+  await page.getByLabel('Search accounts').fill(email)
+  await page.getByRole('button', { name: new RegExp(email) }).click()
+
+  await expect(page.getByText('A researcher cannot approve for a unit.')).toBeVisible()
+  await expect(page.getByRole('combobox', { name: 'Department' })).toHaveCount(0)
+
+  // Moved to staff, the form is back.
+  await page.getByRole('button', { name: 'Move to staff' }).click()
+  await expect(page.getByRole('checkbox', { name: 'researcher' })).not.toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'staff' })).toBeChecked()
+  await expect(page.getByRole('combobox', { name: 'Department' })).toBeVisible()
 })

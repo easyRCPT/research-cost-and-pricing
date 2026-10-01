@@ -195,6 +195,25 @@ class ValidateSubmissionTests(TestCase):
             reasons,
         )
 
+    def test_missing_end_date(self):
+        budget = self.create_budget(
+            project=self.create_project(end_year=None, end_month=None),
+        )
+
+        reasons = validate_submission(budget)
+
+        self.assertIn("Project end date is required.", reasons)
+
+    def test_missing_department(self):
+        project = self.create_project()
+        project.department = None
+        project.save()
+        budget = self.create_budget(project=project)
+
+        reasons = validate_submission(budget)
+
+        self.assertIn("Department is required.", reasons)
+
     def test_same_year_and_month_is_valid(self):
         budget = self.create_budget(
             project=self.create_project(

@@ -1,18 +1,57 @@
-import { Fragment } from 'react'
+import { useMemo, useState } from 'react'
 
-import { useLookupVersions } from '@/api/admin-lookups'
-import { Grid, Panel, Td, Th } from '@/components/shell'
+import {
+  type LookupVersion,
+  useLookupVersion,
+  useLookupVersions,
+  useVersionFilters,
+} from '@/api/admin-lookups'
+import {
+  DataTable,
+  type DataTableFilter,
+  useRemote,
+} from '@/components/data-table'
+import type { FilterState } from '@/components/data-table/filtering'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
+import { isoDay } from '@/lib/format/dates'
+import { cn } from '@/lib/utils'
 
-import type { RatesMoved } from './types'
-import { VersionBudgets } from './VersionBudgets'
-import { VersionRow } from './VersionRow'
+import { versionColumns } from './columns'
+import { RestoreDialog } from './RestoreDialog'
+import type { RatesMoved, Shown } from './types'
+import { VersionDialog } from './VersionDialog'
 
 interface VersionsPanelProps {
-  /** The version whose costings are listed, if any. */
-  shown: number | null
-  onShow: (versionId: number | null) => void
+  /** The version whose dialog is open, if any. */
+  shown: Shown | null
+  onShow: (shown: Shown | null) => void
   onRestored: (moved: RatesMoved) => void
 }
+
+/** The By filter's value for a version made by nobody, as the API takes it. */
+const SYSTEM = 'system'
+
+const FILTERS: DataTableFilter<LookupVersion>[] = [
+  {
+    id: 'made',
+    label: 'Made',
+    value: (version) => isoDay(version.created_at),
+    range: true,
+  },
+  {
+    id: 'by',
+    label: 'By',
+    value: (version) => version.updated_by ?? SYSTEM,
+  },
+]
+
+const byId = (version: LookupVersion) => String(version.id)
+
+const toQuery = ({ made = [], by }: FilterState) => ({
+  by,
+  since: made[0] || undefined,
+  until: made[1] || undefined,
+})
 
 /**
  * Every set of rates the tool has had, the changes saved into each, and a way
@@ -26,45 +65,79 @@ export function VersionsPanel({
   onShow,
   onRestored,
 }: VersionsPanelProps) {
-  const { data: versions } = useLookupVersions()
+  const paged = useRemote()
+  const versions = useLookupVersions({
+    ...toQuery(paged.filters),
+    ...paged.query,
+  })
+  const values = useVersionFilters({
+    ...toQuery(paged.filters),
+    q: paged.query.q,
+  }).data
+  const [restoring, setRestoring] = useState<LookupVersion | null>(null)
+
+  const onPage = versions.data?.results.find(
+    (version) => version.id === shown?.id,
+  )
+  // A link can name a version on some other page.
+  const fetched = useLookupVersion(shown && !onPage ? shown.id : null).data
+  const opened = onPage ?? fetched
+
+  const options = useMemo(
+    () => ({
+      by: (values?.by ?? []).map((option) =>
+        option.value === SYSTEM ? { ...option, label: 'System' } : option,
+      ),
+    }),
+    [values],
+  )
+
+  const columns = useMemo(
+    () =>
+      versionColumns({
+        open: (id, tab) => onShow({ id, tab }),
+        restore: setRestoring,
+      }),
+    [onShow],
+  )
 
   return (
-    <Panel
-      title="Versions"
-      description="A version is the rates some costing was priced on. Saved changes go into the current version until a costing is submitted on it; the next save then starts a new one."
-      className="mt-4"
+    <section
+      className={cn(
+        'overflow-hidden rounded-lg border bg-card',
+        versions.isPlaceholderData && 'opacity-70',
+      )}
     >
-      <Grid>
-        <thead>
-          <tr>
-            <Th>Version</Th>
-            <Th>Made</Th>
-            <Th>By</Th>
-            <Th>Changes saved into it</Th>
-            <Th className="text-right">Costings priced on it</Th>
-            <Th />
-          </tr>
-        </thead>
-        <tbody>
-          {versions.map((version) => (
-            <Fragment key={version.id}>
-              <VersionRow
-                version={version}
-                shown={shown === version.id}
-                onShow={() => onShow(shown === version.id ? null : version.id)}
-                onRestored={onRestored}
-              />
-              {shown === version.id && (
-                <tr>
-                  <Td colSpan={6} className="bg-muted/30 p-3">
-                    <VersionBudgets versionId={version.id} />
-                  </Td>
-                </tr>
-              )}
-            </Fragment>
-          ))}
-        </tbody>
-      </Grid>
-    </Panel>
+      {versions.data ? (
+        <DataTable
+          columns={columns}
+          rows={versions.data.results}
+          getRowId={byId}
+          emptyMessage="No versions yet."
+          sortable
+          searchable
+          filters={FILTERS}
+          flush
+          remote={paged.remote(versions.data, options)}
+        />
+      ) : (
+        <RowsSkeleton label="Loading versions" className="p-4" />
+      )}
+      {opened && shown && (
+        <VersionDialog
+          version={opened}
+          tab={shown.tab}
+          onTab={(tab) => onShow({ id: opened.id, tab })}
+          onClose={() => onShow(null)}
+        />
+      )}
+      {restoring && (
+        <RestoreDialog
+          version={restoring}
+          onClose={() => setRestoring(null)}
+          onRestored={onRestored}
+        />
+      )}
+    </section>
   )
 }

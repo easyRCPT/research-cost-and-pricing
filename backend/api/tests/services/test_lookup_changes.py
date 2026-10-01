@@ -37,7 +37,11 @@ from api.models import (
 )
 from api.services import lookup_changes
 from api.services.lookup_changes import apply_changes
-from api.services.lookup_update import create_lookup_version, list_versions
+from api.services.lookup_update import (
+    changes_in,
+    create_lookup_version,
+    list_versions,
+)
 from api.services.submission import submit_budget
 
 LEVEL_A1 = {
@@ -213,6 +217,36 @@ class TestVersions(RatesMixin, TestCase):
             ],
             [("", self.admin.email, 2), ("2027 EBA increase", self.admin.email, 1)],
         )
+
+    def test_a_version_shows_what_each_of_its_changes_did(self):
+        self.save(set_rate(LEVEL_A1, "110000"), note="2027 EBA increase")
+
+        [only] = changes_in(self.version.id)
+
+        self.assertEqual(only["note"], "2027 EBA increase")
+        self.assertEqual(only["saved_by_name"], self.admin.email)
+        self.assertEqual(
+            only["changes"],
+            [
+                {
+                    "table": "salary_rates",
+                    "op": "update",
+                    "key": LEVEL_A1,
+                    "before": {"rate": "100000.0000"},
+                    "after": {"rate": "110000.0000"},
+                }
+            ],
+        )
+
+    def test_a_set_is_credited_to_its_savers_name_when_they_have_one(self):
+        self.admin.first_name, self.admin.last_name = "Ada", "Lovelace"
+        self.admin.save()
+        self.save(set_rate(LEVEL_A1, "110000"))
+
+        [only] = changes_in(self.version.id)
+
+        self.assertEqual(only["saved_by"], self.admin.email)
+        self.assertEqual(only["saved_by_name"], "Ada Lovelace")
 
     def test_the_versions_list_says_which_version_takes_the_next_set(self):
         listed = {v["id"]: v for v in list_versions()}

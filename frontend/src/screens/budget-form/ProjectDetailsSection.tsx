@@ -17,9 +17,12 @@ export function ProjectDetailsSection({
   years,
   summary,
 }: ProjectDetailsSectionProps) {
-  const duration = `${MONTHS[project.start_month - 1]} ${years[0]} to ${
-    MONTHS[project.end_month - 1]
-  } ${years[years.length - 1]}`
+  const duration =
+    project.end_month === null
+      ? DASH
+      : `${MONTHS[project.start_month - 1]} ${years[0]} to ${
+          MONTHS[project.end_month - 1]
+        } ${years[years.length - 1]}`
 
   return (
     <>

@@ -21,20 +21,30 @@ test('the projects list shows a project and opens it', async ({ page }) => {
   await expect(page.getByLabel('Project title')).toHaveValue(title)
 })
 
-test('a new project can be started from the screen', async ({ page }) => {
-  const title = uniqueTitle('Started from the form')
+test('a new project opens on Project Details with costing locked', async ({
+  page,
+}) => {
+  const title = uniqueTitle('Started from the button')
 
   await page.goto('/')
   await page.getByRole('button', { name: 'New project' }).click()
 
-  await page.getByLabel('Project title').fill(title)
-  await page.getByRole('combobox').first().click()
-  await page.getByRole('option').first().click()
-  await page.getByRole('button', { name: 'Create and open' }).click()
-
-  // Creating one lands in its editor rather than back on the list.
   await expect(
     page.getByRole('heading', { name: 'Project Details' }),
   ).toBeVisible()
-  await expect(page.getByLabel('Project title')).toHaveValue(title)
+  const staffCosts = page
+    .getByRole('navigation', { name: 'Costing sections' })
+    .getByRole('button', { name: 'Staff Costs', exact: true })
+  await expect(staffCosts).toBeDisabled()
+
+  await page.getByLabel('Project title').fill(title)
+  await page.getByRole('combobox', { name: 'Department' }).click()
+  await page.getByRole('combobox', { name: 'Search' }).fill('Computing')
+  await page.getByRole('option').first().click()
+  await page.getByRole('combobox', { name: 'End year' }).click()
+  await page.getByRole('option').first().click()
+  await page.getByRole('combobox', { name: 'End month' }).click()
+  await page.getByRole('option').last().click()
+
+  await expect(staffCosts).toBeEnabled()
 })

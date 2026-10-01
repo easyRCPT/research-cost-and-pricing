@@ -416,9 +416,10 @@ def _validate_year_and_convert_value(
     # Check in project duration
     project = line.budget.project
 
-    if year < project.start_year or year > project.end_year:
+    end_year = project.end_year or project.start_year
+    if year < project.start_year or year > end_year:
         raise ValidationError(
-            f"Year must be between {project.start_year} and {project.end_year}."
+            f"Year must be between {project.start_year} and {end_year}."
         )
 
     # Return None to delete the year value

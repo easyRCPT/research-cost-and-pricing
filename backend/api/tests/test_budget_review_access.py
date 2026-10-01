@@ -91,7 +91,7 @@ class ReviewAccessTestCase(TestCase):
         self.budget(self.computing, DRAFT)
 
         self.client.force_login(self.hod)
-        rows = self.client.get(reverse("projects")).json()
+        rows = self.client.get(reverse("projects")).json()["results"]
 
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["budget_id"], submitted.id)

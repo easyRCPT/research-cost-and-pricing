@@ -1,6 +1,5 @@
 import {
   createProject,
-  DEMO,
   expect,
   readyProject,
   signIn,
@@ -47,7 +46,7 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByText(/Approved\s+by Hana Head/)).toBeVisible()
 
   // Back in the queue, it is gone.
-  await page.locator('header').getByRole('button', { name: 'Approvals' }).click()
+  await page.getByRole('navigation', { name: 'Costing sections' }).getByRole('button', { name: 'Approval queue' }).click()
   await expect(page).toHaveURL('/approvals')
   await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
 
@@ -118,8 +117,7 @@ test('the owner withdraws a submission, it leaves the queue, and a new draft car
     .getByRole('button', { name: 'Approvals', exact: true })
     .click()
   await expect(page.getByRole('button', { name: 'Submit for approval' })).toBeVisible()
-  const budgets = await (await page.request.get('/api/projects/')).json()
-  const row = budgets.find((candidate: { id: number }) => candidate.id === project.id)
+  const row = await (await page.request.get(`/api/projects/${project.id}/`)).json()
   expect(row.budget_count).toBe(2)
 })
 
@@ -134,14 +132,13 @@ test("an approver's register lists their area at any status, and Back returns to
   await expect(page).toHaveURL('/approvals/register')
   await page.getByPlaceholder('Search').fill(title)
   const row = page.getByRole('row').filter({ hasText: title })
-  await expect(row).toContainText(DEMO.researcher)
-  await expect(row).toContainText('Head of Department review')
+  await expect(row).toContainText('Ruth Researcher')
+  await expect(row).toContainText('HoD review')
 
-  // The chips filter on the server.
-  const statuses = page.getByRole('group', { name: 'Status' })
-  await statuses.getByRole('button', { name: 'Approved', exact: true }).click()
-  await expect(row).toHaveCount(0)
-  await statuses.getByRole('button', { name: 'All', exact: true }).click()
+  // The status filter is the table's own, and keeps the row while it matches.
+  await page.getByRole('button', { name: 'Status' }).first().click()
+  await page.getByRole('checkbox', { name: /^HoD review/ }).click()
+  await page.keyboard.press('Escape')
   await expect(row).toBeVisible()
 
   // A row opens the whole costing, read-only, with the margin as a figure.
@@ -155,6 +152,6 @@ test("an approver's register lists their area at any status, and Back returns to
   await expect(page.getByRole('slider')).toHaveCount(0)
 
   // Back goes to the register it came from, not the queue.
-  await page.locator('header').getByRole('button', { name: 'Register' }).click()
+  await page.getByRole('navigation', { name: 'Costing sections' }).getByRole('button', { name: 'Register' }).click()
   await expect(page).toHaveURL('/approvals/register')
 })

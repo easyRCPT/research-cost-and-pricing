@@ -107,6 +107,41 @@ class AdminUsersTest(TestCase):
         response = self.assign(self.ruth, {"role": "hod", "faculty": "ENG"})
         self.assertEqual(response.status_code, 422)
 
+    def test_a_researcher_cannot_be_assigned_to_approve(self):
+        sam = self.account("sam@unimelb.edu.au", "researcher")
+
+        response = self.assign(sam, {"role": "hod", "department": "CIS"})
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(sam.org_assignments.count(), 0)
+
+    def test_only_staff_can_be_assigned_to_approve(self):
+        nobody = make_user("nobody@unimelb.edu.au")
+        admin_only = self.account("ada@unimelb.edu.au", "superadmin")
+
+        for user in (nobody, admin_only):
+            response = self.assign(user, {"role": "hod", "department": "CIS"})
+            self.assertEqual(response.status_code, 422)
+            self.assertEqual(user.org_assignments.count(), 0)
+
+    def test_removing_staff_removes_the_assignments_and_logs_each(self):
+        self.assign(self.ruth, {"role": "hod", "department": "CIS"})
+        self.assign(self.ruth, {"role": "dean", "faculty": "ENG"})
+
+        self.patch(self.ruth, {"groups": ["researcher"]})
+
+        self.assertEqual(self.ruth.org_assignments.count(), 0)
+        self.assertEqual(
+            AuditLog.objects.filter(action="admin.assignment.delete").count(), 2
+        )
+
+    def test_a_save_that_keeps_staff_keeps_the_assignments(self):
+        self.assign(self.ruth, {"role": "hod", "department": "CIS"})
+
+        self.patch(self.ruth, {"groups": ["staff", "researcher"]})
+
+        self.assertEqual(self.ruth.org_assignments.count(), 1)
+
     def test_a_duplicate_assignment_is_refused_not_stored(self):
         self.assertEqual(
             self.assign(self.ruth, {"role": "hod", "department": "CIS"}).status_code,

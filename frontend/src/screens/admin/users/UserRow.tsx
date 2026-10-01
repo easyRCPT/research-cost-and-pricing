@@ -1,56 +1,63 @@
 import type { AdminUser } from '@/api/admin-users'
-import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
-import { nameOf, ROLE_LABEL } from './labels'
-import { UserEditor } from './UserEditor'
+import { nameOf } from './labels'
 
 export function UserRow({
   user,
-  open,
-  onToggle,
+  selected,
+  onSelect,
 }: {
   user: AdminUser
-  open: boolean
-  onToggle: () => void
+  selected: boolean
+  onSelect: () => void
 }) {
+  const approvals = user.assignments.length
   return (
-    <div className="px-4 py-3">
+    <li>
       <button
         type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="flex w-full items-start justify-between gap-4 text-left"
+        onClick={onSelect}
+        aria-current={selected ? 'true' : undefined}
+        className={cn(
+          'w-full border-b px-3.5 py-2.5 text-left last:border-0',
+          selected ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/60',
+        )}
       >
-        <span>
-          <span className="font-medium">{nameOf(user)}</span>
+        <span className="flex items-center gap-2 text-[13.5px] font-medium">
+          {nameOf(user)}
           {!user.is_active && (
-            <Badge variant="destructive" className="ml-2">
+            <span
+              className={cn(
+                'text-[11px] font-semibold',
+                selected ? 'text-primary-foreground/70' : 'text-destructive',
+              )}
+            >
               Deactivated
-            </Badge>
-          )}
-          <span className="block text-[12.5px] text-muted-foreground">
-            {user.email}
-          </span>
-          {user.assignments.length > 0 && (
-            <span className="mt-1 block text-[12.5px]">
-              {user.assignments
-                .map(
-                  (a) =>
-                    `${ROLE_LABEL[a.role]}, ${a.department_name ?? a.faculty_name ?? ''}`,
-                )
-                .join(' · ')}
             </span>
           )}
         </span>
-        <span className="flex flex-wrap justify-end gap-1">
-          {user.groups.map((group) => (
-            <Badge key={group} variant="secondary">
-              {group}
-            </Badge>
-          ))}
+        <span
+          className={cn(
+            'block truncate text-[12px]',
+            selected ? 'text-primary-foreground/65' : 'text-muted-foreground',
+          )}
+        >
+          {user.email}
+        </span>
+        <span
+          className={cn(
+            'block truncate text-[11.5px]',
+            selected
+              ? 'text-primary-foreground/50'
+              : 'text-muted-foreground/80',
+          )}
+        >
+          {user.groups.join(', ') || 'no groups'}
+          {approvals > 0 &&
+            ` · approves for ${approvals} unit${approvals > 1 ? 's' : ''}`}
         </span>
       </button>
-      {open && <UserEditor user={user} />}
-    </div>
+    </li>
   )
 }

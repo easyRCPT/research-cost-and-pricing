@@ -20,10 +20,5 @@ export const fieldError = (
 export const facultyOptions = (faculties: Faculty[]) =>
   faculties.map((f) => ({ value: f.code, label: f.name }))
 
-// A wide table scrolls sideways, and the row's name and its buttons (or the
-// question a save is asking) must stay in view while it does.
-export const PIN_LEFT = 'sticky left-0 z-[1]'
-export const PIN_RIGHT = 'sticky right-0 z-[1]'
-
 export const text = (value: unknown) =>
   value === null || value === undefined ? '' : String(value)

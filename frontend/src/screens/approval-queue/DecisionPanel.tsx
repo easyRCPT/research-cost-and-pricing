@@ -84,13 +84,6 @@ export function DecisionPanel({
         />
       )}
 
-      <p className="mt-4 text-[13px] text-muted-foreground">
-        The rates were locked when this was submitted. A later change to a
-        salary rate or an on-cost reprices new work only, so what you decide on
-        is what it stays. Every screen of the costing is open to you in the
-        rail, read-only.
-      </p>
-
       {tooLate && (
         <Alert className="mt-4">
           <AlertDescription>

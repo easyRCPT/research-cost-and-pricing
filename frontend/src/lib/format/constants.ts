@@ -1,14 +1,3 @@
-const UPPERCASE_WORDS = new Set(['uom', 'gst', 'eba'])
-
-/** `override_uom_oncosts` as a person reads it: "Override UOM Oncosts". */
-export const constantName = (name: string) =>
-  name
-    .split('_')
-    .map((word) =>
-      UPPERCASE_WORDS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1),
-    )
-    .join(' ')
-
 /**
  * The constants held as rates: a decimal, 0.30 for 30% (#151). Display only:
  * which values the server accepts is the server's to say.

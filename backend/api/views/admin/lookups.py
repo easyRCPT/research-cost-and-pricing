@@ -1,13 +1,17 @@
 from typing import cast
 
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
+from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import Budget
+from api.models import Budget, LookupConfiguration
+from api.pagination import Sorted
 from api.permissions import IsSuperadmin
+from api.serializers.filter_serializer import FilterOptionSerializer
 from api.serializers.lookup_serializer import (
     LookupCreateSerializer,
     LookupUpdateSerializer,
@@ -20,14 +24,31 @@ class ChangeSetSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     note = serializers.CharField(allow_blank=True)
     saved_by = serializers.CharField(allow_null=True)
+    # Their name, or their email when they have none.
+    saved_by_name = serializers.CharField(allow_null=True)
     saved_at = serializers.DateTimeField()
     change_count = serializers.IntegerField()
+
+
+class VersionChangeSerializer(serializers.Serializer):
+    """One change in a set: the row it named, and the values before and after."""
+
+    table = serializers.CharField()
+    op = serializers.CharField()
+    key = serializers.DictField()
+    before = serializers.DictField(allow_null=True)
+    after = serializers.DictField(allow_null=True)
+
+
+class VersionChangeSetSerializer(ChangeSetSerializer):
+    changes = VersionChangeSerializer(many=True)
 
 
 class LookupVersionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     created_at = serializers.DateTimeField()
     updated_by = serializers.CharField(allow_null=True)
+    updated_by_name = serializers.CharField(allow_null=True)
     budgets_priced = serializers.IntegerField()
     current = serializers.BooleanField()
     accepts_changes = serializers.BooleanField()
@@ -99,15 +120,96 @@ class ChangesAppliedSerializer(serializers.Serializer):
     replaced = PricedOnSerializer(allow_null=True)
 
 
-class LookupVersionsView(APIView):
-    """Every set of rates the tool has had, newest first (#137)."""
+class VersionsQuerySerializer(serializers.Serializer):
+    by = serializers.ListField(child=serializers.CharField(), required=False)
+    since = serializers.DateField(required=False)
+    until = serializers.DateField(required=False)
+    q = serializers.CharField(required=False, allow_blank=True, default="")
+    ordering = serializers.CharField(required=False)
+
+
+class VersionFiltersSerializer(serializers.Serializer):
+    # Versions made by nobody are `system`.
+    by = FilterOptionSerializer(many=True)
+
+
+def versions_query(request: Request) -> dict:
+    """The history's search and filters, without its sort."""
+    query = VersionsQuerySerializer(data=request.query_params)
+    query.is_valid(raise_exception=True)
+    data = cast(dict, query.validated_data)
+    return {
+        "by": data.get("by"),
+        "since": data.get("since"),
+        "until": data.get("until"),
+        "q": data["q"].strip(),
+    }
+
+
+@extend_schema(parameters=[VersionsQuerySerializer])
+class LookupVersionsView(ListAPIView):
+    """Every set of rates the tool has had, a cursor page at a time (#137)."""
+
+    permission_classes = [IsSuperadmin]
+    serializer_class = LookupVersionSerializer
+    pagination_class = Sorted
+    ordering = "-id"
+    orderings = {
+        "id": "id",
+        "created_at": "created_at",
+        "updated_by": "by",
+        "changes": "changes",
+        "budgets_priced": "budgets_priced",
+    }
+
+    def get_queryset(self):  # type: ignore[override]
+        return lookup_update.versions(**versions_query(cast(Request, self.request)))
+
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        page = cast(list, self.paginate_queryset(self.get_queryset()))
+        return self.get_paginated_response(
+            LookupVersionSerializer(lookup_update.version_rows(page), many=True).data
+        )
+
+
+class LookupVersionView(APIView):
+    """One version, by id or the current one, for a dialog its page may not hold."""
 
     permission_classes = [IsSuperadmin]
 
-    @extend_schema(responses=LookupVersionSerializer(many=True))
-    def get(self, request: Request) -> Response:
+    @extend_schema(responses=LookupVersionSerializer)
+    def get(self, request: Request, version_id: int | None = None) -> Response:
+        if version_id is None:
+            version_id = LookupConfiguration.objects.get().current_version_id
+        version = get_object_or_404(lookup_update.versions(), id=version_id)
         return Response(
-            LookupVersionSerializer(lookup_update.list_versions(), many=True).data
+            LookupVersionSerializer(lookup_update.version_rows([version])[0]).data
+        )
+
+
+class LookupVersionFiltersView(APIView):
+    """Every value the history's filters can take."""
+
+    permission_classes = [IsSuperadmin]
+
+    @extend_schema(
+        parameters=[VersionsQuerySerializer], responses=VersionFiltersSerializer
+    )
+    def get(self, request: Request) -> Response:
+        return Response(lookup_update.version_filters(versions_query(request)))
+
+
+class LookupVersionChangesView(APIView):
+    """The sets saved into one version, with what each change did (#138)."""
+
+    permission_classes = [IsSuperadmin]
+
+    @extend_schema(responses=VersionChangeSetSerializer(many=True))
+    def get(self, request: Request, version_id: int) -> Response:
+        return Response(
+            VersionChangeSetSerializer(
+                lookup_update.changes_in(version_id), many=True
+            ).data
         )
 
 

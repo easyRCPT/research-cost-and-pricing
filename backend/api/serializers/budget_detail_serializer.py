@@ -39,17 +39,17 @@ class ProjectInfoSerializer(serializers.Serializer):
     title = serializers.CharField(allow_blank=True)
     chief_investigator = serializers.CharField(allow_blank=True)
     funder = serializers.CharField(allow_blank=True)
-    department = serializers.CharField()
-    faculty = serializers.CharField()
+    department = serializers.CharField(allow_blank=True)
+    faculty = serializers.CharField(allow_blank=True)
     scheme = serializers.CharField(allow_blank=True)
 
     start_year = serializers.IntegerField()
     start_month = serializers.IntegerField()
-    end_year = serializers.IntegerField()
-    end_month = serializers.IntegerField()
+    end_year = serializers.IntegerField(allow_null=True)
+    end_month = serializers.IntegerField(allow_null=True)
 
     company = serializers.CharField()
-    cost_centre = serializers.CharField()
+    cost_centre = serializers.CharField(allow_blank=True)
     activity = serializers.CharField(allow_null=True)
     region = serializers.CharField(allow_null=True)
     account_string = serializers.CharField(allow_blank=True)
@@ -446,11 +446,9 @@ class BudgetDetailSerializer(serializers.Serializer):
         staff_table = instance["staff_table"]
         non_staff_table = instance["non_staff_table"]
 
+        info = instance["project_info"]
         years = list(
-            range(
-                instance["project_info"]["start_year"],
-                instance["project_info"]["end_year"] + 1,
-            )
+            range(info["start_year"], (info["end_year"] or info["start_year"]) + 1)
         )
 
         data = {

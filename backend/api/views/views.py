@@ -2,13 +2,15 @@ from typing import cast
 from uuid import UUID
 
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.models import Deliverable, NonStaffCostLine, StaffCostLine
+from api.pagination import Sorted
 from api.serializers.budget_detail_serializer import BudgetDetailSerializer
 from api.serializers.budget_update_serializer import (
     UPDATE_SERIALIZERS,
@@ -20,8 +22,10 @@ from api.serializers.lookup_serializer import LookupTablesSerializer
 from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
 from api.serializers.project_serializer import (
     ProjectCreateSerializer,
+    ProjectFiltersSerializer,
     ProjectListQuerySerializer,
     ProjectRowSerializer,
+    list_query,
 )
 from api.serializers.staff_line_serializer import StaffLineSerializer
 from api.services import (
@@ -40,25 +44,28 @@ from api.services import (
 from api.services.budget_state import require_editable, require_ownership
 
 
-class ProjectView(APIView):
+@extend_schema_view(get=extend_schema(parameters=[ProjectListQuerySerializer]))
+class ProjectView(ListAPIView):
     """
-    The list of projects, and the way to start one.
+    The list of projects, a cursor page at a time, and the way to start one.
 
     Who may see which project is decided one level down, in
     services/project.visible_projects.
     """
 
-    @extend_schema(
-        parameters=[ProjectListQuerySerializer],
-        responses={200: ProjectRowSerializer(many=True)},
-    )
-    def get(self, request: Request) -> Response:
-        query = ProjectListQuerySerializer(data=request.query_params)
-        query.is_valid(raise_exception=True)
-        rows = project.list_projects(
-            request.user, cast(dict, query.validated_data)["status"]
+    serializer_class = ProjectRowSerializer
+    pagination_class = Sorted
+    ordering = "-updated_at"
+    orderings = project.SORTS
+
+    def get_queryset(self):
+        return project.narrow(
+            project.user_listing(self.request.user), **list_query(self.request)
         )
-        return Response(ProjectRowSerializer(rows, many=True).data)
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        return [project.build_row(row) for row in page or []]
 
     @extend_schema(
         request=ProjectCreateSerializer,
@@ -69,6 +76,31 @@ class ProjectView(APIView):
         serializer.is_valid(raise_exception=True)
         row = project.create(cast(dict, serializer.validated_data), request.user)
         return Response(ProjectRowSerializer(row).data, status=status.HTTP_201_CREATED)
+
+
+class ProjectDetailView(APIView):
+    """One project as its list row, so a link to it needs no page of the list."""
+
+    @extend_schema(responses=ProjectRowSerializer)
+    def get(self, request: Request, project_id: int) -> Response:
+        row = get_object_or_404(project.user_listing(request.user), id=project_id)
+        return Response(ProjectRowSerializer(project.build_row(row)).data)
+
+
+class ProjectFiltersView(APIView):
+    """Every value the list's filters can take, across the projects you can see."""
+
+    @extend_schema(
+        parameters=[ProjectListQuerySerializer], responses=ProjectFiltersSerializer
+    )
+    def get(self, request: Request) -> Response:
+        return Response(
+            project.filter_options(
+                project.visible_projects(request.user),
+                project.visible_budgets(request.user),
+                list_query(request),
+            )
+        )
 
 
 class BudgetDetailView(APIView):

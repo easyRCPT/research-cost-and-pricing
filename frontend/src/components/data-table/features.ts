@@ -1,9 +1,11 @@
 import {
   type ColumnDef,
+  columnVisibilityFeature,
   createColumnHelper,
   createPaginatedRowModel,
   createSortedRowModel,
   type RowData,
+  rowExpandingFeature,
   rowPaginationFeature,
   rowSortingFeature,
   tableFeatures,
@@ -16,6 +18,8 @@ export interface DataTableColumnMeta {
 }
 
 export const dataTableFeatures = tableFeatures({
+  columnVisibilityFeature,
+  rowExpandingFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
   rowPaginationFeature,
@@ -42,4 +46,10 @@ export interface DataTableFilter<T extends RowData> {
   id: string
   label: string
   value: (row: T) => string
+  /**
+   * A date range rather than a list of values. `value` is then the row's day
+   * as YYYY-MM-DD, and the filter's state is its first and last day, either
+   * empty for open.
+   */
+  range?: boolean
 }

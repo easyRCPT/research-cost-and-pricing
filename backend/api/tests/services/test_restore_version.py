@@ -8,11 +8,13 @@ nothing that already exists is rewritten.
 from decimal import Decimal
 
 from django.test import TestCase
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from api.models import (
     AuditLog,
     Budget,
+    LookupChangeSet,
     LookupConfiguration,
     LookupVersion,
     SalaryRate,
@@ -242,4 +244,110 @@ class RestoreRoutesTest(TestCase):
         self.client.force_login(self.admin)
         response = self.client.get("/api/admin/lookups/versions/")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(any(v["current"] for v in response.json()))
+        self.assertTrue(any(v["current"] for v in response.json()["results"]))
+
+
+class VersionHistoryRoutesTest(TestCase):
+    """The history pages by cursor, sorts and filters on the server."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = make_user(
+            "a@unimelb.edu.au", groups=["superadmin"], first_name="Ada", last_name="Ng"
+        )
+        cls.zed = make_user("z@unimelb.edu.au", groups=["superadmin"])
+        cls.loaded = LookupConfiguration.objects.get().current_version
+        cls.by_ada = LookupVersion.objects.create(updated_by=cls.admin)
+        cls.by_zed = LookupVersion.objects.create(updated_by=cls.zed)
+        LookupChangeSet.objects.create(
+            version=cls.by_ada, saved_by=cls.admin, note="Fix the EBA", change_count=3
+        )
+        LookupChangeSet.objects.create(
+            version=cls.by_ada, saved_by=cls.admin, note="", change_count=2
+        )
+        project = make_project()
+        for _ in range(2):
+            make_budget(project, lookup_version=cls.by_zed)
+
+    def setUp(self):
+        self.client.force_login(self.admin)
+
+    def ids(self, **query) -> list[int]:
+        response = self.client.get("/api/admin/lookups/versions/", query)
+        self.assertEqual(response.status_code, 200, response.content)
+        return [v["id"] for v in response.json()["results"]]
+
+    def test_newest_first_a_page_at_a_time(self):
+        response = self.client.get("/api/admin/lookups/versions/", {"limit": 2})
+        page = response.json()
+        self.assertEqual(
+            [v["id"] for v in page["results"]], [self.by_zed.id, self.by_ada.id]
+        )
+        rest = self.client.get(page["next"]).json()
+        self.assertEqual(rest["results"][0]["id"], self.loaded.id)
+
+    def test_it_sorts_on_the_counts_and_who(self):
+        self.assertEqual(self.ids(ordering="-changes")[0], self.by_ada.id)
+        self.assertEqual(self.ids(ordering="-budgets_priced")[0], self.by_zed.id)
+        # By name, or by email without one; the system's blank sorts first.
+        self.assertEqual(
+            self.ids(ordering="updated_by"),
+            [self.loaded.id, self.by_ada.id, self.by_zed.id],
+        )
+
+    def test_it_refuses_a_sort_it_cannot_do(self):
+        response = self.client.get("/api/admin/lookups/versions/", {"ordering": "note"})
+        self.assertEqual(response.status_code, 400)
+
+    def test_it_filters_by_who_made_it(self):
+        self.assertEqual(self.ids(by="z@unimelb.edu.au"), [self.by_zed.id])
+        self.assertEqual(
+            self.ids(by=["system", "a@unimelb.edu.au"]),
+            [self.by_ada.id, self.loaded.id],
+        )
+
+    def test_it_searches_notes_names_and_numbers(self):
+        self.assertEqual(self.ids(q="eba"), [self.by_ada.id])
+        self.assertEqual(self.ids(q="ada"), [self.by_ada.id])
+        self.assertEqual(self.ids(q=f"#{self.by_zed.id}"), [self.by_zed.id])
+
+    def test_it_filters_by_day(self):
+        today = timezone.localdate().isoformat()
+        self.assertEqual(len(self.ids(since=today, until=today)), 3)
+        self.assertEqual(self.ids(until="2000-01-01"), [])
+
+    def test_the_counts_ride_on_each_row(self):
+        response = self.client.get("/api/admin/lookups/versions/")
+        rows = {v["id"]: v for v in response.json()["results"]}
+        self.assertEqual(rows[self.by_zed.id]["budgets_priced"], 2)
+        self.assertEqual(len(rows[self.by_ada.id]["change_sets"]), 2)
+
+    def test_one_version_by_id_and_the_current_one(self):
+        one = self.client.get(f"/api/admin/lookups/versions/{self.by_ada.id}/")
+        self.assertEqual(one.json()["updated_by_name"], "Ada Ng")
+        current = self.client.get("/api/admin/lookups/versions/current/")
+        self.assertEqual(current.json()["id"], self.loaded.id)
+        self.assertTrue(current.json()["current"])
+
+    def test_the_filter_options_name_and_count_every_maker(self):
+        url = "/api/admin/lookups/versions/filters/"
+        system = LookupVersion.objects.filter(updated_by__isnull=True).count()
+        self.assertEqual(
+            self.client.get(url).json()["by"],
+            [
+                {"value": "a@unimelb.edu.au", "label": "Ada Ng", "count": 1},
+                {"value": "system", "count": system},
+                {
+                    "value": "z@unimelb.edu.au",
+                    "label": "z@unimelb.edu.au",
+                    "count": 1,
+                },
+            ],
+        )
+
+        # Counted against the search, but every maker still listed.
+        searched = self.client.get(url, {"q": "EBA"}).json()["by"]
+        counts = {option["value"]: option["count"] for option in searched}
+        self.assertEqual(
+            counts, {"a@unimelb.edu.au": 1, "system": 0, "z@unimelb.edu.au": 0}
+        )

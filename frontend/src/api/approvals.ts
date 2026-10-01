@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query'
 
 import { budgetKeys } from '@/api/budget/detail'
-import { projectsQuery } from '@/api/projects'
+import { projectKeys } from '@/api/projects'
 import { useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
@@ -61,6 +61,6 @@ export function useDecide() {
     // still offers it.
     // Any open copy of the budget now has a new status and a new step.
     onSettled: () =>
-      invalidate(queueQuery.queryKey, projectsQuery.queryKey, budgetKeys.all),
+      invalidate(queueQuery.queryKey, projectKeys.all, budgetKeys.all),
   })
 }

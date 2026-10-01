@@ -52,10 +52,10 @@ export function VersionsSummary({
         </Grid>
       )}
       <p className="mt-3 text-[12.5px]">
-        <Link to="/admin/lookups" className={LINK}>
+        <Link to="/admin/versions" className={LINK}>
           {versions && versions.total > versions.latest.length
-            ? `All ${versions.total} versions, and the rates themselves`
-            : 'Edit rates, or restore an older version'}
+            ? `All ${versions.total} versions`
+            : 'Restore an older version'}
         </Link>
       </p>
     </Panel>

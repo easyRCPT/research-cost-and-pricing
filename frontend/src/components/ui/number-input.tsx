@@ -24,6 +24,7 @@ export function NumberInput({
   onOutOfRange,
   onFocus,
   onBlur,
+  'aria-invalid': invalid,
   ...rest
 }: NumberInputProps) {
   const [draft, setDraft] = useState<string | null>(null)
@@ -39,7 +40,9 @@ export function NumberInput({
         setDraft(String(value))
         onFocus?.(e)
       }}
-      aria-invalid={draft !== null && outside(Number(draft), min, max)}
+      aria-invalid={
+        Boolean(invalid) || (draft !== null && outside(Number(draft), min, max))
+      }
       onChange={(e) => {
         const raw = e.target.value
         setDraft(raw)

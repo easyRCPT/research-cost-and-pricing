@@ -1,20 +1,24 @@
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
+import { pageOptions } from '@/api/cursor'
 import { lookupsQuery } from '@/api/lookups'
 import { adminQuery, useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 import type { ReferenceTable } from '@/screens/admin/referenceTables'
-import type { components } from '@/types/api'
+import type { components, operations } from '@/types/api'
 
 export type LookupVersion = components['schemas']['LookupVersion']
 export type LookupChange = components['schemas']['LookupChange']
 export type ChangesApplied = components['schemas']['ChangesApplied']
 export type PricedOn = components['schemas']['PricedOn']
 export type VersionBudget = components['schemas']['VersionBudget']
+export type VersionChangeSet = components['schemas']['VersionChangeSet']
+export type VersionChange = components['schemas']['VersionChange']
 
 /**
  * The rate tables an administrator edits here: the versioned ones, which are
@@ -31,12 +35,65 @@ export type RateTable =
   | 'non_staff_cost_categories'
   | 'calculation_constants'
 
-const versionsQuery = adminQuery(['lookup-versions'], () =>
-  api.GET('/api/admin/lookups/versions/'),
-)
+export type VersionsQuery = NonNullable<
+  operations['admin_lookups_versions_list']['parameters']['query']
+>
 
-export function useLookupVersions() {
-  return useSuspenseQuery(versionsQuery)
+/** Every read of the history sits under this key, so one write refreshes them all. */
+const VERSIONS = ['admin', 'lookup-versions'] as const
+
+/** One cursor page of the history. */
+export function useLookupVersions(query: VersionsQuery) {
+  return useQuery(
+    adminQuery(
+      ['lookup-versions', 'page', query],
+      () => api.GET('/api/admin/lookups/versions/', { params: { query } }),
+      pageOptions(query.cursor),
+    ),
+  )
+}
+
+/** Everyone who has made a version, counted against the search and dates. */
+export function useVersionFilters(query: VersionsQuery) {
+  return useQuery(
+    adminQuery(
+      ['lookup-versions', 'filters', query],
+      () => api.GET('/api/admin/lookups/versions/filters/', { params: { query } }),
+      { placeholderData: keepPreviousData },
+    ),
+  )
+}
+
+/** One version, for a dialog linked to one the page on screen may not hold. */
+export function useLookupVersion(versionId: number | null) {
+  return useQuery({
+    ...adminQuery(['lookup-versions', versionId], () =>
+      api.GET('/api/admin/lookups/versions/{version_id}/', {
+        params: { path: { version_id: versionId ?? 0 } },
+      }),
+    ),
+    enabled: versionId !== null,
+  })
+}
+
+/** The version the next saved set goes into, or copies from. */
+export function useCurrentVersion() {
+  return useSuspenseQuery(
+    adminQuery(['lookup-versions', 'current'], () =>
+      api.GET('/api/admin/lookups/versions/current/'),
+    ),
+  )
+}
+
+/** The sets saved into one version, with each change's before and after (#138), fetched when asked for. */
+export function useVersionChanges(versionId: number) {
+  return useQuery(
+    adminQuery(['lookup-versions', versionId, 'changes'], () =>
+      api.GET('/api/admin/lookups/versions/{version_id}/changes/', {
+        params: { path: { version_id: versionId } },
+      }),
+    ),
+  )
 }
 
 /** The costings stamped with one version (#142), fetched when asked for. */
@@ -56,7 +113,7 @@ export function useVersionBudgets(versionId: number) {
  */
 function useRefresh() {
   const invalidate = useInvalidate()
-  return () => invalidate(lookupsQuery.queryKey, versionsQuery.queryKey)
+  return () => invalidate(lookupsQuery.queryKey, VERSIONS)
 }
 
 /**

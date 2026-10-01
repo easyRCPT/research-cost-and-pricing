@@ -14,7 +14,7 @@ from api.models import (
     User,
 )
 from api.services import budget_update
-from api.services.project import budget_defaults, create, list_projects
+from api.services.project import budget_defaults, build_row, create, user_listing
 from api.tests.factories import (
     make_budget,
     make_department,
@@ -27,6 +27,11 @@ from api.tests.factories import (
 def current_version():
     """The singleton the lookup versioning migration creates."""
     return LookupConfiguration.objects.get().current_version
+
+
+def list_projects(user):
+    """The list in its default order, as the projects route serves it."""
+    return [build_row(p) for p in user_listing(user).order_by("-last_activity", "-id")]
 
 
 class ProjectTestMixin:

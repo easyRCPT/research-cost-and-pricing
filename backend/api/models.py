@@ -200,6 +200,11 @@ class User(AbstractUser):
             models.UniqueConstraint(Lower("email"), name="user_email_unique_ci"),
         ]
 
+    @property
+    def display_name(self) -> str:
+        """What they are called on screen: their name, or their email without one."""
+        return self.get_full_name() or self.email
+
 
 class UserOrgAssignment(models.Model):
     """
@@ -590,7 +595,7 @@ def build_account_string(
     activity: str | None,
     region: str | None,
 ) -> str:
-    if not (activity and region):
+    if not (cost_centre and activity and region):
         return ""
     return f"{company}-{cost_centre}-{activity}-{region}"
 
@@ -598,7 +603,7 @@ def build_account_string(
 class Project(models.Model):
     if TYPE_CHECKING:
         id: int
-        department_id: str
+        department_id: str | None
         created_by_id: int
         activity_id: str | None
         region_id: str | None
@@ -610,10 +615,11 @@ class Project(models.Model):
     # Blank while a draft is being written: clearing the title to retype it
     # must not be an error. Completeness belongs at submission, not on the row.
     title = models.CharField(max_length=200, blank=True)
-    department = models.ForeignKey("Department", on_delete=models.PROTECT)
+    # Null until Project Details names one: a project is created empty.
+    department = models.ForeignKey(
+        "Department", null=True, blank=True, on_delete=models.PROTECT
+    )
     chief_investigator = models.CharField(max_length=100, blank=True)
-    # Blank until Project Details names one: a project is created with only a
-    # title and a department, so that costing can start straight away.
     funder = models.CharField(max_length=100, blank=True)
     other_funder = models.CharField(max_length=200, blank=True, default="")
     other_funder_category = models.CharField(max_length=100, blank=True, default="")
@@ -622,8 +628,11 @@ class Project(models.Model):
     # Dictates potential year allocations for staff
     start_year = models.PositiveSmallIntegerField()
     start_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
-    end_year = models.PositiveSmallIntegerField()
-    end_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
+    # Null until Project Details sets it; costing waits on it.
+    end_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    end_month = models.PositiveSmallIntegerField(
+        null=True, blank=True, validators=[MaxValueValidator(12)]
+    )
 
     activity = models.ForeignKey(
         "Activity", null=True, blank=True, on_delete=models.PROTECT
@@ -660,7 +669,7 @@ class Project(models.Model):
     def account_string(self):
         return build_account_string(
             self.COMPANY_CODE,
-            self.department_id,
+            self.department_id or "",
             self.activity_id,
             self.region_id,
         )

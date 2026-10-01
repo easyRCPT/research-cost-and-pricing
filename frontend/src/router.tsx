@@ -9,7 +9,7 @@ import {
 
 import { homeFor, meQuery } from '@/api/auth'
 import { SUPERADMIN } from '@/api/auth'
-import { LOOKUP_SCREEN } from '@/components/lookups-tabs/LookupButton'
+import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppSkeleton } from '@/components/shell'
 import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
 import { EditorRoute } from '@/routes/editor'
@@ -21,6 +21,7 @@ import { LookupEditor } from '@/screens/admin/LookupEditor'
 import { Overview } from '@/screens/admin/Overview'
 import { Projects as ProjectRegister } from '@/screens/admin/Projects'
 import { Users } from '@/screens/admin/Users'
+import { VersionHistory } from '@/screens/admin/VersionHistory'
 import { AdminLogin } from '@/screens/auth/AdminLogin'
 import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
@@ -117,33 +118,45 @@ const adminRoute = createRoute({
   component: AdminShell,
 })
 
+// The shell's own boundary shows the skeleton, inside the frame; the router's
+// default would put a whole app skeleton there.
+const inAdminShell = { getParentRoute: () => adminRoute, wrapInSuspense: false }
+
 // The front door (#94), where a superadmin signing in lands.
 const adminIndexRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: '/',
   component: Overview,
 })
 
 const adminLookupsRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'lookups',
   component: LookupEditor,
 })
 
+const adminVersionsRoute = createRoute({
+  ...inAdminShell,
+  path: 'versions',
+  validateSearch: (search: Record<string, unknown>): { version?: number } =>
+    typeof search.version === 'number' ? { version: search.version } : {},
+  component: VersionHistory,
+})
+
 const adminUsersRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'users',
   component: Users,
 })
 
 const adminProjectsRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'projects',
   component: ProjectRegister,
 })
 
 const adminAuditRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'audit',
   component: Audit,
 })
@@ -212,6 +225,7 @@ const routeTree = rootRoute.addChildren([
   adminRoute.addChildren([
     adminIndexRoute,
     adminLookupsRoute,
+    adminVersionsRoute,
     adminUsersRoute,
     adminProjectsRoute,
     adminAuditRoute,
