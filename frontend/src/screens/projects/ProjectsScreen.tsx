@@ -6,7 +6,7 @@ import { useProjects } from '@/api/projects'
 import { DataTable, type DataTableFilter } from '@/components/data-table'
 import { PageHead } from '@/components/shell'
 import { Button } from '@/components/ui/button'
-import { STATUS_LABELS } from '@/lib/status'
+import { statusLabel } from '@/lib/status'
 import type { ProjectRow } from '@/types'
 
 import { projectColumns } from './columns'
@@ -15,12 +15,7 @@ import { NewProjectForm } from './NewProjectForm'
 const FILTERS: DataTableFilter<ProjectRow>[] = [
   { id: 'department', label: 'Department', value: (row) => row.department },
   { id: 'faculty', label: 'Faculty', value: (row) => row.faculty },
-  {
-    id: 'status',
-    label: 'Status',
-    value: (row) =>
-      row.status === null ? 'No budget' : STATUS_LABELS[row.status],
-  },
+  { id: 'status', label: 'Status', value: (row) => statusLabel(row.status) },
 ]
 
 const byId = (row: ProjectRow) => String(row.id)
@@ -34,7 +29,14 @@ export function ProjectsScreen({ onOpen }: ProjectsScreenProps) {
   const { data: lookups } = useLookups()
   const [creating, setCreating] = useState(false)
 
-  const columns = useMemo(() => projectColumns(onOpen), [onOpen])
+  const columns = useMemo(
+    () =>
+      projectColumns<ProjectRow>({
+        open: (row) => row.budget_id !== null && onOpen(row.budget_id),
+        openable: (row) => row.budget_id !== null,
+      }),
+    [onOpen],
+  )
 
   return (
     <>

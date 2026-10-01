@@ -1,7 +1,7 @@
 import { columnHelper, type DataTableColumns } from '@/components/data-table'
 import { shortDate } from '@/lib/format/dates'
 import { money } from '@/lib/format/utils'
-import { statusLabel } from '@/lib/status'
+import { ownerName, statusLabel } from '@/lib/status'
 import type { ProjectRow } from '@/types'
 
 /** What the shared columns read: a ProjectRow, or an AdminProject. */
@@ -16,9 +16,6 @@ export type ProjectListRow = Pick<
   | 'updated_at'
   | 'owner'
 > & { reference: string | null }
-
-export const ownerName = (row: Pick<ProjectListRow, 'owner'>) =>
-  row.owner.name || row.owner.email
 
 const col = <T extends ProjectListRow>() => columnHelper<T>()
 
@@ -127,17 +124,24 @@ export const updatedColumn = <T extends ProjectListRow>() =>
     },
   })
 
-/** Built per screen because opening a row is the screen's to handle. */
-export const projectColumns = (
-  onOpen: (budgetId: number) => void,
-): DataTableColumns<ProjectRow> =>
-  columnHelper<ProjectRow>().columns([
-    referenceColumn<ProjectRow>(),
-    titleColumn<ProjectRow>(
-      (row) => row.budget_id !== null && onOpen(row.budget_id),
-      (row) => row.budget_id !== null,
-    ),
-    statusColumn<ProjectRow>(),
-    priceColumn<ProjectRow>(),
-    updatedColumn<ProjectRow>(),
+/**
+ * The register columns. `ownerHeader` adds the owner column under that
+ * heading, and `openable` limits which rows link to their costing.
+ */
+export const projectColumns = <T extends ProjectListRow>({
+  open,
+  openable,
+  ownerHeader,
+}: {
+  open: (row: T) => void
+  openable?: (row: T) => boolean
+  ownerHeader?: string
+}): DataTableColumns<T> =>
+  columnHelper<T>().columns([
+    referenceColumn<T>(),
+    titleColumn<T>(open, openable),
+    ...(ownerHeader ? [ownerColumn<T>(ownerHeader)] : []),
+    statusColumn<T>(),
+    priceColumn<T>(),
+    updatedColumn<T>(),
   ])

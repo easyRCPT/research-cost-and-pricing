@@ -2,23 +2,12 @@ import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useProjectsWithStatus } from '@/api/projects'
-import {
-  columnHelper,
-  DataTable,
-  type DataTableColumns,
-} from '@/components/data-table'
+import { DataTable } from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
 import { Skeleton } from '@/components/ui/skeleton'
 import { STATUS_LABELS } from '@/lib/status'
 import { cn } from '@/lib/utils'
-import {
-  ownerColumn,
-  priceColumn,
-  referenceColumn,
-  statusColumn,
-  titleColumn,
-  updatedColumn,
-} from '@/screens/projects/columns'
+import { projectColumns } from '@/screens/projects/columns'
 import type { ProjectRow, Status } from '@/types'
 
 import { ApprovalsNav } from './ApprovalsNav'
@@ -31,18 +20,6 @@ import { rememberApprovalsPage } from './returnTo'
 const STATUSES = (Object.keys(STATUS_LABELS) as Status[]).filter(
   (status) => status !== 'draft' && status !== 'submitted',
 )
-
-const columns = (
-  open: (row: ProjectRow) => void,
-): DataTableColumns<ProjectRow> =>
-  columnHelper<ProjectRow>().columns([
-    referenceColumn<ProjectRow>(),
-    titleColumn(open),
-    ownerColumn<ProjectRow>('Submitted by'),
-    statusColumn<ProjectRow>(),
-    priceColumn<ProjectRow>(),
-    updatedColumn<ProjectRow>(),
-  ])
 
 /**
  * Everything in the approver's area, decided or not (#98). The queue answers
@@ -63,12 +40,14 @@ export function ApprovalRegister() {
 
   const table = useMemo(
     () =>
-      columns((row) =>
-        navigate({
-          to: '/projects/$projectId/$screen',
-          params: { projectId: row.id, screen: 'details' },
-        }),
-      ),
+      projectColumns<ProjectRow>({
+        open: (row) =>
+          navigate({
+            to: '/projects/$projectId/$screen',
+            params: { projectId: row.id, screen: 'details' },
+          }),
+        ownerHeader: 'Submitted by',
+      }),
     [navigate],
   )
 

@@ -31,3 +31,6 @@ export function isDraftStatus(status: Status): status is 'draft' {
 // the same, for a status the generated types have not caught up with.
 export const statusLabel = (status: ProjectRow['status']) =>
   status === null ? 'No budget' : (STATUS_LABELS[status] ?? status)
+
+export const ownerName = (row: Pick<ProjectRow, 'owner'>) =>
+  row.owner.name || row.owner.email

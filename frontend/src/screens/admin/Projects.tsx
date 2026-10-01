@@ -2,24 +2,11 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMemo } from 'react'
 
 import { type AdminProject, useAdminProjects } from '@/api/admin-console'
-import {
-  columnHelper,
-  DataTable,
-  type DataTableColumns,
-  type DataTableFilter,
-} from '@/components/data-table'
+import { DataTable, type DataTableFilter } from '@/components/data-table'
 import { PageHead } from '@/components/shell'
 import { Skeleton } from '@/components/ui/skeleton'
-import { statusLabel } from '@/lib/status'
-import {
-  ownerColumn,
-  ownerName,
-  priceColumn,
-  referenceColumn,
-  statusColumn,
-  titleColumn,
-  updatedColumn,
-} from '@/screens/projects/columns'
+import { ownerName, statusLabel } from '@/lib/status'
+import { projectColumns } from '@/screens/projects/columns'
 
 const FILTERS: DataTableFilter<AdminProject>[] = [
   { id: 'status', label: 'Status', value: (row) => statusLabel(row.status) },
@@ -27,18 +14,6 @@ const FILTERS: DataTableFilter<AdminProject>[] = [
   { id: 'department', label: 'Department', value: (row) => row.department },
   { id: 'owner', label: 'Owner', value: ownerName },
 ]
-
-const columns = (
-  open: (row: AdminProject) => void,
-): DataTableColumns<AdminProject> =>
-  columnHelper<AdminProject>().columns([
-    referenceColumn<AdminProject>(),
-    titleColumn(open),
-    ownerColumn<AdminProject>('Owner'),
-    statusColumn<AdminProject>(),
-    priceColumn<AdminProject>(),
-    updatedColumn<AdminProject>(),
-  ])
 
 const byId = (row: AdminProject) => String(row.id)
 
@@ -53,12 +28,14 @@ export function Projects() {
   const navigate = useNavigate()
   const table = useMemo(
     () =>
-      columns((row) =>
-        navigate({
-          to: '/projects/$projectId/$screen',
-          params: { projectId: row.id, screen: 'details' },
-        }),
-      ),
+      projectColumns<AdminProject>({
+        open: (row) =>
+          navigate({
+            to: '/projects/$projectId/$screen',
+            params: { projectId: row.id, screen: 'details' },
+          }),
+        ownerHeader: 'Owner',
+      }),
     [navigate],
   )
 
