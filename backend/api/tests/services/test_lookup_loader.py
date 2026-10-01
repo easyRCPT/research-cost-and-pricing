@@ -7,6 +7,7 @@ from api.models import (
     Budget,
     CalculationConstant,
     EbaIncrease,
+    IncrementCap,
     LookupConfiguration,
     OnCostRate,
     SalaryRate,
@@ -33,6 +34,7 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
         version_id = 7
 
         salary_rates = Mock()
+        caps = Mock()
         multipliers = Mock()
         eba_increases = Mock()
         on_cost_rates = Mock()
@@ -47,6 +49,9 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
 
         salary_model = Mock()
         salary_model.objects.filter.return_value.order_by.return_value = salary_rates
+
+        cap_model = Mock()
+        cap_model.objects.filter.return_value.order_by.return_value = caps
 
         multiplier_model = Mock()
         multiplier_model.objects.filter.return_value.order_by.return_value = multipliers
@@ -66,6 +71,13 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
                 definition(
                     salary_model,
                     ("payroll_type", "category", "classification"),
+                ),
+            ),
+            (
+                "increment_caps",
+                definition(
+                    cap_model,
+                    ("level",),
                 ),
             ),
             (
@@ -107,6 +119,10 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
         self.assertIs(
             result["salary_rates"],
             salary_rates,
+        )
+        self.assertIs(
+            result["increment_caps"],
+            caps,
         )
         self.assertIs(
             result["salary_rate_multipliers"],
@@ -190,6 +206,10 @@ class TestGetConstants(SimpleTestCase):
         self.salary_rate_1.classification = "Level A.1"
         self.salary_rate_1.rate = Decimal(60000)
 
+        self.cap_1 = Mock(spec=IncrementCap)
+        self.cap_1.level = "UOM 1"
+        self.cap_1.max_steps = 1
+
         self.salary_rate_2 = Mock(spec=SalaryRate)
         self.salary_rate_2.payroll_type = "Casual"
         self.salary_rate_2.category = "Academic"
@@ -250,6 +270,9 @@ class TestGetConstants(SimpleTestCase):
                 self.salary_rate_1,
                 self.salary_rate_2,
             ],
+            "increment_caps": [
+                self.cap_1,
+            ],
             "salary_rate_multipliers": [
                 self.multiplier,
             ],
@@ -308,6 +331,13 @@ class TestGetConstants(SimpleTestCase):
                     "Academic",
                     "RA Grade 1.1",
                 ): Decimal(50000),
+            },
+        )
+
+        self.assertEqual(
+            result["increment_cap"],
+            {
+                "UOM 1": 1,
             },
         )
 

@@ -75,7 +75,7 @@ LOOKUP_DEFINITIONS = {
     "increment_caps": LookupDefinition(
         model=IncrementCap,
         serializer=IncrementCapSerializer,
-        versioned=False,
+        versioned=True,
         order_by=("level",),
     ),
     "eba_increases": LookupDefinition(

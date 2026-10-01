@@ -142,6 +142,12 @@ class TestFindSalaryRate(SimpleTestCase):
                 ("Casual", "Academic", "RA Grade 1.1"): Decimal(50000),
                 ("Casual", "Academic", "RA Grade 1.2"): Decimal(55000),
             },
+            "increment_cap": {
+                "Level A": 3,
+                "Level B": 1,
+                "RA Grade 1": 2,
+                "UOM 10": 0,
+            },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
                 "Daily": Decimal("0.2"),
@@ -467,6 +473,9 @@ class TestCalculateStaffRow(SimpleTestCase):
             "salary_rate": {
                 ("Fortnight", "Academic", "Level A.1"): Decimal(60000),
             },
+            "increment_cap": {
+                "Level A": 1,
+            },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
             },
@@ -776,6 +785,9 @@ class TestCalculateStaffTable(SimpleTestCase):
         self.constants = {
             "salary_rate": {
                 ("Fortnight", "Academic", "Level A.1"): Decimal(60000),
+            },
+            "increment_cap": {
+                "Level A": 1,
             },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),

@@ -285,11 +285,12 @@ class SalaryRateMultiplier(models.Model):
         return f"{self.time_basis} x{self.multiplier}"
 
 
-# TODO: Consider to remove. Not used in calculation. Max steps are maintained and checked in SalaryRate.
 # Defines the Salary Cap
 # Backend configuration only. It is not displayed in frontend.
 class IncrementCap(models.Model):
     level = models.CharField(max_length=20)
+    # 0 means the level is stepless (e.g. "UOM 10"): the classification is
+    # the level name itself, not "<level>.<step>". Stepped levels are >= 1.
     max_steps = models.PositiveSmallIntegerField()
 
     version = models.ForeignKey(

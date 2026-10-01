@@ -231,6 +231,13 @@ def import_increment_caps(workbook, version):
         if not level or not is_number(max_steps):
             continue
 
+        # "UOM 10" is stepless: the classification is the level name itself,
+        # not "<level>.<step>". The workbook records max_steps = 1 for it,
+        # which is ambiguous (it reads as if "UOM 10.1" exists), so normalise
+        # it to 0, the marker for stepless levels.
+        if level == "UOM 10":
+            max_steps = 0
+
         IncrementCap.objects.update_or_create(
             level=level, version=version, defaults={"max_steps": int(max_steps)}
         )

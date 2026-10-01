@@ -250,23 +250,22 @@ def find_salary_rate(
 
     # Continuing and Fixed-term staff progress one classification step per year
     # employed. Casual staff do not progress.
-    # Classification strings are "<level>.<step>". Stepless levels such as
-    # "UOM 10" stay unchanged.
-    if employment_type == "Casual" or classification in NO_STEP_CLASSIFICATIONS:
+    # Classification strings are "<level>.<step>". Levels with max_steps == 0
+    # are stepless (e.g. "UOM 10"): the classification is the level name itself
+    # and stays unchanged.
+    if employment_type == "Casual":
         new_classification = classification
     else:
         level, _, step_str = classification.rpartition(".")
-        current = int(step_str)
-        target = current + year_employed
+        level = level or classification
+        max_steps = constants["increment_cap"][level]
 
-        # Progress of classification stops at the highest step
-        while target > current:
-            key = (payroll_type, category, f"{level}.{target}")
-            if key in constants["salary_rate"]:
-                break
-            target -= 1
-
-        new_classification = f"{level}.{target}"
+        if max_steps == 0:
+            new_classification = classification
+        else:
+            current = int(step_str)
+            target = min(current + year_employed, max_steps)
+            new_classification = f"{level}.{target}"
 
     # Find base salary rate in 2025 from lookup table
     key = (payroll_type, category, new_classification)

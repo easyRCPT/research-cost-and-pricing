@@ -8,6 +8,7 @@ from ..models import (
     Budget,
     CalculationConstant,
     EbaIncrease,
+    IncrementCap,
     LookupConfiguration,
     OnCostRate,
     SalaryRate,
@@ -113,6 +114,12 @@ def get_constants(version_id: int) -> dict:
         for row in salary_rates
     }
 
+    increment_caps = cast(
+        list[IncrementCap],
+        tables["increment_caps"],
+    )
+    increment_cap = {row.level: row.max_steps for row in increment_caps}
+
     salary_rate_multipliers = cast(
         list[SalaryRateMultiplier],
         tables["salary_rate_multipliers"],
@@ -157,6 +164,7 @@ def get_constants(version_id: int) -> dict:
 
     result = {
         "salary_rate": salary_rate,
+        "increment_cap": increment_cap,
         "salary_rate_multiplier": salary_rate_multiplier,
         "eba": eba_rate,
         "on_cost_components": on_cost_components,
