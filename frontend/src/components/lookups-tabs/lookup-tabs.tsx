@@ -1,81 +1,299 @@
 import type { ReactNode } from 'react'
 
+import { columnHelper, type DataTableFilter } from '@/components/data-table'
+import { constantName } from '@/lib/format/constants'
+import { money, money2 } from '@/lib/format/utils'
 import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { LookupTables } from '@/types'
 
-import { AttributesTab } from './AttributesTab'
-import { ConstantsTab } from './ConstantsTab'
-import { DeliverablesTab } from './DeliverablesTab'
-import { EbaTab } from './EbaTab'
-import { ExpensesTab } from './ExpensesTab'
-import { OnCostsTab } from './OnCostsTab'
-import { OrgUnitsTab } from './OrgUnitsTab'
-import { SalaryRatesTab } from './SalaryRatesTab'
+import { byCode, codeNameColumns } from './code-name-columns'
+import { type LookupTable, lookupTable } from './lookup-table'
+import { ON_COST_TABLES } from './on-cost-tables'
 
-interface LookupTab {
+type Constant = LookupTables['calculation_constants'][number]
+type Increase = LookupTables['eba_increases'][number]
+type SalaryRate = LookupTables['salary_rates'][number]
+type IncrementCap = LookupTables['increment_caps'][number]
+type Multiplier = LookupTables['salary_rate_multipliers'][number]
+type Department = LookupTables['departments'][number]
+type Category = LookupTables['non_staff_cost_categories'][number]
+type RevenueCategory = LookupTables['revenue_categories'][number]
+
+const percentage = (value: number) => `${(value * 100).toFixed(2)}%`
+
+const CONSTANT_FORMAT: Record<string, (value: number) => string> = {
+  gst_rate: percentage,
+  max_leave_loading: money,
+}
+
+const constant = columnHelper<Constant>()
+const CONSTANT_COLUMNS = constant.columns([
+  // Read-only here, as everywhere: the engine reads each constant by name.
+  constant.accessor('name', {
+    header: 'Constant',
+    cell: ({ getValue }) => constantName(getValue()),
+  }),
+  constant.accessor('description', { header: 'Description' }),
+  constant.accessor('value', {
+    header: 'Value',
+    cell: ({ row, getValue }) =>
+      (CONSTANT_FORMAT[row.original.name] ?? String)(getValue()),
+    meta: { align: 'right', className: 'w-[180px] tabular' },
+  }),
+])
+
+const rate = columnHelper<SalaryRate>()
+const RATE_COLUMNS = rate.columns([
+  rate.accessor('payroll_type', { header: 'Payroll type' }),
+  rate.accessor('category', { header: 'Category' }),
+  rate.accessor('classification', { header: 'Classification' }),
+  rate.accessor('rate', {
+    header: 'Rate',
+    cell: ({ getValue }) => `$${money2(getValue())}`,
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+/** "Level A.3" and "UOM 4.2" filter by their family, "Level A" and "UOM 4". */
+const classificationFamily = (row: SalaryRate) =>
+  row.classification.split('.')[0]
+
+const RATE_FILTERS: DataTableFilter<SalaryRate>[] = [
+  { id: 'payroll', label: 'Payroll type', value: (row) => row.payroll_type },
+  { id: 'category', label: 'Category', value: (row) => row.category },
+  { id: 'family', label: 'Classification', value: classificationFamily },
+]
+
+const cap = columnHelper<IncrementCap>()
+const CAP_COLUMNS = cap.columns([
+  cap.accessor('level', { header: 'Classification family' }),
+  cap.accessor('max_steps', {
+    header: 'Max. step',
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const multiplier = columnHelper<Multiplier>()
+const MULTIPLIER_COLUMNS = multiplier.columns([
+  multiplier.accessor('time_basis', { header: 'Time basis' }),
+  multiplier.accessor('multiplier', {
+    header: 'Multiplier',
+    cell: ({ getValue }) => getValue().toFixed(6),
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const eba = columnHelper<Increase>()
+const EBA_COLUMNS = eba.columns([
+  eba.accessor('year', { header: 'Year', meta: { className: 'tabular' } }),
+  eba.accessor('rate', {
+    header: 'Rate',
+    cell: ({ getValue }) => getValue().toFixed(4),
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const department = columnHelper<Department>()
+const DEPARTMENT_COLUMNS = department.columns([
+  department.accessor('code', {
+    header: 'Dept code',
+    meta: { className: 'text-muted-foreground' },
+  }),
+  department.accessor('name', { header: 'Department' }),
+  department.accessor('school', { header: 'School' }),
+  department.accessor('faculty', { header: 'Faculty' }),
+])
+
+const DEPARTMENT_FILTERS: DataTableFilter<Department>[] = [
+  { id: 'school', label: 'School', value: (row) => row.school },
+  { id: 'faculty', label: 'Faculty', value: (row) => row.faculty },
+]
+
+const category = columnHelper<Category>()
+const CATEGORY_COLUMNS = category.columns([
+  category.accessor('cost_category', { header: 'Cost group' }),
+  category.accessor('cost_subcategory', { header: 'Expense type' }),
+  category.accessor('ledger_id', {
+    header: 'Ledger ID',
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const CATEGORY_FILTERS: DataTableFilter<Category>[] = [
+  { id: 'group', label: 'Cost group', value: (row) => row.cost_category },
+]
+
+const revenue = columnHelper<RevenueCategory>()
+const REVENUE_COLUMNS = revenue.columns([
+  revenue.accessor('external_party', { header: 'External party' }),
+  revenue.accessor('description', { header: 'Description' }),
+  revenue.accessor('budget_ledger_id', {
+    header: 'Ledger ID',
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+const REVENUE_FILTERS: DataTableFilter<RevenueCategory>[] = [
+  { id: 'party', label: 'External party', value: (row) => row.external_party },
+]
+
+export interface LookupTab {
   value: string
   title: string
-  render: (lookups: LookupTables) => ReactNode
+  notice?: (lookups: LookupTables) => ReactNode
+  tables: LookupTable[]
 }
 
 export const LOOKUP_TABS = [
   {
     value: 'constants',
     title: 'Constants',
-    render: (lookups) => <ConstantsTab data={lookups} />,
+    tables: [
+      lookupTable({
+        value: 'constants',
+        title: 'All constants',
+        columns: CONSTANT_COLUMNS,
+        rows: (lookups) => lookups.calculation_constants,
+        getRowId: (row) => row.name,
+      }),
+    ],
   },
   {
     value: 'rates',
     title: 'Salary Rates',
-    render: (lookups) => (
-      <SalaryRatesTab
-        salaryRates={lookups.salary_rates}
-        incrementCaps={lookups.increment_caps}
-        multipliers={lookups.salary_rate_multipliers}
-        salaryRateYear={salaryRateYear(lookups)}
-      />
-    ),
+    notice: (lookups) => {
+      const year = salaryRateYear(lookups)
+      return (
+        <>
+          Fortnightly rates are displayed <b>annual</b>; casual rates are
+          displayed <b>hourly</b>.
+          {year !== undefined && (
+            <>
+              {' '}
+              These are <b>{year}</b> rates: each later year adds that
+              year&rsquo;s EBA increase.
+            </>
+          )}
+        </>
+      )
+    },
+    tables: [
+      lookupTable({
+        value: 'rates',
+        title: 'Salary Rates',
+        columns: RATE_COLUMNS,
+        rows: (lookups) => lookups.salary_rates,
+        getRowId: (row) =>
+          `${row.payroll_type}-${row.category}-${row.classification}`,
+        sortable: true,
+        searchable: true,
+        filters: RATE_FILTERS,
+      }),
+      lookupTable({
+        value: 'caps',
+        title: 'Salary increment caps',
+        columns: CAP_COLUMNS,
+        rows: (lookups) => lookups.increment_caps,
+        getRowId: (row) => row.level,
+      }),
+      lookupTable({
+        value: 'multipliers',
+        title: 'Time basis multipliers',
+        columns: MULTIPLIER_COLUMNS,
+        rows: (lookups) => lookups.salary_rate_multipliers,
+        getRowId: (row) => row.time_basis,
+      }),
+    ],
   },
   {
     value: 'eba',
     title: 'EBA Increases',
-    render: (lookups) => <EbaTab increases={lookups.eba_increases} />,
+    notice: () =>
+      'Only the years when EBA rate changes are displayed. Years with the same rate are not included.',
+    tables: [
+      lookupTable({
+        value: 'increases',
+        title: 'EBA increases by year',
+        columns: EBA_COLUMNS,
+        rows: (lookups) => lookups.eba_increases,
+        getRowId: (row) => String(row.year),
+      }),
+    ],
   },
-  {
-    value: 'oncosts',
-    title: 'On-costs',
-    render: (lookups) => <OnCostsTab rates={lookups.on_cost_rates} />,
-  },
+  { value: 'oncosts', title: 'On-costs', tables: ON_COST_TABLES },
   {
     value: 'orgunits',
     title: 'Org Units',
-    render: (lookups) => <OrgUnitsTab departments={lookups.departments} />,
+    tables: [
+      lookupTable({
+        value: 'orgunits',
+        title: 'Org Units',
+        columns: DEPARTMENT_COLUMNS,
+        rows: (lookups) => lookups.departments,
+        getRowId: (row) => row.code,
+        sortable: true,
+        searchable: true,
+        filters: DEPARTMENT_FILTERS,
+      }),
+    ],
   },
   {
     value: 'expenses',
     title: 'Non-Staff Expenses',
-    render: (lookups) => (
-      <ExpensesTab categories={lookups.non_staff_cost_categories} />
-    ),
+    tables: [
+      lookupTable({
+        value: 'expenses',
+        title: 'Non-Staff Expense Types',
+        columns: CATEGORY_COLUMNS,
+        rows: (lookups) => lookups.non_staff_cost_categories,
+        getRowId: (row) => String(row.ledger_id),
+        sortable: true,
+        searchable: true,
+        filters: CATEGORY_FILTERS,
+      }),
+    ],
   },
   {
     value: 'attributes',
     title: 'Activities & Regions',
-    render: (lookups) => (
-      <AttributesTab
-        activities={lookups.activities}
-        regions={lookups.regions}
-      />
-    ),
+    tables: [
+      lookupTable({
+        value: 'activities',
+        title: 'Activities',
+        columns: codeNameColumns('Activity'),
+        rows: (lookups) => lookups.activities,
+        getRowId: byCode,
+      }),
+      lookupTable({
+        value: 'regions',
+        title: 'Regions',
+        columns: codeNameColumns('Region'),
+        rows: (lookups) => lookups.regions,
+        getRowId: byCode,
+      }),
+    ],
   },
   {
     value: 'deliverables',
     title: 'Deliverables & Revenue',
-    render: (lookups) => (
-      <DeliverablesTab
-        deliverableTypes={lookups.deliverable_types}
-        revenueCategories={lookups.revenue_categories}
-      />
-    ),
+    tables: [
+      lookupTable({
+        value: 'deliverables',
+        title: 'Deliverable types',
+        columns: codeNameColumns('Deliverable'),
+        rows: (lookups) => lookups.deliverable_types,
+        getRowId: byCode,
+      }),
+      lookupTable({
+        value: 'revenue',
+        title: 'Revenue categories',
+        columns: REVENUE_COLUMNS,
+        rows: (lookups) => lookups.revenue_categories,
+        getRowId: (row) => String(row.budget_ledger_id),
+        sortable: true,
+        searchable: true,
+        filters: REVENUE_FILTERS,
+      }),
+    ],
   },
 ] satisfies readonly LookupTab[]

@@ -1,12 +1,7 @@
-import { useMemo } from 'react'
-
-import {
-  columnHelper,
-  DataTable,
-  type DataTableFilter,
-  TableCard,
-} from '@/components/data-table'
+import { columnHelper, type DataTableFilter } from '@/components/data-table'
 import type { LookupTables } from '@/types'
+
+import { lookupTable } from './lookup-table'
 
 type OnCostRate = LookupTables['on_cost_rates'][number]
 type OnCostType = OnCostRate['on_cost_type']
@@ -80,10 +75,6 @@ const DATED_FILTERS: DataTableFilter<OnCostRate>[] = [
   },
 ]
 
-const byComponent = (row: ComponentRow) => row.component
-const byDatedRate = (row: OnCostRate) =>
-  `${row.on_cost_type}-${row.employment_type}-${row.year}`
-
 function toComponentRows(rates: OnCostRate[]): ComponentRow[] {
   const standing = rates.filter((rate) => rate.year == null)
   return (Object.keys(ON_COST_LABELS) as OnCostType[]).map((component) => {
@@ -99,46 +90,23 @@ function toComponentRows(rates: OnCostRate[]): ComponentRow[] {
   })
 }
 
-interface OnCostsTabProps {
-  rates: LookupTables['on_cost_rates']
-}
-
-export function OnCostsTab({ rates }: OnCostsTabProps) {
-  const components = useMemo(() => toComponentRows(rates), [rates])
-  const datedRates = useMemo(
-    () => rates.filter((rate) => rate.year != null),
-    [rates],
-  )
-
-  return (
-    <TableCard
-      tables={[
-        {
-          value: 'components',
-          title: 'On-cost components',
-          table: (
-            <DataTable
-              columns={COMPONENT_COLUMNS}
-              rows={components}
-              getRowId={byComponent}
-            />
-          ),
-        },
-        {
-          value: 'dated',
-          title: 'Dated rates',
-          table: (
-            <DataTable
-              columns={DATED_COLUMNS}
-              rows={datedRates}
-              getRowId={byDatedRate}
-              sortable
-              searchable
-              filters={DATED_FILTERS}
-            />
-          ),
-        },
-      ]}
-    />
-  )
-}
+export const ON_COST_TABLES = [
+  lookupTable({
+    value: 'components',
+    title: 'On-cost components',
+    columns: COMPONENT_COLUMNS,
+    rows: (lookups) => toComponentRows(lookups.on_cost_rates),
+    getRowId: (row) => row.component,
+  }),
+  lookupTable({
+    value: 'dated',
+    title: 'Dated rates',
+    columns: DATED_COLUMNS,
+    rows: (lookups) =>
+      lookups.on_cost_rates.filter((rate) => rate.year != null),
+    getRowId: (row) => `${row.on_cost_type}-${row.employment_type}-${row.year}`,
+    sortable: true,
+    searchable: true,
+    filters: DATED_FILTERS,
+  }),
+]
