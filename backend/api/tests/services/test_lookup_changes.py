@@ -37,7 +37,7 @@ from api.models import (
 )
 from api.services import lookup_changes
 from api.services.lookup_changes import apply_changes
-from api.services.lookup_update import list_versions
+from api.services.lookup_update import create_lookup_version, list_versions
 from api.services.submission import submit_budget
 
 LEVEL_A1 = {
@@ -93,7 +93,14 @@ class RatesMixin:
             str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
             verbosity=0,
         )
+        cls.admin = User.objects.create(email="admin@unimelb.edu.au")
         cls.config = LookupConfiguration.objects.get()
+        # The seed is the baseline, which no set writes into, so the tests
+        # work on an administrator's copy of it, as a database does once the
+        # first set has been saved.
+        cls.baseline = cls.config.current_version
+        create_lookup_version(cls.config, cls.admin)
+        cls.config.refresh_from_db()
         cls.version = cls.config.current_version
         # Round figures, so a change reads plainly in the assertions.
         for key in (LEVEL_A1, LEVEL_A2):
@@ -101,7 +108,6 @@ class RatesMixin:
                 rate=Decimal(100000)
             )
         EbaIncrease.objects.create(version=cls.version, year=2030, rate=Decimal("0.03"))
-        cls.admin = User.objects.create(email="admin@unimelb.edu.au")
 
     def current(self) -> int:
         return LookupConfiguration.objects.get().current_version_id
@@ -217,6 +223,50 @@ class TestVersions(RatesMixin, TestCase):
         listed = {v["id"]: v for v in list_versions()}
         self.assertFalse(listed[self.version.id]["accepts_changes"])
         self.assertFalse(any(v["accepts_changes"] for v in listed.values()))
+
+
+class TestBaseline(RatesMixin, TestCase):
+    """The rates as first loaded are kept, so they can always be restored."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.make_rates()
+
+    def make_baseline_current(self):
+        LookupConfiguration.objects.update(
+            current_version=self.baseline, referenced=False
+        )
+
+    def test_the_first_set_after_loading_starts_a_new_version(self):
+        self.make_baseline_current()
+        before = SalaryRate.objects.get(version=self.baseline, **LEVEL_A1).rate
+
+        saved = self.save(set_rate(LEVEL_A1, "110000"))
+
+        self.assertTrue(saved["new_version"])
+        self.assertNotEqual(saved["version_id"], self.baseline.id)
+        self.assertEqual(
+            SalaryRate.objects.get(version=self.baseline, **LEVEL_A1).rate, before
+        )
+        self.assertEqual(self.rate(LEVEL_A1), Decimal(110000))
+
+    def test_the_next_set_shares_that_new_version(self):
+        self.make_baseline_current()
+        first = self.save(set_rate(LEVEL_A1, "110000"))
+
+        second = self.save(set_rate(LEVEL_A2, "120000"))
+
+        self.assertEqual(second["version_id"], first["version_id"])
+        self.assertFalse(second["new_version"])
+
+    def test_the_versions_list_marks_the_baseline_and_says_it_takes_no_set(self):
+        self.make_baseline_current()
+
+        listed = {v["id"]: v for v in list_versions()}
+
+        self.assertTrue(listed[self.baseline.id]["baseline"])
+        self.assertFalse(listed[self.baseline.id]["accepts_changes"])
+        self.assertFalse(listed[self.version.id]["baseline"])
 
 
 class TestAllOrNothing(RatesMixin, TestCase):
@@ -659,6 +709,34 @@ class TestRoutes(RatesMixin, TestCase):
             },
         )
         self.assertEqual(LookupChangeSet.objects.get().note, "Two rates")
+
+    def test_a_row_named_with_a_blank_key_field_can_be_changed(self):
+        # An on-cost's rate for every year has no year: its key holds a null.
+        self.client.force_login(self.admin)
+        lookup = {
+            "on_cost_type": "annual_leave_provision",
+            "employment_type": "Casual",
+            "year": None,
+        }
+
+        response = self.post(
+            {
+                "changes": [
+                    {
+                        "table": "on_cost_rates",
+                        "op": "update",
+                        "lookup": lookup,
+                        "values": {"rate": "0.0007"},
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(
+            OnCostRate.objects.get(version_id=self.current(), **lookup).rate,
+            Decimal("0.0007"),
+        )
 
     def test_a_refusal_names_the_change_by_its_index(self):
         self.client.force_login(self.admin)

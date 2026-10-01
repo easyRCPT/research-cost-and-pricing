@@ -123,7 +123,7 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   const review = page.getByRole('region', { name: 'EBA increases' })
   await expect(review).toContainText('2090')
   await expect(review).toContainText('2091')
-  await expect(page.getByText(/^(Saves into version #\d+\.|Starts a new version: costings are already priced on version #\d+)/)).toBeVisible()
+  await expect(page.getByText(/^(Saves into version #\d+\.|Starts a new version: )/)).toBeVisible()
 
   const note = uniqueTitle('Set')
   await page.getByPlaceholder('For example, 2027 EBA increase').fill(note)

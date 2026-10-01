@@ -31,6 +31,7 @@ class LookupVersionSerializer(serializers.Serializer):
     budgets_priced = serializers.IntegerField()
     current = serializers.BooleanField()
     accepts_changes = serializers.BooleanField()
+    baseline = serializers.BooleanField()
     change_sets = ChangeSetSerializer(many=True)
 
 
@@ -71,10 +72,16 @@ VERSIONED_TABLES = [
 class LookupChangeSerializer(serializers.Serializer):
     table = serializers.ChoiceField(choices=VERSIONED_TABLES)
     op = serializers.ChoiceField(choices=lookup_changes.OPS)
-    # The row's natural key, for an update or a delete.
-    lookup = serializers.DictField(child=serializers.JSONField(), required=False)
+    # The row's natural key, for an update or a delete. A key field can be
+    # blank: an on-cost's rate for every year has no year, and some have no
+    # employment type. Typed and checked against the table in the service.
+    lookup = serializers.DictField(
+        child=serializers.JSONField(allow_null=True), required=False
+    )
     # The new values, for a create or an update.
-    values = serializers.DictField(child=serializers.JSONField(), required=False)
+    values = serializers.DictField(
+        child=serializers.JSONField(allow_null=True), required=False
+    )
 
 
 class LookupChangesSerializer(serializers.Serializer):

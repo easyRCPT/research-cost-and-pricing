@@ -18,6 +18,7 @@ class LookupVersion(models.Model):
     if TYPE_CHECKING:
         id: int
         change_sets: RelatedManager["LookupChangeSet"]
+        updated_by_id: int | None
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
