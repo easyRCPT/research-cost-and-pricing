@@ -47,7 +47,7 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByText(/Approved\s+by Hana Head/)).toBeVisible()
 
   // Back in the queue, it is gone.
-  await page.locator('header').getByRole('button', { name: 'Approvals' }).click()
+  await page.getByRole('navigation', { name: 'Costing sections' }).getByRole('button', { name: 'Approval queue' }).click()
   await expect(page).toHaveURL('/approvals')
   await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
 
@@ -153,6 +153,6 @@ test("an approver's register lists their area at any status, and Back returns to
   await expect(page.getByRole('slider')).toHaveCount(0)
 
   // Back goes to the register it came from, not the queue.
-  await page.locator('header').getByRole('button', { name: 'Register' }).click()
+  await page.getByRole('navigation', { name: 'Costing sections' }).getByRole('button', { name: 'Register' }).click()
   await expect(page).toHaveURL('/approvals/register')
 })

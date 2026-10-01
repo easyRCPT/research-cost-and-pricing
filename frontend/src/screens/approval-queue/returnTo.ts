@@ -27,5 +27,5 @@ function remembered(): string | null {
 export function approvalsPage(): { label: string; to: ApprovalsPage } {
   return remembered() === '/approvals/register'
     ? { label: 'Register', to: '/approvals/register' }
-    : { label: 'Approvals', to: '/approvals' }
+    : { label: 'Approval queue', to: '/approvals' }
 }

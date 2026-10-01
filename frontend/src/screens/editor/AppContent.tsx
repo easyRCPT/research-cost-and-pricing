@@ -1,22 +1,21 @@
 import { useNavigate } from '@tanstack/react-router'
+import { ArrowLeftIcon } from 'lucide-react'
 import { type ComponentType, createElement } from 'react'
 
-import { useEditable } from '@/api/budget'
+import { useEditable, useMissingDetails } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
-import {
-  LOOKUP_SCREEN,
-  LookupButton,
-} from '@/components/lookups-tabs/LookupButton'
+import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppShell } from '@/components/shell/AppShell'
-import { BackToProjectsButton } from '@/components/shell/BackToProjectsButton'
+import { DetailsNeededNotice } from '@/components/shell/DetailsNeededNotice'
 import { ExportPdfButton } from '@/components/shell/ExportPdfButton'
-import { MobileNav } from '@/components/shell/MobileNav'
+import { MobileNav, NavPill } from '@/components/shell/MobileNav'
 import { PageHead } from '@/components/shell/PageHead'
 import { ReadOnlyNotice } from '@/components/shell/ReadOnlyNotice'
 import { ScreenNav } from '@/components/shell/ScreenNav'
 import { SECTIONS } from '@/components/shell/sections'
 import {
   type EditorScreen,
+  RailItem,
   SideBar as Sidebar,
 } from '@/components/shell/Sidebar'
 import { useBackTarget } from '@/components/shell/useBackTarget'
@@ -79,33 +78,47 @@ export function AppContent({
   const pageHeading = lookupsOpen
     ? { title: 'Lookup Tables', subtitle: 'Read-only' }
     : SCREEN_HEADINGS[screen]
+  const backLabel = `Back to ${back?.label ?? 'Projects'}`
+  const goBack = back ? () => navigate({ to: back.to }) : onLeave
+  const openLookups = () => setScreen(LOOKUP_SCREEN)
   return (
     <AppShell
-      topBarRight={
-        <>
-          {back ? (
-            <BackToProjectsButton
-              label={back.label}
-              onClick={() => navigate({ to: back.to })}
-            />
-          ) : (
-            <BackToProjectsButton onClick={onLeave} />
-          )}
-          <LookupButton open={lookupsOpen} handleClick={setScreen} />
-        </>
-      }
       sidebar={
         <Sidebar
-          sections={SECTIONS}
+          sections={sections}
           current={lookupsOpen ? null : screen}
           onSelect={setScreen}
+          head={
+            <>
+              <RailItem
+                icon={<ArrowLeftIcon className="-mx-[4.5px] size-4 shrink-0" />}
+                onClick={goBack}
+              >
+                {backLabel}
+              </RailItem>
+              <RailItem active={lookupsOpen} onClick={openLookups}>
+                Lookup Tables
+              </RailItem>
+            </>
+          }
         />
       }
       mobileNav={
         <MobileNav
-          sections={SECTIONS}
+          sections={sections}
           current={lookupsOpen ? null : screen}
           onSelect={setScreen}
+          head={
+            <>
+              <NavPill onClick={goBack}>
+                <ArrowLeftIcon />
+                {backLabel}
+              </NavPill>
+              <NavPill active={lookupsOpen} onClick={openLookups}>
+                Lookup Tables
+              </NavPill>
+            </>
+          }
         />
       }
     >

@@ -9,7 +9,7 @@ import {
 
 import { homeFor, meQuery } from '@/api/auth'
 import { SUPERADMIN } from '@/api/auth'
-import { LOOKUP_SCREEN } from '@/components/lookups-tabs/LookupButton'
+import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppSkeleton } from '@/components/shell'
 import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
 import { EditorRoute } from '@/routes/editor'

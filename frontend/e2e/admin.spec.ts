@@ -23,7 +23,7 @@ test("the register finds anyone's costing, read-only, and the log has its submis
   await row.getByRole('button', { name: title }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/details`)
   await expect(page.getByText('This costing is with the Head of Department, so it is read-only.')).toBeVisible()
-  await page.locator('header').getByRole('button', { name: 'Project register' }).click()
+  await page.getByRole('navigation', { name: 'Costing sections' }).getByRole('button', { name: 'Project register' }).click()
   await expect(page).toHaveURL('/admin/projects')
 
   // The submission is in the log, found through a filter built from the log.

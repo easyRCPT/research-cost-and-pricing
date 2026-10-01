@@ -5,6 +5,10 @@ export function SidebarSkeleton() {
       className="hidden md:block sticky top-15 h-[calc(100vh-3.75rem)] border-r bg-card px-3 py-5"
     >
       <div className="animate-pulse space-y-6">
+        <div className="space-y-2 border-b pb-5">
+          <div className="h-9 rounded-lg bg-muted" />
+          <div className="h-9 rounded-lg bg-muted" />
+        </div>
         {[1, 3, 2, 1].map((rows, group) => (
           <div key={group}>
             {group > 0 && (
