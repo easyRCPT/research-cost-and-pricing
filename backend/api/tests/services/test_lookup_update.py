@@ -17,14 +17,13 @@ from api.models import (
 )
 from api.services import lookup_update
 from api.services.lookup_update import create, update
-from api.tests.factories import make_user
+from api.tests.factories import make_department, make_faculty, make_user
 
 
 class LookupUpdateTestMixin:
     @staticmethod
     def create_faculty(code: str = "SCI", name: str = "Science Faculty") -> Faculty:
-        faculty, _ = Faculty.objects.get_or_create(code=code, defaults={"name": name})
-        return faculty
+        return make_faculty(code, name)
 
     @classmethod
     def create_department(
@@ -35,12 +34,12 @@ class LookupUpdateTestMixin:
         school_code: str = "SCI",
         faculty_code: str = "SCI",
     ) -> Department:
-        return Department.objects.create(
-            code=code,
+        return make_department(
+            code,
+            cls.create_faculty(code=faculty_code),
             name=name,
             school=school,
             school_code=school_code,
-            faculty=cls.create_faculty(code=faculty_code),
         )
 
 

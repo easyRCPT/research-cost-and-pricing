@@ -1,14 +1,14 @@
 from django.test import TestCase
 
-from api.models import AuditLog, Faculty, User, UserOrgAssignment
-from api.tests.factories import make_department, make_user
+from api.models import AuditLog, User, UserOrgAssignment
+from api.tests.factories import make_department, make_faculty, make_user
 
 BASE = "/api/admin/users/"
 
 
 class AdminUsersTest(TestCase):
     def setUp(self):
-        self.faculty = Faculty.objects.create(code="ENG", name="Engineering")
+        self.faculty = make_faculty("ENG", "Engineering")
         self.department = make_department("CIS", self.faculty, name="Computing")
         self.admin = self.account("admin@unimelb.edu.au", "superadmin")
         self.ruth = self.account(

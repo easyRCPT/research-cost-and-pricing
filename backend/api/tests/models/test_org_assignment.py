@@ -2,14 +2,14 @@ from django.contrib.auth.models import Group
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
-from api.models import Faculty, User, UserOrgAssignment
-from api.tests.factories import make_department
+from api.models import User, UserOrgAssignment
+from api.tests.factories import make_department, make_faculty
 
 
 class OrgTestMixin:
     def setUp(self):
-        self.faculty = Faculty.objects.create(code="SCI", name="Science Faculty")
-        self.other_faculty = Faculty.objects.create(code="ART", name="Arts Faculty")
+        self.faculty = make_faculty("SCI", "Science Faculty")
+        self.other_faculty = make_faculty("ART", "Arts Faculty")
 
         self.department = make_department("SOFT", self.faculty)
         self.other_department = make_department("MECH", self.faculty)

@@ -1,11 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from api.models import Budget, Department, Faculty, User, UserOrgAssignment
-from api.services.project import budget_defaults
+from api.models import Budget, Department, User, UserOrgAssignment
 from api.tests.factories import (
     make_budget,
     make_department,
+    make_faculty,
     make_project,
     make_user,
     seed_lookups,
@@ -26,8 +26,8 @@ class ReviewAccessTestCase(TestCase):
         seed_lookups()
 
     def setUp(self):
-        engineering = Faculty.objects.create(code="ENG", name="Engineering")
-        arts = Faculty.objects.create(code="ART", name="Arts")
+        engineering = make_faculty("ENG", "Engineering")
+        arts = make_faculty("ART", "Arts")
         self.computing = make_department("CIS", engineering)
         self.civil = make_department("CIV", engineering)
         self.history = make_department("HIS", arts)
@@ -87,7 +87,7 @@ class ReviewAccessTestCase(TestCase):
 
     def test_a_reviewers_list_shows_the_submitted_attempt_not_the_newer_draft(self):
         submitted = self.budget(self.computing, SUBMITTED)
-        Budget.objects.create(project=submitted.project, **budget_defaults())
+        make_budget(submitted.project)
         self.budget(self.computing, DRAFT)
 
         self.client.force_login(self.hod)

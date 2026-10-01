@@ -25,15 +25,16 @@ def make_user(
     return user
 
 
+def make_faculty(code: str = "SCI", name: str | None = None) -> Faculty:
+    return Faculty.objects.get_or_create(
+        code=code, defaults={"name": name or f"{code} Faculty"}
+    )[0]
+
+
 def make_department(
     code: str = "SCI", faculty: Faculty | None = None, **fields
 ) -> Department:
-    faculty = (
-        faculty
-        or Faculty.objects.get_or_create(
-            code=code, defaults={"name": f"{code} Faculty"}
-        )[0]
-    )
+    faculty = faculty or make_faculty(code)
     return Department.objects.create(
         **{
             "code": code,

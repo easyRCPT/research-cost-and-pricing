@@ -9,14 +9,19 @@ from api.models import (
     Budget,
     CalculationConstant,
     Department,
-    Faculty,
     LookupConfiguration,
     Project,
     User,
 )
 from api.services import budget_update
 from api.services.project import budget_defaults, create, list_projects
-from api.tests.factories import make_budget, make_department, make_project, make_user
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_faculty,
+    make_project,
+    make_user,
+)
 
 
 def current_version():
@@ -27,10 +32,9 @@ def current_version():
 class ProjectTestMixin:
     @staticmethod
     def create_department(code: str = "SCI") -> Department:
-        faculty = Faculty.objects.get_or_create(
-            code="SCI", defaults={"name": "Science Faculty"}
-        )[0]
-        return make_department(code, faculty, name="Science")
+        return make_department(
+            code, make_faculty("SCI", "Science Faculty"), name="Science"
+        )
 
     def project_data(self, **overrides) -> dict:
         return {

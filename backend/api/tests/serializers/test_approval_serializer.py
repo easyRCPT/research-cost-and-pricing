@@ -5,14 +5,19 @@ from django.test import SimpleTestCase, TestCase
 
 from api.models import (
     ApprovalStep,
-    Faculty,
     LookupVersion,
 )
 from api.serializers.approval_serializer import (
     ApprovalDecideSerializer,
     ApprovalQueueSerializer,
 )
-from api.tests.factories import make_budget, make_department, make_project, make_user
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_faculty,
+    make_project,
+    make_user,
+)
 
 from .serializer_utils import get_data, get_errors, get_validated_data
 
@@ -22,7 +27,7 @@ class ApprovalQueueSerializerTest(TestCase):
     def setUpTestData(cls) -> None:
         cls.lookup_version = LookupVersion.objects.create()
 
-        faculty = Faculty.objects.create(code="SCI", name="Science Faculty")
+        faculty = make_faculty("SCI", "Science Faculty")
         project = make_project(
             make_user(),
             make_department(faculty=faculty, name="Science"),
