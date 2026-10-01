@@ -1,13 +1,6 @@
 import { useState } from 'react'
-import { ChevronRightIcon } from 'lucide-react'
-import {
-  AUDIT_LIMITS,
-  useAudit,
-  useAuditActions,
-  type AuditEntry,
-} from '@/api/admin-console'
-import { Grid, PageHead, Panel, Td, Th } from '@/components/shell'
-import { Badge } from '@/components/ui/badge'
+import { AUDIT_LIMITS, useAudit, useAuditActions } from '@/api/admin-console'
+import { PageHead, Panel } from '@/components/shell'
 import {
   Select,
   SelectContent,
@@ -15,9 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { dateTime } from '@/lib/format/dates'
-import { cn } from '@/lib/utils'
-import { Skeleton } from '@/components/ui/skeleton'
+import { AuditTable } from '@/screens/admin/audit/AuditTable'
 
 const ALL = 'all'
 
@@ -100,120 +91,6 @@ export function Audit() {
           expandable
         />
       </Panel>
-    </>
-  )
-}
-
-/** Shared with the overview's recent activity, so an entry reads the same in both. */
-export function AuditTable({
-  entries,
-  loading,
-  dimmed,
-  empty,
-  expandable = false,
-}: {
-  entries: AuditEntry[] | undefined
-  loading: boolean
-  dimmed?: boolean
-  empty: string
-  expandable?: boolean
-}) {
-  const columns = expandable ? 5 : 4
-  return (
-    <Grid className={cn(dimmed && 'opacity-70')}>
-      <thead>
-        <tr>
-          {expandable && <Th className="w-8" />}
-          <Th className="w-[190px]">When</Th>
-          <Th className="w-[240px]">By</Th>
-          <Th className="w-[230px]">Action</Th>
-          <Th>Object</Th>
-        </tr>
-      </thead>
-      <tbody>
-        {loading &&
-          [0, 1, 2, 3, 4].map((i) => (
-            <tr key={i} role="status" aria-label="Loading entries">
-              <Td colSpan={columns}>
-                <Skeleton className="h-5" />
-              </Td>
-            </tr>
-          ))}
-        {entries?.length === 0 && (
-          <tr>
-            <Td
-              colSpan={columns}
-              className="py-6 text-center text-muted-foreground"
-            >
-              {empty}
-            </Td>
-          </tr>
-        )}
-        {entries?.map((entry) => (
-          <AuditRow key={entry.id} entry={entry} expandable={expandable} />
-        ))}
-      </tbody>
-    </Grid>
-  )
-}
-
-function AuditRow({
-  entry,
-  expandable,
-}: {
-  entry: AuditEntry
-  expandable: boolean
-}) {
-  const [open, setOpen] = useState(false)
-  const detail = entry.detail as Record<string, unknown> | null
-  // No expander over an empty detail: it would open onto nothing.
-  const hasDetail = !!detail && Object.keys(detail).length > 0
-
-  return (
-    <>
-      <tr>
-        {expandable && (
-          <Td>
-            {hasDetail && (
-              <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                aria-expanded={open}
-                aria-label={open ? 'Hide detail' : 'Show detail'}
-                className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-primary"
-              >
-                <ChevronRightIcon
-                  className={cn(
-                    'size-4 transition-transform',
-                    open && 'rotate-90',
-                  )}
-                />
-              </button>
-            )}
-          </Td>
-        )}
-        <Td className="tabular whitespace-nowrap text-muted-foreground">
-          {dateTime(entry.created_at)}
-        </Td>
-        <Td>{entry.actor_email ?? 'System'}</Td>
-        <Td>
-          <Badge variant="secondary" className="font-mono text-[11.5px]">
-            {entry.action}
-          </Badge>
-        </Td>
-        <Td className="text-muted-foreground">
-          {entry.object_type} #{entry.object_id}
-        </Td>
-      </tr>
-      {open && (
-        <tr>
-          <Td colSpan={5}>
-            <pre className="ml-8 max-h-64 overflow-auto rounded-md border bg-muted/40 px-3 py-2 text-[12px] leading-relaxed">
-              {JSON.stringify(detail, null, 2)}
-            </pre>
-          </Td>
-        </tr>
-      )}
     </>
   )
 }
