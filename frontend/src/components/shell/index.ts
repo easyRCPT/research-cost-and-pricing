@@ -22,14 +22,7 @@ export { Ledger, LedgerRow } from './Ledger'
 export { Derived } from './Derived'
 export { Money } from './Money'
 export { PartBar } from './PartBar'
-export {
-  Grid,
-  Th,
-  Td,
-  Calc,
-  FootTd,
-  CellTd,
-  CellText,
-  CellNumber,
-  CellChoice,
-} from './Grid'
+export { Grid, Th, Td, Calc, FootTd, CellTd } from './grid/Grid'
+export { CellText } from './grid/CellText'
+export { CellNumber } from './grid/CellNumber'
+export { CellChoice } from './grid/CellChoice'
