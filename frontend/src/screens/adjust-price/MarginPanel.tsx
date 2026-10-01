@@ -2,6 +2,7 @@ import { useBudget, useEditable, useField } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
 import { Slider } from '@/components/ui/slider'
+import { percent1 } from '@/lib/format/utils'
 import { toastOutOfRange } from '@/lib/range'
 
 // TODO(#87): the 0 floor and 100% ceiling hold until Frank sets the margin policy.
@@ -47,7 +48,7 @@ export function MarginPanel() {
           // A value, not a disabled slider (#98): a greyed control still
           // invites a reviewer to try to move it, and it isn't theirs to move.
           <span className="tabular text-[22px] font-semibold">
-            {percent.toFixed(1)}%
+            {percent1(margin.value)}
           </span>
         )}
         {deanRequired && (
@@ -64,7 +65,7 @@ export function MarginPanel() {
             value={<Money value={summary.project_cost} />}
           />
           <LedgerRow
-            label={`Margin at ${asPercent(budget.budget_info.margin).toFixed(1)}%`}
+            label={`Margin at ${percent1(budget.budget_info.margin)}`}
             value={<Money value={summary.margin_amount} />}
           />
           <LedgerRow

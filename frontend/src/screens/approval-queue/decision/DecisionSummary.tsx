@@ -1,6 +1,6 @@
 import type { QueueRow } from '@/api/approvals'
 import { shortDate } from '@/lib/format/dates'
-import { money } from '@/lib/format/utils'
+import { money, percent1 } from '@/lib/format/utils'
 
 export function DecisionSummary({ budget }: { budget: QueueRow['budget'] }) {
   return (
@@ -20,7 +20,7 @@ export function DecisionSummary({ budget }: { budget: QueueRow['budget'] }) {
         {money(budget.total_price_inc_gst)}
       </dd>
       <dt className="text-muted-foreground">Margin</dt>
-      <dd className="tabular">{(budget.margin * 100).toFixed(1)}%</dd>
+      <dd className="tabular">{percent1(budget.margin)}</dd>
     </dl>
   )
 }
