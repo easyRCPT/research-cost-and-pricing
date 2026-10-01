@@ -4,7 +4,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+import { api, unwrap } from '@/lib/api'
 import { projectsQuery } from '@/api/projects'
 import type { components } from '@/types/api'
 
@@ -14,9 +14,7 @@ export type Decision = 'approve' | 'reject'
 export const queueQuery = queryOptions({
   queryKey: ['approvals', 'queue'] as const,
   queryFn: async (): Promise<QueueRow[]> => {
-    const { data, error, response } = await api.GET('/api/approvals/queue/')
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.GET('/api/approvals/queue/'))
   },
   // A queue is other people's work arriving, so it is worth asking again
   // rather than holding the five-minute default the editor uses.
@@ -49,15 +47,12 @@ export function useDecide() {
       decision: Decision
       comment: string
     }) => {
-      const { data, error, response } = await api.POST(
-        '/api/approvals/{step_id}/decide/',
-        {
+      return unwrap(
+        await api.POST('/api/approvals/{step_id}/decide/', {
           params: { path: { step_id: stepId } },
           body: { decision, comment },
-        },
-      )
-      if (error) throw new ApiError(response.status, error)
-      return data.budget_status
+        }),
+      ).budget_status
     },
     // Returned, not fired and forgotten: the mutation stays pending until the
     // queue has refetched, so "you approved it" never shows beside a list that

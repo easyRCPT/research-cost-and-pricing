@@ -5,7 +5,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+import { api, unwrap } from '@/lib/api'
 import { lookupsQuery } from '@/api/lookups'
 import type { components } from '@/types/api'
 import type { ReferenceTable } from '@/screens/admin/referenceTables'
@@ -34,9 +34,7 @@ export type RateTable =
 export const versionsQuery = queryOptions({
   queryKey: ['admin', 'lookup-versions'] as const,
   queryFn: async (): Promise<LookupVersion[]> => {
-    const { data, error, response } = await api.GET('/api/admin/lookups/versions/')
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.GET('/api/admin/lookups/versions/'))
   },
 })
 
@@ -49,12 +47,11 @@ export function useVersionBudgets(versionId: number) {
   return useQuery({
     queryKey: [...versionsQuery.queryKey, versionId, 'budgets'] as const,
     queryFn: async (): Promise<VersionBudget[]> => {
-      const { data, error, response } = await api.GET(
-        '/api/admin/lookups/versions/{version_id}/budgets/',
-        { params: { path: { version_id: versionId } } },
+      return unwrap(
+        await api.GET('/api/admin/lookups/versions/{version_id}/budgets/', {
+          params: { path: { version_id: versionId } },
+        }),
       )
-      if (error) throw new ApiError(response.status, error)
-      return data
     },
   })
 }
@@ -81,11 +78,11 @@ export function useApplyChanges() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: async ({ note, changes }: { note: string; changes: LookupChange[] }) => {
-      const { data, error, response } = await api.POST('/api/admin/lookups/changes/', {
-        body: { note, changes },
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(
+        await api.POST('/api/admin/lookups/changes/', {
+          body: { note, changes },
+        }),
+      )
     },
     onSuccess: refresh,
   })
@@ -96,12 +93,11 @@ export function useRestoreVersion() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: async (versionId: number) => {
-      const { data, error, response } = await api.POST(
-        '/api/admin/lookups/versions/{version_id}/restore/',
-        { params: { path: { version_id: versionId } } },
+      return unwrap(
+        await api.POST('/api/admin/lookups/versions/{version_id}/restore/', {
+          params: { path: { version_id: versionId } },
+        }),
       )
-      if (error) throw new ApiError(response.status, error)
-      return data
     },
     onSettled: refresh,
   })
@@ -121,18 +117,21 @@ export function useReferenceWrite() {
   return useMutation({
     mutationFn: async (write: ReferenceWrite) => {
       const params = { path: { table: write.table } }
-      const { error, response } =
-        write.op === 'create'
-          ? await api.POST('/api/admin/lookups/{table}/', { params, body: { values: write.values } })
+      unwrap(
+        await (write.op === 'create'
+          ? api.POST('/api/admin/lookups/{table}/', {
+              params,
+              body: { values: write.values },
+            })
           : write.op === 'update'
-            ? await api.PATCH('/api/admin/lookups/{table}/', {
+            ? api.PATCH('/api/admin/lookups/{table}/', {
                 params,
                 body: { lookup: write.lookup, values: write.values },
               })
-            : await api.DELETE('/api/admin/lookups/{table}/{key}/', {
+            : api.DELETE('/api/admin/lookups/{table}/{key}/', {
                 params: { path: { table: write.table, key: write.key } },
-              })
-      if (!response.ok) throw new ApiError(response.status, error)
+              })),
+      )
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: lookupsQuery.queryKey }),
   })

@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { api, ApiError } from '@/lib/api'
+import { api, ApiError, unwrap } from '@/lib/api'
 import type { BudgetDetail, BudgetUpdate } from '@/types'
 import { budgetKey } from './detail'
 import { useBudgetId } from './context'
@@ -75,13 +75,13 @@ async function patch(
   budgetId: number,
   command: Command,
 ): Promise<BudgetDetail | null> {
-  const { data, error, response } = await api.PATCH(
-    '/api/budgets/{budget_id}/',
-    { params: { path: { budget_id: budgetId } }, body: command },
-  )
-  if (error) throw new ApiError(response.status, error)
+  const result = await api.PATCH('/api/budgets/{budget_id}/', {
+    params: { path: { budget_id: budgetId } },
+    body: command,
+  })
+  const data = unwrap(result)
   // 204: saved, nothing recalculated.
-  return response.status === 204 ? null : (data as BudgetDetail)
+  return result.response.status === 204 ? null : (data as BudgetDetail)
 }
 
 /**

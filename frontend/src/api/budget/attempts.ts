@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+import { api, unwrap } from '@/lib/api'
 import { projectsQuery } from '@/api/projects'
 import { useBudgetId } from './context'
 import { budgetKey } from './detail'
@@ -14,10 +14,11 @@ export function useWithdrawBudget() {
 
   return useMutation({
     mutationFn: async () => {
-      const { error, response } = await api.POST('/api/budgets/{budget_id}/withdraw/', {
-        params: { path: { budget_id: budgetId } },
-      })
-      if (!response.ok) throw new ApiError(response.status, error)
+      unwrap(
+        await api.POST('/api/budgets/{budget_id}/withdraw/', {
+          params: { path: { budget_id: budgetId } },
+        }),
+      )
     },
     // Refetched on a refusal too: a 409 means an approver decided first, and
     // the screen should show where it went rather than an error.
@@ -41,10 +42,11 @@ export function useNewDraftFrom() {
 
   return useMutation({
     mutationFn: async () => {
-      const { error, response } = await api.POST('/api/budgets/{budget_id}/clone/', {
-        params: { path: { budget_id: budgetId } },
-      })
-      if (!response.ok) throw new ApiError(response.status, error)
+      unwrap(
+        await api.POST('/api/budgets/{budget_id}/clone/', {
+          params: { path: { budget_id: budgetId } },
+        }),
+      )
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: projectsQuery.queryKey }),
   })
