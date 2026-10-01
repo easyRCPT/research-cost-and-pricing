@@ -9,10 +9,16 @@ import {
 } from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
 import { Skeleton } from '@/components/ui/skeleton'
-import { shortDate } from '@/lib/format/dates'
-import { money } from '@/lib/format/utils'
 import { STATUS_LABELS } from '@/lib/status'
 import { cn } from '@/lib/utils'
+import {
+  ownerColumn,
+  priceColumn,
+  referenceColumn,
+  statusColumn,
+  titleColumn,
+  updatedColumn,
+} from '@/screens/projects/columns'
 import type { ProjectRow, Status } from '@/types'
 
 import { ApprovalsNav } from './ApprovalsNav'
@@ -26,76 +32,16 @@ const STATUSES = (Object.keys(STATUS_LABELS) as Status[]).filter(
   (status) => status !== 'draft' && status !== 'submitted',
 )
 
-const ownerName = (row: ProjectRow) => row.owner.name || row.owner.email
-const statusLabel = (status: ProjectRow['status']) =>
-  status === null ? 'No budget' : (STATUS_LABELS[status] ?? status)
-
-const col = columnHelper<ProjectRow>()
-
 const columns = (
   open: (row: ProjectRow) => void,
 ): DataTableColumns<ProjectRow> =>
-  col.columns([
-    col.accessor('reference', {
-      header: 'Reference',
-      meta: {
-        className: 'w-[150px] whitespace-nowrap font-medium text-primary',
-      },
-    }),
-    col.accessor('title', {
-      header: 'Title',
-      cell: ({ row }) => (
-        <div className="max-w-[320px] py-0.5 whitespace-normal">
-          <button
-            type="button"
-            onClick={() => open(row.original)}
-            className="cursor-pointer text-left font-medium hover:underline"
-          >
-            {row.original.title || 'Untitled'}
-          </button>
-          <div className="text-muted-foreground">{row.original.department}</div>
-        </div>
-      ),
-    }),
-    col.accessor(ownerName, {
-      id: 'owner',
-      header: 'Submitted by',
-      cell: ({ row }) => (
-        <div className="py-0.5">
-          <div>{ownerName(row.original)}</div>
-          {row.original.owner.name && (
-            <div className="text-muted-foreground">
-              {row.original.owner.email}
-            </div>
-          )}
-        </div>
-      ),
-      meta: { className: 'w-[220px]' },
-    }),
-    col.accessor((row) => statusLabel(row.status), {
-      id: 'status',
-      header: 'Status',
-      meta: { className: 'w-[200px] text-primary' },
-    }),
-    col.accessor('total_price_inc_gst', {
-      header: 'Total price (inc. GST)',
-      cell: ({ row }) =>
-        row.original.budget_id === null
-          ? '—'
-          : money(row.original.total_price_inc_gst),
-      meta: {
-        align: 'right',
-        className: 'w-[150px] whitespace-nowrap tabular',
-      },
-    }),
-    col.accessor('updated_at', {
-      header: 'Last updated',
-      cell: ({ row }) => shortDate(row.original.updated_at),
-      meta: {
-        align: 'right',
-        className: 'w-[130px] whitespace-nowrap text-muted-foreground',
-      },
-    }),
+  columnHelper<ProjectRow>().columns([
+    referenceColumn<ProjectRow>(),
+    titleColumn(open),
+    ownerColumn<ProjectRow>('Submitted by'),
+    statusColumn<ProjectRow>(),
+    priceColumn<ProjectRow>(),
+    updatedColumn<ProjectRow>(),
   ])
 
 /**

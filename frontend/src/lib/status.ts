@@ -1,4 +1,4 @@
-import type { Status } from '@/types'
+import type { ProjectRow, Status } from '@/types'
 
 /** Labels for models.py Budget.Status */
 export const STATUS_LABELS: Record<Status, string> = {
@@ -25,3 +25,9 @@ export const AWAITING_LABELS: Record<Status, string> = {
 export function isDraftStatus(status: Status): status is 'draft' {
   return status === 'draft'
 }
+
+// Typed against the schema's enum, so a new status breaks the build here
+// rather than rendering an empty cell (#71). The raw value is the fallback all
+// the same, for a status the generated types have not caught up with.
+export const statusLabel = (status: ProjectRow['status']) =>
+  status === null ? 'No budget' : (STATUS_LABELS[status] ?? status)
