@@ -12,19 +12,25 @@ interface OptionSelectProps {
   options: readonly (string | { value: string; label: string })[]
   placeholder?: string
   size?: 'sm' | 'default'
+  /** Which edge of the trigger the open list lines up with. */
+  align?: 'start' | 'center' | 'end'
   className?: string
   id?: string
   'aria-label'?: string
   'aria-invalid'?: boolean
 }
 
-/** A select over a flat list of options; a plain string is its own value and label. */
+/**
+ * A select over a flat list of options; a plain string is its own value and
+ * label.
+ */
 export function OptionSelect({
   value,
   onValueChange,
   options,
   placeholder,
   size,
+  align,
   className,
   id,
   'aria-label': ariaLabel,
@@ -41,7 +47,7 @@ export function OptionSelect({
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent align={align}>
         {options.map((option) => {
           const o =
             typeof option === 'string'
