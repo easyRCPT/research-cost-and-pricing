@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useAddAssignment, type AdminUser, type Role } from '@/api/admin-users'
+
+import { type AdminUser, type Role,useAddAssignment } from '@/api/admin-users'
 import { useLookups } from '@/api/lookups'
 import { Button } from '@/components/ui/button'
 import { OptionSelect } from '@/components/ui/option-select'
-import { ROLE_LABEL, nameOf, refused } from './labels'
+
+import { nameOf, refused,ROLE_LABEL } from './labels'
 
 export function AddAssignment({ user }: { user: AdminUser }) {
   const { data: lookups } = useLookups()

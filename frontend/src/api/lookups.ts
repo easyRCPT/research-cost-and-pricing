@@ -1,4 +1,5 @@
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
+
 import { api, unwrap } from '@/lib/api'
 import type { LookupTables } from '@/types'
 

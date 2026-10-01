@@ -1,12 +1,14 @@
+import { Plus } from 'lucide-react'
+
 import { Grid } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import type {
+  EditableStaffLine,
   SalaryRate,
   SalaryRateMultiplier,
-  EditableStaffLine,
   StaffTotal,
 } from '@/types'
-import { Plus } from 'lucide-react'
+
 import { StaffTableBody } from './StaffTableBody'
 import { StaffTableFooter } from './StaffTableFooter'
 import { StaffTableHeader } from './StaffTableHeader'

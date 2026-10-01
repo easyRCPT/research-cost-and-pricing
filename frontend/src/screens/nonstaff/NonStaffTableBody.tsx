@@ -1,3 +1,5 @@
+import { X } from 'lucide-react'
+
 import {
   Calc,
   CellChoice,
@@ -9,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { dash } from '@/lib/format/utils'
-import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 import {
   allExpenseTypes,
   amountFor,
@@ -18,8 +19,8 @@ import {
   tenPercentAllowed,
   withAmount,
 } from '@/lib/non-staff'
+import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 import type { NonStaffCategory, NonStaffLine } from '@/types'
-import { X } from 'lucide-react'
 
 interface NonStaffTableBodyProps {
   lines: NonStaffLine[]

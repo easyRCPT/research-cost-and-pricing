@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+
 import { useReferenceWrite } from '@/api/admin-lookups'
 import { Button } from '@/components/ui/button'
 import { FieldInput } from '@/screens/admin/reference/FieldInput'
 import {
-  refusalOf,
   type Faculty,
   type Refusal,
+  refusalOf,
 } from '@/screens/admin/reference/shared'
 import type { ReferenceTableSpec } from '@/screens/admin/referenceTables'
 

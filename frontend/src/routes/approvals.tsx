@@ -1,6 +1,7 @@
-import { Suspense, type ReactNode } from 'react'
 import { QueryErrorResetBoundary } from '@tanstack/react-query'
+import { type ReactNode,Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
+
 import { AppErrorState, AppShell, ProjectsSkeleton } from '@/components/shell'
 import { ApprovalQueue } from '@/screens/approval-queue/ApprovalQueue'
 import { ApprovalRegister } from '@/screens/approval-queue/ApprovalRegister'

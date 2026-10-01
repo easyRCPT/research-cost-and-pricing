@@ -1,6 +1,8 @@
-import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { ReactNode } from 'react'
+
+import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { LookupTables } from '@/types'
+
 import { AttributesTab } from './AttributesTab'
 import { ConstantsTab } from './ConstantsTab'
 import { DeliverablesTab } from './DeliverablesTab'

@@ -1,6 +1,8 @@
 import { Fragment } from 'react'
+
 import { useLookupVersions } from '@/api/admin-lookups'
 import { Grid, Panel, Td, Th } from '@/components/shell'
+
 import type { RatesMoved } from './types'
 import { VersionBudgets } from './VersionBudgets'
 import { VersionRow } from './VersionRow'

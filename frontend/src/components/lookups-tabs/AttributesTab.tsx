@@ -1,5 +1,6 @@
 import { DataTable, TableCard } from '@/components/data-table'
 import type { LookupTables } from '@/types'
+
 import { byCode, codeNameColumns } from './code-name-columns'
 
 const ACTIVITY_COLUMNS = codeNameColumns('Activity')

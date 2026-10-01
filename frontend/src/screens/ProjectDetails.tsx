@@ -1,8 +1,9 @@
-import type { LookupTables, ProjectInfo } from '@/types'
 import { Panel } from '@/components/shell'
+import type { LookupTables, ProjectInfo } from '@/types'
+
 import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
-import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectDepartmentRow } from './project-details/ProjectDepartmentRow'
+import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectFunderRow } from './project-details/ProjectFunderRow'
 import { ProjectInvestigatorRow } from './project-details/ProjectInvestigatorRow'
 import { ProjectNotesRow } from './project-details/ProjectNotesRow'

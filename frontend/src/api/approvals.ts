@@ -4,8 +4,9 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, unwrap } from '@/lib/api'
+
 import { projectsQuery } from '@/api/projects'
+import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
 export type QueueRow = components['schemas']['ApprovalQueue']

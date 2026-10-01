@@ -1,5 +1,6 @@
-import { useState } from 'react'
 import { ChevronRightIcon } from 'lucide-react'
+import { useState } from 'react'
+
 import type { AuditEntry } from '@/api/admin-console'
 import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'

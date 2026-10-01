@@ -1,5 +1,5 @@
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { AccountType } from '@/api/auth'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 /**
  * Which door, sent to the server as `account_type`.

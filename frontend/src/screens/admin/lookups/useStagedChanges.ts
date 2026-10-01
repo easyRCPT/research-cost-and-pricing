@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+
 import type { ChangesApplied, RateTable } from '@/api/admin-lookups'
 import { ApiError } from '@/lib/api'
 import { asPercent } from '@/lib/format/constants'
-import type { LookupTables } from '@/types'
 import type { Refused } from '@/screens/admin/rates/types'
-import type { RatesMoved } from '@/screens/admin/versions/types'
 import { idOf, refusedChange, type Staged } from '@/screens/admin/stagedChanges'
+import type { RatesMoved } from '@/screens/admin/versions/types'
+import type { LookupTables } from '@/types'
 
 export function useStagedChanges(
   lookups: LookupTables,

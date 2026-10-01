@@ -1,26 +1,28 @@
-import { useLookups } from '@/api/lookups'
-import {
-  LOOKUP_SCREEN,
-  LookupButton,
-} from '@/components/lookups-tabs/LookupButton'
-import { SideBar as Sidebar, type EditorScreen } from './Sidebar'
+import { useNavigate } from '@tanstack/react-router'
+
 import {
   useBudget,
   useEditable,
   useNonStaffLines,
   useUpdateProject,
 } from '@/api/budget'
-import { ReadOnlyNotice } from './ReadOnlyNotice'
-import { useNavigate } from '@tanstack/react-router'
+import { useLookups } from '@/api/lookups'
+import {
+  LOOKUP_SCREEN,
+  LookupButton,
+} from '@/components/lookups-tabs/LookupButton'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
+import { EditorScreenContent } from '@/screens/EditorScreenContent'
+
 import { AppShell } from './AppShell'
+import { BackToProjectsButton } from './BackToProjectsButton'
 import { ExportPdfButton } from './ExportPdfButton'
 import { MobileNav } from './MobileNav'
 import { PageHead } from './PageHead'
-import { SECTIONS } from './sections'
+import { ReadOnlyNotice } from './ReadOnlyNotice'
 import { ScreenNav } from './ScreenNav'
-import { EditorScreenContent } from '@/screens/EditorScreenContent'
-import { BackToProjectsButton } from './BackToProjectsButton'
+import { SECTIONS } from './sections'
+import { type EditorScreen,SideBar as Sidebar } from './Sidebar'
 import { useBackTarget } from './useBackTarget'
 
 interface AppContentProps {

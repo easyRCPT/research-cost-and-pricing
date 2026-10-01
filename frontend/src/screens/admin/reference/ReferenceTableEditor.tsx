@@ -2,11 +2,11 @@ import { Grid, Panel, Th } from '@/components/shell'
 import { AddReferenceRow } from '@/screens/admin/reference/AddReferenceRow'
 import { ReferenceRow } from '@/screens/admin/reference/ReferenceRow'
 import {
+  type Faculty,
   PIN_LEFT,
   PIN_RIGHT,
-  text,
-  type Faculty,
   type Row,
+  text,
 } from '@/screens/admin/reference/shared'
 import type { ReferenceTableSpec } from '@/screens/admin/referenceTables'
 

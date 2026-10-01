@@ -5,10 +5,11 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, unwrap } from '@/lib/api'
+
 import { lookupsQuery } from '@/api/lookups'
-import type { components } from '@/types/api'
+import { api, unwrap } from '@/lib/api'
 import type { ReferenceTable } from '@/screens/admin/referenceTables'
+import type { components } from '@/types/api'
 
 export type LookupVersion = components['schemas']['LookupVersion']
 export type LookupChange = components['schemas']['LookupChange']

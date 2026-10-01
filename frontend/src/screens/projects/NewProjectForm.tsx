@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 
+import { useCreateProject } from '@/api/projects'
 import { FieldRow, Panel } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,7 +15,6 @@ import {
 import { TextInput } from '@/components/ui/text-input'
 import { ApiError } from '@/lib/api'
 import type { Department, ProjectCreate, ProjectRow } from '@/types'
-import { useCreateProject } from '@/api/projects'
 
 const CURRENT_YEAR = new Date().getFullYear()
 

@@ -1,9 +1,10 @@
-import { useState } from 'react'
 import { useBlocker } from '@tanstack/react-router'
+import { useState } from 'react'
 import { toast } from 'sonner'
+
 import { useApproverGaps } from '@/api/admin-console'
-import { useLookups } from '@/api/lookups'
 import type { RateTable } from '@/api/admin-lookups'
+import { useLookups } from '@/api/lookups'
 import { PageHead } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { gapFlags } from '@/screens/admin/lookups/gapFlags'
@@ -14,7 +15,7 @@ import { useStagedChanges } from '@/screens/admin/lookups/useStagedChanges'
 import { ChangeBar } from '@/screens/admin/rates/ChangeBar'
 import { RatesMovedNotice } from '@/screens/admin/rates/RatesMovedNotice'
 import { Review } from '@/screens/admin/rates/Review'
-import { RATE_TABLES, isRateTable } from '@/screens/admin/rateTables'
+import { isRateTable,RATE_TABLES } from '@/screens/admin/rateTables'
 import { ReferenceTableEditor } from '@/screens/admin/reference/ReferenceTableEditor'
 import {
   referenceSpec,

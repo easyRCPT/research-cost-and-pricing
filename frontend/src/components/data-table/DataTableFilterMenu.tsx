@@ -1,4 +1,5 @@
 import { CheckIcon, ChevronDownIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -6,6 +7,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { ScrollViewport } from '@/components/ui/scroll-indicator'
+
 import type { FilterOption } from './filtering'
 
 interface DataTableFilterMenuProps {

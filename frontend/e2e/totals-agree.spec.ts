@@ -1,4 +1,4 @@
-import { test, expect, newStaffRow } from './fixtures'
+import { expect, newStaffRow,test } from './fixtures'
 
 /**
  * Regression for the optimistic echo speaking for money it could not know.

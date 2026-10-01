@@ -1,5 +1,6 @@
 import type { ReactTable, RowData } from '@tanstack/react-table'
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -8,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
 import type { DataTableFeatures } from './features'
 
 const PAGE_SIZES = [10, 20, 50, 100]

@@ -1,12 +1,12 @@
 import {
+  type ColumnDef,
   createColumnHelper,
   createPaginatedRowModel,
   createSortedRowModel,
+  type RowData,
   rowPaginationFeature,
   rowSortingFeature,
   tableFeatures,
-  type ColumnDef,
-  type RowData,
 } from '@tanstack/react-table'
 
 export interface DataTableColumnMeta {

@@ -1,14 +1,15 @@
 import { MONTHS } from '@/lib/constants'
 import { money } from '@/lib/format/utils'
 import type { BudgetDetail, LookupTables } from '@/types'
-import { DASH, or } from './format'
-import { ProjectDetailsSection } from './ProjectDetailsSection'
-import { PriceSummarySection } from './PriceSummarySection'
-import { StaffBudgetSection } from './StaffBudgetSection'
-import { NonStaffBudgetSection } from './NonStaffBudgetSection'
-import { InKindSection } from './InKindSection'
+
 import { CoverDetail } from './CoverDetail'
 import { DeliverablesPrintSection } from './DeliverablesPrintSection'
+import { DASH, or } from './format'
+import { InKindSection } from './InKindSection'
+import { NonStaffBudgetSection } from './NonStaffBudgetSection'
+import { PriceSummarySection } from './PriceSummarySection'
+import { ProjectDetailsSection } from './ProjectDetailsSection'
+import { StaffBudgetSection } from './StaffBudgetSection'
 
 export interface BudgetPrintDocumentProps {
   budget: BudgetDetail

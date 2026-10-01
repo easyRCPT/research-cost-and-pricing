@@ -1,7 +1,9 @@
 import type { ComponentProps } from 'react'
+
+import { NumberInput } from '@/components/ui/number-input'
 import { useSettled } from '@/lib/use-settled'
 import { cn } from '@/lib/utils'
-import { NumberInput } from '@/components/ui/number-input'
+
 import { cellField } from './cellField'
 
 // A time or an amount moves every figure below it, so it goes almost at once.

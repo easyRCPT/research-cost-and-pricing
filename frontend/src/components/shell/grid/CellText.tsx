@@ -1,7 +1,9 @@
-import { useState, type ComponentProps } from 'react'
+import { type ComponentProps,useState } from 'react'
+
+import { Input } from '@/components/ui/input'
 import { useSettled } from '@/lib/use-settled'
 import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
+
 import { cellField } from './cellField'
 
 /**

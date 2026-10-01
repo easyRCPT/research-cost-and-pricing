@@ -6,8 +6,9 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, unwrap } from '@/lib/api'
+
 import { meQuery } from '@/api/auth'
+import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
 export type AdminUser = components['schemas']['AdminUser']

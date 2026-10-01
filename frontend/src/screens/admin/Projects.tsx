@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useAdminProjects, type AdminProject } from '@/api/admin-console'
+import { useMemo } from 'react'
+
+import { type AdminProject,useAdminProjects } from '@/api/admin-console'
 import {
   columnHelper,
   DataTable,
@@ -8,10 +9,10 @@ import {
   type DataTableFilter,
 } from '@/components/data-table'
 import { PageHead } from '@/components/shell'
-import { money } from '@/lib/format/utils'
-import { shortDate } from '@/lib/format/dates'
-import { STATUS_LABELS } from '@/lib/status'
 import { Skeleton } from '@/components/ui/skeleton'
+import { shortDate } from '@/lib/format/dates'
+import { money } from '@/lib/format/utils'
+import { STATUS_LABELS } from '@/lib/status'
 
 // Typed against the schema's enum, so a new status breaks the build here
 // rather than rendering an empty cell (#71). The raw value is the fallback all

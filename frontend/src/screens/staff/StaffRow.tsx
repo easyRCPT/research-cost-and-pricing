@@ -1,3 +1,5 @@
+import { X } from 'lucide-react'
+
 import {
   Calc,
   CellChoice,
@@ -12,10 +14,10 @@ import { Button } from '@/components/ui/button'
 import { dash } from '@/lib/format/utils'
 import { toastOutOfRange } from '@/lib/range'
 import {
-  EMPLOYMENT_TYPES,
   clampedByYear,
   classificationsFor,
   costFor,
+  EMPLOYMENT_TYPES,
   maxTimeFor,
   timeBasesFor,
   timeFor,
@@ -28,7 +30,6 @@ import type {
   SalaryRate,
   SalaryRateMultiplier,
 } from '@/types'
-import { X } from 'lucide-react'
 
 interface StaffRowProps {
   line: EditableStaffLine

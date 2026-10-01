@@ -3,7 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { RateTableSpec } from '@/screens/admin/rateTables'
-import { keyText, shown, type Key, type Values } from '@/screens/admin/stagedChanges'
+import { type Key, keyText, shown, type Values } from '@/screens/admin/stagedChanges'
+
 import { ValueInput } from './ValueInput'
 
 export function RateRow({

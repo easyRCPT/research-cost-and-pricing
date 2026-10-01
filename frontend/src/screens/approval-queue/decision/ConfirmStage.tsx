@@ -1,5 +1,6 @@
 import type { Decision, QueueRow } from '@/api/approvals'
 import { Button } from '@/components/ui/button'
+
 import { consequence } from './consequence'
 
 export function ConfirmStage({

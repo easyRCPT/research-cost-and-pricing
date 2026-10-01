@@ -1,8 +1,9 @@
 import { useState } from 'react'
+
 import {
+  type ChangesApplied,
   useApplyChanges,
   useLookupVersions,
-  type ChangesApplied,
 } from '@/api/admin-lookups'
 import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -13,9 +14,10 @@ import {
   countText,
   idOf,
   keyText,
-  toRequest,
   type Staged,
+  toRequest,
 } from '@/screens/admin/stagedChanges'
+
 import { ChangeText } from './ChangeText'
 
 /** Every change, old → new, and where the set will go, before it is saved. */

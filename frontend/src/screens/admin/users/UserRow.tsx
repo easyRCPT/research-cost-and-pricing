@@ -1,6 +1,7 @@
 import type { AdminUser } from '@/api/admin-users'
 import { Badge } from '@/components/ui/badge'
-import { ROLE_LABEL, nameOf } from './labels'
+
+import { nameOf,ROLE_LABEL } from './labels'
 import { UserEditor } from './UserEditor'
 
 export function UserRow({

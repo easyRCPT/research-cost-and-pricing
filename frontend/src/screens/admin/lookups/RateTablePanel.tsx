@@ -1,12 +1,12 @@
 import type { RateTable } from '@/api/admin-lookups'
 import { Panel } from '@/components/shell'
 import { salaryRateYear } from '@/lib/salary-rate-year'
-import type { LookupTables } from '@/types'
 import { AddRateRow } from '@/screens/admin/rates/AddRateRow'
 import { RateTable as RateTableView } from '@/screens/admin/rates/RateTable'
 import type { Refused } from '@/screens/admin/rates/types'
 import { tableSpec } from '@/screens/admin/rateTables'
-import { upsert, type Row, type Staged } from '@/screens/admin/stagedChanges'
+import { type Row, type Staged,upsert } from '@/screens/admin/stagedChanges'
+import type { LookupTables } from '@/types'
 
 interface RateTablePanelProps {
   tableId: RateTable

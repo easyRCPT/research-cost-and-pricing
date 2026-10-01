@@ -1,8 +1,10 @@
-import { useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { useState } from 'react'
+
+import { type AccountType,homeFor, useLogin } from '@/api/auth'
 import { Button } from '@/components/ui/button'
-import { homeFor, useLogin, type AccountType } from '@/api/auth'
 import { ApiError } from '@/lib/api'
+
 import { AccountTabs } from './AccountTabs'
 import { AuthError, AuthShell, Field } from './AuthShell'
 

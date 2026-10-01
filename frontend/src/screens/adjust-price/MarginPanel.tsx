@@ -1,8 +1,8 @@
 import { useBudget, useEditable, useField } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
-import { toastOutOfRange } from '@/lib/range'
 import { Slider } from '@/components/ui/slider'
+import { toastOutOfRange } from '@/lib/range'
 
 // TODO(#87): the 0 floor and 100% ceiling hold until Frank sets the margin policy.
 const MAX_MARGIN = 100

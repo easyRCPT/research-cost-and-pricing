@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+
 import { useReferenceWrite } from '@/api/admin-lookups'
 import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
@@ -9,13 +10,13 @@ import { FieldInput } from '@/screens/admin/reference/FieldInput'
 import { MoveConfirm } from '@/screens/admin/reference/MoveConfirm'
 import { RemoveConfirm } from '@/screens/admin/reference/RemoveConfirm'
 import {
+  type Faculty,
   PIN_LEFT,
   PIN_RIGHT,
-  refusalOf,
-  text,
-  type Faculty,
   type Refusal,
+  refusalOf,
   type Row,
+  text,
 } from '@/screens/admin/reference/shared'
 import { ViewActions } from '@/screens/admin/reference/ViewActions'
 import type { ReferenceTableSpec } from '@/screens/admin/referenceTables'

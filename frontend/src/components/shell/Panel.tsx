@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
 import { ChevronRightIcon, InfoIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
+
 import {
   Collapsible,
   CollapsibleContent,

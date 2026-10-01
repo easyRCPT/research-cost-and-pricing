@@ -1,4 +1,4 @@
-import { test, expect, newStaffRow } from './fixtures'
+import { expect, newStaffRow,test } from './fixtures'
 
 test('a staff row prices, and is still there after a reload', async ({
   page,

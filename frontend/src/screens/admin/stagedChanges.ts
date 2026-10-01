@@ -1,6 +1,7 @@
 import type { LookupChange, RateTable } from '@/api/admin-lookups'
 import { ApiError } from '@/lib/api'
-import { tableSpec, type RateTableSpec, type ValueField } from './rateTables'
+
+import { type RateTableSpec, tableSpec, type ValueField } from './rateTables'
 
 export type Row = Record<string, unknown>
 export type Key = Record<string, unknown>

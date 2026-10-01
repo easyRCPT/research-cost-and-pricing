@@ -1,14 +1,15 @@
 import { type EditorScreen } from '@/components/shell'
 import type { LookupTables, ProjectInfo } from '@/types'
-import { ProjectDetails } from './ProjectDetails'
-import { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
-import { StaffCosts } from './StaffCosts'
-import { PriceSummary } from './PriceSummary'
+
 import { AdjustPrice } from './AdjustPrice'
-import { CashCoContributions } from './CashCoContributions'
-import { BudgetForm } from './BudgetForm'
 import { Approvals } from './Approvals'
+import { BudgetForm } from './BudgetForm'
+import { CashCoContributions } from './CashCoContributions'
 import { EmptyStateScreen } from './EmptyStateScreen'
+import { NonStaffCosts, type NonStaffCostsProps } from './NonStaffCosts'
+import { PriceSummary } from './PriceSummary'
+import { ProjectDetails } from './ProjectDetails'
+import { StaffCosts } from './StaffCosts'
 
 interface EditorScreenContentProps {
   lookups: LookupTables

@@ -1,11 +1,13 @@
+import { Plus } from 'lucide-react'
+
 import { Grid } from '@/components/shell'
+import { Button } from '@/components/ui/button'
 import type { NonStaffCategory, NonStaffLine } from '@/types'
-import { NonStaffTableHeader } from './NonStaffTableHeader'
+import type { NonStaffTotal } from '@/types'
+
 import { NonStaffTableBody } from './NonStaffTableBody'
 import { NonStaffTableFooter } from './NonStaffTableFooter'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import type { NonStaffTotal } from '@/types'
+import { NonStaffTableHeader } from './NonStaffTableHeader'
 
 interface NonStaffTableProps {
   lines: NonStaffLine[]

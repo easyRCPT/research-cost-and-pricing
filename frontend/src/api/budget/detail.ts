@@ -2,6 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { api, unwrap } from '@/lib/api'
 import type { BudgetDetail } from '@/types'
+
 import { useBudgetId } from './context'
 
 export const budgetKey = (budgetId: number) => ['budget', budgetId] as const

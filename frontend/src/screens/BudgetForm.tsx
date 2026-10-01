@@ -1,13 +1,14 @@
 import { useBudget } from '@/api/budget'
 import { Panel } from '@/components/shell'
 import type { LookupTables } from '@/types'
-import { ProjectDetailsSection } from './budget-form/ProjectDetailsSection'
-import { PriceSummarySection } from './budget-form/PriceSummarySection'
-import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
-import { NonStaffBudgetSection } from './budget-form/NonStaffBudgetSection'
+
+import { BudgetPrintDocument } from './budget-form/BudgetPrintDocument'
 import { DeliverablesSection } from './budget-form/DeliverablesSection'
 import { InKindSection } from './budget-form/InKindSection'
-import { BudgetPrintDocument } from './budget-form/BudgetPrintDocument'
+import { NonStaffBudgetSection } from './budget-form/NonStaffBudgetSection'
+import { PriceSummarySection } from './budget-form/PriceSummarySection'
+import { ProjectDetailsSection } from './budget-form/ProjectDetailsSection'
+import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
 
 export interface BudgetFormProps {
   lookups: LookupTables

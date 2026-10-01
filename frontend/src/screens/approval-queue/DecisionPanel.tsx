@@ -1,10 +1,12 @@
 import { useState } from 'react'
+
+import { type Decision, type QueueRow,useDecide } from '@/api/approvals'
 import { useMe } from '@/api/auth'
-import { useDecide, type Decision, type QueueRow } from '@/api/approvals'
 import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ApiError } from '@/lib/api'
 import { describeTrigger } from '@/screens/approvals/triggers'
+
 import { ChooseStage } from './decision/ChooseStage'
 import { ComposeStage } from './decision/ComposeStage'
 import { ConfirmStage } from './decision/ConfirmStage'

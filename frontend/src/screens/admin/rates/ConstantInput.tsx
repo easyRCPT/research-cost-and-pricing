@@ -1,4 +1,5 @@
 import { useState } from 'react'
+
 import { Input } from '@/components/ui/input'
 import { asPercent, PERCENT_CONSTANTS } from '@/lib/format/constants'
 

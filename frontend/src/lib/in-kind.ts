@@ -1,7 +1,7 @@
 import type { NonStaffLines, StaffLines } from '@/api/budget'
 import { withCosts } from '@/lib/staff'
-import type { BudgetDetail, EditableStaffLine } from '@/types'
 import type { CostRow } from '@/screens/inkind/InKindFlagsTable'
+import type { BudgetDetail, EditableStaffLine } from '@/types'
 
 const detailOf = (line: EditableStaffLine) =>
   [line.category, line.employment_type, line.classification]

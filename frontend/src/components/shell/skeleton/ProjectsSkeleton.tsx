@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/shell/AppShell'
+
 import { PageHeadSkeleton } from './PageHeadSkeleton'
 
 export function ProjectsSkeleton() {

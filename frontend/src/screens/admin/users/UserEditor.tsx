@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { useGroups, useUpdateUser, type AdminUser } from '@/api/admin-users'
+
+import { type AdminUser,useGroups, useUpdateUser } from '@/api/admin-users'
 import { SUPERADMIN, useMe } from '@/api/auth'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { shortDate } from '@/lib/format/dates'
+
 import { Assignments } from './Assignments'
 import { nameOf, refused } from './labels'
 import { Names } from './Names'

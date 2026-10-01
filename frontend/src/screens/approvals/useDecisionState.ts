@@ -1,7 +1,8 @@
 import { useState } from 'react'
+
+import type { QueueRow } from '@/api/approvals'
 import { useBudgetId } from '@/api/budget'
 import { useDecidableStep } from '@/api/decidable'
-import type { QueueRow } from '@/api/approvals'
 import type { Decided } from '@/screens/approval-queue/DecisionPanel'
 
 export function useDecisionState() {

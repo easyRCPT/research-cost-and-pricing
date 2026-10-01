@@ -1,29 +1,30 @@
 import type { QueryClient } from '@tanstack/react-query'
 import {
-  Outlet,
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  Outlet,
   redirect,
 } from '@tanstack/react-router'
+
 import { homeFor, meQuery } from '@/api/auth'
+import { SUPERADMIN } from '@/api/auth'
 import { LOOKUP_SCREEN } from '@/components/lookups-tabs/LookupButton'
-import type { AppScreen } from '@/components/shell/AppContent'
 import { AppSkeleton } from '@/components/shell'
+import type { AppScreen } from '@/components/shell/AppContent'
+import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
+import { EditorRoute } from '@/routes/editor'
+import { ProjectsRoute } from '@/routes/projects'
 import { SCREEN_HEADINGS } from '@/screens'
+import { AdminShell } from '@/screens/admin/AdminShell'
+import { Audit } from '@/screens/admin/Audit'
+import { LookupEditor } from '@/screens/admin/LookupEditor'
+import { Overview } from '@/screens/admin/Overview'
+import { Projects as ProjectRegister } from '@/screens/admin/Projects'
+import { Users } from '@/screens/admin/Users'
 import { AdminLogin } from '@/screens/auth/AdminLogin'
 import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
-import { EditorRoute } from '@/routes/editor'
-import { ProjectsRoute } from '@/routes/projects'
-import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
-import { AdminShell } from '@/screens/admin/AdminShell'
-import { LookupEditor } from '@/screens/admin/LookupEditor'
-import { Users } from '@/screens/admin/Users'
-import { Overview } from '@/screens/admin/Overview'
-import { Projects as ProjectRegister } from '@/screens/admin/Projects'
-import { Audit } from '@/screens/admin/Audit'
-import { SUPERADMIN } from '@/api/auth'
 
 /**
  * Seven entries, written out rather than generated.

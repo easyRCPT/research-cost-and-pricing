@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

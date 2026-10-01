@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { useUpdateUser, type AdminUser } from '@/api/admin-users'
+
+import { type AdminUser,useUpdateUser } from '@/api/admin-users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+
 import { refused } from './labels'
 
 export function Names({ user }: { user: AdminUser }) {

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo, useState } from 'react'
+
 import { useProjectsWithStatus } from '@/api/projects'
 import {
   columnHelper,
@@ -8,11 +9,12 @@ import {
 } from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
 import { Skeleton } from '@/components/ui/skeleton'
-import { money } from '@/lib/format/utils'
 import { shortDate } from '@/lib/format/dates'
-import { cn } from '@/lib/utils'
+import { money } from '@/lib/format/utils'
 import { STATUS_LABELS } from '@/lib/status'
+import { cn } from '@/lib/utils'
 import type { ProjectRow, Status } from '@/types'
+
 import { ApprovalsNav } from './ApprovalsNav'
 import { rememberApprovalsPage } from './returnTo'
 

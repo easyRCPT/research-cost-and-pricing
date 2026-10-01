@@ -5,6 +5,7 @@ import type {
   SalaryRate,
   SalaryRateMultiplier,
 } from '@/types'
+
 import { StaffRow } from './StaffRow'
 
 interface StaffTableBodyProps {
