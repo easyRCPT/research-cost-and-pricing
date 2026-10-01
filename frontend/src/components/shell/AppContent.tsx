@@ -1,6 +1,9 @@
 import { useLookups } from '@/api/lookups'
-import { LOOKUP_SCREEN, LookupButton } from '../lookups-tabs/LookupButton'
-import type { EditorScreen } from './Sidebar'
+import {
+  LOOKUP_SCREEN,
+  LookupButton,
+} from '@/components/lookups-tabs/LookupButton'
+import { SideBar as Sidebar, type EditorScreen } from './Sidebar'
 import {
   useBudget,
   useEditable,
@@ -9,20 +12,16 @@ import {
 } from '@/api/budget'
 import { ReadOnlyNotice } from './ReadOnlyNotice'
 import { useNavigate } from '@tanstack/react-router'
-import { isApprover, SUPERADMIN, useMe } from '@/api/auth'
 import { LookupsScreen, SCREEN_HEADINGS } from '@/screens'
 import { AppShell } from './AppShell'
-import {
-  ExportPdfButton,
-  MobileNav,
-  PageHead,
-  SECTIONS,
-  ScreenNav,
-  Sidebar,
-} from '.'
+import { ExportPdfButton } from './ExportPdfButton'
+import { MobileNav } from './MobileNav'
+import { PageHead } from './PageHead'
+import { SECTIONS } from './sections'
+import { ScreenNav } from './ScreenNav'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
 import { BackToProjectsButton } from './BackToProjectsButton'
-import { approvalsPage } from '@/screens/approval-queue/returnTo'
+import { useBackTarget } from './useBackTarget'
 
 interface AppContentProps {
   screen: AppScreen
@@ -37,18 +36,8 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
   const { data: lookups } = useLookups()
   const { data: budget } = useBudget()
   const editable = useEditable()
-  const { data: me } = useMe()
   const navigate = useNavigate()
-  const someoneElses = !!me && me.user.id !== budget.project_info.owner_id
-  // Back to where they came from: an administrator from the register, an
-  // approver to the approvals page they opened it from (#98), the owner to
-  // their projects.
-  const back =
-    someoneElses && me.groups.includes(SUPERADMIN)
-      ? { label: 'Project register', to: '/admin/projects' as const }
-      : someoneElses && isApprover(me)
-        ? approvalsPage()
-        : null
+  const back = useBackTarget()
   const updateProject = useUpdateProject()
 
   const project = budget.project_info
@@ -64,7 +53,10 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
       topBarRight={
         <>
           {back ? (
-            <BackToProjectsButton label={back.label} onClick={() => navigate({ to: back.to })} />
+            <BackToProjectsButton
+              label={back.label}
+              onClick={() => navigate({ to: back.to })}
+            />
           ) : (
             <BackToProjectsButton onClick={onLeave} />
           )}
