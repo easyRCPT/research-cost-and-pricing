@@ -79,8 +79,7 @@ class Command(BaseCommand):
             # Re-running resets the password rather than leaving a stale one.
             user.set_password(PASSWORD)
             if person.get("staff_flags"):
-                # So the same account reaches the Django admin, which is where
-                # lookup rows and org assignments are edited until D4.
+                # The console never sets these, so the demo admin gets Django admin here.
                 user.is_staff = True
                 user.is_superuser = True
             user.save()
