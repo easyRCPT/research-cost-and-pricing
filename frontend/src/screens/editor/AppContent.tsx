@@ -53,9 +53,25 @@ const EDITOR_SCREENS: Record<EditorScreen, ComponentType> = {
   approvals: Approvals,
 }
 
-export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
+/** The rail while Project Details is incomplete: every other screen greyed out. */
+const DETAILS_ONLY = SECTIONS.map((section) => ({
+  ...section,
+  items: section.items.map((item) => ({
+    ...item,
+    disabled: item.id !== 'details',
+  })),
+}))
+
+export function AppContent({
+  screen: requested,
+  setScreen,
+  onLeave,
+}: AppContentProps) {
   const { data: lookups } = useLookups()
   const editable = useEditable()
+  const locked = useMissingDetails().length > 0
+  const sections = locked ? DETAILS_ONLY : SECTIONS
+  const screen = locked && requested !== LOOKUP_SCREEN ? 'details' : requested
   const navigate = useNavigate()
   const back = useBackTarget()
 
@@ -103,6 +119,7 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
       ) : (
         <>
           <ReadOnlyNotice />
+          <DetailsNeededNotice />
           {/*
             One switch for every control on every screen: a disabled fieldset
             disables each input, select, button and checkbox inside it. The
@@ -115,7 +132,7 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
           >
             {createElement(EDITOR_SCREENS[screen])}
           </fieldset>
-          <ScreenNav screen={screen} onSelect={setScreen} />
+          <ScreenNav screen={screen} onSelect={setScreen} locked={locked} />
         </>
       )}
     </AppShell>

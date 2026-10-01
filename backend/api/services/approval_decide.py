@@ -113,7 +113,8 @@ def get_decidable_step(user: User, step_id: int) -> ApprovalStep:
     The authorisation rules match the approval queue rules.
     """
     step = (
-        ApprovalStep.objects.select_for_update()
+        # Department is a nullable join, which Postgres will not lock.
+        ApprovalStep.objects.select_for_update(of=("self", "budget", "budget__project"))
         .select_related(
             "budget",
             "budget__project",

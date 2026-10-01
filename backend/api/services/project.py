@@ -240,8 +240,8 @@ def build_row(project: Project) -> dict:
         "title": project.title,
         "chief_investigator": project.chief_investigator,
         "funder": project.funder,
-        "department": project.department.name,
-        "faculty": project.department.faculty.name,
+        "department": project.department.name if project.department else "",
+        "faculty": project.department.faculty.name if project.department else "",
         "start_year": project.start_year,
         "end_year": project.end_year,
         # Null only for a project whose budgets have all been deleted. The

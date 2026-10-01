@@ -51,14 +51,14 @@ class ProjectRowSerializer(serializers.Serializer):
 
     id = serializers.IntegerField()
     reference = serializers.CharField()
-    title = serializers.CharField()
+    title = serializers.CharField(allow_blank=True)
     chief_investigator = serializers.CharField(allow_blank=True)
-    funder = serializers.CharField()
-    department = serializers.CharField()
-    faculty = serializers.CharField()
+    funder = serializers.CharField(allow_blank=True)
+    department = serializers.CharField(allow_blank=True)
+    faculty = serializers.CharField(allow_blank=True)
 
     start_year = serializers.IntegerField()
-    end_year = serializers.IntegerField()
+    end_year = serializers.IntegerField(allow_null=True)
 
     # The budget the row opens: the most recently touched one. Null, with a
     # count of zero, for a project whose budgets have been deleted.
@@ -74,33 +74,37 @@ class ProjectRowSerializer(serializers.Serializer):
 
 class ProjectCreateSerializer(serializers.Serializer):
     """
-    What it takes to start a project.
-
-    Only the fields a project cannot exist without: a title for the list to
-    show and a department for the engine to cost against. Everything else --
-    external party, duration, scheme, activity, region -- is edited afterwards
-    on Project Details, so the create form does not ask for it twice.
+    What it takes to start a project: nothing. New project opens the costing
+    straight away, and Project Details asks for the rest.
     """
 
-    title = serializers.CharField(max_length=200)
-    department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
-
-    funder = serializers.CharField(
-        max_length=100, required=False, allow_blank=True, default=""
+    title = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    department = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), required=False, allow_null=True
     )
+
+    funder = serializers.CharField(max_length=100, required=False, allow_blank=True)
     chief_investigator = serializers.CharField(
-        max_length=100, required=False, allow_blank=True, default=""
+        max_length=100, required=False, allow_blank=True
     )
-    scheme = serializers.CharField(
-        max_length=200, required=False, allow_blank=True, default=""
-    )
+    scheme = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
-    start_year = serializers.IntegerField(min_value=2000, max_value=2100)
-    start_month = serializers.IntegerField(min_value=1, max_value=12)
-    end_year = serializers.IntegerField(min_value=2000, max_value=2100)
-    end_month = serializers.IntegerField(min_value=1, max_value=12)
+    start_year = serializers.IntegerField(
+        min_value=2000, max_value=2100, required=False
+    )
+    start_month = serializers.IntegerField(min_value=1, max_value=12, required=False)
+    end_year = serializers.IntegerField(
+        min_value=2000, max_value=2100, required=False, allow_null=True
+    )
+    end_month = serializers.IntegerField(
+        min_value=1, max_value=12, required=False, allow_null=True
+    )
 
     def validate(self, attrs):
+        attrs.setdefault("start_year", timezone.localdate().year)
+        attrs.setdefault("start_month", 1)
+        if attrs.get("end_year") is None or attrs.get("end_month") is None:
+            return attrs
         start = (attrs["start_year"], attrs["start_month"])
         end = (attrs["end_year"], attrs["end_month"])
         if end < start:
