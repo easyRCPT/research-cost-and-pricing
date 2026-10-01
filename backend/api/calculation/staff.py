@@ -1,5 +1,9 @@
 from decimal import Decimal
 
+# Classifications that carry no step suffix, i.e. the string is the level
+# itself, not "<level>.<step>"
+NO_STEP_CLASSIFICATIONS = ["UOM 10"]
+
 
 def calculate_staff_table(
     table_data: dict,
@@ -244,23 +248,25 @@ def find_salary_rate(
     }
     payroll_type = mapping.get(employment_type, employment_type)
 
-    # Continuing and Fixed-term staff progress based on years employed
-    # Casual staff do not progress classification.
-    # Assume classification level is in the range from 1 to 10
-    if employment_type == "Casual" or classification.endswith("10"):
+    # Continuing and Fixed-term staff progress one classification step per year
+    # employed. Casual staff do not progress.
+    # Classification strings are "<level>.<step>". Stepless levels such as
+    # "UOM 10" stay unchanged.
+    if employment_type == "Casual" or classification in NO_STEP_CLASSIFICATIONS:
         new_classification = classification
     else:
-        prefix = classification[:-1]
-        current = int(classification[-1])
+        level, _, step_str = classification.rpartition(".")
+        current = int(step_str)
+        target = current + year_employed
 
-        max_step = current + year_employed
-
-        while max_step > current:
-            key = (payroll_type, category, f"{prefix}{max_step}")
+        # Progress of classification stops at the highest step
+        while target > current:
+            key = (payroll_type, category, f"{level}.{target}")
             if key in constants["salary_rate"]:
                 break
-            max_step -= 1
-        new_classification = f"{prefix}{max_step}"
+            target -= 1
+
+        new_classification = f"{level}.{target}"
 
     # Find base salary rate in 2025 from lookup table
     key = (payroll_type, category, new_classification)

@@ -111,9 +111,7 @@ def _reject_invalid_salary_rate_year(
         raise ValidationError("Salary Rate Year must be a positive small integer.")
 
 
-def _reject_update_to_constant_name(
-    model: type[models.Model], lookup: dict, data: dict
-) -> None:
+def _reject_update_to_constant_name(model: type[models.Model], data: dict) -> None:
     """
     Names of calculation constant are used in the engine and cannot be updated by admin.
     """
@@ -121,9 +119,7 @@ def _reject_update_to_constant_name(
     if model is not CalculationConstant:
         return
 
-    name = data.get("name")
-
-    if name is not None:
+    if data.get("name") is not None:
         raise ValidationError("Name of calculation constant cannot be updated.")
 
 
@@ -155,7 +151,7 @@ def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
 def _validate_update(model: type[models.Model], lookup: dict, data: dict) -> None:
     _reject_fixed_constant(model, lookup, data)
     _reject_invalid_salary_rate_year(model, lookup, data)
-    _reject_update_to_constant_name(model, lookup, data)
+    _reject_update_to_constant_name(model, data)
 
     _validate_model_fields(model, lookup, data)
 
