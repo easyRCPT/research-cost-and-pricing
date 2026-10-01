@@ -1,15 +1,6 @@
 import { Badge } from '@/components/ui/badge'
+import { AWAITING_LABELS } from '@/lib/status'
 import type { Status } from '@/types'
-
-const STATUS_LABEL: Record<Status, string> = {
-  draft: 'Draft',
-  submitted: 'Awaiting Head of Department',
-  hod_review: 'Awaiting Head of Department',
-  dean_review: 'Awaiting Dean',
-  approved: 'Approved',
-  rejected: 'Rejected',
-  withdrawn: 'Withdrawn',
-}
 
 interface ApprovalStatusBadgeProps {
   status: Status
@@ -18,7 +9,7 @@ interface ApprovalStatusBadgeProps {
 export function ApprovalStatusBadge({ status }: ApprovalStatusBadgeProps) {
   return (
     <Badge variant={status === 'rejected' ? 'destructive' : 'secondary'}>
-      {STATUS_LABEL[status]}
+      {AWAITING_LABELS[status]}
     </Badge>
   )
 }
