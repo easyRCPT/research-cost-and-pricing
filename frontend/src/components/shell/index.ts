@@ -2,6 +2,7 @@ export { AppShell } from './AppShell'
 export { AppSkeleton } from './skeleton/AppSkeleton'
 export { ProjectsSkeleton } from './skeleton/ProjectsSkeleton'
 export { AppErrorState } from './AppErrorState'
+export { AppBoundary } from './AppBoundary'
 
 export { PageHead } from './PageHead'
 export { ExportPdfButton } from './ExportPdfButton'

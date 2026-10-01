@@ -1,33 +1,22 @@
-import { QueryErrorResetBoundary, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { Suspense } from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
 
 import { projectsQuery, useProjects } from '@/api/projects'
-import { AppErrorState, AppShell, ProjectsSkeleton } from '@/components/shell'
+import { AppBoundary, AppShell, ProjectsSkeleton } from '@/components/shell'
 import { ProjectsScreen } from '@/screens'
 
 export function ProjectsRoute() {
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={(props) => <AppErrorState {...props} />}
-        >
-          <Suspense fallback={<ProjectsSkeleton />}>
-            {/*
-              In the shell, without a sidebar: the branding band belongs on
-              every screen, and ProjectsSkeleton already renders one -- so
-              outside it the band flashed away as the list arrived.
-            */}
-            <AppShell>
-              <Projects />
-            </AppShell>
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AppBoundary fallback={<ProjectsSkeleton />}>
+      {/*
+        In the shell, without a sidebar: the branding band belongs on
+        every screen, and ProjectsSkeleton already renders one -- so
+        outside it the band flashed away as the list arrived.
+      */}
+      <AppShell>
+        <Projects />
+      </AppShell>
+    </AppBoundary>
   )
 }
 
