@@ -13,14 +13,14 @@ from api.models import (
 )
 from api.services.audit import write_audit
 
-from .budget_state import require_rejected
+from .budget_state import require_clonable
 
 
 @transaction.atomic
 def clone_budget(user: User, budget: Budget) -> Budget:
-    """Clone a rejected budget into a new draft budget."""
-    # Raise 409 if budget is not at the status rejected
-    require_rejected(budget)
+    """Clone a rejected or withdrawn budget into a new draft budget."""
+    # Raise 409 unless the attempt ended without approval
+    require_clonable(budget)
 
     new_budget = Budget.objects.create(
         project=budget.project,

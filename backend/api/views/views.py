@@ -34,6 +34,7 @@ from api.services import (
     staff_line,
     submission,
     submission_validation,
+    withdrawal,
 )
 from api.services.budget_state import require_editable, require_ownership
 
@@ -108,6 +109,17 @@ class BudgetSubmitView(APIView):
         submission.submit_budget(request.user, budget)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class BudgetWithdrawView(APIView):
+    """The owner pulls a costing back out of review (#95)."""
+
+    @extend_schema(request=None, responses={200: BudgetDetailSerializer})
+    def post(self, request: Request, budget_id: int) -> Response:
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
+        withdrawal.withdraw_budget(request.user, budget)
+        result = budget_details.get_budget_details(budget)
+        return Response(BudgetDetailSerializer(result).data)
 
 
 class BudgetCloneView(APIView):
