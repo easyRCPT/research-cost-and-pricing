@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from ..models import User
 
 SUPERADMIN = "superadmin"
+RESEARCHER = "researcher"
 
 # Hashing an unused password so that a login for an address nobody holds costs
 # the same as one for an address somebody does. Without it the response time

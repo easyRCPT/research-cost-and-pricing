@@ -21,7 +21,7 @@ from django.db.models import Q, QuerySet
 from ..exceptions import Conflict, UnprocessableEntity
 from ..models import Department, Faculty, User, UserOrgAssignment
 from .audit import write_audit
-from .auth import SUPERADMIN
+from .auth import RESEARCHER, SUPERADMIN, groups_of
 
 Role = UserOrgAssignment.Role
 
@@ -177,6 +177,10 @@ def _scope(role: str, department: str | None, faculty: str | None):
 def add_assignment(
     actor: User, user: User, role: str, department: str | None, faculty: str | None
 ) -> UserOrgAssignment:
+    if RESEARCHER in groups_of(user):
+        raise UnprocessableEntity(
+            "A researcher cannot approve for a unit. Move the account to staff first."
+        )
     dept, fac = _scope(role, department, faculty)
     if UserOrgAssignment.objects.filter(
         user=user, role=role, department=dept, faculty=fac
