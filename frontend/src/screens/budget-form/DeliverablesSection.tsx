@@ -1,4 +1,4 @@
-import { Plus, X } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import { useDeliverables } from '@/api/budget'
 import { isDraft } from '@/api/budget/drafts'
@@ -10,6 +10,7 @@ import {
   CellText,
   Grid,
   PartBar,
+  RemoveRowButton,
   Td,
   Th,
 } from '@/components/shell'
@@ -97,17 +98,11 @@ export function DeliverablesSection() {
                   onChange={(sponsor) => patchRow(row.id, { sponsor })}
                 />
               </CellTd>
-              <Td align="center" className="print:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={`Remove ${row.description || 'deliverable'}`}
-                  className="text-muted-foreground hover:bg-bad-bg hover:text-bad"
-                  onClick={() => removeRow(row.id)}
-                >
-                  <X />
-                </Button>
-              </Td>
+              <RemoveRowButton
+                className="print:hidden"
+                label={`Remove ${row.description || 'deliverable'}`}
+                onRemove={() => removeRow(row.id)}
+              />
             </tr>
           ))}
         </tbody>

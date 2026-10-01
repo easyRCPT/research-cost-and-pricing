@@ -27,14 +27,16 @@ export function EditableGrid({
 export function RemoveRowButton({
   label,
   disabled,
+  className,
   onRemove,
 }: {
   label: string
   disabled?: boolean
+  className?: string
   onRemove: () => void
 }) {
   return (
-    <Td align="center">
+    <Td align="center" className={className}>
       <Button
         variant="ghost"
         size="icon-xs"
