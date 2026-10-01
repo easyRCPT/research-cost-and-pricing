@@ -138,7 +138,10 @@ class AuditTest(ConsoleFixture):
             [r["action"] for r in self.page(since=today)["results"]], ["a.new"]
         )
         self.assertEqual(
-            [r["action"] for r in self.page(until=today - timedelta(days=3))["results"]],
+            [
+                r["action"]
+                for r in self.page(until=today - timedelta(days=3))["results"]
+            ],
             ["a.old"],
         )
 

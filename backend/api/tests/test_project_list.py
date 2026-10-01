@@ -70,7 +70,9 @@ class ProjectListTest(TestCase):
     def test_searches_title_department_and_owner(self):
         self.assertEqual(self.titles(q="cher"), ["Cherry"])
         self.assertEqual(self.titles(q="history"), ["Apple"])
-        self.assertEqual(self.titles(q="ann lee", ordering="title"), ["Apple", "Banana"])
+        self.assertEqual(
+            self.titles(q="ann lee", ordering="title"), ["Apple", "Banana"]
+        )
 
     def test_each_filter_takes_several_values(self):
         self.assertEqual(

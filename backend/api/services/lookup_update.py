@@ -559,9 +559,7 @@ SYSTEM = "system"
 
 def _name_of(user: str):
     """`display_name` in SQL: their full name, else their email, else blank."""
-    full = Trim(
-        Concat(F(f"{user}__first_name"), Value(" "), F(f"{user}__last_name"))
-    )
+    full = Trim(Concat(F(f"{user}__first_name"), Value(" "), F(f"{user}__last_name")))
     return Coalesce(
         NullIf(full, Value("")),
         F(f"{user}__email"),
@@ -652,7 +650,9 @@ def version_rows(listed) -> list[dict]:
             "id": version.id,
             "created_at": version.created_at,
             "updated_by": version.updated_by.email if version.updated_by else None,
-            "updated_by_name": version.updated_by.display_name if version.updated_by else None,
+            "updated_by_name": version.updated_by.display_name
+            if version.updated_by
+            else None,
             "budgets_priced": version.budgets_priced,
             "current": version.id == config.current_version_id,
             # Whether the next set writes into this version. Only the current

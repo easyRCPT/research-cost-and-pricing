@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from django.db.models import Count
+from django.db.models import Count, QuerySet
 
 from api.models import User
 
@@ -10,7 +10,7 @@ def emails_to_names(emails) -> dict[str, str]:
 
 
 def facets(
-    narrow: Callable[..., object],
+    narrow: Callable[..., QuerySet],
     query: dict,
     fields: dict[str, str],
     none: dict[str, str] | None = None,

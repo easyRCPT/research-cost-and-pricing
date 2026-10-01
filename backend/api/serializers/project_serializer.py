@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -34,7 +36,7 @@ def list_query(request, serializer=ProjectListQuerySerializer) -> dict:
     """The list's search and filters as `narrow` takes them, without its sort."""
     query = serializer(data=request.query_params)
     query.is_valid(raise_exception=True)
-    data = dict(query.validated_data)
+    data = dict(cast(dict, query.validated_data))
     data.pop("ordering", None)
     return data
 

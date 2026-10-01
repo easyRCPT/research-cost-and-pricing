@@ -24,7 +24,7 @@ class DepartmentSearchView(ListAPIView):
     serializer_class = DepartmentSerializer
     pagination_class = ByName
 
-    def get_queryset(self):
+    def get_queryset(self):  # type: ignore[override]
         return matching(self.request, Department.objects.select_related("faculty"))
 
 
@@ -33,5 +33,5 @@ class FacultySearchView(ListAPIView):
     serializer_class = FacultySerializer
     pagination_class = ByName
 
-    def get_queryset(self):
+    def get_queryset(self):  # type: ignore[override]
         return matching(self.request, Faculty.objects.all())

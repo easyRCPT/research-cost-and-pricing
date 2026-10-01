@@ -284,7 +284,7 @@ class VersionHistoryRoutesTest(TestCase):
             [v["id"] for v in page["results"]], [self.by_zed.id, self.by_ada.id]
         )
         rest = self.client.get(page["next"]).json()
-        self.assertEqual([v["id"] for v in rest["results"]][0], self.loaded.id)
+        self.assertEqual(rest["results"][0]["id"], self.loaded.id)
 
     def test_it_sorts_on_the_counts_and_who(self):
         self.assertEqual(self.ids(ordering="-changes")[0], self.by_ada.id)
@@ -296,9 +296,7 @@ class VersionHistoryRoutesTest(TestCase):
         )
 
     def test_it_refuses_a_sort_it_cannot_do(self):
-        response = self.client.get(
-            "/api/admin/lookups/versions/", {"ordering": "note"}
-        )
+        response = self.client.get("/api/admin/lookups/versions/", {"ordering": "note"})
         self.assertEqual(response.status_code, 400)
 
     def test_it_filters_by_who_made_it(self):

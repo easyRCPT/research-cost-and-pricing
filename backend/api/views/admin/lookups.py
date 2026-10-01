@@ -162,8 +162,8 @@ class LookupVersionsView(ListAPIView):
         "budgets_priced": "budgets_priced",
     }
 
-    def get_queryset(self):
-        return lookup_update.versions(**versions_query(self.request))
+    def get_queryset(self):  # type: ignore[override]
+        return lookup_update.versions(**versions_query(cast(Request, self.request)))
 
     def list(self, request: Request, *args, **kwargs) -> Response:
         page = cast(list, self.paginate_queryset(self.get_queryset()))

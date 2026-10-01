@@ -57,8 +57,8 @@ class AuditView(ListAPIView):
     serializer_class = AuditEntrySerializer
     pagination_class = NewestFirst
 
-    def get_queryset(self):
-        return audit.entries(**audit_query(self.request))
+    def get_queryset(self):  # type: ignore[override]
+        return audit.entries(**audit_query(cast(Request, self.request)))
 
 
 class AuditFiltersView(APIView):
