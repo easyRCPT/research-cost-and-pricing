@@ -5,6 +5,7 @@ import {
   createPaginatedRowModel,
   createSortedRowModel,
   type RowData,
+  rowExpandingFeature,
   rowPaginationFeature,
   rowSortingFeature,
   tableFeatures,
@@ -18,6 +19,7 @@ export interface DataTableColumnMeta {
 
 export const dataTableFeatures = tableFeatures({
   columnVisibilityFeature,
+  rowExpandingFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
   rowPaginationFeature,

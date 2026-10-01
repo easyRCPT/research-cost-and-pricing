@@ -1,29 +1,23 @@
 import type { AuditEntry } from '@/api/admin-console'
 import { Grid, Td, Th } from '@/components/shell'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import { AuditRow } from '@/screens/admin/audit/AuditRow'
 
-/** Shared with the overview's recent activity, so an entry reads the same in both. */
+/** The overview's last few entries, unpaged; the full log is a DataTable. */
 export function AuditTable({
   entries,
   loading,
-  dimmed,
   empty,
-  expandable = false,
 }: {
   entries: AuditEntry[] | undefined
   loading: boolean
-  dimmed?: boolean
   empty: string
-  expandable?: boolean
 }) {
-  const columns = expandable ? 5 : 4
+  const columns = 4
   return (
-    <Grid className={cn(dimmed && 'opacity-70')}>
+    <Grid>
       <thead>
         <tr>
-          {expandable && <Th className="w-8" />}
           <Th className="w-[190px]">When</Th>
           <Th className="w-[240px]">By</Th>
           <Th className="w-[230px]">Action</Th>
@@ -50,7 +44,7 @@ export function AuditTable({
           </tr>
         )}
         {entries?.map((entry) => (
-          <AuditRow key={entry.id} entry={entry} expandable={expandable} />
+          <AuditRow key={entry.id} entry={entry} />
         ))}
       </tbody>
     </Grid>

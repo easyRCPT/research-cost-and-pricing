@@ -1,6 +1,12 @@
 import { type RowData, useTable } from '@tanstack/react-table'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react'
-import { type ComponentProps, type ReactNode, useMemo, useState } from 'react'
+import {
+  type ComponentProps,
+  Fragment,
+  type ReactNode,
+  useMemo,
+  useState,
+} from 'react'
 
 import { Td, Th } from '@/components/shell'
 import { cn } from '@/lib/utils'
@@ -35,6 +41,8 @@ interface DataTableProps<T extends RowData> {
   /** Rows shown whatever the search and filters say. */
   keep?: (row: T) => boolean
   rowProps?: (row: T) => ComponentProps<'tr'>
+  /** Drawn under an expanded row; a row it returns null for cannot expand. */
+  detail?: (row: T) => ReactNode
 }
 
 export function DataTable<T extends RowData>({
@@ -50,6 +58,7 @@ export function DataTable<T extends RowData>({
   actions,
   keep,
   rowProps,
+  detail,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('')
   const [filterState, setFilterState] = useState<FilterState>({})
@@ -66,6 +75,7 @@ export function DataTable<T extends RowData>({
     columns,
     data: visible,
     getRowId,
+    getRowCanExpand: (row) => detail?.(row.original) != null,
     enableSorting: sortable,
     // An edit changes the rows too, and must not send the table back to page 1.
     autoResetPageIndex: false,
@@ -152,17 +162,26 @@ export function DataTable<T extends RowData>({
               </tr>
             )}
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} {...rowProps?.(row.original)}>
-                {row.getVisibleCells().map((cell) => (
-                  <Td
-                    key={cell.id}
-                    align={cell.column.columnDef.meta?.align}
-                    className={cell.column.columnDef.meta?.className}
-                  >
-                    <table.FlexRender cell={cell} />
-                  </Td>
-                ))}
-              </tr>
+              <Fragment key={row.id}>
+                <tr {...rowProps?.(row.original)}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td
+                      key={cell.id}
+                      align={cell.column.columnDef.meta?.align}
+                      className={cell.column.columnDef.meta?.className}
+                    >
+                      <table.FlexRender cell={cell} />
+                    </Td>
+                  ))}
+                </tr>
+                {row.getIsExpanded() && (
+                  <tr>
+                    <Td colSpan={row.getVisibleCells().length}>
+                      {detail?.(row.original)}
+                    </Td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
         </table>

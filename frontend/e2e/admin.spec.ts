@@ -28,8 +28,8 @@ test("the register finds anyone's costing, read-only, and the log has its submis
 
   // The submission is in the log, found through a filter built from the log.
   await rail.getByRole('button', { name: 'Audit log' }).click()
-  await page.getByRole('combobox', { name: 'Action' }).click()
-  await page.getByRole('option', { name: 'budget.submit' }).click()
+  await page.getByRole('button', { name: 'Action' }).click()
+  await page.getByRole('checkbox', { name: /^budget\.submit/ }).click()
   await expect(
     page.getByRole('row').filter({ hasText: `budget #${project.budget_id}` }),
   ).toContainText(DEMO.researcher)

@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { adminQuery } from '@/api/query'
 import { api } from '@/lib/api'
@@ -16,13 +16,9 @@ export type ApproverGaps = components['schemas']['ApproverGaps']
 const FRESH = { staleTime: 0 } as const
 
 /** The most the audit API returns at once (#67). */
-export const AUDIT_LIMITS = [50, 100, 250, 500] as const
+const AUDIT_MAX = 500
 
-/**
- * Plain queries, not suspense: each block on these screens draws its own
- * skeleton, and a changed filter keeps the last answer on screen while the
- * next one loads rather than blanking the table.
- */
+/** Plain queries, not suspense: each block on these screens draws its own skeleton. */
 export function useOverview() {
   return useQuery(adminQuery(['overview'], () => api.GET('/api/admin/overview/'), FRESH))
 }
@@ -36,20 +32,13 @@ export function useAdminProjects() {
   return useQuery(adminQuery(['projects'], () => api.GET('/api/admin/projects/'), FRESH))
 }
 
-export function useAudit(action: string, limit: number) {
+/** The newest entries the API allows, filtered and paged in the table. */
+export function useAudit() {
   return useQuery(
     adminQuery(
-      ['audit', action, limit],
-      () =>
-        api.GET('/api/admin/audit/', {
-          params: { query: { limit, ...(action ? { action } : {}) } },
-        }),
-      { ...FRESH, placeholderData: keepPreviousData },
+      ['audit'],
+      () => api.GET('/api/admin/audit/', { params: { query: { limit: AUDIT_MAX } } }),
+      FRESH,
     ),
   )
-}
-
-/** Read off the log itself, so the filter never hides an action that exists. */
-export function useAuditActions() {
-  return useQuery(adminQuery(['audit-actions'], () => api.GET('/api/admin/audit/actions/'), FRESH))
 }
