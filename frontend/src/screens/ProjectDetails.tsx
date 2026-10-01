@@ -5,10 +5,7 @@ import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
 import { ProjectDepartmentRow } from './project-details/ProjectDepartmentRow'
 import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectFunderRow } from './project-details/ProjectFunderRow'
-import { ProjectInvestigatorRow } from './project-details/ProjectInvestigatorRow'
-import { ProjectNotesRow } from './project-details/ProjectNotesRow'
-import { ProjectSchemeRow } from './project-details/ProjectSchemeRow'
-import { ProjectTitleRow } from './project-details/ProjectTitleRow'
+import { ProjectTextRow } from './project-details/ProjectTextRow'
 
 interface ProjectDetailsProps {
   project: ProjectInfo
@@ -28,9 +25,23 @@ export function ProjectDetails({
   // selects commit at once, having nothing to wait for.
   return (
     <Panel>
-      <ProjectTitleRow project={project} onChange={onChange} />
+      <ProjectTextRow
+        project={project}
+        onChange={onChange}
+        field="title"
+        label="Project title"
+        id="title"
+        required
+      />
 
-      <ProjectInvestigatorRow project={project} onChange={onChange} />
+      <ProjectTextRow
+        project={project}
+        onChange={onChange}
+        field="chief_investigator"
+        label="Lead UoM chief investigator"
+        id="ci"
+        required
+      />
 
       <ProjectFunderRow project={project} onChange={onChange} />
 
@@ -40,7 +51,15 @@ export function ProjectDetails({
         onChange={onChange}
       />
 
-      <ProjectSchemeRow project={project} onChange={onChange} />
+      <ProjectTextRow
+        project={project}
+        onChange={onChange}
+        field="scheme"
+        label="Scheme"
+        id="scheme"
+        hint="Grants only"
+        placeholder="e.g. Discovery Projects 2027"
+      />
 
       <ProjectDurationRow project={project} onChange={onChange} />
 
@@ -51,7 +70,15 @@ export function ProjectDetails({
         onChange={onChange}
       />
 
-      <ProjectNotesRow project={project} onChange={onChange} />
+      <ProjectTextRow
+        project={project}
+        onChange={onChange}
+        field="additional_information"
+        label="Additional information"
+        id="notes"
+        rows={3}
+        placeholder="Anything the Research Office should know about this costing"
+      />
     </Panel>
   )
 }
