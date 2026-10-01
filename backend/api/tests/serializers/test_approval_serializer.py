@@ -5,17 +5,14 @@ from django.test import SimpleTestCase, TestCase
 
 from api.models import (
     ApprovalStep,
-    Budget,
-    Department,
     Faculty,
     LookupVersion,
-    Project,
-    User,
 )
 from api.serializers.approval_serializer import (
     ApprovalDecideSerializer,
     ApprovalQueueSerializer,
 )
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 from .serializer_utils import get_data, get_errors, get_validated_data
 
@@ -25,43 +22,19 @@ class ApprovalQueueSerializerTest(TestCase):
     def setUpTestData(cls) -> None:
         cls.lookup_version = LookupVersion.objects.create()
 
-        faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science Faculty",
-        )
-
-        department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=faculty,
-        )
-
-        user = User.objects.create(
-            email="owner@unimelb.edu.au",
-        )
-
-        project = Project.objects.create(
-            title="Test Project",
-            department=department,
+        faculty = Faculty.objects.create(code="SCI", name="Science Faculty")
+        project = make_project(
+            make_user(),
+            make_department(faculty=faculty, name="Science"),
             chief_investigator="Test Investigator",
             funder="Test Funder",
             start_year=2025,
-            start_month=1,
             end_year=2026,
-            end_month=12,
-            created_by=user,
         )
 
-        cls.budget = Budget.objects.create(
-            project=project,
+        cls.budget = make_budget(
+            project,
             lookup_version=cls.lookup_version,
-            cost_multiplier=Decimal("1.0"),
-            in_kind_multiplier=Decimal("1.0"),
-            margin=Decimal("0.30"),
-            gst_applicable=True,
-            cash_co_contribution=Decimal(0),
             total_price_inc_gst=Decimal("412300.00"),
             submitted_at=datetime(
                 2026,

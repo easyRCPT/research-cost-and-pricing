@@ -2,26 +2,19 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from api.models import Budget, Department, Faculty
+from api.models import Budget
 from api.serializers.project_serializer import (
     ProjectCreateSerializer,
     ProjectRowSerializer,
 )
+from api.tests.factories import make_department
 
 from .serializer_utils import get_data, get_errors, get_validated_data
 
 
 class ProjectCreateSerializerTestCase(TestCase):
     def setUp(self):
-        self.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
+        self.department = make_department()
 
     def valid_data(self, **overrides) -> dict:
         return {

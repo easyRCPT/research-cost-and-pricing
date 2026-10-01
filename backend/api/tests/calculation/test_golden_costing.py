@@ -27,10 +27,9 @@ from api.models import (
     Department,
     NonStaffCostCategory,
     SalaryRate,
-    User,
 )
 from api.services import non_staff_line, project, staff_line
-from api.tests.factories import seed_lookups
+from api.tests.factories import make_user, seed_lookups
 
 CENTS = Decimal("0.01")
 
@@ -55,7 +54,7 @@ class TestGoldenCosting(TestCase):
                 "end_year": 2026,
                 "end_month": 12,
             },
-            User.objects.create_user("owner@unimelb.edu.au"),
+            make_user(),
         )
         cls.budget = Budget.objects.get(project_id=row["id"])
 

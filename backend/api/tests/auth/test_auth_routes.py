@@ -1,11 +1,11 @@
 import time
 
-from django.contrib.auth.models import Group
 from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from api.models import Department, Faculty, User, UserOrgAssignment
+from api.models import User, UserOrgAssignment
+from api.tests import factories
 
 PASSWORD = "a-perfectly-ordinary-password"
 
@@ -20,11 +20,9 @@ class AuthTestMixin:
 
     @staticmethod
     def make_user(email: str, *, groups: list[str], active: bool = True) -> User:
-        user = User.objects.create_user(email=email, password=PASSWORD)
-        user.is_active = active
-        user.save(update_fields=["is_active"])
-        user.groups.set(Group.objects.filter(name__in=groups))
-        return user
+        return factories.make_user(
+            email, groups=groups, password=PASSWORD, is_active=active
+        )
 
     def signup(self, **overrides):
         body = {
@@ -214,10 +212,7 @@ class TestMeAndLogout(AuthTestMixin, TestCase):
         self.assertEqual(self.client.get(reverse("me")).status_code, 401)
 
     def test_me_carries_the_groups_and_the_assignments(self):
-        faculty = Faculty.objects.create(code="ENG", name="Engineering")
-        department = Department.objects.create(
-            code="SOFT", name="CIS", school="Eng", school_code="ENG", faculty=faculty
-        )
+        department = factories.make_department("SOFT")
         hod = self.make_user("hana@unimelb.edu.au", groups=["staff"])
         UserOrgAssignment.objects.create(
             user=hod, role=UserOrgAssignment.Role.HOD, department=department
