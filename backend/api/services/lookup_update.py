@@ -1,8 +1,22 @@
 import json
+from datetime import date
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
-from django.db.models import Count, Prefetch, ProtectedError
+from django.db.models import (
+    CharField,
+    Count,
+    F,
+    OuterRef,
+    Prefetch,
+    ProtectedError,
+    Q,
+    QuerySet,
+    Subquery,
+    Sum,
+    Value,
+)
+from django.db.models.functions import Coalesce, Concat, NullIf, Trim
 from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
@@ -21,6 +35,7 @@ from ..models import (
     User,
 )
 from .audit import write_audit
+from .facets import emails_to_names, facets
 from .lookup_definitions import LOOKUP_DEFINITIONS, LookupDefinition
 from .lookup_loader import invalidate_lookup_cache
 
@@ -538,22 +553,35 @@ def restore_version(version_id: int, actor: User | None) -> dict:
     return {"version_id": restored.id, "replaced": priced_on(replaced)}
 
 
-def list_versions() -> list[dict]:
-    """
-    Every version, newest first: who made it, what it priced, and the sets of
-    changes saved into it (#138).
-    """
-    config = LookupConfiguration.objects.select_related("current_version").get()
-    current_is_baseline = is_baseline(config.current_version)
-    budgets_priced = dict(
-        Budget.objects.filter(lookup_version__isnull=False)
-        .values("lookup_version")
-        .annotate(n=Count("id"))
-        .values_list("lookup_version", "n")
+# The By filter's value for a version made by nobody, such as the rates as loaded.
+SYSTEM = "system"
+
+
+def _name_of(user: str):
+    """`display_name` in SQL: their full name, else their email, else blank."""
+    full = Trim(
+        Concat(F(f"{user}__first_name"), Value(" "), F(f"{user}__last_name"))
     )
-    versions = (
-        LookupVersion.objects.order_by("-id")
-        .select_related("updated_by")
+    return Coalesce(
+        NullIf(full, Value("")),
+        F(f"{user}__email"),
+        Value(""),
+        output_field=CharField(),
+    )
+
+
+def versions(
+    by: list[str] | None = None,
+    since: date | None = None,
+    until: date | None = None,
+    q: str = "",
+) -> QuerySet[LookupVersion]:
+    """
+    Every version, narrowed to any filters given, with what the history sorts
+    on annotated. Days are local and inclusive.
+    """
+    rows = (
+        LookupVersion.objects.select_related("updated_by")
         .prefetch_related(
             Prefetch(
                 "change_sets",
@@ -562,14 +590,70 @@ def list_versions() -> list[dict]:
                 ),
             )
         )
+        .annotate(
+            by=_name_of("updated_by"),
+            changes=Coalesce(
+                Subquery(
+                    LookupChangeSet.objects.filter(version=OuterRef("pk"))
+                    .order_by()
+                    .values("version")
+                    .annotate(n=Sum("change_count"))
+                    .values("n")
+                ),
+                0,
+            ),
+            budgets_priced=Coalesce(
+                Subquery(
+                    Budget.objects.filter(lookup_version=OuterRef("pk"))
+                    .order_by()
+                    .values("lookup_version")
+                    .annotate(n=Count("id"))
+                    .values("n")
+                ),
+                0,
+            ),
+        )
     )
+    if by:
+        made_by = Q(updated_by__email__in=by)
+        if SYSTEM in by:
+            made_by |= Q(updated_by__isnull=True)
+        rows = rows.filter(made_by)
+    if since:
+        rows = rows.filter(created_at__date__gte=since)
+    if until:
+        rows = rows.filter(created_at__date__lte=until)
+    if q:
+        noted = LookupChangeSet.objects.filter(note__icontains=q).values("version")
+        match = Q(id__in=noted) | Q(by__icontains=q) | Q(updated_by__email__icontains=q)
+        if q.lstrip("#").isdigit():
+            match |= Q(id=int(q.lstrip("#")))
+        rows = rows.filter(match)
+    return rows
+
+
+def version_filters(query: dict) -> dict[str, list[dict]]:
+    """The By filter's options, the system among them, counted against `query`."""
+    return facets(
+        versions,
+        query,
+        {"by": "updated_by__email"},
+        none={"by": SYSTEM},
+        labels={"by": emails_to_names},
+    )
+
+
+def version_rows(listed) -> list[dict]:
+    """Each version from `versions()` as the history shows it (#138)."""
+    config = LookupConfiguration.objects.select_related("current_version").get()
+    current_is_baseline = is_baseline(config.current_version)
     return [
         {
             "id": version.id,
             "created_at": version.created_at,
             "updated_by": version.updated_by.email if version.updated_by else None,
             "updated_by_name": version.updated_by.display_name if version.updated_by else None,
-            "budgets_priced": budgets_priced.get(version.id, 0),
+            "budgets_priced": version.budgets_priced,
             "current": version.id == config.current_version_id,
             # Whether the next set writes into this version. Only the current
             # one, and only until a costing is submitted on it; after that the
@@ -592,13 +676,20 @@ def list_versions() -> list[dict]:
                         change_set.saved_by.email if change_set.saved_by else None
                     ),
                     "saved_by_name": (
-                change_set.saved_by.display_name if change_set.saved_by else None
-            ),
+                        change_set.saved_by.display_name
+                        if change_set.saved_by
+                        else None
+                    ),
                     "saved_at": change_set.saved_at,
                     "change_count": change_set.change_count,
                 }
                 for change_set in version.change_sets.all()
             ],
         }
-        for version in versions
+        for version in listed
     ]
+
+
+def list_versions() -> list[dict]:
+    """Every version, newest first."""
+    return version_rows(versions().order_by("-id"))

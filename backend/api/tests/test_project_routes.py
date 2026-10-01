@@ -29,7 +29,7 @@ class ProjectRoutesTestCase(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()["results"], [])
 
     def test_create_returns_the_row_the_list_screen_needs(self):
         response = self.client.post(
@@ -56,7 +56,7 @@ class ProjectRoutesTestCase(TestCase):
             content_type="application/json",
         )
 
-        body = self.client.get(self.url).json()
+        body = self.client.get(self.url).json()["results"]
 
         self.assertEqual(len(body), 1)
         self.assertEqual(body[0]["title"], "Test Project")
@@ -71,7 +71,7 @@ class ProjectRoutesTestCase(TestCase):
             total_price_inc_gst=Decimal("98765.43")
         )
 
-        body = self.client.get(self.url).json()
+        body = self.client.get(self.url).json()["results"]
 
         self.assertEqual(body[0]["total_price_inc_gst"], 98765.43)
 

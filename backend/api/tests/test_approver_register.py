@@ -33,7 +33,7 @@ class ApproverRegisterTest(FlowFixture):
         return self.client.get(reverse("projects"), query)
 
     def ids(self, response) -> set[int]:
-        return {row["id"] for row in response.json()}
+        return {row["id"] for row in response.json()["results"]}
 
     def test_the_head_of_department_sees_every_submitted_project_in_their_area(self):
         response = self.rows(self.hod)
@@ -46,7 +46,7 @@ class ApproverRegisterTest(FlowFixture):
     def test_each_row_says_who_submitted_it(self):
         [row] = [
             row
-            for row in self.rows(self.hod).json()
+            for row in self.rows(self.hod).json()["results"]
             if row["id"] == self.approved.project_id
         ]
 
@@ -62,7 +62,7 @@ class ApproverRegisterTest(FlowFixture):
         response = self.rows(self.hod, "finished")
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["errors"][0]["attr"], "status")
+        self.assertEqual(response.json()["errors"][0]["attr"], "status.0")
 
     def test_a_project_with_several_budgets_appears_once_with_its_latest(self):
         later = Budget.objects.create(
@@ -75,7 +75,7 @@ class ApproverRegisterTest(FlowFixture):
 
         rows = [
             row
-            for row in self.rows(self.hod).json()
+            for row in self.rows(self.hod).json()["results"]
             if row["id"] == self.approved.project_id
         ]
 
@@ -101,4 +101,4 @@ class ApproverRegisterTest(FlowFixture):
         staff = User.objects.create(email="staff@unimelb.edu.au")
         staff.groups.set(Group.objects.filter(name="staff"))
 
-        self.assertEqual(self.rows(staff).json(), [])
+        self.assertEqual(self.rows(staff).json()["results"], [])

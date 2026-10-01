@@ -9,6 +9,8 @@ from api.views.views import (
     DeliverableView,
     LookupView,
     NonStaffLineView,
+    ProjectDetailView,
+    ProjectFiltersView,
     ProjectView,
     StaffLineView,
 )
@@ -36,6 +38,16 @@ urlpatterns = [
         "projects/",
         ProjectView.as_view(http_method_names=["get", "post"]),
         name="projects",
+    ),
+    path(
+        "projects/filters/",
+        ProjectFiltersView.as_view(http_method_names=["get"]),
+        name="project-filters",
+    ),
+    path(
+        "projects/<int:project_id>/",
+        ProjectDetailView.as_view(http_method_names=["get"]),
+        name="project-detail",
     ),
     # Budget
     path(

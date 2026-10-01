@@ -92,8 +92,9 @@ class BudgetOwnershipTestCase(TestCase):
 
     def test_the_list_only_shows_your_own_projects(self):
         self.client.force_login(self.stranger)
-        self.assertEqual(self.client.get(reverse("projects")).json(), [])
+        self.assertEqual(self.client.get(reverse("projects")).json()["results"], [])
 
         self.client.force_login(self.owner)
-        titles = [row["title"] for row in self.client.get(reverse("projects")).json()]
+        rows = self.client.get(reverse("projects")).json()["results"]
+        titles = [row["title"] for row in rows]
         self.assertEqual(titles, ["Owned"])

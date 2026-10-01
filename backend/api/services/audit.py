@@ -1,4 +1,7 @@
+from datetime import date
+
 from api.models import AuditLog
+from api.services.facets import emails_to_names, facets
 
 
 def write_audit(
@@ -17,24 +20,38 @@ def write_audit(
     )
 
 
-# The most the audit screen asks for at once (#67).
-MAX_ENTRIES = 500
-
-
-def entries(action: str = "", limit: int = 50):
-    """The newest entries first, optionally one action only."""
+def entries(
+    action: list[str] | None = None,
+    actor: list[str] | None = None,
+    object_type: list[str] | None = None,
+    since: date | None = None,
+    until: date | None = None,
+):
+    """The log, newest first, narrowed to any values given. Days are local and inclusive."""
     rows = AuditLog.objects.select_related("actor").order_by("-created_at", "-id")
     if action:
-        rows = rows.filter(action=action)
-    return rows[: min(limit, MAX_ENTRIES)]
+        rows = rows.filter(action__in=action)
+    if actor:
+        rows = rows.filter(actor__email__in=actor)
+    if object_type:
+        rows = rows.filter(object_type__in=object_type)
+    if since:
+        rows = rows.filter(created_at__date__gte=since)
+    if until:
+        rows = rows.filter(created_at__date__lte=until)
+    return rows
 
 
-def actions() -> list[str]:
+def filters(query: dict) -> dict[str, list[dict]]:
     """
-    The actions the log holds, read off the log itself (#67). A list kept
-    beside the write_audit calls would fall behind the first new action, and
-    the filter would then hide entries that exist.
+    Every value each filter can take, read off the log itself (#67), counted
+    against `query`. A list kept beside the write_audit calls would fall
+    behind the first new action, and the filter would then hide entries that
+    exist.
     """
-    return list(
-        AuditLog.objects.values_list("action", flat=True).distinct().order_by("action")
+    return facets(
+        entries,
+        query,
+        {"actor": "actor__email", "action": "action", "object_type": "object_type"},
+        labels={"actor": emails_to_names},
     )

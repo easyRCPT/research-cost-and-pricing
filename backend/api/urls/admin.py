@@ -30,6 +30,21 @@ urlpatterns = [
         name="admin-lookup-versions",
     ),
     path(
+        "lookups/versions/filters/",
+        lookups.LookupVersionFiltersView.as_view(),
+        name="admin-lookup-version-filters",
+    ),
+    path(
+        "lookups/versions/current/",
+        lookups.LookupVersionView.as_view(),
+        name="admin-lookup-version-current",
+    ),
+    path(
+        "lookups/versions/<int:version_id>/",
+        lookups.LookupVersionView.as_view(),
+        name="admin-lookup-version",
+    ),
+    path(
         "lookups/versions/<int:version_id>/restore/",
         lookups.LookupVersionRestoreView.as_view(),
         name="admin-lookup-version-restore",
@@ -79,7 +94,12 @@ urlpatterns = [
     # register does not approve or withdraw anything (#66).
     path("audit/", audit.AuditView.as_view(), name="admin-audit"),
     path(
-        "audit/actions/", audit.AuditActionsView.as_view(), name="admin-audit-actions"
+        "audit/filters/", audit.AuditFiltersView.as_view(), name="admin-audit-filters"
     ),
     path("projects/", projects.AdminProjectsView.as_view(), name="admin-projects"),
+    path(
+        "projects/filters/",
+        projects.AdminProjectFiltersView.as_view(),
+        name="admin-project-filters",
+    ),
 ]

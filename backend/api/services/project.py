@@ -1,12 +1,29 @@
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
-from django.db.models import Max, Prefetch, Q
-from django.db.models.functions import Greatest
+from django.db.models import (
+    Case,
+    CharField,
+    DecimalField,
+    Max,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce, Concat, Greatest, Lower, NullIf, Trim
 
-from ..models import Budget, CalculationConstant, Project, UserOrgAssignment
+from ..models import (
+    Budget,
+    CalculationConstant,
+    Project,
+    UserOrgAssignment,
+)
 from . import lookup_loader
 from .auth import SUPERADMIN, groups_of
+from .facets import emails_to_names, facets
 
 # What a budget's numbers start at. The live values are rows, not Python
 # constants, so they are read at creation time and then frozen on the budget.
@@ -78,25 +95,129 @@ def visible_budgets(user):
     )
 
 
-def list_projects(user, status: str = "") -> list[dict]:
-    """
-    One row per project, newest activity first. With a status, only the
-    projects whose current budget -- the one the row shows -- has it (#98).
-    """
-    # Prefetched so the whole list costs two queries rather than one per
-    # project. Which budget is the latest is decided in build_row, not here.
-    projects = (
-        visible_projects(user)
-        .select_related("department__faculty", "created_by")
-        .prefetch_related(Prefetch("budgets", queryset=visible_budgets(user)))
-        .annotate(last_activity=Greatest("updated_at", Max("budgets__updated_at")))
-        .order_by("-last_activity", "-id")
+# What the list sorts by, by column, and the annotation each reads.
+SORTS = {
+    "reference": "sort_reference",
+    "title": "title",
+    "department": "sort_department",
+    "owner": "sort_owner",
+    "status": "sort_status",
+    "total_price_inc_gst": "sort_price",
+    "updated_at": "last_activity",
+}
+
+# The status filter's value for a project with no budget left.
+NO_BUDGET = "none"
+
+
+def _current(budgets, field: str):
+    # The budget build_row reports: the most recently touched of `budgets`.
+    return Subquery(
+        budgets.filter(project=OuterRef("pk"))
+        .order_by("-updated_at", "-id")
+        .values(field)[:1]
     )
 
-    rows = [build_row(project) for project in projects]
-    # Filtered on the row rather than in the query: "current" is build_row's
-    # rule, and a second copy of it in SQL would drift from the first.
-    return [row for row in rows if not status or row["status"] == status]
+
+def _narrowable(projects, budgets):
+    """What `narrow` reads: the current budget's status, and the owner by name."""
+    owner = Trim(Concat("created_by__first_name", Value(" "), "created_by__last_name"))
+    return projects.annotate(
+        current_status=_current(budgets, "status"),
+        sort_owner=Lower(
+            Coalesce(
+                NullIf(owner, Value("")),
+                "created_by__email",
+                output_field=CharField(),
+            )
+        ),
+    )
+
+
+def listing(projects, budgets):
+    """
+    `projects` with what the list sorts and filters on, read off each one's
+    current budget among `budgets`. Every sort key is non-null, as the cursor
+    needs.
+    """
+    return (
+        _narrowable(projects, budgets)
+        .select_related("department__faculty", "created_by")
+        .prefetch_related(Prefetch("budgets", queryset=budgets))
+        .annotate(
+            last_activity=Greatest(
+                "updated_at", Coalesce(Max("budgets__updated_at"), "updated_at")
+            ),
+            sort_reference=Coalesce("reference", Value("")),
+            sort_department=Coalesce("department__name", Value("")),
+            sort_status=Case(
+                *[
+                    When(current_status=value, then=Value(str(label)))
+                    for value, label in Budget.Status.choices
+                ],
+                default=Value("No budget"),
+            ),
+            sort_price=Coalesce(
+                _current(budgets, "total_price_inc_gst"),
+                Value(Decimal(0)),
+                output_field=DecimalField(max_digits=14, decimal_places=2),
+            ),
+        )
+    )
+
+
+def user_listing(user):
+    return listing(visible_projects(user), visible_budgets(user))
+
+
+def narrow(
+    projects,
+    q: str = "",
+    status: list[str] | None = None,
+    faculty: list[str] | None = None,
+    department: list[str] | None = None,
+    owner: list[str] | None = None,
+):
+    """A listing narrowed to a search and any values each filter is given."""
+    if q:
+        projects = projects.filter(
+            Q(title__icontains=q)
+            | Q(reference__icontains=q)
+            | Q(chief_investigator__icontains=q)
+            | Q(funder__icontains=q)
+            | Q(department__name__icontains=q)
+            | Q(sort_owner__icontains=q)
+            | Q(created_by__email__icontains=q)
+        )
+    if status:
+        statuses = Q(current_status__in=status)
+        if NO_BUDGET in status:
+            statuses |= Q(current_status__isnull=True)
+        projects = projects.filter(statuses)
+    if faculty:
+        projects = projects.filter(department__faculty__name__in=faculty)
+    if department:
+        projects = projects.filter(department__name__in=department)
+    if owner:
+        projects = projects.filter(created_by__email__in=owner)
+    return projects
+
+
+def filter_options(projects, budgets, query: dict) -> dict:
+    """Every value each filter can take across `projects`, counted against `query`."""
+    base = _narrowable(projects, budgets)
+    return facets(
+        lambda **narrowed: narrow(base, **narrowed),
+        query,
+        {
+            "status": "current_status",
+            "faculty": "department__faculty__name",
+            "department": "department__name",
+            "owner": "created_by__email",
+        },
+        none={"status": NO_BUDGET},
+        labels={"owner": emails_to_names},
+    )
 
 
 def build_row(project: Project) -> dict:

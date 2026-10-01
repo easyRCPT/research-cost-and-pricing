@@ -1,7 +1,10 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from ..models import Budget, Department
+from ..services.project import NO_BUDGET
 from .budget_detail_serializer import CostDecimalField
+from .filter_serializer import FilterOptionSerializer
 
 
 class ProjectOwnerSerializer(serializers.Serializer):
@@ -11,12 +14,36 @@ class ProjectOwnerSerializer(serializers.Serializer):
 
 
 class ProjectListQuerySerializer(serializers.Serializer):
+    q = serializers.CharField(required=False, allow_blank=True, default="")
     # Checked against the model's own choices, as the console's register does
     # (#66), so a renamed status is a 400 naming the allowed values rather
     # than a filter silently matching nothing (#98).
-    status = serializers.ChoiceField(
-        choices=Budget.Status.choices, required=False, allow_blank=True, default=""
+    status = serializers.ListField(
+        child=serializers.ChoiceField(choices=[*Budget.Status.values, NO_BUDGET]),
+        required=False,
     )
+    faculty = serializers.ListField(child=serializers.CharField(), required=False)
+    department = serializers.ListField(child=serializers.CharField(), required=False)
+    owner = serializers.ListField(child=serializers.EmailField(), required=False)
+    ordering = serializers.CharField(
+        required=False, help_text="A column, with - in front for descending."
+    )
+
+
+def list_query(request, serializer=ProjectListQuerySerializer) -> dict:
+    """The list's search and filters as `narrow` takes them, without its sort."""
+    query = serializer(data=request.query_params)
+    query.is_valid(raise_exception=True)
+    data = dict(query.validated_data)
+    data.pop("ordering", None)
+    return data
+
+
+class ProjectFiltersSerializer(serializers.Serializer):
+    status = FilterOptionSerializer(many=True)
+    faculty = FilterOptionSerializer(many=True)
+    department = FilterOptionSerializer(many=True)
+    owner = FilterOptionSerializer(many=True)
 
 
 class ProjectRowSerializer(serializers.Serializer):

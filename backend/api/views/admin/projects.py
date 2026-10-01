@@ -1,15 +1,21 @@
-from typing import cast
-
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers
+from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import Budget
+from api.models import Budget, Project
+from api.pagination import Sorted
 from api.permissions import IsSuperadmin
-from api.serializers.project_serializer import ProjectOwnerSerializer
+from api.serializers.project_serializer import (
+    ProjectFiltersSerializer,
+    ProjectListQuerySerializer,
+    ProjectOwnerSerializer,
+    list_query,
+)
 from api.services import admin_projects
+from api.services.project import SORTS, filter_options, narrow
 
 
 class AdminProjectSerializer(serializers.Serializer):
@@ -28,27 +34,43 @@ class AdminProjectSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField()
 
 
-class RegisterQuerySerializer(serializers.Serializer):
-    # Checked against the model's own choices (#66), so a renamed status is a
-    # 400 naming the allowed values, not a filter silently matching nothing.
-    status = serializers.ChoiceField(
-        choices=Budget.Status.choices, required=False, allow_blank=True, default=""
-    )
-    q = serializers.CharField(required=False, allow_blank=True, default="")
+class RegisterQuerySerializer(ProjectListQuerySerializer):
+    # So a department's move can count its costings (#70).
+    department_code = serializers.CharField(required=False)
 
 
-class AdminProjectsView(APIView):
-    """Every project, whoever owns it. Read-only (#66)."""
+@extend_schema(parameters=[RegisterQuerySerializer])
+class AdminProjectsView(ListAPIView):
+    """Every project, whoever owns it, a cursor page at a time. Read-only (#66)."""
+
+    permission_classes = [IsSuperadmin]
+    serializer_class = AdminProjectSerializer
+    pagination_class = Sorted
+    ordering = "-updated_at"
+    orderings = SORTS
+
+    def get_queryset(self):
+        data = list_query(self.request, RegisterQuerySerializer)
+        code = data.pop("department_code", None)
+        projects = narrow(admin_projects.register(), **data)
+        return projects.filter(department_id=code) if code else projects
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        return [admin_projects.row(project) for project in page or []]
+
+
+class AdminProjectFiltersView(APIView):
+    """Every value the register's filters can take."""
 
     permission_classes = [IsSuperadmin]
 
     @extend_schema(
-        parameters=[RegisterQuerySerializer],
-        responses=AdminProjectSerializer(many=True),
+        parameters=[ProjectListQuerySerializer], responses=ProjectFiltersSerializer
     )
     def get(self, request: Request) -> Response:
-        query = RegisterQuerySerializer(data=request.query_params)
-        query.is_valid(raise_exception=True)
-        data = cast(dict, query.validated_data)
-        rows = admin_projects.register(data["status"], data["q"].strip())
-        return Response(AdminProjectSerializer(rows, many=True).data)
+        return Response(
+            filter_options(
+                Project.objects.all(), Budget.objects.all(), list_query(request)
+            )
+        )

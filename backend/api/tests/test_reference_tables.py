@@ -188,7 +188,7 @@ class ReferenceTablesTest(TestCase):
             end_month=12,
         )
 
-        rows = self.client.get(reverse("admin-projects")).json()
+        rows = self.client.get(reverse("admin-projects")).json()["results"]
 
         self.assertEqual(rows[0]["department_code"], department.code)
 

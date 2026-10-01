@@ -2,11 +2,14 @@ from typing import cast
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers
+from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.pagination import NewestFirst
 from api.permissions import IsSuperadmin
+from api.serializers.filter_serializer import FilterOptionSerializer
 from api.services import audit
 
 
@@ -27,34 +30,42 @@ class AuditEntrySerializer(serializers.Serializer):
 
 
 class AuditQuerySerializer(serializers.Serializer):
-    action = serializers.CharField(required=False, default="", allow_blank=True)
-    limit = serializers.IntegerField(
-        required=False, default=50, min_value=1, max_value=audit.MAX_ENTRIES
-    )
+    action = serializers.ListField(child=serializers.CharField(), required=False)
+    actor = serializers.ListField(child=serializers.EmailField(), required=False)
+    object_type = serializers.ListField(child=serializers.CharField(), required=False)
+    since = serializers.DateField(required=False)
+    until = serializers.DateField(required=False)
 
 
-class AuditView(APIView):
-    """The audit log, newest first (#67). Read-only: nothing edits an entry."""
+class AuditFiltersSerializer(serializers.Serializer):
+    actor = FilterOptionSerializer(many=True)
+    action = FilterOptionSerializer(many=True)
+    object_type = FilterOptionSerializer(many=True)
+
+
+def audit_query(request: Request) -> dict:
+    query = AuditQuerySerializer(data=request.query_params)
+    query.is_valid(raise_exception=True)
+    return cast(dict, query.validated_data)
+
+
+@extend_schema(parameters=[AuditQuerySerializer])
+class AuditView(ListAPIView):
+    """The audit log, newest first, a cursor page at a time (#67). Read-only."""
+
+    permission_classes = [IsSuperadmin]
+    serializer_class = AuditEntrySerializer
+    pagination_class = NewestFirst
+
+    def get_queryset(self):
+        return audit.entries(**audit_query(self.request))
+
+
+class AuditFiltersView(APIView):
+    """Every value the log's filters can take."""
 
     permission_classes = [IsSuperadmin]
 
-    @extend_schema(
-        parameters=[AuditQuerySerializer],
-        responses=AuditEntrySerializer(many=True),
-    )
+    @extend_schema(parameters=[AuditQuerySerializer], responses=AuditFiltersSerializer)
     def get(self, request: Request) -> Response:
-        query = AuditQuerySerializer(data=request.query_params)
-        query.is_valid(raise_exception=True)
-        data = cast(dict, query.validated_data)
-        rows = audit.entries(data["action"], data["limit"])
-        return Response(AuditEntrySerializer(rows, many=True).data)
-
-
-class AuditActionsView(APIView):
-    """Every action the log holds, for the filter."""
-
-    permission_classes = [IsSuperadmin]
-
-    @extend_schema(responses={200: {"type": "array", "items": {"type": "string"}}})
-    def get(self, request: Request) -> Response:
-        return Response(audit.actions())
+        return Response(audit.filters(audit_query(request)))

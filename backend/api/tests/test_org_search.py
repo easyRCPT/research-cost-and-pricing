@@ -13,7 +13,7 @@ class OrgSearchTest(TestCase):
         self.client.force_login(make_user("ruth@unimelb.edu.au", groups=["staff"]))
 
     def names(self, response):
-        return [row["name"] for row in response.json()]
+        return [row["name"] for row in response.json()["results"]]
 
     def test_departments_match_on_part_of_the_name_without_regard_to_case(self):
         response = self.client.get("/api/departments/", {"q": "engin"})
@@ -23,24 +23,37 @@ class OrgSearchTest(TestCase):
     def test_departments_match_on_code_and_carry_their_faculty(self):
         response = self.client.get("/api/departments/", {"q": "cis"})
 
-        self.assertEqual(response.json()[0]["code"], "CIS")
-        self.assertEqual(response.json()[0]["faculty"], "Engineering")
-        self.assertEqual(response.json()[0]["faculty_code"], "ENG")
+        first = response.json()["results"][0]
+        self.assertEqual(first["code"], "CIS")
+        self.assertEqual(first["faculty"], "Engineering")
+        self.assertEqual(first["faculty_code"], "ENG")
 
-    def test_results_are_capped_and_in_name_order(self):
+    def test_results_come_a_page_at_a_time_in_name_order(self):
         for n in range(30):
             make_department(f"X{n:02}", self.arts, name=f"Zeta {n:02}")
 
-        response = self.client.get("/api/departments/", {"q": "zeta"})
+        first = self.client.get("/api/departments/", {"q": "zeta", "limit": 20})
+        rest = self.client.get(first.json()["next"])
 
-        names = self.names(response)
-        self.assertEqual(len(names), 20)
-        self.assertEqual(names, sorted(names))
+        names = self.names(first) + self.names(rest)
+        self.assertEqual(len(self.names(first)), 20)
+        self.assertEqual(names, [f"Zeta {n:02}" for n in range(30)])
+        self.assertIsNone(rest.json()["next"])
+
+    def test_no_query_lists_every_department(self):
+        response = self.client.get("/api/departments/")
+
+        self.assertEqual(
+            self.names(response),
+            ["Computing and Information Systems", "History", "Mechanical Engineering"],
+        )
 
     def test_faculties_are_searched_the_same_way(self):
         response = self.client.get("/api/faculties/", {"q": "ENGIN"})
 
-        self.assertEqual(response.json(), [{"code": "ENG", "name": "Engineering"}])
+        self.assertEqual(
+            response.json()["results"], [{"code": "ENG", "name": "Engineering"}]
+        )
 
     def test_both_need_a_signed_in_user(self):
         self.client.logout()
