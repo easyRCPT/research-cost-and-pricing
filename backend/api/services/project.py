@@ -24,7 +24,12 @@ BUDGET_DEFAULTS = {
         Decimal("1.70"),
         Decimal("0.01"),
     ),
-    "in_kind_multiplier": ("in_kind_multiplier", Decimal("1.70"), Decimal("0.01")),
+    # In-kind staff are costed at the full cost recovery rate too (#149).
+    "in_kind_multiplier": (
+        "full_cost_recovery_multiplier",
+        Decimal("1.70"),
+        Decimal("0.01"),
+    ),
     "margin": ("default_margin", Decimal("0.30"), Decimal("0.0001")),
 }
 

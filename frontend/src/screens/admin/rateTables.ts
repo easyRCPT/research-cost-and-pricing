@@ -7,8 +7,6 @@ export interface RateTableSpec {
   key: { field: string; label: string; kind: 'text' | 'number' }[]
   /** The one figure an administrator changes. */
   value: { field: string; label: string; step: number }
-  /** Rows the API refuses to change, shown locked rather than failing on save. */
-  locked?: (row: Record<string, unknown>) => boolean
 }
 
 export const RATE_TABLES: RateTableSpec[] = [
@@ -49,7 +47,5 @@ export const RATE_TABLES: RateTableSpec[] = [
     label: 'Constants',
     key: [{ field: 'name', label: 'Name', kind: 'text' }],
     value: { field: 'value', label: 'Value', step: 0.0001 },
-    // Fixed by the University (#60). The server refuses it; the screen says so.
-    locked: (row) => row.name === 'full_cost_recovery_multiplier',
   },
 ]

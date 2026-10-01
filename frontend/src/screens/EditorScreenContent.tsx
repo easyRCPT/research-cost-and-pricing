@@ -41,7 +41,7 @@ export function EditorScreenContent({
     case 'adjust':
       return <AdjustPrice nonStaff={nonStaff} />
     case 'price':
-      return <PriceSummary lookups={lookups} />
+      return <PriceSummary />
     case 'budget':
       return <BudgetForm lookups={lookups} />
     case 'approvals':

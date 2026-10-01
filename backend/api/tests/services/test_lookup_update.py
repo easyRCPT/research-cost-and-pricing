@@ -794,13 +794,10 @@ class TestVersionedUpdate(TestCase):
         mock_invalidate_cache.assert_not_called()
 
 
-class TestFixedConstants(TestCase):
+class TestFullCostRecoveryMultiplier(TestCase):
     """
-    1.70 is not a rate that gets corrected (#60).
-
-    It decides whether a budget needs a Dean, so an edit changes who has to
-    approve every budget in the system. The API refuses it however the row is
-    named: by name, by id, or as a new row.
+    An administrator sets the full cost recovery multiplier, as a rate edit
+    that goes into a lookup version like any other (#149), within a range.
     """
 
     TABLE = "calculation_constants"
@@ -816,21 +813,66 @@ class TestFixedConstants(TestCase):
             value=Decimal("1.700000"),
         )
 
-    def test_it_cannot_be_changed(self):
-        with self.assertRaises(ValidationError) as refused:
-            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.000000")})
+    def test_an_administrator_can_change_it(self):
+        update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.80")})
 
-        self.assertIn(self.FIXED, str(refused.exception))
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.value, Decimal("1.80"))
+
+    def test_it_can_be_changed_by_id(self):
+        update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("1.65")})
+
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.value, Decimal("1.65"))
+
+    def test_below_one_is_refused(self):
+        with self.assertRaises(ValidationError) as refused:
+            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("0.99")})
+
+        self.assertIn("1.00", str(refused.exception))
         self.constant.refresh_from_db()
         self.assertEqual(self.constant.value, Decimal("1.700000"))
 
-    def test_it_cannot_be_changed_by_id(self):
-        with self.assertRaises(ValidationError) as refused:
-            update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("1.5")})
+    def test_below_one_is_refused_when_named_by_id(self):
+        with self.assertRaises(ValidationError):
+            update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("0.5")})
 
-        self.assertIn(self.FIXED, str(refused.exception))
         self.constant.refresh_from_db()
         self.assertEqual(self.constant.value, Decimal("1.700000"))
+
+    def test_more_than_two_decimal_places_is_refused(self):
+        with self.assertRaises(ValidationError):
+            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.725")})
+
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.value, Decimal("1.700000"))
+
+    def test_a_refused_edit_mints_no_version(self):
+        # The edit runs in one transaction, so a version made for a write that
+        # is then refused is rolled back with it.
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+        before = LookupVersion.objects.count()
+
+        with self.assertRaises(ValidationError):
+            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("0.5")})
+
+        self.assertEqual(LookupVersion.objects.count(), before)
+
+    def test_a_change_after_a_submission_leaves_the_stamped_version_alone(self):
+        self.config.referenced = True
+        self.config.save(update_fields=["referenced"])
+
+        update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.80")})
+
+        self.constant.refresh_from_db()
+        self.assertEqual(self.constant.value, Decimal("1.700000"))
+        current = LookupConfiguration.objects.get().current_version
+        self.assertNotEqual(current, self.version)
+        self.assertEqual(
+            CalculationConstant.objects.get(version=current, name=self.FIXED).value,
+            Decimal("1.80"),
+        )
 
     def test_it_cannot_be_renamed_by_id(self):
         with self.assertRaises(ValidationError):
@@ -838,18 +880,6 @@ class TestFixedConstants(TestCase):
 
         self.constant.refresh_from_db()
         self.assertEqual(self.constant.name, self.FIXED)
-
-    def test_a_refused_edit_mints_no_version(self):
-        # The refusal comes before the copy-on-write check, so a rejected write
-        # leaves no new version lying around.
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-        before = LookupVersion.objects.count()
-
-        with self.assertRaises(ValidationError):
-            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.5")})
-
-        self.assertEqual(LookupVersion.objects.count(), before)
 
     def test_every_other_constant_is_still_editable(self):
         other = CalculationConstant.objects.create(

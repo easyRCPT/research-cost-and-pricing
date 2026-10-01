@@ -70,12 +70,38 @@ class LookupWriteAccessTestCase(TestCase):
         self.assertEqual(response.status_code, 204, response.content)
         self.assertEqual(Department.objects.get(code="SCI").name, "Renamed")
 
-    def test_the_fixed_multiplier_cannot_be_changed_by_id(self):
+    def test_the_superadmin_can_change_the_multiplier(self):
         self.client.force_login(self.admin)
 
         response = self.patch(
             "calculation_constants",
-            {"lookup": {"id": self.fixed.pk}, "values": {"value": "1.5"}},
+            {"lookup": {"id": self.fixed.pk}, "values": {"value": "1.80"}},
+        )
+
+        self.assertEqual(response.status_code, 204, response.content)
+        self.fixed.refresh_from_db()
+        self.assertEqual(self.fixed.value, Decimal("1.80"))
+
+    def test_a_researcher_cannot_change_the_multiplier(self):
+        researcher = User.objects.create_user("researcher@unimelb.edu.au")
+        researcher.groups.add(Group.objects.get(name="researcher"))
+        self.client.force_login(researcher)
+
+        response = self.patch(
+            "calculation_constants",
+            {"lookup": {"id": self.fixed.pk}, "values": {"value": "1.80"}},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.fixed.refresh_from_db()
+        self.assertEqual(self.fixed.value, Decimal("1.700000"))
+
+    def test_a_multiplier_below_one_is_refused(self):
+        self.client.force_login(self.admin)
+
+        response = self.patch(
+            "calculation_constants",
+            {"lookup": {"id": self.fixed.pk}, "values": {"value": "0.90"}},
         )
 
         self.assertEqual(response.status_code, 400)

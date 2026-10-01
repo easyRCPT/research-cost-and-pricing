@@ -21,6 +21,7 @@ def get_budget_details(budget: Budget) -> dict:
         data_loader.load_budget_data(budget),
     )
     store_price(budget, details)
+    store_multipliers(budget, details)
     details["approval"] = approval_record.approval_record(budget)
     return details
 
@@ -46,17 +47,56 @@ def store_price(budget: Budget, details: dict) -> None:
     budget.save(update_fields=["total_price_inc_gst"])
 
 
+def store_multipliers(budget: Budget, details: dict) -> None:
+    """
+    Keep the budget's copy of its multipliers at the rate it was last priced
+    at, as store_price does for the price. Nothing reads the copy to price:
+    the rate comes from the lookup version (build_budget_details).
+    """
+    info = details["budget_info"]
+    changed = [
+        field
+        for field in ("cost_multiplier", "in_kind_multiplier")
+        if getattr(budget, field) != info[field]
+    ]
+    if not changed:
+        return
+
+    for field in changed:
+        setattr(budget, field, info[field])
+    budget.save(update_fields=changed)
+
+
+def priced_budget_info(constants: dict, budget_info: dict) -> dict:
+    """
+    The budget's inputs with the multiplier it is priced at.
+
+    The full cost recovery multiplier is a rate like any other (#149): it comes
+    from the lookup version the budget prices against, so a draft follows an
+    administrator's change and a submitted costing keeps the rate of the
+    version it was stamped with. In-kind staff are costed at the same rate.
+    """
+    multiplier = constants["constants"]["full_cost_recovery_multiplier"]
+    return {
+        **budget_info,
+        "cost_multiplier": multiplier,
+        "in_kind_multiplier": multiplier,
+    }
+
+
 def build_budget_details(constants: dict, budget_data: dict) -> dict:
     """
     Run the engine over one budget's inputs and shape the response.
     """
+    budget_info = priced_budget_info(constants, budget_data["budget_info"])
+
     # Calculation
     calculation_result = pricing.pricing(
         constants,
         budget_data["project_duration"],
         budget_data["staff_table"],
         budget_data["non_staff_table"],
-        budget_data["budget_info"],
+        budget_info,
     )
 
     # Merge staff table and result
@@ -78,7 +118,7 @@ def build_budget_details(constants: dict, budget_data: dict) -> dict:
 
     return {
         "project_info": budget_data["project_info"],
-        "budget_info": budget_data["budget_info"],
+        "budget_info": budget_info,
         "staff_table": staff_table,
         "non_staff_table": calculation_result["non_staff_result"],
         "budget_summary": calculation_result["budget_summary"],

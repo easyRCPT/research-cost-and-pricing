@@ -688,8 +688,9 @@ class Budget(models.Model):
     )
     mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.FULL)
 
-    # Seeded from CalculationConstant when the budget is created, not by a
-    # field default, because the current values live in the database.
+    # A record of the rate the budget was last priced at, kept in step by
+    # services/budget_details.py. The engine reads the rate from the budget's
+    # lookup version, not from here (#149); in-kind staff use the same rate.
     cost_multiplier = models.DecimalField(
         max_digits=4,
         decimal_places=2,

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { LockIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useLookups } from '@/api/lookups'
 import { useAddRate, useUpdateRate } from '@/api/admin-lookups'
@@ -92,7 +91,6 @@ function RateRow({ spec, row }: { spec: RateTableSpec; row: Row }) {
   const update = useUpdateRate()
   const saved = Number(row[spec.value.field])
   const [draft, setDraft] = useState<number | null>(null)
-  const locked = spec.locked?.(row) ?? false
   const changed = draft !== null && draft !== saved
 
   const save = () =>
@@ -113,35 +111,25 @@ function RateRow({ spec, row }: { spec: RateTableSpec; row: Row }) {
         <Td key={k.field}>{row[k.field] === null || row[k.field] === '' ? '—' : String(row[k.field])}</Td>
       ))}
       <Td className="text-right">
-        {locked ? (
-          <span className="tabular inline-flex items-center gap-1.5 text-muted-foreground" title="Fixed by the University">
-            <LockIcon className="size-3.5" /> {saved}
-          </span>
-        ) : (
-          <NumberInput
-            className="tabular ml-auto h-8 w-36 text-right"
-            step={spec.value.step}
-            min={0}
-            value={draft ?? saved}
-            onChange={setDraft}
-            aria-label={`${spec.value.label} for ${keyText(spec, row).replaceAll('|', ' ')}`}
-          />
-        )}
+        <NumberInput
+          className="tabular ml-auto h-8 w-36 text-right"
+          step={spec.value.step}
+          min={0}
+          value={draft ?? saved}
+          onChange={setDraft}
+          aria-label={`${spec.value.label} for ${keyText(spec, row).replaceAll('|', ' ')}`}
+        />
       </Td>
       <Td className="w-40">
-        {locked ? (
-          <span className="text-[12px] text-muted-foreground">Fixed by the University</span>
-        ) : (
-          changed && (
-            <div className="flex gap-2">
-              <Button size="sm" disabled={update.isPending} onClick={save}>
-                {update.isPending ? 'Saving…' : 'Save'}
-              </Button>
-              <Button size="sm" variant="ghost" disabled={update.isPending} onClick={() => setDraft(null)}>
-                Undo
-              </Button>
-            </div>
-          )
+        {changed && (
+          <div className="flex gap-2">
+            <Button size="sm" disabled={update.isPending} onClick={save}>
+              {update.isPending ? 'Saving…' : 'Save'}
+            </Button>
+            <Button size="sm" variant="ghost" disabled={update.isPending} onClick={() => setDraft(null)}>
+              Undo
+            </Button>
+          </div>
         )}
       </Td>
     </tr>
