@@ -1,17 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { useCreateProject } from '@/api/projects'
 import { FieldRow, Panel } from '@/components/shell'
+import { DepartmentSelect } from '@/components/shell/DepartmentSelect'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { TextInput } from '@/components/ui/text-input'
 import { ApiError } from '@/lib/api'
 import type { Department, ProjectCreate, ProjectRow } from '@/types'
@@ -38,17 +30,6 @@ function startingProject(title: string, department: string): ProjectCreate {
   }
 }
 
-/** Faculties in first-seen order, each with its departments in endpoint order. */
-function byFaculty(departments: readonly Department[]) {
-  const groups = new Map<string, Department[]>()
-  for (const department of departments) {
-    const group = groups.get(department.faculty)
-    if (group) group.push(department)
-    else groups.set(department.faculty, [department])
-  }
-  return [...groups]
-}
-
 interface NewProjectFormProps {
   departments: Department[]
   onCreated: (project: ProjectRow) => void
@@ -63,24 +44,6 @@ export function NewProjectForm({
   const [title, setTitle] = useState('')
   const [department, setDepartment] = useState('')
   const create = useCreateProject()
-
-  // Built once rather than on every render, as in ProjectDepartmentRow: several
-  // hundred options rebuilt on each keystroke in the title is what a held key
-  // finds first.
-  const options = useMemo(
-    () =>
-      byFaculty(departments).map(([faculty, rows]) => (
-        <SelectGroup key={faculty}>
-          <SelectLabel>{faculty}</SelectLabel>
-          {rows.map((option) => (
-            <SelectItem key={option.code} value={option.code}>
-              {option.name}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      )),
-    [departments],
-  )
 
   const complete = title.trim() !== '' && department !== ''
 
@@ -108,12 +71,11 @@ export function NewProjectForm({
         </FieldRow>
 
         <FieldRow label="Department" required>
-          <Select value={department} onValueChange={setDepartment}>
-            <SelectTrigger className="w-full max-w-lg">
-              <SelectValue placeholder="Select a department" />
-            </SelectTrigger>
-            <SelectContent>{options}</SelectContent>
-          </Select>
+          <DepartmentSelect
+            departments={departments}
+            value={department}
+            onValueChange={setDepartment}
+          />
         </FieldRow>
 
         {error && (
