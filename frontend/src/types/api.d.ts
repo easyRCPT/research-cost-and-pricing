@@ -178,6 +178,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/lookups/versions/{version_id}/changes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The sets saved into one version, with what each change did (#138). */
+        get: operations["admin_lookups_versions_changes_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/lookups/versions/{version_id}/restore/": {
         parameters: {
             query?: never;
@@ -599,23 +616,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/lookups/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["lookups_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/projects/": {
     "/api/departments/": {
         parameters: {
             query?: never;
@@ -649,6 +649,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/lookups/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["lookups_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/": {
         parameters: {
             query?: never;
             header?: never;
@@ -1013,6 +1030,7 @@ export interface components {
             detail: string;
         };
         AdminLookupsVersionsBudgetsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsChangesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminOverviewRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
@@ -1494,6 +1512,7 @@ export interface components {
             created_at: string;
             /** Format: email */
             actor_email?: string | null;
+            actor_name?: string | null;
             action: string;
             object_type: string;
             object_id: string;
@@ -2495,6 +2514,7 @@ export interface components {
             id: number;
             note: string;
             saved_by: string | null;
+            saved_by_name: string | null;
             /** Format: date-time */
             saved_at: string;
             change_count: number;
@@ -2571,6 +2591,7 @@ export interface components {
             faculty_code: string;
             budget_unit?: string;
         };
+        DepartmentsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         EbaIncrease: {
             year: number;
             /** Format: double */
@@ -2590,7 +2611,6 @@ export interface components {
         };
         Error403: {
             code: components["schemas"]["ErrorCode403Enum"];
-        DepartmentsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
             detail: string;
             attr: string | null;
         };
@@ -2697,6 +2717,7 @@ export interface components {
             type: components["schemas"]["ServerErrorEnum"];
             errors: components["schemas"]["Error500"][];
         };
+        FacultiesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         Faculty: {
             code: string;
             name: string;
@@ -2716,7 +2737,6 @@ export interface components {
             max_steps: number;
         };
         Login: {
-        FacultiesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
             /** Format: email */
             email: string;
             password: string;
@@ -2770,6 +2790,7 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             updated_by: string | null;
+            updated_by_name: string | null;
             budgets_priced: number;
             current: boolean;
             accepts_changes: boolean;
@@ -3504,6 +3525,30 @@ export interface components {
             /** Format: email */
             email: string;
             name: string;
+        };
+        /** @description One change in a set: the row it named, and the values before and after. */
+        VersionChange: {
+            table: string;
+            op: string;
+            key: {
+                [key: string]: unknown;
+            };
+            before: {
+                [key: string]: unknown;
+            } | null;
+            after: {
+                [key: string]: unknown;
+            } | null;
+        };
+        VersionChangeSet: {
+            id: number;
+            note: string;
+            saved_by: string | null;
+            saved_by_name: string | null;
+            /** Format: date-time */
+            saved_at: string;
+            change_count: number;
+            changes: components["schemas"]["VersionChange"][];
         };
         VersionsSummary: {
             total: number;
@@ -4325,6 +4370,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsVersionsBudgetsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_changes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionChangeSet"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsChangesListErrorResponse400"];
                 };
             };
             401: {
@@ -6719,135 +6849,6 @@ export interface operations {
             };
         };
     };
-    lookups_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LookupTables"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LookupsRetrieveErrorResponse400"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse401"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse404"];
-                };
-            };
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse405"];
-                };
-            };
-            406: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse406"];
-                };
-            };
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse415"];
-                };
-            };
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse500"];
-                };
-            };
-        };
-    };
-    projects_list: {
-        parameters: {
-            query?: {
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse401"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse404"];
-                };
-            };
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse405"];
-                };
-            };
-            406: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse406"];
-                };
-            };
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse415"];
-                };
-            };
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse500"];
-                };
-            };
-        };
-    };
     departments_list: {
         parameters: {
             query?: {
@@ -6951,6 +6952,135 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FacultiesListErrorResponse400"];
                 };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    lookups_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupTables"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    projects_list: {
+        parameters: {
+            query?: {
                 /**
                  * @description * `draft` - Draft
                  *     * `submitted` - Submitted
