@@ -211,7 +211,7 @@ test('a set that starts a new version says who was priced on the old one, and li
 
   await notice.getByRole('button', { name: 'See them' }).click()
   const listed = page.getByRole('table', { name: /Costings priced on version/ })
-  await expect(listed.getByRole('row').filter({ hasText: title })).toContainText('Head of Department review')
+  await expect(listed.getByRole('row').filter({ hasText: title })).toContainText('HoD review')
 
   await listed.getByRole('link', { name: title }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/details`)

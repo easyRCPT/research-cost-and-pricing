@@ -115,6 +115,7 @@ export function ApprovalRegister() {
             emptyMessage="Nothing here."
             sortable
             searchable
+            hideable
             flush
           />
         </section>

@@ -60,6 +60,7 @@ export function Projects() {
             emptyMessage="No projects yet."
             sortable
             searchable
+            hideable
             filters={FILTERS}
             flush
           />

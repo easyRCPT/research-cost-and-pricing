@@ -18,7 +18,7 @@ test("the register finds anyone's costing, read-only, and the log has its submis
   await page.getByPlaceholder('Search').fill(title)
   const row = page.getByRole('row').filter({ hasText: title })
   await expect(row).toContainText(DEMO.researcher)
-  await expect(row).toContainText('Head of Department review')
+  await expect(row).toContainText('HoD review')
 
   await row.getByRole('button', { name: title }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/details`)

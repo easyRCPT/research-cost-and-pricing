@@ -1,4 +1,5 @@
 import { CheckIcon, ChevronDownIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -43,24 +44,17 @@ export function DataTableFilterMenu({
           {options.map((option) => {
             const checked = selected.includes(option.value)
             return (
-              <button
+              <MenuCheckbox
                 key={option.value}
-                type="button"
-                role="checkbox"
-                aria-checked={checked}
+                checked={checked}
                 disabled={option.count === 0 && !checked}
-                data-checked={checked || undefined}
-                onClick={() => onToggle(option.value, !checked)}
-                className="flex w-full cursor-default items-center gap-2 rounded-md py-1 pr-2 pl-1.5 text-left text-sm outline-none select-none hover:bg-accent focus-visible:bg-accent disabled:pointer-events-none disabled:opacity-50 data-checked:not-hover:bg-primary/5"
+                onToggle={() => onToggle(option.value, !checked)}
               >
-                <span className="flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-input transition-colors in-data-checked:border-primary in-data-checked:bg-primary in-data-checked:text-primary-foreground">
-                  {checked && <CheckIcon className="size-3.5" />}
-                </span>
                 <span className="flex-1 truncate">{option.value}</span>
                 <span className="tabular text-muted-foreground">
                   ({option.count})
                 </span>
-              </button>
+              </MenuCheckbox>
             )
           })}
         </ScrollViewport>
@@ -79,5 +73,37 @@ export function DataTableFilterMenu({
         </footer>
       </PopoverContent>
     </Popover>
+  )
+}
+
+interface MenuCheckboxProps {
+  checked: boolean
+  disabled?: boolean
+  onToggle: () => void
+  children: ReactNode
+}
+
+/** A ticked row in a popover menu. */
+export function MenuCheckbox({
+  checked,
+  disabled,
+  onToggle,
+  children,
+}: MenuCheckboxProps) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      disabled={disabled}
+      data-checked={checked || undefined}
+      onClick={onToggle}
+      className="flex w-full cursor-default items-center gap-2 rounded-md py-1 pr-2 pl-1.5 text-left text-sm outline-none select-none hover:bg-accent focus-visible:bg-accent disabled:pointer-events-none disabled:opacity-50 data-checked:not-hover:bg-primary/5"
+    >
+      <span className="flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-input transition-colors in-data-checked:border-primary in-data-checked:bg-primary in-data-checked:text-primary-foreground">
+        {checked && <CheckIcon className="size-3.5" />}
+      </span>
+      {children}
+    </button>
   )
 }

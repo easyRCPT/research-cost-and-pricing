@@ -1,10 +1,11 @@
 import { type RowData, useTable } from '@tanstack/react-table'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 
 import { Td, Th } from '@/components/shell'
 import { cn } from '@/lib/utils'
 
+import { DataTableColumnMenu } from './DataTableColumnMenu'
 import { DataTablePagination } from './DataTablePagination'
 import { DataTableToolbar } from './DataTableToolbar'
 import {
@@ -22,11 +23,15 @@ interface DataTableProps<T extends RowData> {
   getRowId?: (row: T) => string
   sortable?: boolean
   searchable?: boolean
+  /** Adds a Columns menu beside the search for showing and hiding columns. */
+  hideable?: boolean
   filters?: DataTableFilter<T>[]
   /** Shown when there is nothing to list at all, rather than nothing matching. */
   emptyMessage?: string
-  /** Drops the side padding, for a table that draws its own frame. */
+  /** Pads above the toolbar, for a table sitting straight in a card. */
   flush?: boolean
+  /** Buttons for the whole table, such as Add row, beside the search. */
+  actions?: ReactNode
 }
 
 export function DataTable<T extends RowData>({
@@ -35,9 +40,11 @@ export function DataTable<T extends RowData>({
   getRowId,
   sortable = false,
   searchable = false,
+  hideable = false,
   filters = NO_FILTERS,
   emptyMessage = 'No rows seeded yet.',
   flush = false,
+  actions,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('')
   const [filterState, setFilterState] = useState<FilterState>({})
@@ -58,7 +65,7 @@ export function DataTable<T extends RowData>({
 
   return (
     <>
-      {(searchable || filters.length > 0) && (
+      {(searchable || hideable || filters.length > 0 || actions) && (
         <div className={cn(flush && 'pt-4')}>
           <DataTableToolbar
             rows={rows}
@@ -68,15 +75,16 @@ export function DataTable<T extends RowData>({
             onSearch={setSearch}
             state={filterState}
             onState={setFilterState}
+            actions={
+              <>
+                {hideable && <DataTableColumnMenu table={table} />}
+                {actions}
+              </>
+            }
           />
         </div>
       )}
-      <div
-        className={cn(
-          'scroll-persist overflow-x-auto overscroll-x-none',
-          !flush && 'px-6',
-        )}
-      >
+      <div className="scroll-persist overflow-x-auto overscroll-x-none px-6">
         <table className="grid-table w-max min-w-full text-[13px]">
           <thead>
             {table.getHeaderGroups().map((group) => (
@@ -121,7 +129,7 @@ export function DataTable<T extends RowData>({
             {visible.length === 0 && (
               <tr>
                 <Td
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length}
                   className="py-6 text-center text-muted-foreground"
                 >
                   {rows.length === 0 ? emptyMessage : 'No rows match.'}
@@ -130,7 +138,7 @@ export function DataTable<T extends RowData>({
             )}
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id}>
-                {row.getAllCells().map((cell) => (
+                {row.getVisibleCells().map((cell) => (
                   <Td
                     key={cell.id}
                     align={cell.column.columnDef.meta?.align}

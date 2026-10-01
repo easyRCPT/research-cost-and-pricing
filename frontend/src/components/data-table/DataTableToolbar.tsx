@@ -1,5 +1,6 @@
 import type { RowData } from '@tanstack/react-table'
 import { XIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ interface DataTableToolbarProps<T extends RowData> {
   onSearch: (value: string) => void
   state: FilterState
   onState: (state: FilterState) => void
+  actions?: ReactNode
 }
 
 export function DataTableToolbar<T extends RowData>({
@@ -30,6 +32,7 @@ export function DataTableToolbar<T extends RowData>({
   onSearch,
   state,
   onState,
+  actions,
 }: DataTableToolbarProps<T>) {
   const toggle = (id: string, value: string, checked: boolean) => {
     const current = state[id] ?? []
@@ -58,15 +61,18 @@ export function DataTableToolbar<T extends RowData>({
             />
           ))}
         </div>
-        {searchable && (
-          <Input
-            type="search"
-            placeholder="Search"
-            value={search}
-            onChange={(event) => onSearch(event.target.value)}
-            className="h-7 w-56 bg-card text-[13px]"
-          />
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {searchable && (
+            <Input
+              type="search"
+              placeholder="Search"
+              value={search}
+              onChange={(event) => onSearch(event.target.value)}
+              className="h-7 w-56 bg-card text-[13px]"
+            />
+          )}
+          {actions}
+        </div>
       </div>
       {active.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">

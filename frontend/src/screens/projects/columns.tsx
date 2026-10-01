@@ -1,5 +1,6 @@
 import { columnHelper, type DataTableColumns } from '@/components/data-table'
-import { shortDate } from '@/lib/format/dates'
+import { StatusChip } from '@/components/shell'
+import { dateTime } from '@/lib/format/dates'
 import { money } from '@/lib/format/utils'
 import { ownerName, statusLabel } from '@/lib/status'
 import type { ProjectRow } from '@/types'
@@ -36,24 +37,39 @@ export const titleColumn = <T extends ProjectListRow>(
   col<T>().accessor((row) => row.title, {
     id: 'title',
     header: 'Title',
-    // Bounded and wrapping: the table sizes to its content, and the owner
-    // column pushes long titles off the side of the page otherwise.
+    enableHiding: false,
+    cell: ({ row }) => {
+      const title = row.original.title || 'Untitled'
+      return openable(row.original) ? (
+        <button
+          type="button"
+          title={title}
+          onClick={() => open(row.original)}
+          className="block max-w-[320px] cursor-pointer truncate text-left font-medium hover:underline"
+        >
+          {title}
+        </button>
+      ) : (
+        <div title={title} className="max-w-[320px] truncate font-medium">
+          {title}
+        </div>
+      )
+    },
+    // Truncated: the table sizes to its content, and a long title pushes the
+    // other columns off the side of the page otherwise.
+    meta: { className: 'whitespace-nowrap' },
+  })
+
+export const departmentColumn = <T extends ProjectListRow>() =>
+  col<T>().accessor((row) => row.department, {
+    id: 'department',
+    header: 'Department',
     cell: ({ row }) => (
-      <div className="max-w-[320px] py-0.5 whitespace-normal">
-        {openable(row.original) ? (
-          <button
-            type="button"
-            onClick={() => open(row.original)}
-            className="cursor-pointer text-left font-medium hover:underline"
-          >
-            {row.original.title || 'Untitled'}
-          </button>
-        ) : (
-          <div className="font-medium">{row.original.title || 'Untitled'}</div>
-        )}
-        <div className="text-muted-foreground">{row.original.department}</div>
+      <div title={row.original.department} className="max-w-[260px] truncate">
+        {row.original.department}
       </div>
     ),
+    meta: { className: 'whitespace-nowrap text-muted-foreground' },
   })
 
 export const ownerColumn = <T extends ProjectListRow>(header: string) =>
@@ -61,16 +77,9 @@ export const ownerColumn = <T extends ProjectListRow>(header: string) =>
     id: 'owner',
     header,
     cell: ({ row }) => (
-      <div className="py-0.5">
-        <div>{ownerName(row.original)}</div>
-        {row.original.owner.name && (
-          <div className="text-muted-foreground">
-            {row.original.owner.email}
-          </div>
-        )}
-      </div>
+      <span title={row.original.owner.email}>{ownerName(row.original)}</span>
     ),
-    meta: { className: 'w-[220px]' },
+    meta: { className: 'whitespace-nowrap' },
   })
 
 export const statusColumn = <T extends ProjectListRow>() =>
@@ -80,23 +89,16 @@ export const statusColumn = <T extends ProjectListRow>() =>
     // A project can carry several budgets. This is the most recently touched
     // one, which is the only one a single column can honestly report.
     cell: ({ row }) => (
-      <span
-        className={
-          row.original.status === null
-            ? 'text-muted-foreground'
-            : 'text-primary'
-        }
-      >
-        {statusLabel(row.original.status)}
+      <span className="flex items-center gap-1.5">
+        <StatusChip status={row.original.status} />
         {row.original.budget_count > 1 && (
           <span className="text-muted-foreground">
-            {' '}
             · {row.original.budget_count} budgets
           </span>
         )}
       </span>
     ),
-    meta: { className: 'w-[220px]' },
+    meta: { className: 'whitespace-nowrap' },
   })
 
 export const priceColumn = <T extends ProjectListRow>() =>
@@ -117,10 +119,10 @@ export const updatedColumn = <T extends ProjectListRow>() =>
   col<T>().accessor((row) => row.updated_at, {
     id: 'updated_at',
     header: 'Last updated',
-    cell: ({ row }) => shortDate(row.original.updated_at),
+    cell: ({ row }) => dateTime(row.original.updated_at),
     meta: {
       align: 'right',
-      className: 'w-[140px] whitespace-nowrap text-muted-foreground',
+      className: 'whitespace-nowrap text-muted-foreground',
     },
   })
 
@@ -140,6 +142,7 @@ export const projectColumns = <T extends ProjectListRow>({
   columnHelper<T>().columns([
     referenceColumn<T>(),
     titleColumn<T>(open, openable),
+    departmentColumn<T>(),
     ...(ownerHeader ? [ownerColumn<T>(ownerHeader)] : []),
     statusColumn<T>(),
     priceColumn<T>(),

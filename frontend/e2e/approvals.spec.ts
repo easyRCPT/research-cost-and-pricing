@@ -135,7 +135,7 @@ test("an approver's register lists their area at any status, and Back returns to
   await page.getByPlaceholder('Search').fill(title)
   const row = page.getByRole('row').filter({ hasText: title })
   await expect(row).toContainText(DEMO.researcher)
-  await expect(row).toContainText('Head of Department review')
+  await expect(row).toContainText('HoD review')
 
   // The chips filter on the server.
   const statuses = page.getByRole('group', { name: 'Status' })

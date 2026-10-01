@@ -74,6 +74,7 @@ export function ProjectsScreen({ onOpen }: ProjectsScreenProps) {
           emptyMessage="No projects yet. Start one with New project."
           sortable
           searchable
+          hideable
           filters={FILTERS}
           flush
         />
