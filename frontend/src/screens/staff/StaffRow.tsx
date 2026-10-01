@@ -1,28 +1,15 @@
 import { X } from 'lucide-react'
 
-import {
-  Calc,
-  CellChoice,
-  CellNumber,
-  CellTd,
-  CellText,
-  Derived,
-  Td,
-} from '@/components/shell'
+import { CellChoice, CellTd, CellText, Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { dash } from '@/lib/format/utils'
-import { toastOutOfRange } from '@/lib/range'
 import {
+  categoryPatch,
   clampedByYear,
   classificationsFor,
-  costFor,
   EMPLOYMENT_TYPES,
-  maxTimeFor,
+  employmentTypePatch,
   timeBasesFor,
-  timeFor,
-  timeLabelFor,
-  withTime,
 } from '@/lib/staff'
 import { cn } from '@/lib/utils'
 import type {
@@ -30,6 +17,9 @@ import type {
   SalaryRate,
   SalaryRateMultiplier,
 } from '@/types'
+
+import { StaffFigureCell } from './StaffFigureCell'
+import { StaffYearCells } from './StaffYearCells'
 
 interface StaffRowProps {
   line: EditableStaffLine
@@ -61,33 +51,6 @@ export function StaffRow({
   // An excluded row is neither charged nor in-kind: it is simply not part
   // of what the project costs, so it carries no figures.
   const excluded = isCi && !ciIncluded
-
-  function setEmploymentType(employment_type: string) {
-    const selected = employment_type as EditableStaffLine['employment_type']
-    const allowed = timeBasesFor(multipliers, selected)
-    if (allowed.includes(line.time_basis)) {
-      patchLine(line.id, { employment_type: selected })
-      return
-    }
-    const time_basis = (allowed[0] ??
-      line.time_basis) as EditableStaffLine['time_basis']
-    patchLine(line.id, {
-      employment_type: selected,
-      time_basis,
-      by_year: clampedByYear(line, time_basis),
-    })
-  }
-
-  function setCategory(category: string) {
-    const selected = category as EditableStaffLine['category']
-    const options = classificationsFor(salaryRates, category)
-    patchLine(line.id, {
-      category: selected,
-      ...(options.includes(line.classification)
-        ? {}
-        : { classification: options[0] ?? line.classification }),
-    })
-  }
 
   return (
     <tr className={excluded ? 'opacity-55' : undefined}>
@@ -122,7 +85,12 @@ export function StaffRow({
           value={line.employment_type}
           options={EMPLOYMENT_TYPES}
           placeholder="—"
-          onChange={setEmploymentType}
+          onChange={(employmentType) =>
+            patchLine(
+              line.id,
+              employmentTypePatch(line, multipliers, employmentType),
+            )
+          }
         />
       </CellTd>
       <CellTd>
@@ -130,7 +98,9 @@ export function StaffRow({
           value={line.category}
           options={categories}
           placeholder="—"
-          onChange={setCategory}
+          onChange={(category) =>
+            patchLine(line.id, categoryPatch(line, salaryRates, category))
+          }
         />
       </CellTd>
       <CellTd>
@@ -158,51 +128,14 @@ export function StaffRow({
           }
         />
       </CellTd>
-      <Calc
-        className={!excluded && line.rate ? undefined : 'text-muted-foreground'}
-      >
-        <Derived>{dash(excluded ? 0 : line.rate)}</Derived>
-      </Calc>
-      {years.map((year) => [
-        <CellTd key={`${year}-time`}>
-          <CellNumber
-            min={0}
-            max={maxTimeFor(line.time_basis)}
-            onOutOfRange={() =>
-              toastOutOfRange(
-                timeLabelFor(line.time_basis),
-                0,
-                maxTimeFor(line.time_basis),
-              )
-            }
-            value={timeFor(line, year)}
-            onChange={(time) =>
-              patchLine(line.id, {
-                by_year: withTime(line, years, year, time),
-              })
-            }
-          />
-        </CellTd>,
-        <Calc
-          key={`${year}-total`}
-          className={cn(
-            !excluded && costFor(line, year)
-              ? undefined
-              : 'text-muted-foreground',
-            excluded && 'line-through',
-          )}
-        >
-          <Derived>{dash(excluded ? 0 : costFor(line, year))}</Derived>
-        </Calc>,
-      ])}
-      <Calc
-        className={cn(
-          !excluded && line.total ? undefined : 'text-muted-foreground',
-          excluded && 'line-through',
-        )}
-      >
-        <Derived>{dash(excluded ? 0 : line.total)}</Derived>
-      </Calc>
+      <StaffFigureCell value={line.rate} excluded={excluded} />
+      <StaffYearCells
+        line={line}
+        years={years}
+        excluded={excluded}
+        patchLine={patchLine}
+      />
+      <StaffFigureCell value={line.total} excluded={excluded} struck />
       <Td align="center">
         <Button
           variant="ghost"

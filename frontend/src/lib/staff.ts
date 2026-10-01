@@ -83,6 +83,39 @@ export const clampedByYear = (line: EditableStaffLine, timeBasis: string) => {
   }))
 }
 
+/** The patch for a new employment type, moving the time basis if it no longer fits. */
+export const employmentTypePatch = (
+  line: EditableStaffLine,
+  multipliers: readonly SalaryRateMultiplier[],
+  employmentType: string,
+): Partial<EditableStaffLine> => {
+  const employment_type = employmentType as EditableStaffLine['employment_type']
+  const allowed = timeBasesFor(multipliers, employment_type)
+  if (allowed.includes(line.time_basis)) return { employment_type }
+  const time_basis = (allowed[0] ??
+    line.time_basis) as EditableStaffLine['time_basis']
+  return {
+    employment_type,
+    time_basis,
+    by_year: clampedByYear(line, time_basis),
+  }
+}
+
+/** The patch for a new category, moving the classification if it no longer fits. */
+export const categoryPatch = (
+  line: EditableStaffLine,
+  rates: readonly SalaryRate[],
+  category: string,
+): Partial<EditableStaffLine> => {
+  const options = classificationsFor(rates, category)
+  return {
+    category: category as EditableStaffLine['category'],
+    ...(options.includes(line.classification)
+      ? {}
+      : { classification: options[0] ?? line.classification }),
+  }
+}
+
 export const timeFor = (line: EditableStaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.time ?? 0
 
