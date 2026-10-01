@@ -1,16 +1,14 @@
 from django.test import TestCase
 
-from api.models import AuditLog, User
+from api.models import AuditLog
 from api.services.audit import write_audit
+from api.tests.factories import make_user
 
 
 class WriteAuditTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = User.objects.create_user(
-            email="user@example.com",
-            password="password",
-        )
+        cls.user = make_user("user@example.com")
 
     def test_write_audit_creates_log(self) -> None:
         write_audit(

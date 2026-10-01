@@ -3,14 +3,11 @@ from django.test import TestCase
 from api.models import (
     ApprovalStep,
     Budget,
-    Department,
-    Faculty,
     LookupVersion,
-    Project,
-    User,
     UserOrgAssignment,
 )
 from api.services.approval_queue import get_approval_steps
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 class ApprovalQueueTest(TestCase):
@@ -18,42 +15,14 @@ class ApprovalQueueTest(TestCase):
     def setUpTestData(cls) -> None:
         cls.lookup_version = LookupVersion.objects.create()
 
-        cls.faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science Faculty",
-        )
+        cls.department = make_department(name="Science")
+        cls.faculty = cls.department.faculty
+        cls.other_department = make_department("ART", cls.faculty, name="Arts")
 
-        cls.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=cls.faculty,
-        )
-
-        cls.other_department = Department.objects.create(
-            code="ART",
-            name="Arts",
-            school="Arts School",
-            school_code="ART",
-            faculty=cls.faculty,
-        )
-
-        cls.owner = User.objects.create(
-            email="owner@unimelb.edu.au",
-        )
-
-        cls.hod = User.objects.create(
-            email="hod@unimelb.edu.au",
-        )
-
-        cls.dean = User.objects.create(
-            email="dean@unimelb.edu.au",
-        )
-
-        cls.unassigned_user = User.objects.create(
-            email="member@unimelb.edu.au",
-        )
+        cls.owner = make_user()
+        cls.hod = make_user("hod@unimelb.edu.au")
+        cls.dean = make_user("dean@unimelb.edu.au")
+        cls.unassigned_user = make_user("member@unimelb.edu.au")
 
         UserOrgAssignment.objects.create(
             user=cls.hod,
@@ -67,45 +36,26 @@ class ApprovalQueueTest(TestCase):
             faculty=cls.faculty,
         )
 
-        cls.hod_budget = Budget.objects.create(
-            project=Project.objects.create(
+        cls.hod_budget = make_budget(
+            make_project(
+                cls.owner,
+                cls.department,
                 title="HOD Budget",
-                department=cls.department,
-                chief_investigator="Test Investigator",
-                funder="Test Funder",
                 start_year=2025,
-                start_month=1,
                 end_year=2026,
-                end_month=12,
-                created_by=cls.owner,
             ),
             lookup_version=cls.lookup_version,
-            cost_multiplier=1,
-            in_kind_multiplier=1,
-            margin=0.30,
-            gst_applicable=True,
-            cash_co_contribution=0,
             status=Budget.Status.HOD_REVIEW,
         )
-
-        cls.dean_budget = Budget.objects.create(
-            project=Project.objects.create(
+        cls.dean_budget = make_budget(
+            make_project(
+                cls.owner,
+                cls.department,
                 title="Dean Budget",
-                department=cls.department,
-                chief_investigator="Test Investigator",
-                funder="Test Funder",
                 start_year=2025,
-                start_month=1,
                 end_year=2026,
-                end_month=12,
-                created_by=cls.owner,
             ),
             lookup_version=cls.lookup_version,
-            cost_multiplier=1,
-            in_kind_multiplier=1,
-            margin=0.30,
-            gst_applicable=True,
-            cash_co_contribution=0,
             status=Budget.Status.DEAN_REVIEW,
         )
 

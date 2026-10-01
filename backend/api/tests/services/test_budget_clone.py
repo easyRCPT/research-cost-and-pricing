@@ -9,18 +9,15 @@ from api.models import (
     Budget,
     Deliverable,
     DeliverableType,
-    Department,
-    Faculty,
     LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
-    Project,
     StaffCostLine,
-    User,
     YearAllocation,
     YearAmount,
 )
 from api.services.budget_clone import clone_budget
+from api.tests.factories import make_budget, make_project, make_user
 
 from .test_submission import ForceRollbackError
 
@@ -28,34 +25,8 @@ from .test_submission import ForceRollbackError
 class BudgetCloneTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.owner = User.objects.create_user(
-            email="owner@example.com",
-            password="password",
-        )
-
-        cls.faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science Faculty",
-        )
-
-        cls.department = Department.objects.create(
-            code="SCI-01",
-            name="Science Department",
-            school="Science School",
-            school_code="SCI",
-            faculty=cls.faculty,
-        )
-
-        cls.project = Project.objects.create(
-            title="Test Project",
-            department=cls.department,
-            start_year=2026,
-            start_month=1,
-            end_year=2027,
-            end_month=12,
-            created_by=cls.owner,
-        )
-
+        cls.owner = make_user("owner@example.com")
+        cls.project = make_project(cls.owner, end_year=2027)
         cls.non_staff_category = NonStaffCostCategory.objects.create(
             ledger_id=1001,
             cost_category="Travel",
@@ -73,13 +44,7 @@ class BudgetCloneTest(TestCase):
         *,
         status: str,
     ) -> Budget:
-        return Budget.objects.create(
-            project=self.project,
-            status=status,
-            cost_multiplier=Decimal("1.00"),
-            in_kind_multiplier=Decimal("1.00"),
-            margin=Decimal("0.3000"),
-        )
+        return make_budget(self.project, status=status)
 
     def test_clone_rejected_budget_creates_new_draft(self) -> None:
         source = self.create_budget(
