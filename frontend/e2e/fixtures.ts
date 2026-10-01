@@ -210,6 +210,17 @@ export async function signIn(
  * would land on the login page instead. The three auth specs opt out with
  * `test.use({ signedIn: false })`.
  */
+/** The admin door, by API, as signIn does for the others. */
+export async function signInAsAdmin(page: Page) {
+  await page.context().clearCookies()
+  await page.request.get('/api/auth/csrf/')
+  const response = await page.request.post('/api/auth/admin-login/', {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+    data: { email: DEMO.admin, password: DEMO.password },
+  })
+  expect(response.status(), await response.text()).toBe(200)
+}
+
 export const test = base.extend<{ signedIn: boolean }>({
   signedIn: [true, { option: true }],
   page: async ({ page, signedIn }, use) => {

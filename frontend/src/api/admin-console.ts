@@ -5,6 +5,7 @@ import type { components } from '@/types/api'
 export type AuditEntry = components['schemas']['AuditEntry']
 export type AdminProject = components['schemas']['AdminProject']
 export type Overview = components['schemas']['Overview']
+export type ApproverGaps = components['schemas']['ApproverGaps']
 
 /**
  * These read what the rest of the console just did, so each is asked again
@@ -25,6 +26,19 @@ export function useOverview() {
     queryKey: ['admin', 'overview'] as const,
     queryFn: async (): Promise<Overview> => {
       const { data, error, response } = await api.GET('/api/admin/overview/')
+      if (error) throw new ApiError(response.status, error)
+      return data
+    },
+    ...FRESH,
+  })
+}
+
+/** Costings waiting on a role nobody holds, and the units missing one (#121). */
+export function useApproverGaps() {
+  return useQuery({
+    queryKey: ['admin', 'approver-gaps'] as const,
+    queryFn: async (): Promise<ApproverGaps> => {
+      const { data, error, response } = await api.GET('/api/admin/approver-gaps/')
       if (error) throw new ApiError(response.status, error)
       return data
     },

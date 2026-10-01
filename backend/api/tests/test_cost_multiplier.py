@@ -15,7 +15,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from api.models import AuditLog, Budget, Department, LookupConfiguration, User
-from api.services import lookup_update, project, staff_line
+from api.services import lookup_changes, project, staff_line
 from api.services.budget_details import get_budget_details
 
 MULTIPLIER = "full_cost_recovery_multiplier"
@@ -71,12 +71,20 @@ class TestCostMultiplier(TestCase):
             )
 
     def set_multiplier(self, value: str) -> None:
-        lookup_update.update(
-            "calculation_constants",
-            {"name": MULTIPLIER},
-            {"value": Decimal(value)},
-            actor=self.admin,
-        )
+        # The rates cache is cleared once the set commits, so run that here.
+        with self.captureOnCommitCallbacks(execute=True):
+            lookup_changes.apply_changes(
+                [
+                    {
+                        "table": "calculation_constants",
+                        "op": "update",
+                        "lookup": {"name": MULTIPLIER},
+                        "values": {"value": value},
+                    }
+                ],
+                note="",
+                actor=self.admin,
+            )
 
     def stamp_as_submitted(self) -> None:
         # What submit_budget does to the rates: the budget is frozen on the
@@ -137,7 +145,8 @@ class TestCostMultiplier(TestCase):
     def test_the_change_is_audited_with_its_old_and_new_value(self):
         self.set_multiplier("1.80")
 
-        entry = AuditLog.objects.get(action="admin.lookup.update")
+        entry = AuditLog.objects.get(action="admin.lookup.changes")
         self.assertEqual(entry.actor, self.admin)
-        self.assertEqual(Decimal(entry.detail["before"]["value"]), Decimal("1.7"))
-        self.assertEqual(Decimal(entry.detail["after"]["value"]), Decimal("1.8"))
+        [change] = entry.detail["changes"]
+        self.assertEqual(Decimal(change["before"]["value"]), Decimal("1.7"))
+        self.assertEqual(Decimal(change["after"]["value"]), Decimal("1.8"))

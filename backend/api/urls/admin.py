@@ -20,6 +20,11 @@ urlpatterns = [
     # Admin
     path("overview/", overview.OverviewView.as_view(), name="admin-overview"),
     path(
+        "approver-gaps/",
+        overview.ApproverGapsView.as_view(),
+        name="admin-approver-gaps",
+    ),
+    path(
         "lookups/versions/",
         lookups.LookupVersionsView.as_view(),
         name="admin-lookup-versions",
@@ -30,9 +35,25 @@ urlpatterns = [
         name="admin-lookup-version-restore",
     ),
     path(
+        "lookups/versions/<int:version_id>/budgets/",
+        lookups.LookupVersionBudgetsView.as_view(),
+        name="admin-lookup-version-budgets",
+    ),
+    # Before the table route, which would otherwise take "changes" for a table.
+    path(
+        "lookups/changes/",
+        lookups.LookupChangesView.as_view(),
+        name="admin-lookup-changes",
+    ),
+    path(
         "lookups/<str:table>/",
-        lookups.LookupTableView.as_view(http_method_names=["post", "patch"]),
+        lookups.LookupTableView.as_view(http_method_names=["post", "patch", "delete"]),
         name="lookup-table",
+    ),
+    path(
+        "lookups/<str:table>/<str:key>/",
+        lookups.LookupRowView.as_view(),
+        name="lookup-row",
     ),
     # No route deletes a user: owners are PROTECTed, so deactivating is the
     # operation (#64).

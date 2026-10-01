@@ -1,5 +1,6 @@
 import { DataTable, TableCard, columnHelper } from '@/components/data-table'
 import { money } from '@/lib/format/utils'
+import { constantName } from '@/lib/format/constants'
 import type { LookupTables } from '@/types'
 
 type Constant = LookupTables['calculation_constants'][number]
@@ -11,24 +12,12 @@ const CONSTANT_FORMAT: Record<string, (value: number) => string> = {
   max_leave_loading: money,
 }
 
-const UPPERCASE_WORDS = new Set(['uom', 'gst', 'eba'])
-
-const formatName = (name: string) =>
-  name
-    .split('_')
-    .map((word) =>
-      UPPERCASE_WORDS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1),
-    )
-    .join(' ')
-
 const constant = columnHelper<Constant>()
 const CONSTANT_COLUMNS = constant.columns([
-  // TODO: `name` is not editable via the API, but it should still be displayed.
-  // `description` alone is ambiguous and hard to read.
-  // The frontend must also block editing `name`.
+  // Read-only here, as everywhere: the engine reads each constant by name.
   constant.accessor('name', {
     header: 'Constant',
-    cell: ({ getValue }) => formatName(getValue()),
+    cell: ({ getValue }) => constantName(getValue()),
   }),
   constant.accessor('description', { header: 'Description' }),
   constant.accessor('value', {

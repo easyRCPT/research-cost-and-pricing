@@ -1,185 +1,246 @@
 import { useState } from 'react'
+import { useBlocker } from '@tanstack/react-router'
 import { toast } from 'sonner'
+import { useApproverGaps } from '@/api/admin-console'
 import { useLookups } from '@/api/lookups'
-import { useAddRate, useUpdateRate } from '@/api/admin-lookups'
-import { Grid, PageHead, Panel, Td, Th } from '@/components/shell'
+import type { ChangesApplied, RateTable } from '@/api/admin-lookups'
+import { PageHead, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { NumberInput } from '@/components/ui/number-input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ApiError } from '@/lib/api'
-import { RATE_TABLES, type RateTableSpec } from './rateTables'
-import { VersionsPanel } from './VersionsPanel'
-
-type Row = Record<string, unknown>
-
-const keyOf = (spec: RateTableSpec, row: Row) =>
-  Object.fromEntries(spec.key.map((k) => [k.field, row[k.field] ?? null]))
-
-const keyText = (spec: RateTableSpec, row: Row) =>
-  spec.key.map((k) => String(row[k.field] ?? '')).join('|')
-
-const failed = (error: unknown) =>
-  toast.error('Not saved', {
-    description: error instanceof ApiError ? error.message : 'Try again.',
-  })
+import { asPercent } from '@/lib/format/constants'
+import { salaryRateYear } from '@/lib/salary-rate-year'
+import { AddRateRow, ChangeBar, RateTable as RateTableView, RatesMovedNotice, Review, type Refused } from './RateEditor'
+import { RATE_TABLES, isRateTable, tableSpec } from './rateTables'
+import { ReferenceTableEditor } from './ReferenceEditor'
+import { REFERENCE_TABLES, referenceSpec, type ReferenceTable } from './referenceTables'
+import { countText, idOf, refusedChange, upsert, type Row, type Staged } from './stagedChanges'
+import { VersionsPanel, type RatesMoved } from './VersionsPanel'
 
 /**
- * The rates that price a costing, editable (#68).
+ * Everything an administrator maintains in the workbook's lookup sheets, in
+ * two kinds (#138, #70, #144).
  *
- * Built on the versioned tables as they are: an edit changes a row of the
- * current version, and once any costing has been submitted on that version the
- * server copies the whole set into a new one first. So a costing already
- * submitted keeps the rates it was submitted with, and any older set can be
- * put back from the versions panel (#137).
+ * The rates price a costing, so they are edited as one reviewed set: edits
+ * are held on screen, across every rate tab, until they are reviewed and
+ * saved in one request, which the server applies all at once or not at all.
+ * Saving a row at a time, a costing submitted while an administrator was
+ * partway through a many-row change was frozen onto half of it for good. A
+ * set goes into the current version until a costing is submitted on it; the
+ * first set after that starts a new version, so a submitted costing keeps the
+ * rates it was submitted with, and any older set can be put back (#137).
+ *
+ * The reference tables (faculties, departments, the lists a project picks
+ * from) don't price anything, so each row is saved on its own and changed in
+ * place, with no version.
  */
 export function LookupEditor() {
   const { data: lookups } = useLookups()
-  const [tableId, setTableId] = useState(RATE_TABLES[0].id)
-  const spec = RATE_TABLES.find((table) => table.id === tableId) ?? RATE_TABLES[0]
-  const rows = (lookups[spec.id] ?? []) as unknown as Row[]
+  // Which units have nobody to sign for them, flagged on their tabs (#121).
+  const gaps = useApproverGaps()
+  const [tableId, setTableId] = useState<RateTable | ReferenceTable>(RATE_TABLES[0].id)
+  const [staged, setStaged] = useState<Staged[]>([])
+  const [refused, setRefused] = useState<Refused>(null)
+  const [reviewing, setReviewing] = useState(false)
+  const [moved, setMoved] = useState<RatesMoved | null>(null)
+  const [shownVersion, setShownVersion] = useState<number | null>(null)
 
-  return (
-    <>
-      <PageHead title="Lookup tables" subtitle="The rates every costing is priced with" />
+  const rowsOf = (id: RateTable | ReferenceTable) => (lookups[id] ?? []) as unknown as Row[]
 
-      <Alert className="mb-4">
-        <AlertDescription>
-          A change here reprices every draft and every new costing straight
-          away. Costings already submitted keep the rates they were submitted
-          with, and any earlier set of rates can be put back below.
-        </AlertDescription>
-      </Alert>
-
-      <Tabs value={spec.id} onValueChange={(next) => setTableId(next as typeof tableId)}>
-        <TabsList className="mb-4 flex-wrap">
-          {RATE_TABLES.map((table) => (
-            <TabsTrigger key={table.id} value={table.id}>
-              {table.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
-      <Panel title={spec.label}>
-        <Grid>
-          <thead>
-            <tr>
-              {spec.key.map((k) => (
-                <Th key={k.field}>{k.label}</Th>
-              ))}
-              <Th className="text-right">{spec.value.label}</Th>
-              <Th />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <RateRow key={keyText(spec, row)} spec={spec} row={row} />
-            ))}
-          </tbody>
-        </Grid>
-        <AddRow spec={spec} />
-      </Panel>
-
-      <VersionsPanel />
-    </>
-  )
-}
-
-function RateRow({ spec, row }: { spec: RateTableSpec; row: Row }) {
-  const update = useUpdateRate()
-  const saved = Number(row[spec.value.field])
-  const [draft, setDraft] = useState<number | null>(null)
-  const changed = draft !== null && draft !== saved
-
-  const save = () =>
-    update.mutate(
-      { table: spec.id, key: keyOf(spec, row), values: { [spec.value.field]: draft } },
-      {
-        onSuccess: () => {
-          setDraft(null)
-          toast.success('Saved', { description: `${spec.label}: ${keyText(spec, row).replaceAll('|', ' · ')}` })
-        },
-        onError: failed,
-      },
+  // A constant's value once the staged set is saved: what is staged for it,
+  // or what it is now.
+  const constantAfter = (name: string) => {
+    const change = staged.find(
+      (candidate) => candidate.table === 'calculation_constants' && candidate.key.name === name,
     )
+    if (change?.op === 'update' && 'value' in change.value) return Number(change.value.value)
+    return Number(lookups.calculation_constants.find((row) => row.name === name)?.value)
+  }
+  // A warning, not a refusal: it may be what policy wants (#151).
+  const warnings =
+    constantAfter('minimum_margin') > constantAfter('default_margin')
+      ? [
+          `The minimum margin (${asPercent(constantAfter('minimum_margin'))}) will be above the default margin (${asPercent(constantAfter('default_margin'))}), so every new costing will start out needing the Dean.`,
+        ]
+      : []
 
-  return (
-    <tr>
-      {spec.key.map((k) => (
-        <Td key={k.field}>{row[k.field] === null || row[k.field] === '' ? '—' : String(row[k.field])}</Td>
-      ))}
-      <Td className="text-right">
-        <NumberInput
-          className="tabular ml-auto h-8 w-36 text-right"
-          step={spec.value.step}
-          min={0}
-          value={draft ?? saved}
-          onChange={setDraft}
-          aria-label={`${spec.value.label} for ${keyText(spec, row).replaceAll('|', ' ')}`}
-        />
-      </Td>
-      <Td className="w-40">
-        {changed && (
-          <div className="flex gap-2">
-            <Button size="sm" disabled={update.isPending} onClick={save}>
-              {update.isPending ? 'Saving…' : 'Save'}
-            </Button>
-            <Button size="sm" variant="ghost" disabled={update.isPending} onClick={() => setDraft(null)}>
-              Undo
-            </Button>
-          </div>
-        )}
-      </Td>
-    </tr>
-  )
-}
+  // Every staged change is the set's, so any edit may clear the refusal.
+  const stage = (next: Staged[]) => {
+    setStaged(next)
+    setRefused(null)
+    if (next.length === 0) setReviewing(false)
+  }
 
-function AddRow({ spec }: { spec: RateTableSpec }) {
-  const add = useAddRate()
-  const blank = () => Object.fromEntries([...spec.key.map((k) => [k.field, '']), [spec.value.field, '']])
-  const [values, setValues] = useState<Record<string, string>>(blank)
-  const ready = spec.key.every((k) => k.kind === 'number' || values[k.field]?.trim()) && values[spec.value.field] !== ''
+  const blocker = useBlocker({
+    shouldBlockFn: () => true,
+    disabled: staged.length === 0,
+    enableBeforeUnload: () => staged.length > 0,
+    withResolver: true,
+  })
 
-  const submit = () => {
-    const body: Record<string, unknown> = {}
-    for (const k of spec.key) {
-      const raw = values[k.field]?.trim() ?? ''
-      body[k.field] = k.kind === 'number' ? (raw === '' ? null : Number(raw)) : raw
-    }
-    body[spec.value.field] = Number(values[spec.value.field])
-    add.mutate(
-      { table: spec.id, values: body },
-      {
-        onSuccess: () => {
-          setValues(blank())
-          toast.success('Row added', { description: spec.label })
-        },
-        onError: failed,
-      },
+  const seeVersion = (versionId: number) => {
+    setShownVersion(versionId)
+    requestAnimationFrame(() =>
+      document.getElementById(`version-${versionId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
     )
   }
 
+  const onSaved = (saved: ChangesApplied, count: number) => {
+    const done = {
+      title: `${count} ${count === 1 ? 'change' : 'changes'} saved`,
+      description: saved.new_version
+        ? `They started version #${saved.version_id}.`
+        : `They went into version #${saved.version_id}.`,
+      replaced: saved.replaced,
+    }
+    setStaged([])
+    setReviewing(false)
+    setMoved(done)
+    toast.success(done.title, { description: done.description })
+  }
+
+  const onRefused = (error: unknown) => {
+    const which = refusedChange(error, staged)
+    setRefused(which)
+    setReviewing(false)
+    if (which) setTableId(staged.find((change) => idOf(change) === which.id)!.table)
+    toast.error('Nothing was saved', {
+      description: error instanceof ApiError ? error.message : 'Try again.',
+    })
+  }
+
   return (
-    <div key={spec.id} className="mt-5 border-t pt-4">
-      <div className="mb-2 text-[13px] font-medium">Add a row</div>
-      <div className="flex flex-wrap items-end gap-3">
-        {[...spec.key, { field: spec.value.field, label: spec.value.label, kind: 'number' as const }].map((k) => (
-          <label key={k.field} className="grid gap-1 text-[12px] text-muted-foreground">
-            {k.label}
-            <Input
-              className="h-8 w-40"
-              type={k.kind === 'number' ? 'number' : 'text'}
-              value={values[k.field] ?? ''}
-              onChange={(event) => setValues({ ...values, [k.field]: event.target.value })}
+    <>
+      <PageHead title="Lookup tables" subtitle="The rates every costing is priced with, and the lists it is built from" />
+
+      {moved ? (
+        <RatesMovedNotice moved={moved} onSee={seeVersion} onDismiss={() => setMoved(null)} />
+      ) : (
+        <Alert className="mb-4">
+          <AlertDescription>
+            Rate changes are held here until you review and save them, and then
+            apply all at once. Saved changes reprice every draft and every new
+            costing straight away. Costings already submitted keep the rates
+            they were submitted with, and any earlier set of rates can be put
+            back below. Reference tables are saved a row at a time.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Tabs value={tableId} onValueChange={(next) => setTableId(next as typeof tableId)}>
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Rates</span>
+          <TabsList aria-label="Rate tables" className="flex-wrap">
+            {RATE_TABLES.map((table) => {
+              const changes = staged.filter((change) => change.table === table.id).length
+              return (
+                <TabsTrigger key={table.id} value={table.id}>
+                  {table.label}
+                  {changes > 0 && (
+                    <Badge className="ml-1.5" aria-label={`${changes} unsaved`}>
+                      {changes}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+          <span className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">
+            Reference
+          </span>
+          <TabsList aria-label="Reference tables" className="flex-wrap">
+            {REFERENCE_TABLES.map((table) => (
+              <TabsTrigger key={table.id} value={table.id}>
+                {table.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+      </Tabs>
+
+      {isRateTable(tableId) ? (
+        <Panel
+          title={tableSpec(tableId).label}
+          description={
+            tableId === 'salary_rates' && salaryRateYear(lookups) !== undefined
+              ? `These are ${salaryRateYear(lookups)} rates: each later year adds that year's EBA increase. The year is the salary rate year, on the Constants tab.`
+              : undefined
+          }
+        >
+          <RateTableView
+            spec={tableSpec(tableId)}
+            rows={rowsOf(tableId)}
+            staged={staged}
+            refused={refused}
+            onStage={stage}
+          />
+          {tableSpec(tableId).addable !== false && (
+            <AddRateRow
+              key={tableId}
+              spec={tableSpec(tableId)}
+              onAdd={(key, value) => stage(upsert(staged, { op: 'create', table: tableId, key, value }))}
             />
-          </label>
+          )}
+        </Panel>
+      ) : (
+        <ReferenceTableEditor
+          spec={referenceSpec(tableId)}
+          rows={rowsOf(tableId)}
+          faculties={lookups.faculties}
+          flags={
+            gaps.data && tableId === 'departments'
+              ? { keys: new Set(gaps.data.departments_without_head), label: 'No head of department' }
+              : gaps.data && tableId === 'faculties'
+                ? { keys: new Set(gaps.data.faculties_without_dean), label: 'No dean' }
+                : undefined
+          }
+        />
+      )}
+
+      {staged.length > 0 &&
+        (reviewing ? (
+          <Review
+            staged={staged}
+            warnings={warnings}
+            onBack={() => setReviewing(false)}
+            onSaved={onSaved}
+            onRefused={onRefused}
+          />
+        ) : (
+          <ChangeBar staged={staged} onDiscard={() => stage([])} onReview={() => setReviewing(true)} />
         ))}
-        <Button size="sm" disabled={!ready || add.isPending} onClick={submit}>
-          {add.isPending ? 'Adding…' : 'Add'}
-        </Button>
-      </div>
-    </div>
+
+      {blocker.status === 'blocked' && (
+        <div
+          role="alertdialog"
+          aria-label="Unsaved changes"
+          className="sticky bottom-4 z-10 mt-4 rounded-md border border-destructive/30 bg-card px-4 py-3 text-[13px] shadow-lg"
+        >
+          <p className="font-semibold text-destructive">Leave without saving?</p>
+          <p className="mt-1">
+            {countText(staged)} {staged.length === 1 ? 'has' : 'have'} not been saved, and will be lost.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="destructive" onClick={blocker.proceed}>
+              Leave without saving
+            </Button>
+            <Button size="sm" variant="ghost" onClick={blocker.reset}>
+              Stay
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <VersionsPanel
+        shown={shownVersion}
+        onShow={setShownVersion}
+        onRestored={(restored) => {
+          setMoved(restored)
+          toast.success(restored.title, { description: restored.description })
+        }}
+      />
+    </>
   )
 }

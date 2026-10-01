@@ -13,5 +13,6 @@ export {
 export { useNonStaffLines, useStaffLines } from './lines'
 export type { Lines, NonStaffLines, StaffLines } from './lines'
 export { useDeliverables, type Deliverables } from './deliverables'
-export { useEditable } from './editable'
+export { useEditable, useOwnsBudget } from './editable'
+export { useNewDraftFrom, useWithdrawBudget } from './attempts'
 export { NotReady, useSubmitBudget } from './submit'

@@ -11,12 +11,9 @@ from api.models import (
     Department,
     Faculty,
     LookupConfiguration,
-    LookupVersion,
     SalaryRate,
-    SalaryRateMultiplier,
     User,
 )
-from api.services import lookup_update
 from api.services.lookup_update import create, update
 
 
@@ -57,7 +54,9 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             "faculty": faculty,
         }
 
-        create("departments", data)
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            create("departments", data)
 
         department = Department.objects.get(code="SCI")
 
@@ -112,17 +111,19 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             is_superuser=True,
         )
 
-        create(
-            "departments",
-            {
-                "code": "SCI",
-                "name": "Science",
-                "school": "Science School",
-                "school_code": "SCI",
-                "faculty": faculty,
-            },
-            actor=actor,
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            create(
+                "departments",
+                {
+                    "code": "SCI",
+                    "name": "Science",
+                    "school": "Science School",
+                    "school_code": "SCI",
+                    "faculty": faculty,
+                },
+                actor=actor,
+            )
 
         audit = AuditLog.objects.get(
             action="admin.lookup.insert",
@@ -143,25 +144,23 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
 
         mock_invalidate_cache.assert_called_once()
 
-    def test_cannot_create_calculation_constant(self):
-        with self.assertRaises(ValidationError) as refused:
+    def test_a_rate_table_is_refused(self):
+        # Rates change only as a reviewed set (#138): a row at a time, a
+        # costing submitted partway through a change was frozen onto half of it.
+        rates = SalaryRate.objects.count()
+
+        with self.assertRaisesRegex(ValidationError, "reviewed set"):
             create(
-                "calculation_constants",
+                "salary_rates",
                 {
-                    "name": "new_constant",
-                    "description": "Created by admin",
-                    "value": Decimal("1.000000"),
+                    "payroll_type": "Fortnight",
+                    "category": "Academic",
+                    "classification": "Level A.1",
+                    "rate": Decimal(100000),
                 },
             )
 
-        self.assertIn(
-            "Calculation Constant cannot be created",
-            str(refused.exception),
-        )
-
-        self.assertFalse(
-            CalculationConstant.objects.filter(name="new_constant").exists()
-        )
+        self.assertEqual(SalaryRate.objects.count(), rates)
 
 
 class TestUpdate(TestCase, LookupUpdateTestMixin):
@@ -169,11 +168,13 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
     def test_updates_lookup_row(self, mock_invalidate_cache):
         department = self.create_department()
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"name": "Engineering"},
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"name": "Engineering"},
+            )
 
         department.refresh_from_db()
 
@@ -190,11 +191,13 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             name="Engineering Faculty",
         )
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"faculty_code": "ENG"},
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"faculty_code": "ENG"},
+            )
 
         department.refresh_from_db()
 
@@ -342,12 +345,14 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             is_superuser=True,
         )
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"name": "Engineering"},
-            actor=actor,
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"name": "Engineering"},
+                actor=actor,
+            )
 
         audit = AuditLog.objects.get(
             action="admin.lookup.update",
@@ -390,12 +395,14 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             is_superuser=True,
         )
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"faculty": engineering},
-            actor=actor,
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"faculty": engineering},
+                actor=actor,
+            )
 
         audit = AuditLog.objects.get(
             action="admin.lookup.update",
@@ -412,524 +419,19 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
 
         mock_invalidate_cache.assert_called_once()
 
-
-class TestVersionedCreate(TestCase):
-    def setUp(self):
-        # The singleton already exists: the lookup versioning migration
-        # creates it, so the app can assume there is always a current version.
-        self.config = LookupConfiguration.objects.get()
-        self.version = self.config.current_version
-        self.config.referenced = False
-        self.config.save(update_fields=["referenced"])
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_creates_new_version_when_referenced(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        create(
-            "salary_rates",
-            {
-                "payroll_type": "Fortnight",
-                "category": "Academic",
-                "classification": "A",
-                "rate": Decimal(100000),
-            },
-        )
-
-        self.config.refresh_from_db()
-
-        self.assertNotEqual(
-            self.config.current_version_id,
-            self.version.id,
-        )
-        self.assertFalse(self.config.referenced)
-        self.assertEqual(LookupVersion.objects.count(), 2)
-
-        salary_rate = SalaryRate.objects.get(
-            version_id=self.config.current_version_id,
-            classification="A",
-        )
-
-        self.assertEqual(salary_rate.rate, Decimal(100000))
-        mock_invalidate_cache.assert_called_once()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_rolls_back_new_version_when_create_fails(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        with self.assertRaises(DjangoValidationError):
-            create(
-                "salary_rates",
-                {
-                    "payroll_type": "Fortnight",
-                    "category": "Academic",
-                    "classification": "A",
-                    "rate": Decimal(-1),
-                },
-            )
-
-        self.config.refresh_from_db()
-
-        self.assertEqual(
-            self.config.current_version_id,
-            self.version.id,
-        )
-        self.assertTrue(self.config.referenced)
-        self.assertEqual(LookupVersion.objects.count(), 1)
-        self.assertEqual(SalaryRate.objects.count(), 0)
-        mock_invalidate_cache.assert_not_called()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_creates_version_audit_when_version_created_by_actor(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
-
-        create(
-            "salary_rates",
-            {
-                "payroll_type": "Fortnight",
-                "category": "Academic",
-                "classification": "A",
-                "rate": Decimal(100000),
-            },
-            actor=actor,
-        )
-
-        version_audit = AuditLog.objects.get(
-            action="admin.lookup_version.create",
-        )
-
-        self.assertEqual(
-            version_audit.actor_id,
-            actor.id,
-        )
-
-        self.assertEqual(
-            version_audit.object_type,
-            "lookup_version",
-        )
-
-        self.assertEqual(
-            version_audit.detail["source_version_id"],
-            self.version.id,
-        )
-
-        edit_audit = AuditLog.objects.get(
-            action="admin.lookup.insert",
-        )
-
-        self.assertEqual(
-            edit_audit.actor_id,
-            actor.id,
-        )
-
-        mock_invalidate_cache.assert_called_once()
-
-
-class TestVersionedUpdate(TestCase):
-    def setUp(self):
-        # The singleton already exists: the lookup versioning migration
-        # creates it, so the app can assume there is always a current version.
-        self.config = LookupConfiguration.objects.get()
-        self.version = self.config.current_version
-        self.config.referenced = False
-        self.config.save(update_fields=["referenced"])
-
-    def create_salary_rate(
-        self,
-        *,
-        rate: Decimal = Decimal(100000),
-    ) -> SalaryRate:
-        return SalaryRate.objects.create(
-            version=self.version,
-            payroll_type="Fortnight",
-            category="Academic",
-            classification="A",
-            rate=rate,
-        )
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_creates_new_version_when_referenced(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.create_salary_rate()
-
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        update(
-            "salary_rates",
-            {
-                "payroll_type": "Fortnight",
-                "category": "Academic",
-                "classification": "A",
-            },
-            {"rate": Decimal(120000)},
-        )
-
-        self.config.refresh_from_db()
-
-        self.assertNotEqual(
-            self.config.current_version_id,
-            self.version.id,
-        )
-        self.assertFalse(self.config.referenced)
-
-        old_salary_rate = SalaryRate.objects.get(
-            version=self.version,
-            classification="A",
-        )
-        new_salary_rate = SalaryRate.objects.get(
-            version_id=self.config.current_version_id,
-            classification="A",
-        )
-
-        self.assertEqual(old_salary_rate.rate, Decimal(100000))
-        self.assertEqual(new_salary_rate.rate, Decimal(120000))
-        self.assertNotEqual(
-            old_salary_rate.id,
-            new_salary_rate.id,
-        )
-
-        mock_invalidate_cache.assert_called_once()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_new_version_copies_all_versioned_lookup_rows(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.create_salary_rate()
-
-        SalaryRateMultiplier.objects.create(
-            version=self.version,
-            time_basis="FTE",
-            multiplier=Decimal(1),
-        )
-
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        update(
-            "salary_rates",
-            {
-                "payroll_type": "Fortnight",
-                "category": "Academic",
-                "classification": "A",
-            },
-            {"rate": Decimal(120000)},
-        )
-
-        self.config.refresh_from_db()
-        new_version_id = self.config.current_version_id
-
-        new_salary_rate = SalaryRate.objects.get(
-            version_id=new_version_id,
-            classification="A",
-        )
-        new_multiplier = SalaryRateMultiplier.objects.get(
-            version_id=new_version_id,
-            time_basis="FTE",
-        )
-
-        self.assertEqual(new_salary_rate.rate, Decimal(120000))
-        self.assertEqual(new_multiplier.multiplier, Decimal(1))
-
-        self.assertNotEqual(
-            new_salary_rate.id,
-            SalaryRate.objects.get(
-                version=self.version,
-                classification="A",
-            ).id,
-        )
-        self.assertNotEqual(
-            new_multiplier.id,
-            SalaryRateMultiplier.objects.get(
-                version=self.version,
-                time_basis="FTE",
-            ).id,
-        )
-
-        mock_invalidate_cache.assert_called_once()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_does_not_create_new_version_when_row_does_not_exist(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        with self.assertRaisesRegex(
-            ValidationError,
-            "No matching row found in lookup table 'salary_rates'.",
-        ):
-            update(
-                "salary_rates",
-                {
-                    "payroll_type": "Fortnight",
-                    "category": "Academic",
-                    "classification": "UNKNOWN",
-                },
-                {"rate": Decimal(120000)},
-            )
-
-        self.config.refresh_from_db()
-
-        self.assertEqual(
-            self.config.current_version_id,
-            self.version.id,
-        )
-        self.assertTrue(self.config.referenced)
-        self.assertEqual(LookupVersion.objects.count(), 1)
-        mock_invalidate_cache.assert_not_called()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_creates_both_version_and_update_audit_logs(
-        self,
-        mock_invalidate_cache,
-    ):
-        self.create_salary_rate()
-
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
-
-        update(
-            "salary_rates",
-            {
-                "payroll_type": "Fortnight",
-                "category": "Academic",
-                "classification": "A",
-            },
-            {"rate": Decimal(120000)},
-            actor=actor,
-        )
-
-        self.config.refresh_from_db()
-
-        version_audit = AuditLog.objects.get(
-            action="admin.lookup_version.create",
-        )
-
-        update_audit = AuditLog.objects.get(
-            action="admin.lookup.update",
-        )
-
-        self.assertEqual(
-            version_audit.detail["source_version_id"],
-            self.version.id,
-        )
-
-        self.assertEqual(
-            Decimal(update_audit.detail["before"]["rate"]),
-            Decimal(100000),
-        )
-
-        self.assertEqual(
-            Decimal(update_audit.detail["after"]["rate"]),
-            Decimal(120000),
-        )
-
-        self.assertEqual(
-            update_audit.detail["version"],
-            self.config.current_version_id,
-        )
-
-        self.assertEqual(
-            AuditLog.objects.count(),
-            2,
-        )
-
-        mock_invalidate_cache.assert_called_once()
-
-    @patch("api.services.lookup_update.invalidate_lookup_cache")
-    def test_cannot_update_calculation_constant_name(
-        self,
-        mock_invalidate_cache,
-    ):
+    def test_a_rate_table_is_refused(self):
         constant = CalculationConstant.objects.create(
-            version=self.version,
+            version=LookupConfiguration.objects.get().current_version,
             name="default_margin",
-            description="Default margin",
-            value=Decimal("0.30"),
-        )
-
-        with self.assertRaisesRegex(
-            ValidationError,
-            "Name of calculation constant cannot be updated.",
-        ):
-            update(
-                "calculation_constants",
-                {"name": constant.name},
-                {"name": "new_constant_name"},
-            )
-
-        constant.refresh_from_db()
-
-        self.assertEqual(
-            constant.name,
-            "default_margin",
-        )
-        mock_invalidate_cache.assert_not_called()
-
-
-class TestFullCostRecoveryMultiplier(TestCase):
-    """
-    An administrator sets the full cost recovery multiplier, as a rate edit
-    that goes into a lookup version like any other (#149), within a range.
-    """
-
-    TABLE = "calculation_constants"
-    FIXED = "full_cost_recovery_multiplier"
-
-    def setUp(self):
-        self.config = LookupConfiguration.objects.get()
-        self.version = self.config.current_version
-        self.constant = CalculationConstant.objects.create(
-            version=self.version,
-            name=self.FIXED,
-            description="Default cost recovery multiplier",
-            value=Decimal("1.700000"),
-        )
-
-    def test_an_administrator_can_change_it(self):
-        update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.80")})
-
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.value, Decimal("1.80"))
-
-    def test_it_can_be_changed_by_id(self):
-        update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("1.65")})
-
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.value, Decimal("1.65"))
-
-    def test_below_one_is_refused(self):
-        with self.assertRaises(ValidationError) as refused:
-            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("0.99")})
-
-        self.assertIn("1.00", str(refused.exception))
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.value, Decimal("1.700000"))
-
-    def test_below_one_is_refused_when_named_by_id(self):
-        with self.assertRaises(ValidationError):
-            update(self.TABLE, {"id": self.constant.pk}, {"value": Decimal("0.5")})
-
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.value, Decimal("1.700000"))
-
-    def test_more_than_two_decimal_places_is_refused(self):
-        with self.assertRaises(ValidationError):
-            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.725")})
-
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.value, Decimal("1.700000"))
-
-    def test_a_refused_edit_mints_no_version(self):
-        # The edit runs in one transaction, so a version made for a write that
-        # is then refused is rolled back with it.
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-        before = LookupVersion.objects.count()
-
-        with self.assertRaises(ValidationError):
-            update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("0.5")})
-
-        self.assertEqual(LookupVersion.objects.count(), before)
-
-    def test_a_change_after_a_submission_leaves_the_stamped_version_alone(self):
-        self.config.referenced = True
-        self.config.save(update_fields=["referenced"])
-
-        update(self.TABLE, {"name": self.FIXED}, {"value": Decimal("1.80")})
-
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.value, Decimal("1.700000"))
-        current = LookupConfiguration.objects.get().current_version
-        self.assertNotEqual(current, self.version)
-        self.assertEqual(
-            CalculationConstant.objects.get(version=current, name=self.FIXED).value,
-            Decimal("1.80"),
-        )
-
-    def test_it_cannot_be_renamed_by_id(self):
-        with self.assertRaises(ValidationError):
-            update(self.TABLE, {"id": self.constant.pk}, {"name": "renamed"})
-
-        self.constant.refresh_from_db()
-        self.assertEqual(self.constant.name, self.FIXED)
-
-    def test_every_other_constant_is_still_editable(self):
-        other = CalculationConstant.objects.create(
-            version=self.version,
-            name="default_margin",
-            description="Default margin",
             value=Decimal("0.300000"),
         )
 
-        update(self.TABLE, {"name": "default_margin"}, {"value": Decimal("0.250000")})
-
-        other.refresh_from_db()
-        self.assertEqual(other.value, Decimal("0.250000"))
-
-
-class TestSalaryRateYearValidation(TestCase):
-    def test_salary_rate_year_accepts_positive_integer(self):
-        lookup_update._reject_invalid_salary_rate_year(
-            CalculationConstant,
-            {"name": "salary_rate_year"},
-            {"value": Decimal(2025)},
-        )
-
-    def test_salary_rate_year_rejects_zero(self):
-        with self.assertRaises(ValidationError):
-            lookup_update._reject_invalid_salary_rate_year(
-                CalculationConstant,
-                {"name": "salary_rate_year"},
-                {"value": Decimal(0)},
+        with self.assertRaisesRegex(ValidationError, "reviewed set"):
+            update(
+                "calculation_constants",
+                {"name": "default_margin"},
+                {"value": Decimal("0.25")},
             )
 
-    def test_salary_rate_year_rejects_negative_value(self):
-        with self.assertRaises(ValidationError):
-            lookup_update._reject_invalid_salary_rate_year(
-                CalculationConstant,
-                {"name": "salary_rate_year"},
-                {"value": Decimal(-1)},
-            )
-
-    def test_salary_rate_year_rejects_decimal(self):
-        with self.assertRaises(ValidationError):
-            lookup_update._reject_invalid_salary_rate_year(
-                CalculationConstant,
-                {"name": "salary_rate_year"},
-                {"value": Decimal("2025.5")},
-            )
-
-    def test_other_constants_are_not_validated(self):
-        lookup_update._reject_invalid_salary_rate_year(
-            CalculationConstant,
-            {"name": "default_margin"},
-            {"value": Decimal(-1)},
-        )
+        constant.refresh_from_db()
+        self.assertEqual(constant.value, Decimal("0.300000"))

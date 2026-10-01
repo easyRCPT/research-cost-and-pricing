@@ -20,6 +20,7 @@ from api.serializers.lookup_serializer import LookupTablesSerializer
 from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
 from api.serializers.project_serializer import (
     ProjectCreateSerializer,
+    ProjectListQuerySerializer,
     ProjectRowSerializer,
 )
 from api.serializers.staff_line_serializer import StaffLineSerializer
@@ -34,6 +35,7 @@ from api.services import (
     staff_line,
     submission,
     submission_validation,
+    withdrawal,
 )
 from api.services.budget_state import require_editable, require_ownership
 
@@ -46,9 +48,16 @@ class ProjectView(APIView):
     services/project.visible_projects.
     """
 
-    @extend_schema(responses={200: ProjectRowSerializer(many=True)})
+    @extend_schema(
+        parameters=[ProjectListQuerySerializer],
+        responses={200: ProjectRowSerializer(many=True)},
+    )
     def get(self, request: Request) -> Response:
-        rows = project.list_projects(request.user)
+        query = ProjectListQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        rows = project.list_projects(
+            request.user, cast(dict, query.validated_data)["status"]
+        )
         return Response(ProjectRowSerializer(rows, many=True).data)
 
     @extend_schema(
@@ -108,6 +117,17 @@ class BudgetSubmitView(APIView):
         submission.submit_budget(request.user, budget)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class BudgetWithdrawView(APIView):
+    """The owner pulls a costing back out of review (#95)."""
+
+    @extend_schema(request=None, responses={200: BudgetDetailSerializer})
+    def post(self, request: Request, budget_id: int) -> Response:
+        budget = get_object_or_404(project.visible_budgets(request.user), id=budget_id)
+        withdrawal.withdraw_budget(request.user, budget)
+        result = budget_details.get_budget_details(budget)
+        return Response(BudgetDetailSerializer(result).data)
 
 
 class BudgetCloneView(APIView):

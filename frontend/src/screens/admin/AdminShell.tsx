@@ -22,8 +22,8 @@ const SECTIONS: SidebarSection<AdminScreen>[] = [
 
 /**
  * The admin console's frame (#62): the calculator's own shell and rail, so the
- * two read as one product. Faculties and departments are not screens here:
- * they almost never change, and are edited in Django admin when they do.
+ * two read as one product. Faculties, departments and the other reference
+ * lists are tabs of the lookup tables screen (#70, #144), beside the rates.
  */
 export function AdminShell() {
   const navigate = useNavigate()

@@ -1,6 +1,9 @@
 from decimal import Decimal
+from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth.models import Group
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
@@ -23,11 +26,16 @@ class LookupWriteAccessTestCase(TestCase):
             school_code="SCI",
             faculty=faculty,
         )
-        self.fixed = CalculationConstant.objects.create(
+        # A whole set of rates: a set of changes is refused if it would leave
+        # rates that cannot price a costing.
+        call_command(
+            "loaddata",
+            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
+            verbosity=0,
+        )
+        self.fixed = CalculationConstant.objects.get(
             version=LookupConfiguration.objects.get().current_version,
             name="full_cost_recovery_multiplier",
-            description="Full cost recovery multiplier",
-            value=Decimal("1.700000"),
         )
         self.admin = User.objects.create_user("admin@unimelb.edu.au")
         self.admin.groups.add(Group.objects.get(name="superadmin"))
@@ -35,6 +43,22 @@ class LookupWriteAccessTestCase(TestCase):
     def patch(self, table: str, body: dict):
         return self.client.patch(
             reverse("lookup-table", args=[table]), body, "application/json"
+        )
+
+    def set_multiplier(self, value: str):
+        return self.client.post(
+            reverse("admin-lookup-changes"),
+            {
+                "changes": [
+                    {
+                        "table": "calculation_constants",
+                        "op": "update",
+                        "lookup": {"name": "full_cost_recovery_multiplier"},
+                        "values": {"value": value},
+                    }
+                ]
+            },
+            "application/json",
         )
 
     def rename(self):
@@ -73,12 +97,9 @@ class LookupWriteAccessTestCase(TestCase):
     def test_the_superadmin_can_change_the_multiplier(self):
         self.client.force_login(self.admin)
 
-        response = self.patch(
-            "calculation_constants",
-            {"lookup": {"id": self.fixed.pk}, "values": {"value": "1.80"}},
-        )
+        response = self.set_multiplier("1.80")
 
-        self.assertEqual(response.status_code, 204, response.content)
+        self.assertEqual(response.status_code, 201, response.content)
         self.fixed.refresh_from_db()
         self.assertEqual(self.fixed.value, Decimal("1.80"))
 
@@ -87,10 +108,7 @@ class LookupWriteAccessTestCase(TestCase):
         researcher.groups.add(Group.objects.get(name="researcher"))
         self.client.force_login(researcher)
 
-        response = self.patch(
-            "calculation_constants",
-            {"lookup": {"id": self.fixed.pk}, "values": {"value": "1.80"}},
-        )
+        response = self.set_multiplier("1.80")
 
         self.assertEqual(response.status_code, 403)
         self.fixed.refresh_from_db()
@@ -99,9 +117,22 @@ class LookupWriteAccessTestCase(TestCase):
     def test_a_multiplier_below_one_is_refused(self):
         self.client.force_login(self.admin)
 
+        response = self.set_multiplier("0.90")
+
+        self.assertEqual(response.status_code, 400)
+        self.fixed.refresh_from_db()
+        self.assertEqual(self.fixed.value, Decimal("1.700000"))
+
+    def test_a_rate_cannot_be_changed_a_row_at_a_time(self):
+        # The one way to change a rate is a reviewed set (#138).
+        self.client.force_login(self.admin)
+
         response = self.patch(
             "calculation_constants",
-            {"lookup": {"id": self.fixed.pk}, "values": {"value": "0.90"}},
+            {
+                "lookup": {"name": "full_cost_recovery_multiplier"},
+                "values": {"value": "1.80"},
+            },
         )
 
         self.assertEqual(response.status_code, 400)

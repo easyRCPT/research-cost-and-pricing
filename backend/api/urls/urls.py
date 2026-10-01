@@ -4,6 +4,7 @@ from api.views.views import (
     BudgetCloneView,
     BudgetDetailView,
     BudgetSubmitView,
+    BudgetWithdrawView,
     DeliverableView,
     LookupView,
     NonStaffLineView,
@@ -34,6 +35,11 @@ urlpatterns = [
         "budgets/<int:budget_id>/submit/",
         BudgetSubmitView.as_view(http_method_names=["post"]),
         name="submission",
+    ),
+    path(
+        "budgets/<int:budget_id>/withdraw/",
+        BudgetWithdrawView.as_view(http_method_names=["post"]),
+        name="withdrawal",
     ),
     path(
         "budgets/<int:budget_id>/clone/",

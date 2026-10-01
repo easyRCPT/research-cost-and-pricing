@@ -4,6 +4,21 @@ from ..models import Budget, Department
 from .budget_detail_serializer import CostDecimalField
 
 
+class ProjectOwnerSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    name = serializers.CharField(allow_blank=True)
+
+
+class ProjectListQuerySerializer(serializers.Serializer):
+    # Checked against the model's own choices, as the console's register does
+    # (#66), so a renamed status is a 400 naming the allowed values rather
+    # than a filter silently matching nothing (#98).
+    status = serializers.ChoiceField(
+        choices=Budget.Status.choices, required=False, allow_blank=True, default=""
+    )
+
+
 class ProjectRowSerializer(serializers.Serializer):
     """One line of the projects list."""
 
@@ -27,6 +42,7 @@ class ProjectRowSerializer(serializers.Serializer):
     total_price_inc_gst = CostDecimalField(max_digits=14, decimal_places=2)
 
     updated_at = serializers.DateTimeField()
+    owner = ProjectOwnerSerializer()
 
 
 class ProjectCreateSerializer(serializers.Serializer):

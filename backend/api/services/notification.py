@@ -63,6 +63,24 @@ def notify_budget_decision(
     )
 
 
+def notify_withdrawn(budget: Budget, *, levels: list[str]) -> None:
+    """
+    Tell the approvers it was waiting on that it has been withdrawn (#95), so
+    nobody opens a costing that is no longer theirs to decide.
+    """
+    recipients: list[str] = []
+    if "department" in levels:
+        recipients += _get_hod_emails(budget)
+    if "faculty" in levels:
+        recipients += _get_dean_emails(budget)
+    _send_email(
+        recipients=sorted(set(recipients)),
+        subject="Budget withdrawn from review",
+        template="budget_withdrawn",
+        context={"budget": budget, "url": get_url()},
+    )
+
+
 # TODO: Add urls of approval step or RCPT to emails
 def get_url() -> str:
     return ""
