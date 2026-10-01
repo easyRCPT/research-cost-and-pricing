@@ -39,8 +39,13 @@ async function rowOf(page: Page, code: string) {
   // An open dialog hides the page from the accessibility tree.
   await expect(page.getByRole('dialog')).toHaveCount(0)
   const search = page.getByRole('searchbox', { name: 'Search' })
-  if (await search.count()) await search.fill(code)
-  return page.getByRole('row').filter({ hasText: code })
+  const row = page.getByRole('row').filter({ hasText: code })
+  // Retried: the row just added can be what makes the table long enough to search.
+  await expect(async () => {
+    if (await search.count()) await search.fill(code)
+    await expect(row).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  return row
 }
 
 test.beforeEach(async ({ page }) => {

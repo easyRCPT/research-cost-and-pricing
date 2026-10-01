@@ -311,7 +311,8 @@ test('constants read as what they are, take 30% or 0.30, and refuse a bare 25 (#
 test('the version history filters by the dates versions were made', async ({ page }) => {
   await page.goto('/admin/versions')
   await expect(page.getByRole('heading', { name: 'Lookup history' })).toBeVisible()
-  const today = new Date().toLocaleDateString('en-CA')
+  // The server's day, which the filter is read in, not the browser's.
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Melbourne' })
 
   await page.getByRole('button', { name: 'Made' }).first().click()
   await page.getByLabel('To', { exact: true }).fill('2000-01-01')
