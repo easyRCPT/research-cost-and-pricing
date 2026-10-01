@@ -6,9 +6,6 @@ import { toast } from 'sonner'
 import { isApprover, SUPERADMIN, useLogout, useMe } from '@/api/auth'
 import { Button } from '@/components/ui/button'
 
-const BAR_BUTTON =
-  'border-primary-foreground/55 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'
-
 /**
  * Who is signed in, and the way out. Clears the cache only after leaving, or
  * the guards refetch `me` on the way out and the sign-in screen renders twice.
@@ -45,9 +42,8 @@ export function AccountMenu() {
       */}
       {me.data.groups.includes(SUPERADMIN) && (
         <Button
-          variant="outline"
+          variant="bar"
           size="lg"
-          className={BAR_BUTTON}
           onClick={() => navigate({ to: onConsole ? '/projects' : '/admin' })}
         >
           {onConsole ? <FolderIcon /> : <SettingsIcon />}
@@ -56,9 +52,8 @@ export function AccountMenu() {
       )}
       {isApprover(me.data) && !inCosting && (
         <Button
-          variant="outline"
+          variant="bar"
           size="lg"
-          className={BAR_BUTTON}
           onClick={() => navigate({ to: onQueue ? '/projects' : '/approvals' })}
         >
           {onQueue ? <FolderIcon /> : <ClipboardCheckIcon />}
@@ -69,10 +64,9 @@ export function AccountMenu() {
         {me.data.user.email}
       </span>
       <Button
-        variant="outline"
+        variant="bar"
         size="lg"
         disabled={logout.isPending}
-        className={BAR_BUTTON}
         onClick={signOut}
       >
         <LogOutIcon />

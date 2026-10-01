@@ -11,13 +11,13 @@ interface LookupButtonProps {
 export function LookupButton({ open, handleClick }: LookupButtonProps) {
   return (
     <Button
-      variant="outline"
+      variant="bar"
       size="lg"
       aria-pressed={open}
       className={
         open
           ? 'border-primary-foreground bg-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary'
-          : 'border-primary-foreground/55 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'
+          : undefined
       }
       onClick={() => handleClick(open ? 'details' : LOOKUP_SCREEN)}
     >
