@@ -1,18 +1,36 @@
-import { Fragment } from 'react'
+import { useMemo, useState } from 'react'
 
-import { useLookupVersions } from '@/api/admin-lookups'
-import { Grid, Panel, Td, Th } from '@/components/shell'
+import { type LookupVersion, useLookupVersions } from '@/api/admin-lookups'
+import { DataTable, type DataTableFilter } from '@/components/data-table'
+import { isoDay } from '@/lib/format/dates'
 
-import type { RatesMoved } from './types'
-import { VersionBudgets } from './VersionBudgets'
-import { VersionRow } from './VersionRow'
+import { versionColumns } from './columns'
+import { RestoreDialog } from './RestoreDialog'
+import type { RatesMoved, Shown } from './types'
+import { VersionDialog } from './VersionDialog'
 
 interface VersionsPanelProps {
-  /** The version whose costings are listed, if any. */
-  shown: number | null
-  onShow: (versionId: number | null) => void
+  /** The version whose dialog is open, if any. */
+  shown: Shown | null
+  onShow: (shown: Shown | null) => void
   onRestored: (moved: RatesMoved) => void
 }
+
+const FILTERS: DataTableFilter<LookupVersion>[] = [
+  {
+    id: 'made',
+    label: 'Made',
+    value: (version) => isoDay(version.created_at),
+    range: true,
+  },
+  {
+    id: 'by',
+    label: 'By',
+    value: (version) => version.updated_by_name ?? 'System',
+  },
+]
+
+const byId = (version: LookupVersion) => String(version.id)
 
 /**
  * Every set of rates the tool has had, the changes saved into each, and a way
@@ -27,41 +45,45 @@ export function VersionsPanel({
   onRestored,
 }: VersionsPanelProps) {
   const { data: versions } = useLookupVersions()
+  const [restoring, setRestoring] = useState<LookupVersion | null>(null)
+
+  const opened = versions.find((version) => version.id === shown?.id)
+
+  const columns = useMemo(
+    () =>
+      versionColumns({
+        open: (id, tab) => onShow({ id, tab }),
+        restore: setRestoring,
+      }),
+    [onShow],
+  )
 
   return (
-    <Panel>
-      {/* The page scrolls, not the table. */}
-      <Grid className="max-h-none overflow-auto">
-        <thead>
-          <tr>
-            <Th>Version</Th>
-            <Th>Made</Th>
-            <Th>By</Th>
-            <Th>Changes saved into it</Th>
-            <Th className="text-right">Costings priced on it</Th>
-            <Th />
-          </tr>
-        </thead>
-        <tbody>
-          {versions.map((version) => (
-            <Fragment key={version.id}>
-              <VersionRow
-                version={version}
-                shown={shown === version.id}
-                onShow={() => onShow(shown === version.id ? null : version.id)}
-                onRestored={onRestored}
-              />
-              {shown === version.id && (
-                <tr>
-                  <Td colSpan={6} className="bg-muted/30 p-3">
-                    <VersionBudgets versionId={version.id} />
-                  </Td>
-                </tr>
-              )}
-            </Fragment>
-          ))}
-        </tbody>
-      </Grid>
-    </Panel>
+    <section className="overflow-hidden rounded-lg border bg-card">
+      <DataTable
+        columns={columns}
+        rows={versions}
+        getRowId={byId}
+        emptyMessage="No versions yet."
+        sortable
+        filters={FILTERS}
+        flush
+      />
+      {opened && shown && (
+        <VersionDialog
+          version={opened}
+          tab={shown.tab}
+          onTab={(tab) => onShow({ id: opened.id, tab })}
+          onClose={() => onShow(null)}
+        />
+      )}
+      {restoring && (
+        <RestoreDialog
+          version={restoring}
+          onClose={() => setRestoring(null)}
+          onRestored={onRestored}
+        />
+      )}
+    </section>
   )
 }

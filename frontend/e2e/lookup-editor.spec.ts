@@ -144,7 +144,15 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   expect(await ebaYears(page)).toEqual(expect.arrayContaining([2090, 2091]))
   // The version history shows the set, with its note and size.
   await page.goto('/admin/versions')
-  await expect(page.getByRole('listitem').filter({ hasText: note })).toContainText('2 changes')
+  await page.getByRole('button', { name: /^Show changes saved into version #\d+$/ }).first().click()
+  // Saves and the changes in them are closed until asked for.
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText('EBA increases: 2090')).toHaveCount(0)
+  await dialog.getByRole('button', { name: new RegExp(note) }).click()
+  await expect(dialog.getByText('EBA increases: 2091')).toBeVisible()
+  await expect(dialog.getByText('Added', { exact: true })).toHaveCount(2)
+  await dialog.getByRole('button', { name: /EBA increases: 2090/ }).click()
+  await expect(dialog.getByRole('table', { name: 'Figures changed on EBA increases: 2090' })).toContainText('Increase')
   await openEditor(page)
 
   // And one entry in the log for the whole set.
@@ -298,4 +306,21 @@ test('constants read as what they are, take 30% or 0.30, and refuse a bare 25 (#
 
   await page.getByRole('button', { name: 'Discard all' }).click()
   await expect(page.getByRole('region', { name: 'Unsaved changes' })).toHaveCount(0)
+})
+
+test('the version history filters by the dates versions were made', async ({ page }) => {
+  await page.goto('/admin/versions')
+  await expect(page.getByRole('heading', { name: 'Lookup history' })).toBeVisible()
+  const today = new Date().toLocaleDateString('en-CA')
+
+  await page.getByRole('button', { name: 'Made' }).first().click()
+  await page.getByLabel('To', { exact: true }).fill('2000-01-01')
+  await expect(page.getByText('No rows match.')).toBeVisible()
+  await expect(page.getByText('to 1 Jan 2000')).toBeVisible()
+
+  // A range that holds today brings the rows back.
+  await page.getByLabel('From', { exact: true }).fill('2000-01-01')
+  await page.getByLabel('To', { exact: true }).fill(today)
+  await expect(page.getByText('No rows match.')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Show changes saved into version/ }).first()).toBeVisible()
 })

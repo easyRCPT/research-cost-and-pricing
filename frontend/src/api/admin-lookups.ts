@@ -15,6 +15,8 @@ export type LookupChange = components['schemas']['LookupChange']
 export type ChangesApplied = components['schemas']['ChangesApplied']
 export type PricedOn = components['schemas']['PricedOn']
 export type VersionBudget = components['schemas']['VersionBudget']
+export type VersionChangeSet = components['schemas']['VersionChangeSet']
+export type VersionChange = components['schemas']['VersionChange']
 
 /**
  * The rate tables an administrator edits here: the versioned ones, which are
@@ -37,6 +39,17 @@ const versionsQuery = adminQuery(['lookup-versions'], () =>
 
 export function useLookupVersions() {
   return useSuspenseQuery(versionsQuery)
+}
+
+/** The sets saved into one version, with each change's before and after (#138), fetched when asked for. */
+export function useVersionChanges(versionId: number) {
+  return useQuery(
+    adminQuery(['lookup-versions', versionId, 'changes'], () =>
+      api.GET('/api/admin/lookups/versions/{version_id}/changes/', {
+        params: { path: { version_id: versionId } },
+      }),
+    ),
+  )
 }
 
 /** The costings stamped with one version (#142), fetched when asked for. */
