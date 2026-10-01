@@ -1,12 +1,14 @@
 import { useBudget, useCiFlag, useLines } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
-import { Note, Panel } from '@/components/shell'
+import { EditableGrid, Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { ciLineId, withCiName, withCosts } from '@/lib/staff'
 
-import { StaffTable } from './staff/StaffTable'
+import { StaffTableBody } from './staff/StaffTableBody'
+import { StaffTableFooter } from './staff/StaffTableFooter'
+import { StaffTableHeader } from './staff/StaffTableHeader'
 
 export function StaffCosts() {
   const { data: budget } = useBudget()
@@ -63,18 +65,23 @@ export function StaffCosts() {
           )}
         </div>
 
-        <StaffTable
-          lines={lines}
-          years={staff.years}
-          columnTotal={budget.staff_cost.column_total}
-          salaryRates={lookups.salary_rates}
-          multipliers={lookups.salary_rate_multipliers}
-          ciId={ciId}
-          ciIncluded={included}
-          patchLine={staff.patchLine}
-          removeLine={staff.removeLine}
-          addLine={staff.addLine}
-        />
+        <EditableGrid onAdd={staff.addLine}>
+          <StaffTableHeader years={staff.years} />
+          <StaffTableBody
+            lines={lines}
+            years={staff.years}
+            salaryRates={lookups.salary_rates}
+            multipliers={lookups.salary_rate_multipliers}
+            ciId={ciId}
+            ciIncluded={included}
+            patchLine={staff.patchLine}
+            removeLine={staff.removeLine}
+          />
+          <StaffTableFooter
+            years={staff.years}
+            columnTotal={budget.staff_cost.column_total}
+          />
+        </EditableGrid>
 
         <Note>
           Overheads are calculated by applying the cost recovery multiplier to

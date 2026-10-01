@@ -83,6 +83,15 @@ export const clampedByYear = (line: EditableStaffLine, timeBasis: string) => {
   }))
 }
 
+/** The patch for a new time basis, clamping the entered time to its limit. */
+export const timeBasisPatch = (
+  line: EditableStaffLine,
+  timeBasis: string,
+): Partial<EditableStaffLine> => ({
+  time_basis: timeBasis as EditableStaffLine['time_basis'],
+  by_year: clampedByYear(line, timeBasis),
+})
+
 /** The patch for a new employment type, moving the time basis if it no longer fits. */
 export const employmentTypePatch = (
   line: EditableStaffLine,

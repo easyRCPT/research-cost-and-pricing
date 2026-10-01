@@ -1,8 +1,10 @@
 import { useBudget, useLines } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
-import { Panel } from '@/components/shell'
+import { EditableGrid, Panel } from '@/components/shell'
 
-import { NonStaffTable } from './nonstaff/NonStaffTable'
+import { NonStaffTableBody } from './nonstaff/NonStaffTableBody'
+import { NonStaffTableFooter } from './nonstaff/NonStaffTableFooter'
+import { NonStaffTableHeader } from './nonstaff/NonStaffTableHeader'
 
 export function NonStaffCosts() {
   const { data: budget } = useBudget()
@@ -14,15 +16,17 @@ export function NonStaffCosts() {
 
   return (
     <Panel>
-      <NonStaffTable
-        years={years}
-        lines={lines}
-        categories={lookups.non_staff_cost_categories}
-        columnTotal={budget.non_staff_cost.column_total}
-        patchLine={patchLine}
-        removeLine={removeLine}
-        addLine={addLine}
-      />
+      <EditableGrid onAdd={addLine}>
+        <NonStaffTableHeader years={years} />
+        <NonStaffTableBody
+          lines={lines}
+          years={years}
+          categories={lookups.non_staff_cost_categories}
+          patchLine={patchLine}
+          removeLine={removeLine}
+        />
+        <NonStaffTableFooter columnTotal={budget.non_staff_cost.column_total} />
+      </EditableGrid>
 
       <p className="mt-4 max-w-[100ch] text-xs text-muted-foreground">
         * Additional costs can be difficult to determine. If no better method is

@@ -28,6 +28,18 @@ export const tenPercentAllowed = (
       c.excludes_additional_rate,
   )
 
+/** The patch for a new cost group, clearing what no longer applies to it. */
+export const costGroupPatch = (
+  line: NonStaffLine,
+  categories: readonly NonStaffCategory[],
+  costGroup: string,
+): Partial<NonStaffLine> => ({
+  cost_group: costGroup,
+  expense_type: '',
+  add_ten_percent:
+    line.add_ten_percent && tenPercentAllowed(categories, costGroup),
+})
+
 /** Returns the cost amount for a given year in a NonStaffLine  */
 export const amountFor = (line: NonStaffLine, year: number) =>
   line.by_year.find((y) => y.year === year)?.amount ?? 0

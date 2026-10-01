@@ -1,4 +1,4 @@
-import { Td } from '@/components/shell'
+import { EmptyRow } from '@/components/shell'
 import { allClassifications, allTimeBases, staffCategories } from '@/lib/staff'
 import type {
   EditableStaffLine,
@@ -53,14 +53,7 @@ export function StaffTableBody({
       ))}
 
       {lines.length === 0 && (
-        <tr>
-          <Td
-            colSpan={7 + years.length * 2}
-            className="py-6 text-center text-muted-foreground"
-          >
-            No staff costs yet.
-          </Td>
-        </tr>
+        <EmptyRow colSpan={7 + years.length * 2}>No staff costs yet.</EmptyRow>
       )}
     </tbody>
   )
