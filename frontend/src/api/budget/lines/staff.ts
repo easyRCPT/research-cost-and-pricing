@@ -1,10 +1,6 @@
-import { useEffect } from 'react'
-
 import { useBudgetId } from '@/api/budget/context'
 import { useBudget } from '@/api/budget/detail'
-import { getDrafts, setDrafts, useDrafts } from '@/api/budget/drafts'
-import { type Command,useEdit } from '@/api/budget/write'
-import { STARTING_ROWS } from '@/lib/constants'
+import { useEdit } from '@/api/budget/write'
 import { emptyStaffLine, isRated } from '@/lib/staff'
 import type {
   BudgetDetail,
@@ -14,13 +10,13 @@ import type {
   StaffLineInput,
 } from '@/types'
 
+import { useDraftRows } from './draftRows'
 import { useLineMutations } from './mutations'
 import {
-  blankRows,
   byPosition,
   coalesceKey,
-  creating,
-  inFlight,
+  createOnce,
+  patchCommands,
   type StaffLines,
 } from './shared'
 
@@ -100,24 +96,9 @@ const echoStaffLine =
     }
   }
 
-function ensureBlankStaffRows(
-  budgetId: number,
-  years: number[],
-  saved: number,
-) {
-  const drafts = getDrafts(budgetId)
-  if (drafts.staff.length > 0) return
-  const count = saved === 0 ? STARTING_ROWS : 1
-  setDrafts(budgetId, {
-    ...drafts,
-    staff: blankRows(count, emptyStaffLine, years),
-  })
-}
-
 export function useStaffLines(years: number[]): StaffLines {
   const budgetId = useBudgetId()
   const { data: budget } = useBudget()
-  const drafts = useDrafts()
   const edit = useEdit()
   const { createStaff, deleteStaff } = useLineMutations()
 
@@ -126,42 +107,21 @@ export function useStaffLines(years: number[]): StaffLines {
     ...budget.staff_in_kind_cost.lines,
   ].sort(byPosition)
 
-  // A draft keeps its id once saved, so the server having it is what ends it.
-  const savedIds = new Set(saved.map((line) => line.id))
-  const isDraft = (id: string) => !savedIds.has(id)
-  const lines = [...saved, ...drafts.staff.filter((row) => isDraft(row.id))]
-
-  const blanks = drafts.staff.length
-  useEffect(() => {
-    if (blanks === 0) ensureBlankStaffRows(budgetId, years, saved.length)
-  }, [blanks, saved.length, budgetId, years])
-
-  const writeDrafts = (rows: EditableStaffLine[]) =>
-    setDrafts(budgetId, { ...getDrafts(budgetId), staff: rows })
+  const rows = useDraftRows('staff', saved, years, emptyStaffLine)
 
   return {
-    lines,
+    lines: rows.lines,
     years,
 
-    addLine: () =>
-      writeDrafts([
-        ...getDrafts(budgetId).staff,
-        emptyStaffLine(crypto.randomUUID(), years),
-      ]),
+    addLine: rows.addLine,
 
-    removeLine: (id) => {
-      if (isDraft(id)) {
-        writeDrafts(getDrafts(budgetId).staff.filter((row) => row.id !== id))
-        return
-      }
-      deleteStaff.mutate(id)
-    },
+    removeLine: (id) =>
+      rows.removeLine(id, (lineId) => deleteStaff.mutate(lineId)),
 
     patchLine: (id, patch) => {
-      if (isDraft(id)) {
-        const current = getDrafts(budgetId).staff.find((row) => row.id === id)
-        if (!current) return
-        const next = { ...current, ...patch }
+      if (rows.isDraft(id)) {
+        const next = rows.patchDraft(id, patch)
+        if (!next) return
 
         // Complete enough for the engine to rate: it belongs to the server now.
         //
@@ -170,60 +130,24 @@ export function useStaffLines(years: number[]): StaffLines {
         // the serializer would not take -- was gone from both places at once:
         // removed from drafts, never saved, and the toast talking about a row
         // that was no longer on screen.
-        if (isRated(next)) {
-          writeDrafts(
-            getDrafts(budgetId).staff.map((row) =>
-              row.id === id ? next : row,
-            ),
+        if (isRated(next))
+          createOnce(budgetId, id, () =>
+            createStaff.mutate({ draftId: id, body: toStaffInput(next) }),
           )
-          const key = inFlight(budgetId, id)
-          if (!creating.has(key)) {
-            creating.add(key)
-            createStaff.mutate({ draftId: id, body: toStaffInput(next) })
-          }
-          return
-        }
-
-        writeDrafts(
-          getDrafts(budgetId).staff.map((row) => (row.id === id ? next : row)),
-        )
         return
       }
 
       const current = saved.find((row) => row.id === id)
       if (!current) return
 
-      const commands: Command[] = []
-
-      for (const [field, value] of Object.entries(patch)) {
-        if (field === 'by_year') {
-          for (const entry of patch.by_year ?? []) {
-            const before = current.by_year.find(
-              (year) => year.year === entry.year,
-            )
-            if (before?.time !== entry.time)
-              commands.push({
-                section: 'staff',
-                field: 'year_value',
-                row_id: id,
-                year: entry.year,
-                value: entry.time,
-              } as Command)
-          }
-          continue
-        }
-
-        if (
-          STAFF_FIELDS.has(field) &&
-          value !== current[field as keyof StaffLine]
-        )
-          commands.push({
-            section: 'staff',
-            field,
-            row_id: id,
-            value,
-          } as Command)
-      }
+      const commands = patchCommands(
+        'staff',
+        id,
+        current,
+        patch,
+        STAFF_FIELDS,
+        'time',
+      )
 
       edit(commands, echoStaffLine(id, patch), coalesceKey('staff', id, patch))
     },

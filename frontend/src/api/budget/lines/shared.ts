@@ -1,3 +1,4 @@
+import type { Command } from '@/api/budget/write'
 import type { EditableStaffLine, NonStaffLine } from '@/types'
 
 export interface Lines<T> {
@@ -41,6 +42,17 @@ export const creating = new Set<string>()
 export const inFlight = (budgetId: number, draftId: string) =>
   `${budgetId}:${draftId}`
 
+export function createOnce(
+  budgetId: number,
+  draftId: string,
+  create: () => void,
+) {
+  const key = inFlight(budgetId, draftId)
+  if (creating.has(key)) return
+  creating.add(key)
+  create()
+}
+
 /**
  * Blank rows to type into.
  *
@@ -58,4 +70,48 @@ export function blankRows<T>(
   years: number[],
 ) {
   return Array.from({ length: count }, () => empty(crypto.randomUUID(), years))
+}
+
+type ByYear<K extends string> = ({ year: number } & Record<K, number>)[]
+
+/** One command per field the patch moved on a saved row. */
+export function patchCommands<K extends 'time' | 'amount'>(
+  section: 'staff' | 'non_staff',
+  id: string,
+  current: { by_year: ByYear<K> },
+  patch: { by_year?: ByYear<K> },
+  fields: Set<string>,
+  yearKey: K,
+) {
+  const commands: Command[] = []
+
+  for (const [field, value] of Object.entries(patch)) {
+    if (field === 'by_year') {
+      for (const entry of patch.by_year ?? []) {
+        const before = current.by_year.find((year) => year.year === entry.year)
+        if (before?.[yearKey] !== entry[yearKey])
+          commands.push({
+            section,
+            field: 'year_value',
+            row_id: id,
+            year: entry.year,
+            value: entry[yearKey],
+          } as Command)
+      }
+      continue
+    }
+
+    if (
+      fields.has(field) &&
+      value !== (current as Record<string, unknown>)[field]
+    )
+      commands.push({
+        section,
+        field,
+        row_id: id,
+        value,
+      } as Command)
+  }
+
+  return commands
 }

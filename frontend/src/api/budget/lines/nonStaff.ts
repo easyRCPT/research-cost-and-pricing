@@ -1,22 +1,18 @@
-import { useEffect } from 'react'
-
 import { useBudgetId } from '@/api/budget/context'
 import { useBudget } from '@/api/budget/detail'
-import { getDrafts, setDrafts, useDrafts } from '@/api/budget/drafts'
-import { type Command,useEdit } from '@/api/budget/write'
+import { type Command, useEdit } from '@/api/budget/write'
 import { useLookups } from '@/api/lookups'
-import { STARTING_ROWS } from '@/lib/constants'
 import { emptyNonStaffLine } from '@/lib/non-staff'
 import type { BudgetDetail, NonStaffLine, NonStaffLineInput } from '@/types'
 
+import { useDraftRows } from './draftRows'
 import { useLineMutations } from './mutations'
 import {
-  blankRows,
   byPosition,
   coalesceKey,
-  creating,
-  inFlight,
+  createOnce,
   type NonStaffLines,
+  patchCommands,
 } from './shared'
 
 const NON_STAFF_FIELDS = new Set<string>([
@@ -63,25 +59,10 @@ const echoNonStaffLine =
     }
   }
 
-function ensureBlankNonStaffRows(
-  budgetId: number,
-  years: number[],
-  saved: number,
-) {
-  const drafts = getDrafts(budgetId)
-  if (drafts.non_staff.length > 0) return
-  const count = saved === 0 ? STARTING_ROWS : 1
-  setDrafts(budgetId, {
-    ...drafts,
-    non_staff: blankRows(count, emptyNonStaffLine, years),
-  })
-}
-
 export function useNonStaffLines(years: number[]): NonStaffLines {
   const budgetId = useBudgetId()
   const { data: budget } = useBudget()
   const { data: lookups } = useLookups()
-  const drafts = useDrafts()
   const edit = useEdit()
   const { createNonStaff, deleteNonStaff } = useLineMutations()
 
@@ -90,17 +71,7 @@ export function useNonStaffLines(years: number[]): NonStaffLines {
     ...budget.non_staff_in_kind_cost.lines,
   ].sort(byPosition)
 
-  const savedIds = new Set(saved.map((line) => line.id))
-  const isDraft = (id: string) => !savedIds.has(id)
-  const lines = [...saved, ...drafts.non_staff.filter((row) => isDraft(row.id))]
-
-  const blanks = drafts.non_staff.length
-  useEffect(() => {
-    if (blanks === 0) ensureBlankNonStaffRows(budgetId, years, saved.length)
-  }, [blanks, saved.length, budgetId, years])
-
-  const writeDrafts = (rows: NonStaffLine[]) =>
-    setDrafts(budgetId, { ...getDrafts(budgetId), non_staff: rows })
+  const rows = useDraftRows('non_staff', saved, years, emptyNonStaffLine)
 
   /** The expense type a row is booked against, as the API names it. */
   const ledgerId = (costGroup: string, expenseType: string) =>
@@ -111,90 +82,38 @@ export function useNonStaffLines(years: number[]): NonStaffLines {
     )?.ledger_id
 
   return {
-    lines,
+    lines: rows.lines,
     years,
 
-    addLine: () =>
-      writeDrafts([
-        ...getDrafts(budgetId).non_staff,
-        emptyNonStaffLine(crypto.randomUUID(), years),
-      ]),
+    addLine: rows.addLine,
 
-    removeLine: (id) => {
-      if (isDraft(id)) {
-        writeDrafts(
-          getDrafts(budgetId).non_staff.filter((row) => row.id !== id),
-        )
-        return
-      }
-      deleteNonStaff.mutate(id)
-    },
+    removeLine: (id) =>
+      rows.removeLine(id, (lineId) => deleteNonStaff.mutate(lineId)),
 
     patchLine: (id, patch) => {
-      if (isDraft(id)) {
-        const current = getDrafts(budgetId).non_staff.find(
-          (row) => row.id === id,
-        )
-        if (!current) return
-        const next = { ...current, ...patch }
+      if (rows.isDraft(id)) {
+        const next = rows.patchDraft(id, patch)
+        if (!next) return
 
         // Kept until the server has it, for the same reason as a staff row.
-        if (isCosted(next)) {
-          writeDrafts(
-            getDrafts(budgetId).non_staff.map((row) =>
-              row.id === id ? next : row,
-            ),
+        if (isCosted(next))
+          createOnce(budgetId, id, () =>
+            createNonStaff.mutate({ draftId: id, body: toNonStaffInput(next) }),
           )
-          const key = inFlight(budgetId, id)
-          if (!creating.has(key)) {
-            creating.add(key)
-            createNonStaff.mutate({ draftId: id, body: toNonStaffInput(next) })
-          }
-          return
-        }
-
-        writeDrafts(
-          getDrafts(budgetId).non_staff.map((row) =>
-            row.id === id ? next : row,
-          ),
-        )
         return
       }
 
       const current = saved.find((row) => row.id === id)
       if (!current) return
 
-      const commands: Command[] = []
-
-      for (const [field, value] of Object.entries(patch)) {
-        if (field === 'by_year') {
-          for (const entry of patch.by_year ?? []) {
-            const before = current.by_year.find(
-              (year) => year.year === entry.year,
-            )
-            if (before?.amount !== entry.amount)
-              commands.push({
-                section: 'non_staff',
-                field: 'year_value',
-                row_id: id,
-                year: entry.year,
-                value: entry.amount,
-              } as Command)
-          }
-          continue
-        }
-
-        if (
-          NON_STAFF_FIELDS.has(field) &&
-          value !== current[field as keyof NonStaffLine]
-        )
-          commands.push({
-            section: 'non_staff',
-            field,
-            row_id: id,
-            value,
-          } as Command)
-      }
+      const commands: Command[] = patchCommands(
+        'non_staff',
+        id,
+        current,
+        patch,
+        NON_STAFF_FIELDS,
+        'amount',
+      )
 
       // Cost group and expense type are two halves of one stored category, so
       // they only reach the server once both name a real one.
