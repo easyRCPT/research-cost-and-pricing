@@ -2,11 +2,12 @@ import type { RateTable } from '@/api/admin-lookups'
 import { Panel } from '@/components/shell'
 import { salaryRateYear } from '@/lib/salary-rate-year'
 import { AddRateRow } from '@/screens/admin/rates/AddRateRow'
-import { RateTable as RateTableView } from '@/screens/admin/rates/RateTable'
 import type { Refused } from '@/screens/admin/rates/types'
 import { tableSpec } from '@/screens/admin/rateTables'
 import { type Row, type Staged, upsert } from '@/screens/admin/stagedChanges'
 import type { LookupTables } from '@/types'
+
+import { FilterableRateTable } from './FilterableRateTable'
 
 interface RateTablePanelProps {
   tableId: RateTable
@@ -34,7 +35,8 @@ export function RateTablePanel({
           : undefined
       }
     >
-      <RateTableView
+      <FilterableRateTable
+        key={tableId}
         spec={tableSpec(tableId)}
         rows={rows}
         staged={staged}
