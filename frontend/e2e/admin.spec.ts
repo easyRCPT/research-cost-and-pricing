@@ -102,3 +102,68 @@ test('a costing waiting on a role nobody holds is shown to RIC and named to its 
   await page.getByRole('tablist', { name: 'Reference tables' }).getByRole('tab', { name: 'Departments' }).click()
   await expect(page.getByRole('row').filter({ hasText: code })).toContainText('No head of department')
 })
+
+test('a head of department is found by searching, not scrolling (#69)', async ({ page }) => {
+  await signIn(page, 'admin')
+  const code = `E2E${Date.now().toString(36).toUpperCase()}`.slice(0, 20)
+  const name = `Searchable ${code}`
+  const lookups = await (await page.request.get('/api/lookups/')).json()
+  await apiWrite(page, 'post', '/api/admin/lookups/departments/', {
+    status: 201,
+    data: {
+      values: {
+        code,
+        name,
+        school: 'School of Testing',
+        school_code: 'SCH',
+        budget_unit: '',
+        faculty_code: lookups.faculties[0].code,
+      },
+    },
+  })
+  const email = `searcher-${Date.now()}@unimelb.edu.au`
+  await apiWrite(page, 'post', '/api/admin/users/', {
+    status: 201,
+    data: { email, first_name: 'Sam', last_name: 'Searcher', password: 'demo12345', groups: ['staff'] },
+  })
+
+  await page.goto('/admin/users')
+  await page.getByLabel('Search accounts').fill(email)
+  await page.getByRole('button', { name: new RegExp(email) }).click()
+
+  await page.getByRole('combobox', { name: 'Department' }).click()
+  const box = page.getByRole('combobox', { name: 'Search' })
+
+  // Nothing is offered until three letters are in.
+  await box.fill('se')
+  await expect(page.getByText('Start typing to search.')).toBeVisible()
+  await expect(page.getByRole('option')).toHaveCount(0)
+
+  await box.fill(name)
+  await page.getByRole('option', { name: new RegExp(name) }).click()
+  await expect(page.getByRole('combobox', { name: 'Department' })).toHaveText(name)
+
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await expect(page.getByText(`Head of Department, ${name}`)).toBeVisible()
+})
+
+test('a researcher cannot be given anything to approve (#69)', async ({ page }) => {
+  await signIn(page, 'admin')
+  const email = `researcher-${Date.now()}@unimelb.edu.au`
+  await apiWrite(page, 'post', '/api/admin/users/', {
+    status: 201,
+    data: { email, first_name: 'Rae', last_name: 'Searcher', password: 'demo12345', groups: ['researcher'] },
+  })
+
+  await page.goto('/admin/users')
+  await page.getByLabel('Search accounts').fill(email)
+  await page.getByRole('button', { name: new RegExp(email) }).click()
+
+  await expect(page.getByText('A researcher cannot approve for a unit.')).toBeVisible()
+  await expect(page.getByRole('combobox', { name: 'Department' })).toHaveCount(0)
+
+  // Moved to staff, the form is back.
+  await page.getByRole('checkbox', { name: 'researcher' }).click()
+  await page.getByRole('checkbox', { name: 'staff' }).click()
+  await expect(page.getByRole('combobox', { name: 'Department' })).toBeVisible()
+})
