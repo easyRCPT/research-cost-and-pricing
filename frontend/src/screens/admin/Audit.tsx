@@ -1,13 +1,7 @@
 import { useState } from 'react'
 import { AUDIT_LIMITS, useAudit, useAuditActions } from '@/api/admin-console'
 import { PageHead, Panel } from '@/components/shell'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { OptionSelect } from '@/components/ui/option-select'
 import { AuditTable } from '@/screens/admin/audit/AuditTable'
 
 const ALL = 'all'
@@ -33,45 +27,28 @@ export function Audit() {
       />
       <Panel>
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <Select
+          <OptionSelect
             value={action || ALL}
             onValueChange={(next) => setAction(next === ALL ? '' : next)}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-64 bg-white"
-              aria-label="Action"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All actions</SelectItem>
-              {actions.data?.map((name) => (
-                <SelectItem key={name} value={name}>
-                  {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            options={[
+              { value: ALL, label: 'All actions' },
+              ...(actions.data ?? []),
+            ]}
+            size="sm"
+            className="w-64 bg-white"
+            aria-label="Action"
+          />
+          <OptionSelect
             value={String(limit)}
             onValueChange={(next) => setLimit(Number(next))}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-36 bg-white"
-              aria-label="Entries shown"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {AUDIT_LIMITS.map((n) => (
-                <SelectItem key={n} value={String(n)}>
-                  {n} entries
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={AUDIT_LIMITS.map((n) => ({
+              value: String(n),
+              label: `${n} entries`,
+            }))}
+            size="sm"
+            className="w-36 bg-white"
+            aria-label="Entries shown"
+          />
           {entries.data && (
             <span className="text-[12.5px] text-muted-foreground">
               {entries.data.length} shown

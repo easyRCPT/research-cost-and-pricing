@@ -3,13 +3,7 @@ import { toast } from 'sonner'
 import { useAddAssignment, type AdminUser, type Role } from '@/api/admin-users'
 import { useLookups } from '@/api/lookups'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { OptionSelect } from '@/components/ui/option-select'
 import { ROLE_LABEL, nameOf, refused } from './labels'
 
 export function AddAssignment({ user }: { user: AdminUser }) {
@@ -57,40 +51,30 @@ export function AddAssignment({ user }: { user: AdminUser }) {
     <div className="mt-4 grid gap-2 border-t pt-3">
       <span className="text-[12.5px] font-medium">Add an assignment</span>
       <div className="flex flex-wrap gap-2">
-        <Select
+        <OptionSelect
           value={role}
           onValueChange={(next) => {
             setRole(next as Role)
             setUnit('')
           }}
-        >
-          <SelectTrigger size="sm" className="w-48 bg-white" aria-label="Role">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="hod">Head of Department</SelectItem>
-            <SelectItem value="dean">Dean</SelectItem>
-            <SelectItem value="member">Member</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={unit} onValueChange={setUnit}>
-          <SelectTrigger
-            size="sm"
-            className="w-72 bg-white"
-            aria-label={role === 'dean' ? 'Faculty' : 'Department'}
-          >
-            <SelectValue
-              placeholder={role === 'dean' ? 'Faculty…' : 'Department…'}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {units.map((u) => (
-              <SelectItem key={u.code} value={u.code}>
-                {u.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          options={[
+            { value: 'hod', label: 'Head of Department' },
+            { value: 'dean', label: 'Dean' },
+            { value: 'member', label: 'Member' },
+          ]}
+          size="sm"
+          className="w-48 bg-white"
+          aria-label="Role"
+        />
+        <OptionSelect
+          value={unit}
+          onValueChange={setUnit}
+          options={units.map((u) => ({ value: u.code, label: u.name }))}
+          placeholder={role === 'dean' ? 'Faculty…' : 'Department…'}
+          size="sm"
+          className="w-72 bg-white"
+          aria-label={role === 'dean' ? 'Faculty' : 'Department'}
+        />
         <Button size="sm" disabled={!unit || add.isPending} onClick={submit}>
           Add
         </Button>
