@@ -2,11 +2,15 @@ from django.db import transaction
 from django.db.models import Max
 
 from ..models import Budget, StaffCostLine, YearAllocation
-from . import budget_details
+from . import budget_details, classification
 
 
 @transaction.atomic
 def create(budget: Budget, data: dict) -> dict:
+    # Validate classification before update
+    # Other fields are validated by serializer
+    classification.validate_with_budget(budget, data["classification"])
+
     allocations = data.pop("allocations", [])
 
     last = budget.staff_lines.aggregate(Max("position"))["position__max"]

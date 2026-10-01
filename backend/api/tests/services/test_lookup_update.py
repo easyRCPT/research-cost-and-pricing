@@ -422,10 +422,12 @@ class TestVersionedCreate(TestCase):
         self.config.referenced = False
         self.config.save(update_fields=["referenced"])
 
+    @patch("api.services.lookup_update.classification.validate")
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_creates_new_version_when_referenced(
         self,
         mock_invalidate_cache,
+        mock_validate,
     ):
         self.config.referenced = True
         self.config.save(update_fields=["referenced"])
@@ -457,10 +459,12 @@ class TestVersionedCreate(TestCase):
         self.assertEqual(salary_rate.rate, Decimal(100000))
         mock_invalidate_cache.assert_called_once()
 
+    @patch("api.services.lookup_update.classification.validate")
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_rolls_back_new_version_when_create_fails(
         self,
         mock_invalidate_cache,
+        mock_validate,
     ):
         self.config.referenced = True
         self.config.save(update_fields=["referenced"])
@@ -487,10 +491,12 @@ class TestVersionedCreate(TestCase):
         self.assertEqual(SalaryRate.objects.count(), 0)
         mock_invalidate_cache.assert_not_called()
 
+    @patch("api.services.lookup_update.classification.validate")
     @patch("api.services.lookup_update.invalidate_lookup_cache")
     def test_creates_version_audit_when_version_created_by_actor(
         self,
         mock_invalidate_cache,
+        mock_validate,
     ):
         self.config.referenced = True
         self.config.save(update_fields=["referenced"])
@@ -903,3 +909,44 @@ class TestSalaryRateYearValidation(TestCase):
             {"name": "default_margin"},
             {"value": Decimal(-1)},
         )
+
+
+class TestClassificationValidation(TestCase):
+    @patch("api.services.classification.validate")
+    def test_salary_rate_classification_is_validated(
+        self,
+        mock_validate,
+    ):
+        lookup_update._validate_classification(
+            SalaryRate,
+            {"classification": "A.2"},
+        )
+
+        mock_validate.assert_called_once_with(
+            lookup_update.current_version_id(),
+            "A.2",
+        )
+
+    @patch("api.services.classification.validate")
+    def test_salary_rate_without_classification_is_not_validated(
+        self,
+        mock_validate,
+    ):
+        lookup_update._validate_classification(
+            SalaryRate,
+            {},
+        )
+
+        mock_validate.assert_not_called()
+
+    @patch("api.services.classification.validate")
+    def test_other_lookup_models_are_not_validated(
+        self,
+        mock_validate,
+    ):
+        lookup_update._validate_classification(
+            CalculationConstant,
+            {"classification": "A.2"},
+        )
+
+        mock_validate.assert_not_called()

@@ -13,11 +13,13 @@ from ..models import (
     Faculty,
     LookupConfiguration,
     LookupVersion,
+    SalaryRate,
     User,
 )
+from . import classification
 from .audit import write_audit
 from .lookup_definitions import LOOKUP_DEFINITIONS
-from .lookup_loader import invalidate_lookup_cache
+from .lookup_loader import current_version_id, invalidate_lookup_cache
 
 # Fixed by the University at its full cost recovery rate (#60). It sets the
 # price of every budget; it no longer decides Dean review, which reads the
@@ -123,6 +125,14 @@ def _reject_update_to_constant_name(model: type[models.Model], data: dict) -> No
         raise ValidationError("Name of calculation constant cannot be updated.")
 
 
+def _validate_classification(model: type[models.Model], data: dict) -> None:
+    if model is not SalaryRate:
+        return
+
+    if data.get("classification") is not None:
+        classification.validate(current_version_id(), data["classification"])
+
+
 def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
     for source in sources:
         # Process foreign key fields
@@ -153,6 +163,7 @@ def _validate_update(model: type[models.Model], lookup: dict, data: dict) -> Non
     _reject_invalid_salary_rate_year(model, lookup, data)
     _reject_update_to_constant_name(model, data)
 
+    _validate_classification(model, data)
     _validate_model_fields(model, lookup, data)
 
 
@@ -205,6 +216,8 @@ def create(
 ) -> None:
     # Get model
     model = _get_model(table)
+
+    _validate_classification(model, data)
 
     # Calculation constants are part of application logic and cannot be
     # created dynamically after deployment.

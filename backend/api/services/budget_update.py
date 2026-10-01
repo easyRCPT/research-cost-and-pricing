@@ -7,7 +7,7 @@ from django.db import models, transaction
 from django.db.models import Model
 from rest_framework.exceptions import ValidationError
 
-from ..models import (
+from api.models import (
     Activity,
     Budget,
     Deliverable,
@@ -20,6 +20,8 @@ from ..models import (
     YearAllocation,
     YearAmount,
 )
+
+from . import classification
 from .budget_details import get_budget_details
 from .staff_time_validation import check_time
 
@@ -237,6 +239,11 @@ def update_staff(
     if field in fields_requiring_calculation:
         if field in {"in_kind", "in_kind_reason"}:
             _set_in_kind(staff_line, field, value)
+        elif field == "classification":
+            # Validate classification before update
+            # Other fields are validated through model validation
+            classification.validate_with_budget(budget, str(value))
+            _set_field(staff_line, field, value)
         else:
             _set_field(staff_line, field, value)
         return True
