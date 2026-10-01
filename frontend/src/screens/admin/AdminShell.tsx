@@ -9,16 +9,14 @@ const SECTIONS: SidebarSection<AdminScreen>[] = [
   { label: 'Console', items: [{ id: 'overview', label: 'Overview' }] },
   {
     label: 'Reference data',
-    items: [
-      { id: 'lookups', label: 'Lookup tables' },
-      { id: 'versions', label: 'Version history' },
-    ],
+    items: [{ id: 'lookups', label: 'Lookup tables' }],
   },
   { label: 'People', items: [{ id: 'users', label: 'Users and approvers' }] },
   {
     label: 'Records',
     items: [
       { id: 'projects', label: 'Project register' },
+      { id: 'versions', label: 'Lookup history' },
       { id: 'audit', label: 'Audit log' },
     ],
   },
@@ -28,7 +26,7 @@ const SECTIONS: SidebarSection<AdminScreen>[] = [
  * The admin console's frame (#62): the calculator's own shell and rail, so the
  * two read as one product. Faculties, departments and the other reference
  * lists are tabs of the lookup tables screen (#70, #144), beside the rates;
- * the rates' versions have a screen of their own.
+ * the rates' versions are a record of their own, the lookup history.
  */
 export function AdminShell() {
   const navigate = useNavigate()

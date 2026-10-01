@@ -28,7 +28,7 @@ export function VersionHistory() {
   return (
     <>
       <PageHead
-        title="Version history"
+        title="Lookup history"
         subtitle="A version is the rates some costing was priced on. Saved changes go into the current version until a costing is submitted on it; the next save then starts a new one."
       />
 
