@@ -20,14 +20,31 @@ class ChangeSetSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     note = serializers.CharField(allow_blank=True)
     saved_by = serializers.CharField(allow_null=True)
+    # Their name, or their email when they have none.
+    saved_by_name = serializers.CharField(allow_null=True)
     saved_at = serializers.DateTimeField()
     change_count = serializers.IntegerField()
+
+
+class VersionChangeSerializer(serializers.Serializer):
+    """One change in a set: the row it named, and the values before and after."""
+
+    table = serializers.CharField()
+    op = serializers.CharField()
+    key = serializers.DictField()
+    before = serializers.DictField(allow_null=True)
+    after = serializers.DictField(allow_null=True)
+
+
+class VersionChangeSetSerializer(ChangeSetSerializer):
+    changes = VersionChangeSerializer(many=True)
 
 
 class LookupVersionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     created_at = serializers.DateTimeField()
     updated_by = serializers.CharField(allow_null=True)
+    updated_by_name = serializers.CharField(allow_null=True)
     budgets_priced = serializers.IntegerField()
     current = serializers.BooleanField()
     accepts_changes = serializers.BooleanField()
@@ -108,6 +125,20 @@ class LookupVersionsView(APIView):
     def get(self, request: Request) -> Response:
         return Response(
             LookupVersionSerializer(lookup_update.list_versions(), many=True).data
+        )
+
+
+class LookupVersionChangesView(APIView):
+    """The sets saved into one version, with what each change did (#138)."""
+
+    permission_classes = [IsSuperadmin]
+
+    @extend_schema(responses=VersionChangeSetSerializer(many=True))
+    def get(self, request: Request, version_id: int) -> Response:
+        return Response(
+            VersionChangeSetSerializer(
+                lookup_update.changes_in(version_id), many=True
+            ).data
         )
 
 

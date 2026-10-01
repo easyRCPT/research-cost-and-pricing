@@ -200,6 +200,11 @@ class User(AbstractUser):
             models.UniqueConstraint(Lower("email"), name="user_email_unique_ci"),
         ]
 
+    @property
+    def display_name(self) -> str:
+        """What they are called on screen: their name, or their email without one."""
+        return self.get_full_name() or self.email
+
 
 class UserOrgAssignment(models.Model):
     """

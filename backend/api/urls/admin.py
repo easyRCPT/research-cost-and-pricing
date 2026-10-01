@@ -35,6 +35,11 @@ urlpatterns = [
         name="admin-lookup-version-restore",
     ),
     path(
+        "lookups/versions/<int:version_id>/changes/",
+        lookups.LookupVersionChangesView.as_view(),
+        name="admin-lookup-version-changes",
+    ),
+    path(
         "lookups/versions/<int:version_id>/budgets/",
         lookups.LookupVersionBudgetsView.as_view(),
         name="admin-lookup-version-budgets",

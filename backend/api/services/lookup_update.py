@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 
 from ..exceptions import Conflict
 from ..models import (
+    AuditLog,
     Budget,
     Department,
     Faculty,
@@ -417,6 +418,43 @@ def priced_on(version_id: int) -> dict:
     }
 
 
+def changes_in(version_id: int) -> list[dict]:
+    """
+    The sets saved into a version, newest first, each with what its changes said
+    before and after. That is kept in the set's audit entry (#73), not on the
+    set.
+    """
+    if not LookupVersion.objects.filter(id=version_id).exists():
+        raise ValidationError(f"There is no lookup version {version_id}.")
+
+    sets = list(
+        LookupChangeSet.objects.filter(version_id=version_id)
+        .select_related("saved_by")
+        .order_by("-saved_at", "-id")
+    )
+    logged = {
+        entry.object_id: entry.detail.get("changes", [])
+        for entry in AuditLog.objects.filter(
+            action="admin.lookup.changes",
+            object_id__in=[str(change_set.id) for change_set in sets],
+        )
+    }
+    return [
+        {
+            "id": change_set.id,
+            "note": change_set.note,
+            "saved_by": change_set.saved_by.email if change_set.saved_by else None,
+            "saved_by_name": (
+                change_set.saved_by.display_name if change_set.saved_by else None
+            ),
+            "saved_at": change_set.saved_at,
+            "change_count": change_set.change_count,
+            "changes": logged.get(str(change_set.id), []),
+        }
+        for change_set in sets
+    ]
+
+
 def budgets_on(version_id: int) -> list[dict]:
     """Every costing stamped with a version, newest submission first (#142)."""
     if not LookupVersion.objects.filter(id=version_id).exists():
@@ -530,6 +568,7 @@ def list_versions() -> list[dict]:
             "id": version.id,
             "created_at": version.created_at,
             "updated_by": version.updated_by.email if version.updated_by else None,
+            "updated_by_name": version.updated_by.display_name if version.updated_by else None,
             "budgets_priced": budgets_priced.get(version.id, 0),
             "current": version.id == config.current_version_id,
             # Whether the next set writes into this version. Only the current
@@ -552,6 +591,9 @@ def list_versions() -> list[dict]:
                     "saved_by": (
                         change_set.saved_by.email if change_set.saved_by else None
                     ),
+                    "saved_by_name": (
+                change_set.saved_by.display_name if change_set.saved_by else None
+            ),
                     "saved_at": change_set.saved_at,
                     "change_count": change_set.change_count,
                 }
