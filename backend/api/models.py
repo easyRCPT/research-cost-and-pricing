@@ -287,9 +287,23 @@ class SalaryRateMultiplier(models.Model):
 
 # TODO: Consider to remove. Not used in calculation. Max steps are maintained and checked in SalaryRate.
 # Defines the Salary Cap
+# Backend configuration only. It is not displayed in frontend.
 class IncrementCap(models.Model):
-    level = models.CharField(max_length=20, primary_key=True)
+    level = models.CharField(max_length=20)
     max_steps = models.PositiveSmallIntegerField()
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["level", "version"],
+                name="unique_increment_cap",
+            )
+        ]
 
 
 # Salary increases by EBA rate

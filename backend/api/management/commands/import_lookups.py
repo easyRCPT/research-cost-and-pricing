@@ -218,7 +218,7 @@ def import_salary_rates(workbook, version):
     return count
 
 
-def import_increment_caps(workbook):
+def import_increment_caps(workbook, version):
     """
     The highest step within each level. Continuing and fixed-term staff
     move up one step per project year. Take the scenario where
@@ -232,7 +232,7 @@ def import_increment_caps(workbook):
             continue
 
         IncrementCap.objects.update_or_create(
-            level=level, defaults={"max_steps": int(max_steps)}
+            level=level, version=version, defaults={"max_steps": int(max_steps)}
         )
 
         count += 1
@@ -544,7 +544,6 @@ class Command(BaseCommand):
 
         unversioned_importers = (
             ("departments", import_departments),
-            ("increment caps", import_increment_caps),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
@@ -553,6 +552,7 @@ class Command(BaseCommand):
 
         versioned_importers = (
             ("salary rates", import_salary_rates),
+            ("increment caps", import_increment_caps),
             ("EBA increases", import_eba_increases),
             ("on-cost rates", import_on_costs),
             ("salary rate multipliers", import_salary_rate_multipliers),

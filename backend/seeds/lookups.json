@@ -3,8 +3,8 @@
   "model": "api.lookupversion",
   "pk": 1,
   "fields": {
-    "created_at": "2026-09-30T22:58:06.633Z",
-    "updated_at": "2026-09-30T22:58:06.633Z",
+    "created_at": "2026-10-01T07:27:52.479Z",
+    "updated_at": "2026-10-01T07:27:52.479Z",
     "updated_by": null
   }
 },
@@ -3809,114 +3809,146 @@
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level A",
+  "pk": 1,
   "fields": {
-    "max_steps": 8
+    "level": "Level A",
+    "max_steps": 8,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level B",
+  "pk": 2,
   "fields": {
-    "max_steps": 6
+    "level": "Level B",
+    "max_steps": 6,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level C",
+  "pk": 3,
   "fields": {
-    "max_steps": 6
+    "level": "Level C",
+    "max_steps": 6,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level D",
+  "pk": 4,
   "fields": {
-    "max_steps": 4
+    "level": "Level D",
+    "max_steps": 4,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level E",
+  "pk": 5,
   "fields": {
-    "max_steps": 1
+    "level": "Level E",
+    "max_steps": 1,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "RA Grade 1",
+  "pk": 6,
   "fields": {
-    "max_steps": 3
+    "level": "RA Grade 1",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 1",
+  "pk": 7,
   "fields": {
-    "max_steps": 3
+    "level": "UOM 1",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 10",
+  "pk": 8,
   "fields": {
-    "max_steps": 1
+    "level": "UOM 2",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 2",
+  "pk": 9,
   "fields": {
-    "max_steps": 3
+    "level": "UOM 3",
+    "max_steps": 6,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 3",
+  "pk": 10,
   "fields": {
-    "max_steps": 6
+    "level": "UOM 4",
+    "max_steps": 4,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 4",
+  "pk": 11,
   "fields": {
-    "max_steps": 4
+    "level": "UOM 5",
+    "max_steps": 8,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 5",
+  "pk": 12,
   "fields": {
-    "max_steps": 8
+    "level": "UOM 6",
+    "max_steps": 5,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 6",
+  "pk": 13,
   "fields": {
-    "max_steps": 5
+    "level": "UOM 7",
+    "max_steps": 5,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 7",
+  "pk": 14,
   "fields": {
-    "max_steps": 5
+    "level": "UOM 8",
+    "max_steps": 5,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 8",
+  "pk": 15,
   "fields": {
-    "max_steps": 5
+    "level": "UOM 9",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 9",
+  "pk": 16,
   "fields": {
-    "max_steps": 3
+    "level": "UOM 10",
+    "max_steps": 1,
+    "version": 1
   }
 },
 {
