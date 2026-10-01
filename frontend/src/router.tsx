@@ -45,26 +45,6 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: Outlet,
 })
 
-/**
- * The gate every private route sits behind.
- *
- * In `beforeLoad` rather than in a component: the route does not begin to load
- * until the answer is in, so a signed-out visitor never gets a frame of the
- * screen they are not allowed to see, and there is no second render to loop
- * on. `ensureQueryData` shares one fetch with the `useMe` every screen calls.
- */
-async function requireAuth(
-  { queryClient }: RouterContext,
-  href: string,
-) {
-  const me = await queryClient.ensureQueryData(meQuery)
-  if (!me) {
-    // Carried so signing in finishes the trip they started.
-    throw redirect({ to: '/login', search: { redirect: href } })
-  }
-  return me
-}
-
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -95,10 +75,28 @@ const adminLoginRoute = createRoute({
   component: AdminLogin,
 })
 
-const projectsRoute = createRoute({
+/**
+ * The gate every private route sits behind. Guarded once, on this pathless
+ * parent, so a route added beneath it cannot arrive unguarded.
+ *
+ * In `beforeLoad` rather than in a component: the route does not begin to load
+ * until the answer is in, so a signed-out visitor never gets a frame of the
+ * screen they are not allowed to see, and there is no second render to loop
+ * on. `ensureQueryData` shares one fetch with the `useMe` every screen calls.
+ */
+const privateRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: 'private',
+  beforeLoad: async ({ context, location }) => {
+    const me = await context.queryClient.ensureQueryData(meQuery)
+    // Carried so signing in finishes the trip they started.
+    if (!me) throw redirect({ to: '/login', search: { redirect: location.href } })
+  },
+})
+
+const projectsRoute = createRoute({
+  getParentRoute: () => privateRoute,
   path: '/projects',
-  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
   component: ProjectsRoute,
 })
 
@@ -151,21 +149,19 @@ const adminAuditRoute = createRoute({
 })
 
 const approvalsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => privateRoute,
   path: '/approvals',
-  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
   component: ApprovalsRoute,
 })
 
 const approvalRegisterRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => privateRoute,
   path: '/approvals/register',
-  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
   component: ApprovalRegisterRoute,
 })
 
 export const editorRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => privateRoute,
   path: '/projects/$projectId/$screen',
   params: {
     parse: ({ projectId, screen }) => ({
@@ -180,8 +176,7 @@ export const editorRoute = createRoute({
   // A pasted or stale URL is the normal way an unknown screen arrives, so it
   // lands on the first screen rather than rendering blank. A project id that is
   // not a number never had a row behind it.
-  beforeLoad: async ({ context, location, params }) => {
-    await requireAuth(context, location.href)
+  beforeLoad: ({ params }) => {
     if (!Number.isInteger(params.projectId)) {
       throw redirect({ to: '/projects' })
     }
@@ -208,9 +203,12 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   signupRoute,
   adminLoginRoute,
-  projectsRoute,
-  approvalsRoute,
-  approvalRegisterRoute,
+  privateRoute.addChildren([
+    projectsRoute,
+    approvalsRoute,
+    approvalRegisterRoute,
+    editorRoute,
+  ]),
   adminRoute.addChildren([
     adminIndexRoute,
     adminLookupsRoute,
@@ -218,7 +216,6 @@ const routeTree = rootRoute.addChildren([
     adminProjectsRoute,
     adminAuditRoute,
   ]),
-  editorRoute,
   catchAllRoute,
 ])
 
