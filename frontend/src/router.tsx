@@ -117,33 +117,37 @@ const adminRoute = createRoute({
   component: AdminShell,
 })
 
+// The shell's own boundary shows the skeleton, inside the frame; the router's
+// default would put a whole app skeleton there.
+const inAdminShell = { getParentRoute: () => adminRoute, wrapInSuspense: false }
+
 // The front door (#94), where a superadmin signing in lands.
 const adminIndexRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: '/',
   component: Overview,
 })
 
 const adminLookupsRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'lookups',
   component: LookupEditor,
 })
 
 const adminUsersRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'users',
   component: Users,
 })
 
 const adminProjectsRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'projects',
   component: ProjectRegister,
 })
 
 const adminAuditRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'audit',
   component: Audit,
 })
