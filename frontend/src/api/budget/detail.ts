@@ -7,7 +7,7 @@ import { useBudgetId } from './context'
 
 export const budgetKey = (budgetId: number) => ['budget', budgetId] as const
 
-export async function fetchBudget(budgetId: number): Promise<BudgetDetail> {
+async function fetchBudget(budgetId: number): Promise<BudgetDetail> {
   return unwrap(
     await api.GET('/api/budgets/{budget_id}/', {
       params: { path: { budget_id: budgetId } },

@@ -1,6 +1,6 @@
 import { Th } from '@/components/shell'
 
-export interface NonStaffTableHeaderProps {
+interface NonStaffTableHeaderProps {
   years: number[]
 }
 

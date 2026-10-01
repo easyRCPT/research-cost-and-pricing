@@ -1,4 +1,5 @@
 import { useMe } from '@/api/auth'
+import { isDraftStatus } from '@/lib/status'
 
 import { useBudget } from './detail'
 
@@ -12,7 +13,7 @@ import { useBudget } from './detail'
  */
 export function useEditable(): boolean {
   const { data: budget } = useBudget()
-  return useOwnsBudget() && budget.budget_info.status === 'draft'
+  return useOwnsBudget() && isDraftStatus(budget.budget_info.status)
 }
 
 /** Whether the signed-in user made this budget's project. */

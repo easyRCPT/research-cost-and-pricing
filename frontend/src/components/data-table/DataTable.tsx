@@ -20,7 +20,6 @@ interface DataTableProps<T extends RowData> {
   columns: DataTableColumns<T>
   rows: T[]
   getRowId?: (row: T) => string
-  pageSize?: number
   sortable?: boolean
   searchable?: boolean
   filters?: DataTableFilter<T>[]
@@ -34,7 +33,6 @@ export function DataTable<T extends RowData>({
   columns,
   rows,
   getRowId,
-  pageSize = 20,
   sortable = false,
   searchable = false,
   filters = NO_FILTERS,
@@ -55,7 +53,7 @@ export function DataTable<T extends RowData>({
     data: visible,
     getRowId,
     enableSorting: sortable,
-    initialState: { pagination: { pageIndex: 0, pageSize } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 20 } },
   })
 
   return (

@@ -71,8 +71,5 @@ export const REFERENCE_TABLES: ReferenceTableSpec[] = [
   },
 ]
 
-export const isReferenceTable = (id: string): id is ReferenceTable =>
-  REFERENCE_TABLES.some((table) => table.id === id)
-
 export const referenceSpec = (id: ReferenceTable) =>
   REFERENCE_TABLES.find((table) => table.id === id) ?? REFERENCE_TABLES[0]

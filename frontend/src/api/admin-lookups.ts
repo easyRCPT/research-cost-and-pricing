@@ -32,7 +32,7 @@ export type RateTable =
   | 'non_staff_cost_categories'
   | 'calculation_constants'
 
-export const versionsQuery = queryOptions({
+const versionsQuery = queryOptions({
   queryKey: ['admin', 'lookup-versions'] as const,
   queryFn: async (): Promise<LookupVersion[]> => {
     return unwrap(await api.GET('/api/admin/lookups/versions/'))

@@ -15,7 +15,7 @@ type Signup = components['schemas']['Signup']
 type Login = components['schemas']['Login']
 type AdminLogin = components['schemas']['AdminLogin']
 
-export const meKey = ['me'] as const
+const meKey = ['me'] as const
 
 /**
  * Who is signed in, or nobody.

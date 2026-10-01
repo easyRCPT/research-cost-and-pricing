@@ -9,6 +9,7 @@ import {
 import { ExportPdfButton } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { isDraftStatus } from '@/lib/status'
 import type { Status } from '@/types'
 
 import { SubmitErrors } from './SubmitErrors'
@@ -98,7 +99,7 @@ export function ApprovalActions({
               : 'Make a new draft from it'}
           </Button>
         )}
-        {status === 'draft' && canSubmit && (
+        {isDraftStatus(status) && canSubmit && (
           <Button
             size="lg"
             disabled={submit.isPending}

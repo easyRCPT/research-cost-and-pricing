@@ -13,7 +13,6 @@ import { ConfirmStage } from './decision/ConfirmStage'
 import { DecisionSummary } from './decision/DecisionSummary'
 
 export interface Decided {
-  title: string
   decision: Decision
   /** Where the server moved the budget: dean_review, approved or rejected. */
   status: string
@@ -57,8 +56,7 @@ export function DecisionPanel({
     decide.mutate(
       { stepId: row.step_id, decision, comment: comment.trim() },
       {
-        onSuccess: (status) =>
-          onDecided({ title: budget.project_title, decision, status }),
+        onSuccess: (status) => onDecided({ decision, status }),
       },
     )
 
