@@ -5,6 +5,7 @@ import { type LookupVersion, useRestoreVersion } from '@/api/admin-lookups'
 import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 import { ApiError } from '@/lib/api'
 import { dateTime, shortDate } from '@/lib/format/dates'
 
@@ -91,40 +92,31 @@ export function VersionRow({
               The rates go back to how they were in version #{version.id}, as a
               new version. Costings already submitted keep their rates.
             </span>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                disabled={restore.isPending}
-                onClick={() =>
-                  restore.mutate(version.id, {
-                    onSuccess: (restored) => {
-                      setConfirming(false)
-                      onRestored({
-                        title: `Rates restored from version #${version.id}`,
-                        description: `They are now version #${restored.version_id}.`,
-                        replaced: restored.replaced,
-                      })
-                    },
-                    onError: (error) =>
-                      toast.error('Not restored', {
-                        description:
-                          error instanceof ApiError
-                            ? error.message
-                            : 'Try again.',
-                      }),
-                  })
-                }
-              >
-                {restore.isPending ? 'Restoring…' : 'Restore these rates'}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setConfirming(false)}
-              >
-                Cancel
-              </Button>
-            </div>
+            <InlineConfirm
+              confirm="Restore these rates"
+              pendingLabel="Restoring…"
+              pending={restore.isPending}
+              onConfirm={() =>
+                restore.mutate(version.id, {
+                  onSuccess: (restored) => {
+                    setConfirming(false)
+                    onRestored({
+                      title: `Rates restored from version #${version.id}`,
+                      description: `They are now version #${restored.version_id}.`,
+                      replaced: restored.replaced,
+                    })
+                  },
+                  onError: (error) =>
+                    toast.error('Not restored', {
+                      description:
+                        error instanceof ApiError
+                          ? error.message
+                          : 'Try again.',
+                    }),
+                })
+              }
+              onCancel={() => setConfirming(false)}
+            />
           </div>
         )}
       </Td>

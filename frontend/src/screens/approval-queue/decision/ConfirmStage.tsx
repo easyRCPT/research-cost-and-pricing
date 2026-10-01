@@ -1,5 +1,5 @@
 import type { Decision, QueueRow } from '@/api/approvals'
-import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 
 import { consequence } from './consequence'
 
@@ -29,18 +29,16 @@ export function ConfirmStage({
       <p className="mt-2 text-[12.5px] text-muted-foreground">
         Recorded under your account, {who}, with the date and time.
       </p>
-      <div className="mt-3 flex gap-3">
-        <Button disabled={pending} onClick={onConfirm}>
-          {pending
-            ? 'Recording…'
-            : rejecting
-              ? 'Confirm and reject'
-              : 'Confirm and approve'}
-        </Button>
-        <Button variant="ghost" disabled={pending} onClick={onBack}>
-          Back
-        </Button>
-      </div>
+      <InlineConfirm
+        className="mt-3 gap-3"
+        size="default"
+        confirm={rejecting ? 'Confirm and reject' : 'Confirm and approve'}
+        pendingLabel="Recording…"
+        cancel="Back"
+        pending={pending}
+        onConfirm={onConfirm}
+        onCancel={onBack}
+      />
     </div>
   )
 }

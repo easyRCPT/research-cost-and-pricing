@@ -4,6 +4,7 @@ import { type AdminUser, useGroups, useUpdateUser } from '@/api/admin-users'
 import { SUPERADMIN, useMe } from '@/api/auth'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 import { shortDate } from '@/lib/format/dates'
 
 import { Assignments } from './Assignments'
@@ -89,19 +90,14 @@ export function UserEditor({ user }: { user: AdminUser }) {
         >
           <p className="font-semibold text-destructive">{pending.title}</p>
           <p className="mt-1">{pending.body}</p>
-          <div className="mt-3 flex gap-2">
-            <Button
-              size="sm"
-              variant="destructive"
-              disabled={update.isPending}
-              onClick={() => save(pending.changes)}
-            >
-              {pending.confirm}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setPending(null)}>
-              Cancel
-            </Button>
-          </div>
+          <InlineConfirm
+            className="mt-3"
+            confirm={pending.confirm}
+            variant="destructive"
+            pending={update.isPending}
+            onConfirm={() => save(pending.changes)}
+            onCancel={() => setPending(null)}
+          />
         </div>
       )}
 

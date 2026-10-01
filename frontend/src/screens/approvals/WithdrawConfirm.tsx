@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 
 export function WithdrawConfirm({
   pending,
@@ -23,19 +23,16 @@ export function WithdrawConfirm({
         record of what was submitted. This can&rsquo;t be undone: to carry on,
         you make a new draft from it and submit that.
       </p>
-      <div className="mt-3 flex gap-2">
-        <Button
-          size="sm"
-          variant="destructive"
-          disabled={pending}
-          onClick={onWithdraw}
-        >
-          {pending ? 'Withdrawing…' : 'Withdraw'}
-        </Button>
-        <Button size="sm" variant="ghost" disabled={pending} onClick={onCancel}>
-          Keep it in review
-        </Button>
-      </div>
+      <InlineConfirm
+        className="mt-3"
+        confirm="Withdraw"
+        pendingLabel="Withdrawing…"
+        cancel="Keep it in review"
+        variant="destructive"
+        pending={pending}
+        onConfirm={onWithdraw}
+        onCancel={onCancel}
+      />
     </div>
   )
 }

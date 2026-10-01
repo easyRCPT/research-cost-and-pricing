@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 
 export function EditActions({
   renamed,
@@ -21,14 +21,14 @@ export function EditActions({
           versioned. The audit log keeps the old one.
         </p>
       )}
-      <div className="flex gap-2">
-        <Button size="sm" disabled={!canSave || pending} onClick={onSave}>
-          {pending ? 'Saving…' : 'Save'}
-        </Button>
-        <Button size="sm" variant="ghost" disabled={pending} onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
+      <InlineConfirm
+        confirm="Save"
+        pendingLabel="Saving…"
+        disabled={!canSave}
+        pending={pending}
+        onConfirm={onSave}
+        onCancel={onCancel}
+      />
     </div>
   )
 }

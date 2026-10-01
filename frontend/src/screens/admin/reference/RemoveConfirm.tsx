@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 
 export function RemoveConfirm({
   noun,
@@ -18,19 +18,13 @@ export function RemoveConfirm({
       <span>
         Remove {noun} {name}? Nothing can use it afterwards.
       </span>
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="destructive"
-          disabled={pending}
-          onClick={onConfirm}
-        >
-          Remove
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
+      <InlineConfirm
+        confirm="Remove"
+        variant="destructive"
+        pending={pending}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />
     </div>
   )
 }

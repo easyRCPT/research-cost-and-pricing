@@ -1,5 +1,5 @@
 import { useAdminProjects } from '@/api/admin-console'
-import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 
 /**
  * Moving a department moves its costings waiting on a dean to the new
@@ -38,14 +38,15 @@ export function MoveConfirm({
             ? 'No costing from this department is waiting on a dean.'
             : `${waiting} ${waiting === 1 ? 'costing' : 'costings'} waiting on a dean will go to the dean of ${to} instead.`}
       </span>
-      <div className="flex gap-2">
-        <Button size="sm" disabled={pending || isPending} onClick={onConfirm}>
-          {pending ? 'Moving…' : 'Move'}
-        </Button>
-        <Button size="sm" variant="ghost" disabled={pending} onClick={onCancel}>
-          Back
-        </Button>
-      </div>
+      <InlineConfirm
+        confirm="Move"
+        pendingLabel="Moving…"
+        cancel="Back"
+        disabled={isPending}
+        pending={pending}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />
     </div>
   )
 }
