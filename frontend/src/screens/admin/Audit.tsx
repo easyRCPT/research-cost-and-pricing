@@ -1,11 +1,23 @@
 import { useState } from 'react'
 import { ChevronRightIcon } from 'lucide-react'
-import { AUDIT_LIMITS, useAudit, useAuditActions, type AuditEntry } from '@/api/admin-console'
+import {
+  AUDIT_LIMITS,
+  useAudit,
+  useAuditActions,
+  type AuditEntry,
+} from '@/api/admin-console'
 import { Grid, PageHead, Panel, Td, Th } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { dateTime } from '@/lib/format/dates'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const ALL = 'all'
 
@@ -24,32 +36,55 @@ export function Audit() {
 
   return (
     <>
-      <PageHead title="Audit log" subtitle="Every change to accounts, approvers, rates and costings, newest first" />
+      <PageHead
+        title="Audit log"
+        subtitle="Every change to accounts, approvers, rates and costings, newest first"
+      />
       <Panel>
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <Select value={action || ALL} onValueChange={(next) => setAction(next === ALL ? '' : next)}>
-            <SelectTrigger size="sm" className="w-64 bg-white" aria-label="Action">
+          <Select
+            value={action || ALL}
+            onValueChange={(next) => setAction(next === ALL ? '' : next)}
+          >
+            <SelectTrigger
+              size="sm"
+              className="w-64 bg-white"
+              aria-label="Action"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>All actions</SelectItem>
               {actions.data?.map((name) => (
-                <SelectItem key={name} value={name}>{name}</SelectItem>
+                <SelectItem key={name} value={name}>
+                  {name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={String(limit)} onValueChange={(next) => setLimit(Number(next))}>
-            <SelectTrigger size="sm" className="w-36 bg-white" aria-label="Entries shown">
+          <Select
+            value={String(limit)}
+            onValueChange={(next) => setLimit(Number(next))}
+          >
+            <SelectTrigger
+              size="sm"
+              className="w-36 bg-white"
+              aria-label="Entries shown"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {AUDIT_LIMITS.map((n) => (
-                <SelectItem key={n} value={String(n)}>{n} entries</SelectItem>
+                <SelectItem key={n} value={String(n)}>
+                  {n} entries
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {entries.data && (
-            <span className="text-[12.5px] text-muted-foreground">{entries.data.length} shown</span>
+            <span className="text-[12.5px] text-muted-foreground">
+              {entries.data.length} shown
+            </span>
           )}
         </div>
         <AuditTable
@@ -57,7 +92,11 @@ export function Audit() {
           loading={entries.isPending}
           dimmed={entries.isPlaceholderData}
           // Two different sentences: nothing recorded, and nothing of this kind.
-          empty={action ? 'No entry matches that action.' : 'Nothing has been recorded yet.'}
+          empty={
+            action
+              ? 'No entry matches that action.'
+              : 'Nothing has been recorded yet.'
+          }
           expandable
         />
       </Panel>
@@ -96,13 +135,18 @@ export function AuditTable({
           [0, 1, 2, 3, 4].map((i) => (
             <tr key={i} role="status" aria-label="Loading entries">
               <Td colSpan={columns}>
-                <div className="h-5 animate-pulse rounded bg-muted" />
+                <Skeleton className="h-5" />
               </Td>
             </tr>
           ))}
         {entries?.length === 0 && (
           <tr>
-            <Td colSpan={columns} className="py-6 text-center text-muted-foreground">{empty}</Td>
+            <Td
+              colSpan={columns}
+              className="py-6 text-center text-muted-foreground"
+            >
+              {empty}
+            </Td>
           </tr>
         )}
         {entries?.map((entry) => (
@@ -113,7 +157,13 @@ export function AuditTable({
   )
 }
 
-function AuditRow({ entry, expandable }: { entry: AuditEntry; expandable: boolean }) {
+function AuditRow({
+  entry,
+  expandable,
+}: {
+  entry: AuditEntry
+  expandable: boolean
+}) {
   const [open, setOpen] = useState(false)
   const detail = entry.detail as Record<string, unknown> | null
   // No expander over an empty detail: it would open onto nothing.
@@ -132,15 +182,24 @@ function AuditRow({ entry, expandable }: { entry: AuditEntry; expandable: boolea
                 aria-label={open ? 'Hide detail' : 'Show detail'}
                 className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-primary"
               >
-                <ChevronRightIcon className={cn('size-4 transition-transform', open && 'rotate-90')} />
+                <ChevronRightIcon
+                  className={cn(
+                    'size-4 transition-transform',
+                    open && 'rotate-90',
+                  )}
+                />
               </button>
             )}
           </Td>
         )}
-        <Td className="tabular whitespace-nowrap text-muted-foreground">{dateTime(entry.created_at)}</Td>
+        <Td className="tabular whitespace-nowrap text-muted-foreground">
+          {dateTime(entry.created_at)}
+        </Td>
         <Td>{entry.actor_email ?? 'System'}</Td>
         <Td>
-          <Badge variant="secondary" className="font-mono text-[11.5px]">{entry.action}</Badge>
+          <Badge variant="secondary" className="font-mono text-[11.5px]">
+            {entry.action}
+          </Badge>
         </Td>
         <Td className="text-muted-foreground">
           {entry.object_type} #{entry.object_id}

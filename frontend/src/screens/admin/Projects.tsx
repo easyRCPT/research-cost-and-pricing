@@ -11,6 +11,7 @@ import { PageHead } from '@/components/shell'
 import { money } from '@/lib/format/utils'
 import { shortDate } from '@/lib/format/dates'
 import { STATUS_LABELS } from '@/screens/projects/status'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Typed against the schema's enum, so a new status breaks the build here
 // rather than rendering an empty cell (#71). The raw value is the fallback all
@@ -29,11 +30,15 @@ const FILTERS: DataTableFilter<AdminProject>[] = [
 
 const col = columnHelper<AdminProject>()
 
-const columns = (open: (row: AdminProject) => void): DataTableColumns<AdminProject> =>
+const columns = (
+  open: (row: AdminProject) => void,
+): DataTableColumns<AdminProject> =>
   col.columns([
     col.accessor('reference', {
       header: 'Reference',
-      meta: { className: 'w-[150px] whitespace-nowrap font-medium text-primary' },
+      meta: {
+        className: 'w-[150px] whitespace-nowrap font-medium text-primary',
+      },
     }),
     col.accessor('title', {
       header: 'Title',
@@ -59,7 +64,9 @@ const columns = (open: (row: AdminProject) => void): DataTableColumns<AdminProje
         <div className="py-0.5">
           <div>{ownerName(row.original)}</div>
           {row.original.owner.name && (
-            <div className="text-muted-foreground">{row.original.owner.email}</div>
+            <div className="text-muted-foreground">
+              {row.original.owner.email}
+            </div>
           )}
         </div>
       ),
@@ -69,10 +76,19 @@ const columns = (open: (row: AdminProject) => void): DataTableColumns<AdminProje
       id: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <span className={row.original.status === null ? 'text-muted-foreground' : 'text-primary'}>
+        <span
+          className={
+            row.original.status === null
+              ? 'text-muted-foreground'
+              : 'text-primary'
+          }
+        >
           {statusLabel(row.original.status)}
           {row.original.budget_count > 1 && (
-            <span className="text-muted-foreground"> · {row.original.budget_count} budgets</span>
+            <span className="text-muted-foreground">
+              {' '}
+              · {row.original.budget_count} budgets
+            </span>
           )}
         </span>
       ),
@@ -81,13 +97,21 @@ const columns = (open: (row: AdminProject) => void): DataTableColumns<AdminProje
     col.accessor('total_price_inc_gst', {
       header: 'Total price (inc. GST)',
       cell: ({ row }) =>
-        row.original.budget_id === null ? '—' : money(row.original.total_price_inc_gst),
-      meta: { align: 'right', className: 'w-[150px] whitespace-nowrap tabular' },
+        row.original.budget_id === null
+          ? '—'
+          : money(row.original.total_price_inc_gst),
+      meta: {
+        align: 'right',
+        className: 'w-[150px] whitespace-nowrap tabular',
+      },
     }),
     col.accessor('updated_at', {
       header: 'Last updated',
       cell: ({ row }) => shortDate(row.original.updated_at),
-      meta: { align: 'right', className: 'w-[130px] whitespace-nowrap text-muted-foreground' },
+      meta: {
+        align: 'right',
+        className: 'w-[130px] whitespace-nowrap text-muted-foreground',
+      },
     }),
   ])
 
@@ -105,7 +129,10 @@ export function Projects() {
   const table = useMemo(
     () =>
       columns((row) =>
-        navigate({ to: '/projects/$projectId/$screen', params: { projectId: row.id, screen: 'details' } }),
+        navigate({
+          to: '/projects/$projectId/$screen',
+          params: { projectId: row.id, screen: 'details' },
+        }),
       ),
     [navigate],
   )
@@ -114,13 +141,21 @@ export function Projects() {
     <>
       <PageHead
         title="Project register"
-        subtitle={projects ? `Every project in the tool · ${projects.length} in all` : 'Every project in the tool'}
+        subtitle={
+          projects
+            ? `Every project in the tool · ${projects.length} in all`
+            : 'Every project in the tool'
+        }
       />
       <section className="overflow-hidden rounded-lg border bg-card">
         {isPending ? (
-          <div className="space-y-3 p-4" role="status" aria-label="Loading projects">
+          <div
+            className="space-y-3 p-4"
+            role="status"
+            aria-label="Loading projects"
+          >
             {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-9 animate-pulse rounded bg-muted" />
+              <Skeleton key={i} className="h-9" />
             ))}
           </div>
         ) : (
