@@ -21,6 +21,10 @@ function haystack<T extends RowData>(row: T, filters: DataTableFilter<T>[]) {
     .toLowerCase()
 }
 
+/** Whether a day, as YYYY-MM-DD, falls inside a range with either end open. */
+const inRange = (day: string, [from = '', to = '']: string[]) =>
+  (!from || day >= from) && (!to || day <= to)
+
 /** Rows passing the search and every active filter, except `skip`. */
 function narrow<T extends RowData>(
   rows: T[],
@@ -36,7 +40,11 @@ function narrow<T extends RowData>(
   return rows.filter(
     (row) =>
       (!q || haystack(row, filters).includes(q)) &&
-      active.every((f) => state[f.id].includes(f.value(row))),
+      active.every((f) =>
+        f.range
+          ? inRange(f.value(row), state[f.id])
+          : state[f.id].includes(f.value(row)),
+      ),
   )
 }
 

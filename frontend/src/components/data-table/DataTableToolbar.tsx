@@ -5,13 +5,23 @@ import type { ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { shortDate } from '@/lib/format/dates'
 
+import { DataTableDateRangeMenu } from './DataTableDateRangeMenu'
 import { DataTableFilterMenu } from './DataTableFilterMenu'
 import type { DataTableFilter } from './features'
 import { filterOptions, type FilterState } from './filtering'
 
 /** Values named in a badge before the rest collapse to a count. */
 const VALUES_SHOWN = 3
+
+const day = (value: string) => shortDate(`${value}T00:00`)
+
+/** A date range as a person reads it: "1 Oct 2026 to 2 Oct 2026", or "from" or "to" alone. */
+function rangeText([from = '', to = '']: string[]) {
+  if (from && to) return `${day(from)} to ${day(to)}`
+  return from ? `from ${day(from)}` : `to ${day(to)}`
+}
 
 interface DataTableToolbarProps<T extends RowData> {
   rows: T[]
@@ -50,16 +60,25 @@ export function DataTableToolbar<T extends RowData>({
     <div className="flex flex-col gap-2 px-6 pb-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-nowrap items-center gap-1 overflow-x-auto">
-          {filters.map((filter) => (
-            <DataTableFilterMenu
-              key={filter.id}
-              label={filter.label}
-              options={filterOptions(rows, filters, filter, state, search)}
-              selected={state[filter.id] ?? []}
-              onToggle={(value, checked) => toggle(filter.id, value, checked)}
-              onSet={(values) => onState({ ...state, [filter.id]: values })}
-            />
-          ))}
+          {filters.map((filter) =>
+            filter.range ? (
+              <DataTableDateRangeMenu
+                key={filter.id}
+                label={filter.label}
+                range={state[filter.id] ?? []}
+                onRange={(range) => onState({ ...state, [filter.id]: range })}
+              />
+            ) : (
+              <DataTableFilterMenu
+                key={filter.id}
+                label={filter.label}
+                options={filterOptions(rows, filters, filter, state, search)}
+                selected={state[filter.id] ?? []}
+                onToggle={(value, checked) => toggle(filter.id, value, checked)}
+                onSet={(values) => onState({ ...state, [filter.id]: values })}
+              />
+            ),
+          )}
         </div>
         <div className="ml-auto flex items-center gap-2">
           {searchable && (
@@ -85,9 +104,11 @@ export function DataTableToolbar<T extends RowData>({
             >
               <span className="truncate">
                 <span className="text-muted-foreground">{filter.label}: </span>
-                {values.slice(0, VALUES_SHOWN).join(', ')}
+                {filter.range
+                  ? rangeText(values)
+                  : values.slice(0, VALUES_SHOWN).join(', ')}
               </span>
-              {values.length > VALUES_SHOWN && (
+              {!filter.range && values.length > VALUES_SHOWN && (
                 <span className="shrink-0 text-muted-foreground">
                   +{values.length - VALUES_SHOWN} more
                 </span>

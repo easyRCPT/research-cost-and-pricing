@@ -17,3 +17,10 @@ const DATE_TIME = new Intl.DateTimeFormat('en-AU', {
 
 /** 28 Sept 2026, 2:32 pm: an audit trail has to tell two changes in an afternoon apart. */
 export const dateTime = (iso: string) => DATE_TIME.format(new Date(iso))
+
+/** The local day an instant falls on, as YYYY-MM-DD: the day a person sees it under. */
+export const isoDay = (iso: string) => {
+  const date = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
