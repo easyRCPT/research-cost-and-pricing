@@ -1,11 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
 
 import { homeFor, useAdminLogin } from '@/api/auth'
-import { Button } from '@/components/ui/button'
-import { ApiError } from '@/lib/api'
 
-import { AuthError, AuthShell, Field } from './AuthShell'
+import { AuthShell } from './AuthShell'
+import { SignInForm } from './SignInForm'
 
 /**
  * Its own page: no tabs, and no way to sign up.
@@ -18,18 +16,10 @@ export function AdminLogin() {
   const navigate = useNavigate()
   const adminLogin = useAdminLogin()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
-  const fields = adminLogin.error instanceof ApiError ? adminLogin.error.fields : {}
-
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault()
-    adminLogin.mutate(
-      { email, password },
-      { onSuccess: (me) => navigate({ to: homeFor(me), replace: true }) },
-    )
-  }
+  const submit = (credentials: { email: string; password: string }) =>
+    adminLogin.mutate(credentials, {
+      onSuccess: (me) => navigate({ to: homeFor(me), replace: true }),
+    })
 
   return (
     <AuthShell
@@ -37,31 +27,7 @@ export function AdminLogin() {
       title="Administrator sign in"
       intro="For Research, Innovation and Commercialisation staff who administer the tool."
     >
-      <form onSubmit={submit} className="grid gap-4">
-        <AuthError error={adminLogin.error} />
-        <Field
-          id="email"
-          label="Email"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          error={fields.email}
-          autoComplete="username"
-          autoFocus
-        />
-        <Field
-          id="password"
-          label="Password"
-          type="password"
-          value={password}
-          onChange={setPassword}
-          error={fields.password}
-          autoComplete="current-password"
-        />
-        <Button type="submit" disabled={adminLogin.isPending}>
-          {adminLogin.isPending ? 'Signing in…' : 'Sign in'}
-        </Button>
-      </form>
+      <SignInForm attempt={adminLogin} onSubmit={submit} />
     </AuthShell>
   )
 }
