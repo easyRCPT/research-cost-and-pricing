@@ -40,14 +40,11 @@ export function AccountMenu() {
         places to be -- their own costings and the ones waiting on them -- and
         this moves between the two.
       */}
-      {me.data.groups.includes(SUPERADMIN) && (
-        <Button
-          variant="bar"
-          size="lg"
-          onClick={() => navigate({ to: onConsole ? '/projects' : '/admin' })}
-        >
-          {onConsole ? <FolderIcon /> : <SettingsIcon />}
-          {onConsole ? 'My projects' : 'Admin'}
+      {/* In the console the project register already lists every costing. */}
+      {me.data.groups.includes(SUPERADMIN) && !onConsole && (
+        <Button variant="bar" size="lg" onClick={() => navigate({ to: '/admin' })}>
+          <SettingsIcon />
+          Admin
         </Button>
       )}
       {isApprover(me.data) && !inCosting && (
@@ -60,9 +57,6 @@ export function AccountMenu() {
           {onQueue ? 'My projects' : 'Approvals'}
         </Button>
       )}
-      <span className="hidden text-xs text-primary-foreground/65 md:inline">
-        {me.data.user.email}
-      </span>
       <Button
         variant="bar"
         size="lg"
@@ -72,6 +66,9 @@ export function AccountMenu() {
         <LogOutIcon />
         Sign out
       </Button>
+      <span className="hidden text-xs text-primary-foreground/65 md:inline">
+        {me.data.user.email}
+      </span>
     </div>
   )
 }
