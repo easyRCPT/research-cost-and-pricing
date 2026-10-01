@@ -59,13 +59,6 @@ def _set_groups(user: User, names: list[str]) -> None:
     if unknown:
         raise UnprocessableEntity(f"No such group: {', '.join(unknown)}.")
     user.groups.set(groups)
-    # In step with the group, so Django admin and the console never disagree
-    # about who administers the tool. is_staff too: Django admin checks it, and
-    # it is where faculties and departments are edited.
-    admin = SUPERADMIN in names
-    user.is_superuser = admin
-    user.is_staff = admin
-    user.save(update_fields=["is_superuser", "is_staff"])
 
 
 @transaction.atomic

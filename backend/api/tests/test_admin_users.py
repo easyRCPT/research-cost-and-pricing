@@ -1,6 +1,7 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from api.models import AuditLog, User, UserOrgAssignment
+from api.services.auth import groups_of
 from api.tests.factories import make_department, make_faculty, make_user
 
 BASE = "/api/admin/users/"
@@ -18,11 +19,7 @@ class AdminUsersTest(TestCase):
 
     @staticmethod
     def account(email, group, first="", last="") -> User:
-        user = make_user(email, groups=[group], first_name=first, last_name=last)
-        if group == "superadmin":
-            user.is_superuser = user.is_staff = True
-            user.save()
-        return user
+        return make_user(email, groups=[group], first_name=first, last_name=last)
 
     def patch(self, user, body):
         return self.client.patch(
@@ -100,8 +97,7 @@ class AdminUsersTest(TestCase):
         response = self.patch(self.admin, {"groups": ["staff"]})
 
         self.assertEqual(response.status_code, 200, response.content)
-        self.admin.refresh_from_db()
-        self.assertFalse(self.admin.is_superuser)
+        self.assertEqual(groups_of(self.admin), ["staff"])
 
     def test_a_dean_with_a_department_is_refused(self):
         response = self.assign(self.ruth, {"role": "dean", "department": "CIS"})
@@ -124,14 +120,58 @@ class AdminUsersTest(TestCase):
 
     # --------------------------------------------------------------- writes
 
-    def test_granting_superadmin_sets_the_django_flags_and_clearing_clears_them(self):
+    def test_granting_or_clearing_superadmin_leaves_the_django_flags_alone(self):
         self.patch(self.ruth, {"groups": ["staff", "superadmin"]})
         self.ruth.refresh_from_db()
-        self.assertTrue(self.ruth.is_superuser and self.ruth.is_staff)
-
-        self.patch(self.ruth, {"groups": ["staff"]})
-        self.ruth.refresh_from_db()
         self.assertFalse(self.ruth.is_superuser or self.ruth.is_staff)
+
+        dev = make_user("dev@unimelb.edu.au", groups=["superadmin"])
+        User.objects.filter(id=dev.id).update(is_staff=True, is_superuser=True)
+        self.patch(dev, {"groups": ["staff"]})
+        dev.refresh_from_db()
+        self.assertTrue(dev.is_superuser and dev.is_staff)
+
+        self.patch(dev, {"groups": ["staff", "superadmin"]})
+        dev.refresh_from_db()
+        self.assertTrue(dev.is_superuser and dev.is_staff)
+
+    def test_creating_a_superadmin_leaves_the_django_flags_off(self):
+        response = self.client.post(
+            BASE,
+            {
+                "email": "new@unimelb.edu.au",
+                "password": "demo12345",
+                "first_name": "New",
+                "last_name": "Admin",
+                "groups": ["superadmin"],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 201, response.content)
+        created = User.objects.get(email="new@unimelb.edu.au")
+        self.assertFalse(created.is_superuser or created.is_staff)
+
+    def test_a_superadmin_without_the_flags_reaches_the_console_but_not_django_admin(
+        self,
+    ):
+        self.assertEqual(self.client.get(BASE).status_code, 200)
+        self.assertNotEqual(self.client.get("/admin/").status_code, 200)
+
+    # Plain storage: CI renders the admin page without running collectstatic.
+    @override_settings(
+        STORAGES={
+            "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+            },
+        }
+    )
+    def test_a_createsuperuser_account_reaches_django_admin(self):
+        dev = User.objects.create_superuser(email="dev@unimelb.edu.au", password="x")
+        self.client.force_login(dev)
+
+        self.assertEqual(self.client.get("/admin/").status_code, 200)
 
     def test_an_unknown_group_is_refused(self):
         self.assertEqual(self.patch(self.ruth, {"groups": ["wizard"]}).status_code, 422)
