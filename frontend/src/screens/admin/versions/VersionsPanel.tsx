@@ -29,12 +29,9 @@ export function VersionsPanel({
   const { data: versions } = useLookupVersions()
 
   return (
-    <Panel
-      title="Versions"
-      description="A version is the rates some costing was priced on. Saved changes go into the current version until a costing is submitted on it; the next save then starts a new one."
-      className="mt-4"
-    >
-      <Grid>
+    <Panel>
+      {/* The page scrolls, not the table. */}
+      <Grid className="max-h-none overflow-auto">
         <thead>
           <tr>
             <Th>Version</Th>

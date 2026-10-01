@@ -99,8 +99,10 @@ test('a costing waiting on a role nobody holds is shown to RIC and named to its 
     `Unheaded ${code} has no head of department`,
   )
   await page.goto('/admin/lookups')
-  await page.getByRole('tablist', { name: 'Reference tables' }).getByRole('tab', { name: 'Departments' }).click()
-  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('No head of department')
+  await page.getByRole('tablist', { name: 'Lookup tables' }).getByRole('tab', { name: 'Org Units', exact: true }).click()
+  await page.getByRole('tab', { name: 'Departments', exact: true }).click()
+  await page.getByRole('searchbox', { name: 'Search' }).fill(code)
+  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('Unassigned')
 })
 
 test('a head of department is found by searching, not scrolling (#69)', async ({ page }) => {

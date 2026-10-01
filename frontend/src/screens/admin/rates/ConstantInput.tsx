@@ -59,10 +59,10 @@ export function ConstantInput({
   const errorId = useId()
 
   return (
-    <div className="grid justify-items-end gap-0.5">
+    <div className="grid justify-items-start gap-0.5">
       <div className="flex items-center gap-2">
         <Input
-          className="tabular h-8 w-32 text-right"
+          className="tabular h-7 w-32 text-right"
           inputMode="decimal"
           value={draft ?? String(value)}
           aria-label={label}
@@ -79,11 +79,10 @@ export function ConstantInput({
             if (!error) setDraft(null)
           }}
         />
-        {percent && (
-          <span className="tabular w-20 text-left text-muted-foreground">
-            = {asPercent(value)}
-          </span>
-        )}
+        {/* Held open when empty too, so every constant's field lines up. */}
+        <span className="tabular w-16 text-left text-muted-foreground">
+          {percent && `= ${asPercent(value)}`}
+        </span>
       </div>
       {error && (
         <span id={errorId} className="text-[12px] text-destructive">

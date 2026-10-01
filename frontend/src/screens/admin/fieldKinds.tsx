@@ -67,7 +67,7 @@ export const KINDS: Record<FieldKind, Kind> = {
   text: {
     input: ({ value, label, error, errorId, onChange }) => (
       <Input
-        className="h-8 min-w-48"
+        className="h-7 w-full min-w-48"
         value={String(value ?? '')}
         onChange={(event) => onChange(event.target.value)}
         aria-label={label}
@@ -83,7 +83,7 @@ export const KINDS: Record<FieldKind, Kind> = {
   number: {
     input: ({ value, label, step, error, errorId, onChange }) => (
       <NumberInput
-        className="tabular ml-auto h-8 w-36 text-right"
+        className="tabular ml-auto h-7 w-32 text-right"
         step={step}
         min={0}
         value={Number(value)}

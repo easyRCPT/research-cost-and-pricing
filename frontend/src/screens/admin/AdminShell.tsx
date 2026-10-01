@@ -3,11 +3,17 @@ import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { LookupSkeleton } from '@/components/lookups-tabs/LookupSkeleton'
 import { AppBoundary, AppShell, Sidebar, type SidebarSection } from '@/components/shell'
 
-type AdminScreen = 'overview' | 'lookups' | 'users' | 'projects' | 'audit'
+type AdminScreen = 'overview' | 'lookups' | 'versions' | 'users' | 'projects' | 'audit'
 
 const SECTIONS: SidebarSection<AdminScreen>[] = [
   { label: 'Console', items: [{ id: 'overview', label: 'Overview' }] },
-  { label: 'Reference data', items: [{ id: 'lookups', label: 'Lookup tables' }] },
+  {
+    label: 'Reference data',
+    items: [
+      { id: 'lookups', label: 'Lookup tables' },
+      { id: 'versions', label: 'Version history' },
+    ],
+  },
   { label: 'People', items: [{ id: 'users', label: 'Users and approvers' }] },
   {
     label: 'Records',
@@ -21,7 +27,8 @@ const SECTIONS: SidebarSection<AdminScreen>[] = [
 /**
  * The admin console's frame (#62): the calculator's own shell and rail, so the
  * two read as one product. Faculties, departments and the other reference
- * lists are tabs of the lookup tables screen (#70, #144), beside the rates.
+ * lists are tabs of the lookup tables screen (#70, #144), beside the rates;
+ * the rates' versions have a screen of their own.
  */
 export function AdminShell() {
   const navigate = useNavigate()

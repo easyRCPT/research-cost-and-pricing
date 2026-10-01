@@ -1,2 +1,2 @@
-export { LookupTabPanel } from './LookupTabPanel'
-export { LOOKUP_TABS } from './lookup-tabs'
+export { LOOKUP_TABS, type LookupTabValue } from './lookup-tabs'
+export { type LookupTabView, LookupTabsView } from './LookupTabsView'

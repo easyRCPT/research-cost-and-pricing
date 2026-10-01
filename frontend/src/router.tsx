@@ -21,6 +21,7 @@ import { LookupEditor } from '@/screens/admin/LookupEditor'
 import { Overview } from '@/screens/admin/Overview'
 import { Projects as ProjectRegister } from '@/screens/admin/Projects'
 import { Users } from '@/screens/admin/Users'
+import { VersionHistory } from '@/screens/admin/VersionHistory'
 import { AdminLogin } from '@/screens/auth/AdminLogin'
 import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
@@ -134,6 +135,14 @@ const adminLookupsRoute = createRoute({
   component: LookupEditor,
 })
 
+const adminVersionsRoute = createRoute({
+  ...inAdminShell,
+  path: 'versions',
+  validateSearch: (search: Record<string, unknown>): { version?: number } =>
+    typeof search.version === 'number' ? { version: search.version } : {},
+  component: VersionHistory,
+})
+
 const adminUsersRoute = createRoute({
   ...inAdminShell,
   path: 'users',
@@ -216,6 +225,7 @@ const routeTree = rootRoute.addChildren([
   adminRoute.addChildren([
     adminIndexRoute,
     adminLookupsRoute,
+    adminVersionsRoute,
     adminUsersRoute,
     adminProjectsRoute,
     adminAuditRoute,

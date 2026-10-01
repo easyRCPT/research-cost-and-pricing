@@ -1,5 +1,5 @@
 export { DataTable } from './DataTable'
-export { TableCard } from './TableCard'
+export { TableCard, type TableCardTable } from './TableCard'
 export {
   columnHelper,
   type DataTableColumns,

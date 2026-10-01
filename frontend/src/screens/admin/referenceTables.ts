@@ -34,6 +34,8 @@ export interface ReferenceTableSpec {
    * be, when nothing uses it; the server says what does when something does.
    */
   removable: boolean
+  /** Fields a long table can be filtered by. */
+  filterBy?: string[]
 }
 
 const code = { field: 'code', label: 'Code', kind: 'text' } as const
@@ -54,6 +56,7 @@ export const REFERENCE_TABLES: ReferenceTableSpec[] = [
       { field: 'faculty_code', label: 'Faculty', kind: 'faculty' },
     ],
     removable: false,
+    filterBy: ['school', 'faculty_code'],
   },
   { id: 'activities', label: 'Activities', noun: 'activity', key: code, fields: [name], removable: true },
   { id: 'regions', label: 'Regions', noun: 'region', key: code, fields: [name], removable: true },
@@ -68,6 +71,7 @@ export const REFERENCE_TABLES: ReferenceTableSpec[] = [
       { field: 'description', label: 'Description', kind: 'text', named: true },
     ],
     removable: true,
+    filterBy: ['external_party'],
   },
 ]
 

@@ -3,7 +3,7 @@ import { fieldErrors } from '@/lib/api'
 
 import { KINDS } from './fieldKinds'
 import type { Refused } from './rates/types'
-import { type RateTableSpec, tableSpec, type ValueField } from './rateTables'
+import { type KeyField, type RateTableSpec, tableSpec, type ValueField } from './rateTables'
 
 export type Row = Record<string, unknown>
 export type Key = Record<string, unknown>
@@ -34,9 +34,15 @@ export const typed = (field: ValueField, raw: unknown) => KINDS[field.kind].pars
 /** A field's value as the review and the "was" line show it. */
 export const shown = (field: ValueField, value: unknown) => KINDS[field.kind].show(value)
 
+/** One key field's value as a person reads it. */
+export const keyShown = (k: KeyField, value: unknown) => {
+  if (value === null || value === undefined || value === '') return '—'
+  return k.format ? k.format(String(value)) : String(value)
+}
+
 /** "Fortnight · Academic · Level A.1", as a person reads a row's name. */
 export const keyText = (spec: RateTableSpec, key: Key) =>
-  spec.key.map((k) => (key[k.field] === null || key[k.field] === '' ? '—' : String(key[k.field]))).join(' · ')
+  spec.key.map((k) => keyShown(k, key[k.field])).join(' · ')
 
 /** One row of one table, whichever change is staged against it. */
 export const stagedId = (table: RateTable, key: Key) =>

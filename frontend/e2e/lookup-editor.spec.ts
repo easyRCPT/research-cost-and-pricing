@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import {
   apiWrite,
@@ -63,11 +63,24 @@ async function openEditor(page: Page) {
   await expect(page.getByRole('heading', { name: 'Lookup tables' })).toBeVisible()
 }
 
+async function openTab(page: Page, tab: string) {
+  await page.getByRole('tablist', { name: 'Lookup tables' }).getByRole('tab', { name: new RegExp(`^${tab}`) }).click()
+}
+
+/** Fills a rate table's Add row dialog and adds the row. */
+async function addRow(page: Page, fill: (form: Locator) => Promise<void>) {
+  await page.getByRole('button', { name: 'Add row' }).click()
+  const form = page.getByRole('dialog')
+  await fill(form)
+  await form.getByRole('button', { name: 'Add', exact: true }).click()
+}
+
 async function stageYear(page: Page, year: number, increase: string) {
-  await page.getByRole('tab', { name: /EBA increases/ }).click()
-  await page.getByLabel('Year', { exact: true }).fill(String(year))
-  await page.getByLabel('Increase', { exact: true }).fill(increase)
-  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await openTab(page, 'EBA Increases')
+  await addRow(page, async (form) => {
+    await form.getByLabel('Year', { exact: true }).fill(String(year))
+    await form.getByLabel('Increase', { exact: true }).fill(increase)
+  })
 }
 
 async function reviewAndSave(page: Page, note: string) {
@@ -95,9 +108,9 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   await stageYear(page, 2090, '0.031')
 
   // A change in another table, then back: both are still held.
-  await page.getByRole('tab', { name: /Salary rates/ }).click()
+  await openTab(page, 'Salary Rates')
   // The rates say which year they are for (#148).
-  await expect(page.getByText(/These are \d{4} rates: each later year adds that year's EBA increase/)).toBeVisible()
+  await expect(page.getByText(/These are \d{4} rates: each later year adds that year.s EBA increase/)).toBeVisible()
   const firstRate = page.getByRole('spinbutton', { name: /^Rate for / }).first()
   const was = await firstRate.inputValue()
   await firstRate.fill(String(Number(was) + 1))
@@ -112,7 +125,7 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   expect(await ebaYears(page)).not.toContain(2090)
 
   // Undo the salary edit: only the two years go in the set.
-  await page.getByRole('tab', { name: /Salary rates/ }).click()
+  await openTab(page, 'Salary Rates')
   await page.getByRole('button', { name: /^Undo the change to / }).click()
   await expect(bar).toContainText('2 changes across 1 table')
 
@@ -129,8 +142,10 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   await expect(page.getByRole('status').filter({ hasText: '2 changes saved' })).toBeVisible()
   await expect(bar).toHaveCount(0)
   expect(await ebaYears(page)).toEqual(expect.arrayContaining([2090, 2091]))
-  // The versions list shows the set, with its note and size.
+  // The version history shows the set, with its note and size.
+  await page.goto('/admin/versions')
   await expect(page.getByRole('listitem').filter({ hasText: note })).toContainText('2 changes')
+  await openEditor(page)
 
   // And one entry in the log for the whole set.
   const log = await (await page.request.get('/api/admin/audit/?action=admin.lookup.changes&limit=5')).json()
@@ -138,7 +153,7 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   expect(entry.detail.changes).toHaveLength(2)
 
   // Removing is a change like any other.
-  await page.getByRole('tab', { name: /EBA increases/ }).click()
+  await openTab(page, 'EBA Increases')
   await page.getByRole('button', { name: 'Remove 2090' }).click()
   await page.getByRole('button', { name: 'Remove 2091' }).click()
   await reviewAndSave(page, 'e2e: take the years out again')
@@ -177,7 +192,7 @@ test('leaving with unsaved changes asks first (#138)', async ({ page }) => {
   const rail = page.getByRole('navigation', { name: 'Admin sections' })
 
   await rail.getByRole('button', { name: 'Overview' }).click()
-  const ask = page.getByRole('alertdialog', { name: 'Unsaved changes' })
+  const ask = page.getByRole('alertdialog', { name: 'Leave without saving?' })
   await expect(ask).toContainText('1 change across 1 table has not been saved')
   await ask.getByRole('button', { name: 'Stay' }).click()
   await expect(page).toHaveURL('/admin/lookups')
@@ -219,16 +234,18 @@ test('a set that starts a new version says who was priced on the old one, and li
 
 test('a non-staff category is a rate: added, changed and removed through sets (#144)', async ({ page }) => {
   await openEditor(page)
-  await page.getByRole('tablist', { name: 'Rate tables' }).getByRole('tab', { name: /Non-staff categories/ }).click()
-  await page.getByLabel('Ledger ID', { exact: true }).fill(String(LEDGER))
-  await page.getByLabel('Cost group', { exact: true }).fill('E2E group')
-  await page.getByLabel('Expense type', { exact: true }).fill('E2E expense')
-  await page.getByLabel('No 10% or indirect rate', { exact: true }).check()
-  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await openTab(page, 'Non-Staff Expenses')
+  await addRow(page, async (form) => {
+    await form.getByLabel('Ledger ID', { exact: true }).fill(String(LEDGER))
+    await form.getByLabel('Cost group', { exact: true }).fill('E2E group')
+    await form.getByLabel('Expense type', { exact: true }).fill('E2E expense')
+    await form.getByLabel('No 10% or indirect rate', { exact: true }).check()
+  })
   await reviewAndSave(page, 'e2e: a category')
   await expect(page.getByRole('status').filter({ hasText: '1 change saved' })).toBeVisible()
 
-  // Its flag prices a costing, so it is changed in a set too.
+  // Its flag prices a costing, so it is changed in a set too. The table is long, so search for it.
+  await page.getByRole('searchbox', { name: 'Search' }).fill(String(LEDGER))
   const row = page.getByRole('row').filter({ hasText: String(LEDGER) })
   await row.getByRole('checkbox', { name: `No 10% or indirect rate for ${LEDGER}` }).uncheck()
   await expect(row).toContainText('was Yes')
@@ -250,8 +267,8 @@ test('a non-staff category is a rate: added, changed and removed through sets (#
 
 test('constants read as what they are, take 30% or 0.30, and refuse a bare 25 (#151)', async ({ page }) => {
   await openEditor(page)
-  await page.getByRole('tablist', { name: 'Rate tables' }).getByRole('tab', { name: /Constants/ }).click()
-  const floor = page.getByRole('row').filter({ hasText: 'Minimum Margin' })
+  await openTab(page, 'Constants')
+  const floor = page.getByRole('row').filter({ hasText: 'Minimum margin' })
   await expect(floor).toContainText('A budget priced below this margin needs the Dean')
   const value = floor.getByRole('textbox', { name: 'Value for minimum_margin' })
 

@@ -66,6 +66,7 @@ export function DataTableToolbar<T extends RowData>({
             <Input
               type="search"
               placeholder="Search"
+              aria-label="Search"
               value={search}
               onChange={(event) => onSearch(event.target.value)}
               className="h-7 w-56 bg-card text-[13px]"

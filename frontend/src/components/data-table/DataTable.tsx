@@ -1,6 +1,6 @@
 import { type RowData, useTable } from '@tanstack/react-table'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ComponentProps, type ReactNode, useMemo, useState } from 'react'
 
 import { Td, Th } from '@/components/shell'
 import { cn } from '@/lib/utils'
@@ -32,6 +32,9 @@ interface DataTableProps<T extends RowData> {
   flush?: boolean
   /** Buttons for the whole table, such as Add row, beside the search. */
   actions?: ReactNode
+  /** Rows shown whatever the search and filters say. */
+  keep?: (row: T) => boolean
+  rowProps?: (row: T) => ComponentProps<'tr'>
 }
 
 export function DataTable<T extends RowData>({
@@ -45,14 +48,18 @@ export function DataTable<T extends RowData>({
   emptyMessage = 'No rows seeded yet.',
   flush = false,
   actions,
+  keep,
+  rowProps,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('')
   const [filterState, setFilterState] = useState<FilterState>({})
 
-  const visible = useMemo(
-    () => applyFilters(rows, filters, filterState, search),
-    [rows, filters, filterState, search],
-  )
+  const visible = useMemo(() => {
+    const shown = applyFilters(rows, filters, filterState, search)
+    if (!keep) return shown
+    const passed = new Set(shown)
+    return rows.filter((row) => passed.has(row) || keep(row))
+  }, [rows, filters, filterState, search, keep])
 
   const table = useTable({
     features: dataTableFeatures,
@@ -60,6 +67,8 @@ export function DataTable<T extends RowData>({
     data: visible,
     getRowId,
     enableSorting: sortable,
+    // An edit changes the rows too, and must not send the table back to page 1.
+    autoResetPageIndex: false,
     initialState: { pagination: { pageIndex: 0, pageSize: 20 } },
   })
 
@@ -72,9 +81,15 @@ export function DataTable<T extends RowData>({
             filters={filters}
             searchable={searchable}
             search={search}
-            onSearch={setSearch}
+            onSearch={(value) => {
+              setSearch(value)
+              table.setPageIndex(0)
+            }}
             state={filterState}
-            onState={setFilterState}
+            onState={(state) => {
+              setFilterState(state)
+              table.setPageIndex(0)
+            }}
             actions={
               <>
                 {hideable && <DataTableColumnMenu table={table} />}
@@ -137,7 +152,7 @@ export function DataTable<T extends RowData>({
               </tr>
             )}
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} {...rowProps?.(row.original)}>
                 {row.getVisibleCells().map((cell) => (
                   <Td
                     key={cell.id}

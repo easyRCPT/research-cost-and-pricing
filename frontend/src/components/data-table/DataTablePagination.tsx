@@ -48,7 +48,9 @@ export function DataTablePagination<T extends RowData>({
   return (
     <footer className="grid min-h-14 items-center gap-3 px-6 py-3 text-[13px] text-muted-foreground md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-6">
       <span className="tabular">
-        {paged ? `Showing ${first}–${last} of ${total} rows` : `${total} rows`}
+        {paged
+          ? `Showing ${first}–${last} of ${total} rows`
+          : `${total} ${total === 1 ? 'row' : 'rows'}`}
         {total !== unfiltered && ` · filtered from ${unfiltered}`}
       </span>
       {paged && (
