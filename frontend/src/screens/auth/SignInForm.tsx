@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ApiError } from '@/lib/api'
+import { fieldErrors } from '@/lib/api'
 
 import { AuthError, Field } from './AuthShell'
 
@@ -17,7 +17,7 @@ export function SignInForm({
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const fields = attempt.error instanceof ApiError ? attempt.error.fields : {}
+  const fields = fieldErrors(attempt.error)
 
   return (
     <form

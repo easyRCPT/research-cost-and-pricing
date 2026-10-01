@@ -6,7 +6,7 @@ import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { InlineConfirm } from '@/components/ui/inline-confirm'
-import { ApiError } from '@/lib/api'
+import { messageOf } from '@/lib/api'
 import { dateTime, shortDate } from '@/lib/format/dates'
 
 import type { RatesMoved } from './types'
@@ -108,10 +108,7 @@ export function VersionRow({
                   },
                   onError: (error) =>
                     toast.error('Not restored', {
-                      description:
-                        error instanceof ApiError
-                          ? error.message
-                          : 'Try again.',
+                      description: messageOf(error),
                     }),
                 })
               }

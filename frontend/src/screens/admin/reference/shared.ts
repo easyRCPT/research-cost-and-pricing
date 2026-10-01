@@ -1,13 +1,13 @@
-import { ApiError } from '@/lib/api'
+import { fieldErrors, messageOf } from '@/lib/api'
 
 export type Row = Record<string, unknown>
 export type Faculty = { code: string; name: string }
 export type Refusal = { message: string; fields: Record<string, string> }
 
-export const refusalOf = (error: unknown): Refusal =>
-  error instanceof ApiError
-    ? { message: error.message, fields: error.fields }
-    : { message: 'Not saved. Try again.', fields: {} }
+export const refusalOf = (error: unknown): Refusal => ({
+  message: messageOf(error, 'Not saved. Try again.'),
+  fields: fieldErrors(error),
+})
 
 /** The server's complaint about a field; it names the faculty field `faculty`. */
 export const fieldError = (

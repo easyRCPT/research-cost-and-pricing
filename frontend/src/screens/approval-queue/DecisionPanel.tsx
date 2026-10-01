@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { type Decision, type QueueRow, useDecide } from '@/api/approvals'
 import { useMe } from '@/api/auth'
 import { Panel } from '@/components/shell'
+import { ApiErrorAlert } from '@/components/shell/ApiErrorAlert'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ApiError } from '@/lib/api'
 import { DeanTriggers } from '@/screens/approvals/DeanTriggers'
@@ -98,11 +99,7 @@ export function DecisionPanel({
           </AlertDescription>
         </Alert>
       )}
-      {decide.error instanceof ApiError && !tooLate && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertDescription>{decide.error.message}</AlertDescription>
-        </Alert>
-      )}
+      {!tooLate && <ApiErrorAlert error={decide.error} className="mt-4" />}
 
       {stage === 'choose' && !tooLate && <ChooseStage onChoose={choose} />}
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import type { ChangesApplied, RateTable } from '@/api/admin-lookups'
-import { ApiError } from '@/lib/api'
+import { messageOf } from '@/lib/api'
 import { asPercent } from '@/lib/format/constants'
 import type { Refused } from '@/screens/admin/rates/types'
 import { idOf, refusedChange, type Staged } from '@/screens/admin/stagedChanges'
@@ -68,7 +68,7 @@ export function useStagedChanges(
     if (which)
       onShowTable(staged.find((change) => idOf(change) === which.id)!.table)
     toast.error('Nothing was saved', {
-      description: error instanceof ApiError ? error.message : 'Try again.',
+      description: messageOf(error),
     })
   }
 

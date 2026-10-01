@@ -1,5 +1,5 @@
 import type { LookupChange, RateTable } from '@/api/admin-lookups'
-import { ApiError } from '@/lib/api'
+import { fieldErrors } from '@/lib/api'
 
 import { KINDS } from './fieldKinds'
 import { type RateTableSpec, tableSpec, type ValueField } from './rateTables'
@@ -92,8 +92,7 @@ export function toRequest(change: Staged): LookupChange {
  * in the request, which is its place in `staged`.
  */
 export function refusedChange(error: unknown, staged: Staged[]): { id: string; message: string } | null {
-  if (!(error instanceof ApiError)) return null
-  for (const [attr, message] of Object.entries(error.fields)) {
+  for (const [attr, message] of Object.entries(fieldErrors(error))) {
     const index = /^changes\.(\d+)/.exec(attr)?.[1]
     const change = index === undefined ? undefined : staged[Number(index)]
     if (change) return { id: idOf(change), message }

@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { type AccountType, homeFor, useSignup } from '@/api/auth'
 import { Button } from '@/components/ui/button'
-import { ApiError } from '@/lib/api'
+import { fieldErrors } from '@/lib/api'
 
 import { AccountTabs } from './AccountTabs'
 import { AuthError, AuthShell, Field } from './AuthShell'
@@ -20,7 +20,7 @@ export function Signup() {
 
   // The 422 names the field it is about, so it renders against that field
   // rather than as one message at the top.
-  const fields = signup.error instanceof ApiError ? signup.error.fields : {}
+  const fields = fieldErrors(signup.error)
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault()

@@ -58,6 +58,16 @@ export class ApiError extends Error {
   }
 }
 
+/** The server's message for an ApiError; `fallback` for anything else. */
+export function messageOf(error: unknown, fallback = 'Try again.'): string {
+  return error instanceof ApiError ? error.message : fallback
+}
+
+/** The server's message per field for an ApiError; none for anything else. */
+export function fieldErrors(error: unknown): Record<string, string> {
+  return error instanceof ApiError ? error.fields : {}
+}
+
 /** Unwraps the data of a successful request or an ApiError if failed */
 export function unwrap<T>(result: {
   data?: T
