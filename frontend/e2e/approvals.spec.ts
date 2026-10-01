@@ -1,6 +1,5 @@
 import {
   createProject,
-  DEMO,
   expect,
   readyProject,
   signIn,
@@ -133,7 +132,7 @@ test("an approver's register lists their area at any status, and Back returns to
   await expect(page).toHaveURL('/approvals/register')
   await page.getByPlaceholder('Search').fill(title)
   const row = page.getByRole('row').filter({ hasText: title })
-  await expect(row).toContainText(DEMO.researcher)
+  await expect(row).toContainText('Ruth Researcher')
   await expect(row).toContainText('HoD review')
 
   // The status filter is the table's own, and keeps the row while it matches.

@@ -17,7 +17,7 @@ test("the register finds anyone's costing, read-only, and the log has its submis
   await rail.getByRole('button', { name: 'Project register' }).click()
   await page.getByPlaceholder('Search').fill(title)
   const row = page.getByRole('row').filter({ hasText: title })
-  await expect(row).toContainText(DEMO.researcher)
+  await expect(row).toContainText('Ruth Researcher')
   await expect(row).toContainText('HoD review')
 
   await row.getByRole('button', { name: title }).click()
