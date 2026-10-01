@@ -29,7 +29,12 @@ export function AppShell({
         )}
       >
         {sidebar}
-        <main className="w-full min-w-0 max-w-7xl px-4 py-6 pb-24 md:px-8 md:py-7 print:max-w-none print:px-0 print:py-0">
+        <main
+          className={cn(
+            'w-full min-w-0 px-4 py-6 pb-24 md:px-8 md:py-7 print:max-w-none print:px-0 print:py-0',
+            sidebar && 'max-w-7xl',
+          )}
+        >
           {children}
         </main>
       </div>
