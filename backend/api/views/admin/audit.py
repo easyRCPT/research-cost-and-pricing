@@ -16,6 +16,10 @@ class AuditEntrySerializer(serializers.Serializer):
     actor_email = serializers.EmailField(
         source="actor.email", allow_null=True, default=None
     )
+    # Their name, or their email when they have none.
+    actor_name = serializers.CharField(
+        source="actor.display_name", allow_null=True, default=None
+    )
     action = serializers.CharField()
     object_type = serializers.CharField()
     object_id = serializers.CharField()
