@@ -7,15 +7,13 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
-import { api, ApiError } from '@/lib/api'
+import { api, unwrap } from '@/lib/api'
 import type { ProjectCreate, ProjectRow, Status } from '@/types'
 
 export const projectsQuery = queryOptions({
   queryKey: ['projects'] as const,
   queryFn: async (): Promise<ProjectRow[]> => {
-    const { data, error, response } = await api.GET('/api/projects/')
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.GET('/api/projects/'))
   },
 })
 
@@ -32,11 +30,11 @@ export function useProjectsWithStatus(status: Status | null) {
   return useQuery({
     queryKey: [...projectsQuery.queryKey, { status }] as const,
     queryFn: async (): Promise<ProjectRow[]> => {
-      const { data, error, response } = await api.GET('/api/projects/', {
-        params: { query: status ? { status } : {} },
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(
+        await api.GET('/api/projects/', {
+          params: { query: status ? { status } : {} },
+        }),
+      )
     },
     placeholderData: keepPreviousData,
   })
@@ -47,11 +45,7 @@ export function useCreateProject() {
 
   return useMutation({
     mutationFn: async (body: ProjectCreate): Promise<ProjectRow> => {
-      const { data, error, response } = await api.POST('/api/projects/', {
-        body,
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(await api.POST('/api/projects/', { body }))
     },
     // The response is the row the list wants, so the new project shows without
     // a second round trip. It sorts first because it was just touched.
