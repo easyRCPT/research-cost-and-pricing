@@ -1,48 +1,35 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { type AdminUser, type Role, useAddAssignment } from '@/api/admin-users'
-import { useLookups } from '@/api/lookups'
+import { searchDepartments, searchFaculties } from '@/api/org-search'
 import { Button } from '@/components/ui/button'
 import { OptionSelect } from '@/components/ui/option-select'
+import { type SearchOption,SearchSelect } from '@/components/ui/search-select'
 
 import { nameOf, refused, ROLE_LABEL } from './labels'
 
 export function AddAssignment({ user }: { user: AdminUser }) {
-  const { data: lookups } = useLookups()
   const add = useAddAssignment()
   const [role, setRole] = useState<Role>('hod')
-  const [unit, setUnit] = useState('')
+  const [unit, setUnit] = useState<SearchOption | null>(null)
 
   // A dean is scoped to a faculty, everyone else to a department -- the same
   // rule the server holds, so the screen offers only what it would accept.
-  const faculties = useMemo(() => {
-    const seen = new Map<string, string>()
-    for (const d of lookups.departments) seen.set(d.faculty_code, d.faculty)
-    return [...seen]
-      .map(([code, name]) => ({ code, name }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [lookups.departments])
-  const units =
-    role === 'dean'
-      ? faculties
-      : lookups.departments
-          .map((d) => ({ code: d.code, name: d.name }))
-          .sort((a, b) => a.name.localeCompare(b.name))
-
   const submit = () =>
+    unit &&
     add.mutate(
       {
         id: user.id,
         role,
-        department: role === 'dean' ? null : unit,
-        faculty: role === 'dean' ? unit : null,
+        department: role === 'dean' ? null : unit.value,
+        faculty: role === 'dean' ? unit.value : null,
       },
       {
         onSuccess: () => {
-          setUnit('')
+          setUnit(null)
           toast.success(
-            `${nameOf(user)} is now ${ROLE_LABEL[role].toLowerCase()} for ${units.find((u) => u.code === unit)?.name}`,
+            `${nameOf(user)} is now ${ROLE_LABEL[role].toLowerCase()} for ${unit.label}`,
           )
         },
         onError: refused,
@@ -57,7 +44,7 @@ export function AddAssignment({ user }: { user: AdminUser }) {
           value={role}
           onValueChange={(next) => {
             setRole(next as Role)
-            setUnit('')
+            setUnit(null)
           }}
           options={[
             { value: 'hod', label: 'Head of Department' },
@@ -65,16 +52,18 @@ export function AddAssignment({ user }: { user: AdminUser }) {
             { value: 'member', label: 'Member' },
           ]}
           size="sm"
-          className="w-48 bg-white"
+          className="w-48"
           aria-label="Role"
         />
-        <OptionSelect
+        <SearchSelect
+          key={role === 'dean' ? 'faculties' : 'departments'}
           value={unit}
-          onValueChange={setUnit}
-          options={units.map((u) => ({ value: u.code, label: u.name }))}
+          onChange={setUnit}
+          searchKey={role === 'dean' ? 'faculties' : 'departments'}
+          search={role === 'dean' ? searchFaculties : searchDepartments}
           placeholder={role === 'dean' ? 'Faculty…' : 'Department…'}
           size="sm"
-          className="w-72 bg-white"
+          className="w-72"
           aria-label={role === 'dean' ? 'Faculty' : 'Department'}
         />
         <Button size="sm" disabled={!unit || add.isPending} onClick={submit}>
