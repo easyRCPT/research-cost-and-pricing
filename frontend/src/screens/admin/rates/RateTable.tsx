@@ -1,5 +1,5 @@
 import { Grid, Th } from '@/components/shell'
-import { cn } from '@/lib/utils'
+import { KINDS } from '@/screens/admin/fieldKinds'
 import type { RateTableSpec } from '@/screens/admin/rateTables'
 import {
   idOf,
@@ -43,7 +43,7 @@ export function RateTable({
           {spec.values.map((v) => (
             <Th
               key={v.field}
-              className={cn(v.kind === 'number' && 'text-right')}
+              className={KINDS[v.kind].align}
             >
               {v.label}
             </Th>

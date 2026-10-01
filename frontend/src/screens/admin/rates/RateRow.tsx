@@ -2,6 +2,7 @@ import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { KINDS } from '@/screens/admin/fieldKinds'
 import type { RateTableSpec } from '@/screens/admin/rateTables'
 import { type Key, keyText, shown, type Values } from '@/screens/admin/stagedChanges'
 
@@ -80,7 +81,7 @@ export function RateRow({
       {spec.values.map((field) => (
         <Td
           key={field.field}
-          className={cn(field.kind === 'number' && 'text-right')}
+          className={KINDS[field.kind].align}
         >
           {removed ? (
             <span className="tabular line-through">

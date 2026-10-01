@@ -3,9 +3,11 @@ import { toast } from 'sonner'
 
 import { useReferenceWrite } from '@/api/admin-lookups'
 import { Button } from '@/components/ui/button'
-import { FieldInput } from '@/screens/admin/reference/FieldInput'
+import { FieldInput } from '@/screens/admin/FieldInput'
 import {
   type Faculty,
+  facultyOptions,
+  fieldError,
   type Refusal,
   refusalOf,
 } from '@/screens/admin/reference/shared'
@@ -67,15 +69,14 @@ export function AddReferenceRow({
           >
             {f.label}
             <FieldInput
-              field={f}
+              kind={f.kind}
               value={values[f.field]}
-              faculties={faculties}
+              options={facultyOptions(faculties)}
               label={f.label}
-              error={
-                refusal?.fields[f.field] ??
-                (f.kind === 'faculty' ? refusal?.fields.faculty : undefined)
+              error={fieldError(refusal, f)}
+              onChange={(value) =>
+                setValues({ ...values, [f.field]: String(value) })
               }
-              onChange={(value) => setValues({ ...values, [f.field]: value })}
             />
           </label>
         ))}
