@@ -1,3 +1,2 @@
-export { useNonStaffLines } from './nonStaff'
-export { useStaffLines } from './staff'
+export { useLines } from './useLines'
 export type { NonStaffLines, StaffLines } from './shared'

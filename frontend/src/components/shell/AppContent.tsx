@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import {
   useBudget,
   useEditable,
-  useNonStaffLines,
+  useLines,
   useUpdateProject,
 } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
@@ -44,7 +44,7 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
 
   const project = budget.project_info
   const years = budget.years
-  const nonStaff = useNonStaffLines(years)
+  const nonStaff = useLines('non_staff', years)
 
   const lookupsOpen = screen === LOOKUP_SCREEN
   const pageHeading = lookupsOpen

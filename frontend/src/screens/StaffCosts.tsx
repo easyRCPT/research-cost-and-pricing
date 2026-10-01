@@ -1,4 +1,4 @@
-import { useBudget, useCiFlag, useStaffLines } from '@/api/budget'
+import { useBudget, useCiFlag, useLines } from '@/api/budget'
 import { Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -14,7 +14,7 @@ export interface StaffCostsProps {
 
 export function StaffCosts({ lookups }: StaffCostsProps) {
   const { data: budget } = useBudget()
-  const staff = useStaffLines(budget.years)
+  const staff = useLines('staff', budget.years)
   const { included, setIncluded } = useCiFlag()
 
   const chiefInvestigator = budget.project_info.chief_investigator

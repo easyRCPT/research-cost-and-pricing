@@ -1,4 +1,4 @@
-import { type NonStaffLines, useBudget, useStaffLines } from '@/api/budget'
+import { type NonStaffLines, useBudget, useLines } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { costRows } from '@/lib/in-kind'
 import { InKindFlagsTable } from '@/screens/inkind/InKindFlagsTable'
@@ -9,7 +9,7 @@ interface InKindPanelProps {
 
 export function InKindPanel({ nonStaff }: InKindPanelProps) {
   const { data: budget } = useBudget()
-  const staff = useStaffLines(budget.years)
+  const staff = useLines('staff', budget.years)
 
   const summary = budget.budget_summary.price_summary
   const rows = costRows(budget, staff, nonStaff)
