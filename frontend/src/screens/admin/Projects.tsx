@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { type AdminProject, useAdminProjects } from '@/api/admin-console'
 import { DataTable, type DataTableFilter } from '@/components/data-table'
 import { PageHead } from '@/components/shell'
-import { Skeleton } from '@/components/ui/skeleton'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { ownerName, statusLabel } from '@/lib/status'
 import { projectColumns } from '@/screens/projects/columns'
 
@@ -51,15 +51,7 @@ export function Projects() {
       />
       <section className="overflow-hidden rounded-lg border bg-card">
         {isPending ? (
-          <div
-            className="space-y-3 p-4"
-            role="status"
-            aria-label="Loading projects"
-          >
-            {[0, 1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-9" />
-            ))}
-          </div>
+          <RowsSkeleton label="Loading projects" className="p-4" />
         ) : (
           <DataTable
             columns={table}

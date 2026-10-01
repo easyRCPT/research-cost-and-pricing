@@ -2,9 +2,9 @@ import { useDeferredValue, useState } from 'react'
 
 import { useAdminUsers } from '@/api/admin-users'
 import { PageHead, Panel } from '@/components/shell'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 
 import { CreateAccount } from './users/CreateAccount'
 import { UserRow } from './users/UserRow'
@@ -54,15 +54,12 @@ export function Users() {
         >
           {/* Not an empty list while the first answer is on its way. */}
           {users === undefined && (
-            <div
-              className="space-y-3 px-4 py-4"
-              role="status"
-              aria-label="Loading accounts"
-            >
-              {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-10" />
-              ))}
-            </div>
+            <RowsSkeleton
+              label="Loading accounts"
+              rows={3}
+              rowClassName="h-10"
+              className="px-4 py-4"
+            />
           )}
           {users?.map((user) => (
             <UserRow

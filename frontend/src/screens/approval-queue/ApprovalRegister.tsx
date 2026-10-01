@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useProjectsWithStatus } from '@/api/projects'
 import { DataTable } from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
-import { Skeleton } from '@/components/ui/skeleton'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { STATUS_LABELS } from '@/lib/status'
 import { cn } from '@/lib/utils'
 import { projectColumns } from '@/screens/projects/columns'
@@ -83,15 +83,10 @@ export function ApprovalRegister() {
       </div>
 
       {isPending ? (
-        <div
-          className="space-y-3 rounded-lg border bg-card p-4"
-          role="status"
-          aria-label="Loading the register"
-        >
-          {[0, 1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-9" />
-          ))}
-        </div>
+        <RowsSkeleton
+          label="Loading the register"
+          className="rounded-lg border bg-card p-4"
+        />
       ) : rows && rows.length === 0 ? (
         <Panel
           title={
