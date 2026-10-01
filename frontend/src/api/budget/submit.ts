@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+
 import { projectsQuery } from '@/api/projects'
+import { api, unwrap } from '@/lib/api'
+
 import { useBudgetId } from './context'
 import { budgetKey } from './detail'
 
@@ -33,15 +35,14 @@ export function useSubmitBudget() {
 
   return useMutation({
     mutationFn: async () => {
-      const { error, response } = await api.POST(
-        '/api/budgets/{budget_id}/submit/',
-        { params: { path: { budget_id: budgetId } } },
-      )
-      if (response.status === 422) {
-        const body = error as { reasons?: string[] } | undefined
+      const result = await api.POST('/api/budgets/{budget_id}/submit/', {
+        params: { path: { budget_id: budgetId } },
+      })
+      if (result.response.status === 422) {
+        const body = result.error as { reasons?: string[] } | undefined
         throw new NotReady(body?.reasons ?? [])
       }
-      if (!response.ok) throw new ApiError(response.status, error)
+      unwrap(result)
     },
     onSettled: () => {
       // Refetched on a refusal too: a 409 means another tab already

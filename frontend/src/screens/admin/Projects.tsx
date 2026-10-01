@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useAdminProjects, type AdminProject } from '@/api/admin-console'
+import { useMemo } from 'react'
+
+import { type AdminProject, useAdminProjects } from '@/api/admin-console'
 import {
   columnHelper,
   DataTable,
@@ -8,17 +9,17 @@ import {
   type DataTableFilter,
 } from '@/components/data-table'
 import { PageHead } from '@/components/shell'
-import { money } from '@/lib/format/utils'
-import { shortDate } from '@/lib/format/dates'
-import { STATUS_LABELS } from '@/screens/projects/status'
-
-// Typed against the schema's enum, so a new status breaks the build here
-// rather than rendering an empty cell (#71). The raw value is the fallback all
-// the same, for a status the generated types have not caught up with.
-const statusLabel = (status: AdminProject['status']) =>
-  status === null ? 'No budget' : (STATUS_LABELS[status] ?? status)
-
-const ownerName = (row: AdminProject) => row.owner.name || row.owner.email
+import { Skeleton } from '@/components/ui/skeleton'
+import { statusLabel } from '@/lib/status'
+import {
+  ownerColumn,
+  ownerName,
+  priceColumn,
+  referenceColumn,
+  statusColumn,
+  titleColumn,
+  updatedColumn,
+} from '@/screens/projects/columns'
 
 const FILTERS: DataTableFilter<AdminProject>[] = [
   { id: 'status', label: 'Status', value: (row) => statusLabel(row.status) },
@@ -27,68 +28,16 @@ const FILTERS: DataTableFilter<AdminProject>[] = [
   { id: 'owner', label: 'Owner', value: ownerName },
 ]
 
-const col = columnHelper<AdminProject>()
-
-const columns = (open: (row: AdminProject) => void): DataTableColumns<AdminProject> =>
-  col.columns([
-    col.accessor('reference', {
-      header: 'Reference',
-      meta: { className: 'w-[150px] whitespace-nowrap font-medium text-primary' },
-    }),
-    col.accessor('title', {
-      header: 'Title',
-      // Bounded and wrapping: the table sizes to its content, and the owner
-      // column pushes long titles off the side of the page otherwise.
-      cell: ({ row }) => (
-        <div className="max-w-[300px] py-0.5 whitespace-normal">
-          <button
-            type="button"
-            onClick={() => open(row.original)}
-            className="cursor-pointer text-left font-medium hover:underline"
-          >
-            {row.original.title || 'Untitled'}
-          </button>
-          <div className="text-muted-foreground">{row.original.department}</div>
-        </div>
-      ),
-    }),
-    col.accessor(ownerName, {
-      id: 'owner',
-      header: 'Owner',
-      cell: ({ row }) => (
-        <div className="py-0.5">
-          <div>{ownerName(row.original)}</div>
-          {row.original.owner.name && (
-            <div className="text-muted-foreground">{row.original.owner.email}</div>
-          )}
-        </div>
-      ),
-      meta: { className: 'w-[210px]' },
-    }),
-    col.accessor((row) => statusLabel(row.status), {
-      id: 'status',
-      header: 'Status',
-      cell: ({ row }) => (
-        <span className={row.original.status === null ? 'text-muted-foreground' : 'text-primary'}>
-          {statusLabel(row.original.status)}
-          {row.original.budget_count > 1 && (
-            <span className="text-muted-foreground"> · {row.original.budget_count} budgets</span>
-          )}
-        </span>
-      ),
-      meta: { className: 'w-[200px]' },
-    }),
-    col.accessor('total_price_inc_gst', {
-      header: 'Total price (inc. GST)',
-      cell: ({ row }) =>
-        row.original.budget_id === null ? '—' : money(row.original.total_price_inc_gst),
-      meta: { align: 'right', className: 'w-[150px] whitespace-nowrap tabular' },
-    }),
-    col.accessor('updated_at', {
-      header: 'Last updated',
-      cell: ({ row }) => shortDate(row.original.updated_at),
-      meta: { align: 'right', className: 'w-[130px] whitespace-nowrap text-muted-foreground' },
-    }),
+const columns = (
+  open: (row: AdminProject) => void,
+): DataTableColumns<AdminProject> =>
+  columnHelper<AdminProject>().columns([
+    referenceColumn<AdminProject>(),
+    titleColumn(open),
+    ownerColumn<AdminProject>('Owner'),
+    statusColumn<AdminProject>(),
+    priceColumn<AdminProject>(),
+    updatedColumn<AdminProject>(),
   ])
 
 const byId = (row: AdminProject) => String(row.id)
@@ -105,7 +54,10 @@ export function Projects() {
   const table = useMemo(
     () =>
       columns((row) =>
-        navigate({ to: '/projects/$projectId/$screen', params: { projectId: row.id, screen: 'details' } }),
+        navigate({
+          to: '/projects/$projectId/$screen',
+          params: { projectId: row.id, screen: 'details' },
+        }),
       ),
     [navigate],
   )
@@ -114,13 +66,21 @@ export function Projects() {
     <>
       <PageHead
         title="Project register"
-        subtitle={projects ? `Every project in the tool · ${projects.length} in all` : 'Every project in the tool'}
+        subtitle={
+          projects
+            ? `Every project in the tool · ${projects.length} in all`
+            : 'Every project in the tool'
+        }
       />
       <section className="overflow-hidden rounded-lg border bg-card">
         {isPending ? (
-          <div className="space-y-3 p-4" role="status" aria-label="Loading projects">
+          <div
+            className="space-y-3 p-4"
+            role="status"
+            aria-label="Loading projects"
+          >
             {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-9 animate-pulse rounded bg-muted" />
+              <Skeleton key={i} className="h-9" />
             ))}
           </div>
         ) : (

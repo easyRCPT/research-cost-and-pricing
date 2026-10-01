@@ -1,6 +1,7 @@
 import { PartBar } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { ApprovalStepRecord } from '@/types'
+
 import { DecisionRecord } from './DecisionRecord'
 import { describeTrigger } from './triggers'
 

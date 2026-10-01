@@ -1,4 +1,5 @@
 import createClient from 'openapi-fetch'
+
 import type { paths } from '@/types/api'
 
 export const api = createClient<paths>({
@@ -40,9 +41,7 @@ api.use({
 })
 
 function readCookie(name: string): string | null {
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${name}=([^;]*)`),
-  )
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
   return match ? decodeURIComponent(match[1]) : null
 }
 
@@ -57,6 +56,18 @@ export class ApiError extends Error {
     this.status = status
     this.fields = fields
   }
+}
+
+/** Unwraps the data of a successful request or an ApiError if failed */
+export function unwrap<T>(result: {
+  data?: T
+  error?: unknown
+  response: Response
+}): T {
+  if (!result.response.ok) {
+    throw new ApiError(result.response.status, result.error)
+  }
+  return result.data as T
 }
 
 /** The envelope drf-standardized-errors wraps every 4xx and 5xx in. */

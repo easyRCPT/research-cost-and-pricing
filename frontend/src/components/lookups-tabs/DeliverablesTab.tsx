@@ -1,10 +1,11 @@
 import {
-  DataTable,
-  TableCard,
   columnHelper,
+  DataTable,
   type DataTableFilter,
+  TableCard,
 } from '@/components/data-table'
 import type { LookupTables } from '@/types'
+
 import { byCode, codeNameColumns } from './code-name-columns'
 
 type RevenueCategory = LookupTables['revenue_categories'][number]

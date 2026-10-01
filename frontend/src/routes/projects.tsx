@@ -1,7 +1,8 @@
-import { Suspense } from 'react'
 import { QueryErrorResetBoundary, useQueryClient } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
 import { useNavigate } from '@tanstack/react-router'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+
 import { projectsQuery, useProjects } from '@/api/projects'
 import { AppErrorState, AppShell, ProjectsSkeleton } from '@/components/shell'
 import { ProjectsScreen } from '@/screens'

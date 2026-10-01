@@ -1,16 +1,13 @@
 import type { ReactTable, RowData } from '@tanstack/react-table'
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { OptionSelect } from '@/components/ui/option-select'
+
 import type { DataTableFeatures } from './features'
 
 const PAGE_SIZES = [10, 20, 50, 100]
+const PAGE_SIZE_OPTIONS = PAGE_SIZES.map(String)
 
 /** Slots the page list always fills, so its width never shifts between pages. */
 const SLOTS = 7
@@ -101,21 +98,14 @@ export function DataTablePagination<T extends RowData>({
           </nav>
           <label className="flex items-center justify-self-end gap-2">
             Rows per page
-            <Select
+            <OptionSelect
               value={String(pageSize)}
               onValueChange={(value) => table.setPageSize(Number(value))}
-            >
-              <SelectTrigger size="sm" className="w-17 bg-card text-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent align="end">
-                {PAGE_SIZES.map((size) => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={PAGE_SIZE_OPTIONS}
+              size="sm"
+              align="end"
+              className="w-17 bg-card text-foreground"
+            />
           </label>
         </>
       )}

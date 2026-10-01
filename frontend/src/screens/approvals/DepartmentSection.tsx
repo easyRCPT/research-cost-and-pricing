@@ -1,5 +1,6 @@
 import { PartBar } from '@/components/shell'
 import type { ApprovalStepRecord } from '@/types'
+
 import { DecisionRecord } from './DecisionRecord'
 
 export function DepartmentSection({

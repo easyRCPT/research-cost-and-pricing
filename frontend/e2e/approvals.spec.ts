@@ -1,12 +1,12 @@
 import {
-  test,
-  expect,
   createProject,
+  DEMO,
+  expect,
   readyProject,
   signIn,
   submitBudget,
+  test,
   uniqueTitle,
-  DEMO,
 } from './fixtures'
 
 test('submitted, approved by the head of department, and recorded (#83, #84)', async ({

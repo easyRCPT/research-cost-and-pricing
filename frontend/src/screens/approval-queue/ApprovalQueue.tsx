@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useApprovalQueue, type QueueRow } from '@/api/approvals'
+import { useEffect } from 'react'
+
+import { type QueueRow, useApprovalQueue } from '@/api/approvals'
 import { PageHead, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { shortDate } from '@/lib/format/dates'
 import { money } from '@/lib/format/utils'
+
 import { ApprovalsNav } from './ApprovalsNav'
 import { rememberApprovalsPage } from './returnTo'
 

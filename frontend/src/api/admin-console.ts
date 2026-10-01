@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+
+import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
 export type AuditEntry = components['schemas']['AuditEntry']
@@ -25,9 +26,7 @@ export function useOverview() {
   return useQuery({
     queryKey: ['admin', 'overview'] as const,
     queryFn: async (): Promise<Overview> => {
-      const { data, error, response } = await api.GET('/api/admin/overview/')
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(await api.GET('/api/admin/overview/'))
     },
     ...FRESH,
   })
@@ -38,9 +37,7 @@ export function useApproverGaps() {
   return useQuery({
     queryKey: ['admin', 'approver-gaps'] as const,
     queryFn: async (): Promise<ApproverGaps> => {
-      const { data, error, response } = await api.GET('/api/admin/approver-gaps/')
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(await api.GET('/api/admin/approver-gaps/'))
     },
     ...FRESH,
   })
@@ -50,9 +47,7 @@ export function useAdminProjects() {
   return useQuery({
     queryKey: ['admin', 'projects'] as const,
     queryFn: async (): Promise<AdminProject[]> => {
-      const { data, error, response } = await api.GET('/api/admin/projects/')
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(await api.GET('/api/admin/projects/'))
     },
     ...FRESH,
   })
@@ -62,11 +57,11 @@ export function useAudit(action: string, limit: number) {
   return useQuery({
     queryKey: ['admin', 'audit', action, limit] as const,
     queryFn: async (): Promise<AuditEntry[]> => {
-      const { data, error, response } = await api.GET('/api/admin/audit/', {
-        params: { query: { limit, ...(action ? { action } : {}) } },
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(
+        await api.GET('/api/admin/audit/', {
+          params: { query: { limit, ...(action ? { action } : {}) } },
+        }),
+      )
     },
     placeholderData: keepPreviousData,
     ...FRESH,
@@ -78,9 +73,7 @@ export function useAuditActions() {
   return useQuery({
     queryKey: ['admin', 'audit-actions'] as const,
     queryFn: async (): Promise<string[]> => {
-      const { data, error, response } = await api.GET('/api/admin/audit/actions/')
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(await api.GET('/api/admin/audit/actions/'))
     },
     ...FRESH,
   })

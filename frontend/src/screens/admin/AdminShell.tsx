@@ -1,9 +1,10 @@
-import { Suspense } from 'react'
 import { QueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
 import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
-import { AppErrorState, AppShell, Sidebar, type SidebarSection } from '@/components/shell'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+
 import { LookupSkeleton } from '@/components/lookups-tabs/LookupSkeleton'
+import { AppErrorState, AppShell, Sidebar, type SidebarSection } from '@/components/shell'
 
 type AdminScreen = 'overview' | 'lookups' | 'users' | 'projects' | 'audit'
 

@@ -1,15 +1,16 @@
-import { useMemo, useState } from 'react'
 import { PlusIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 import { useLookups } from '@/api/lookups'
 import { useProjects } from '@/api/projects'
 import { DataTable, type DataTableFilter } from '@/components/data-table'
 import { PageHead } from '@/components/shell'
 import { Button } from '@/components/ui/button'
+import { STATUS_LABELS } from '@/lib/status'
 import type { ProjectRow } from '@/types'
+
 import { projectColumns } from './columns'
 import { NewProjectForm } from './NewProjectForm'
-import { STATUS_LABELS } from './status'
 
 const FILTERS: DataTableFilter<ProjectRow>[] = [
   { id: 'department', label: 'Department', value: (row) => row.department },

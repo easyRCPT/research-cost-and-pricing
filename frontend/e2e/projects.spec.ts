@@ -1,8 +1,8 @@
 import {
-  test,
-  expect,
   createProject,
+  expect,
   openProject,
+  test,
   uniqueTitle,
 } from './fixtures'
 

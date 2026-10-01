@@ -1,6 +1,6 @@
-import { DataTable, TableCard, columnHelper } from '@/components/data-table'
-import type { LookupTables } from '@/types'
+import { columnHelper, DataTable, TableCard } from '@/components/data-table'
 import { Alert, AlertDescription } from '@/components/ui/alert.tsx'
+import type { LookupTables } from '@/types'
 
 type Increase = LookupTables['eba_increases'][number]
 

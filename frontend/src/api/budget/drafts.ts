@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
-import type { Deliverable, NonStaffLine, EditableStaffLine } from '@/types'
+import type { Deliverable, EditableStaffLine, NonStaffLine } from '@/types'
+
 import { useBudgetId } from './context'
 
 /**

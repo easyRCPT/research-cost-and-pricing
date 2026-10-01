@@ -1,10 +1,11 @@
 import { LOOKUP_SCREEN } from '@/components/lookups-tabs/LookupButton'
-import { AppShell } from '../AppShell'
-import { SidebarSkeleton } from './SidebarSkeleton'
 import { LookupSkeleton } from '@/components/lookups-tabs/LookupSkeleton'
+import { AppShell } from '@/components/shell/AppShell'
+import type { EditorScreen } from '@/components/shell/Sidebar'
+
 import { EditorPanelSkeleton } from './EditorPanelSkeleton'
 import { PageHeadSkeleton } from './PageHeadSkeleton'
-import type { EditorScreen } from '../Sidebar'
+import { SidebarSkeleton } from './SidebarSkeleton'
 
 interface AppSkeletonProps {
   screen: EditorScreen | typeof LOOKUP_SCREEN

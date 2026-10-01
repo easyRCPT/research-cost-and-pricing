@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { ciLineId, withCiName, withCosts } from '@/lib/staff'
 import type { LookupTables } from '@/types'
+
 import { StaffTable } from './staff/StaffTable'
 
 export interface StaffCostsProps {

@@ -1,16 +1,16 @@
-import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { ReactNode } from 'react'
+
+import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { LookupTables } from '@/types'
-import {
-  AttributesTab,
-  ConstantsTab,
-  DeliverablesTab,
-  EbaTab,
-  ExpensesTab,
-  OnCostsTab,
-  OrgUnitsTab,
-  SalaryRatesTab,
-} from '.'
+
+import { AttributesTab } from './AttributesTab'
+import { ConstantsTab } from './ConstantsTab'
+import { DeliverablesTab } from './DeliverablesTab'
+import { EbaTab } from './EbaTab'
+import { ExpensesTab } from './ExpensesTab'
+import { OnCostsTab } from './OnCostsTab'
+import { OrgUnitsTab } from './OrgUnitsTab'
+import { SalaryRatesTab } from './SalaryRatesTab'
 
 interface LookupTab {
   value: string

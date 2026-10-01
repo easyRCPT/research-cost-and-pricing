@@ -2,8 +2,9 @@ import { PartBar } from '@/components/shell'
 import { MONTHS } from '@/lib/constants'
 import { money } from '@/lib/format/utils'
 import type { PriceSummary, ProjectInfo } from '@/types'
-import { KeyValues } from './KeyValues'
+
 import { DASH, or } from './format'
+import { KeyValues } from './KeyValues'
 
 interface ProjectDetailsSectionProps {
   project: ProjectInfo

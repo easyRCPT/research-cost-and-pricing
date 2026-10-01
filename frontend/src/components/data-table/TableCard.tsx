@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export interface TableCardTable {

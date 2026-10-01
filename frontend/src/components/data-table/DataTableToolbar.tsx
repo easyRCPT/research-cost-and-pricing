@@ -1,8 +1,10 @@
 import type { RowData } from '@tanstack/react-table'
 import { XIcon } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+
 import { DataTableFilterMenu } from './DataTableFilterMenu'
 import type { DataTableFilter } from './features'
 import { filterOptions, type FilterState } from './filtering'

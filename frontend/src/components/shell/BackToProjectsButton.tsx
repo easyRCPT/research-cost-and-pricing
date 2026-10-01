@@ -1,4 +1,5 @@
 import { ArrowLeftIcon } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 
 /** Matches the outline treatment LookupButton uses against the primary bar. */

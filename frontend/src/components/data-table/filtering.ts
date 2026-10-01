@@ -1,4 +1,5 @@
 import type { RowData } from '@tanstack/react-table'
+
 import type { DataTableFilter } from './features'
 
 export type FilterState = Record<string, string[]>

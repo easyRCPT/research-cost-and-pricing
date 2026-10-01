@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+
 import type { EditorScreen, SidebarSection } from './Sidebar'
 
 interface MobileNavProps {

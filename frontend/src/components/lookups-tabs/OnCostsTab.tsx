@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
+
 import {
-  DataTable,
-  TableCard,
   columnHelper,
+  DataTable,
   type DataTableFilter,
+  TableCard,
 } from '@/components/data-table'
 import type { LookupTables } from '@/types'
 

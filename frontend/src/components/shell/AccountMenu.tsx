@@ -2,8 +2,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { ClipboardCheckIcon, FolderIcon, LogOutIcon, SettingsIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+
 import { isApprover, SUPERADMIN, useLogout, useMe } from '@/api/auth'
+import { Button } from '@/components/ui/button'
 
 const BAR_BUTTON =
   'border-primary-foreground/55 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'

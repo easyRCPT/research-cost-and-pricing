@@ -6,8 +6,9 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+
 import { meQuery } from '@/api/auth'
+import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
 export type AdminUser = components['schemas']['AdminUser']
@@ -20,11 +21,11 @@ export function useAdminUsers(q: string) {
   return useQuery({
     queryKey: [...usersKey, q],
     queryFn: async (): Promise<AdminUser[]> => {
-      const { data, error, response } = await api.GET('/api/admin/users/', {
-        params: { query: q ? { q } : {} },
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
+      return unwrap(
+        await api.GET('/api/admin/users/', {
+          params: { query: q ? { q } : {} },
+        }),
+      )
     },
     placeholderData: keepPreviousData,
   })
@@ -33,9 +34,7 @@ export function useAdminUsers(q: string) {
 const groupsQuery = queryOptions({
   queryKey: ['admin', 'groups'] as const,
   queryFn: async (): Promise<string[]> => {
-    const { data, error, response } = await api.GET('/api/admin/groups/')
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.GET('/api/admin/groups/'))
   },
   staleTime: Infinity,
 })
@@ -65,11 +64,12 @@ export function useUpdateUser() {
       id: number
       changes: { first_name?: string; last_name?: string; is_active?: boolean; groups?: string[] }
     }) => {
-      const { error, response } = await api.PATCH('/api/admin/users/{user_id}/', {
-        params: { path: { user_id: id } },
-        body: changes,
-      })
-      if (error) throw new ApiError(response.status, error)
+      unwrap(
+        await api.PATCH('/api/admin/users/{user_id}/', {
+          params: { path: { user_id: id } },
+          body: changes,
+        }),
+      )
     },
     onSettled: refresh,
   })
@@ -79,8 +79,7 @@ export function useCreateUser() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: async (body: components['schemas']['UserCreate']) => {
-      const { error, response } = await api.POST('/api/admin/users/', { body })
-      if (error) throw new ApiError(response.status, error)
+      unwrap(await api.POST('/api/admin/users/', { body }))
     },
     onSettled: refresh,
   })
@@ -100,11 +99,12 @@ export function useAddAssignment() {
       department: string | null
       faculty: string | null
     }) => {
-      const { error, response } = await api.POST('/api/admin/users/{user_id}/assignments/', {
-        params: { path: { user_id: id } },
-        body: { role, department, faculty },
-      })
-      if (error) throw new ApiError(response.status, error)
+      unwrap(
+        await api.POST('/api/admin/users/{user_id}/assignments/', {
+          params: { path: { user_id: id } },
+          body: { role, department, faculty },
+        }),
+      )
     },
     onSettled: refresh,
   })
@@ -114,11 +114,12 @@ export function useRemoveAssignment() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: async ({ id, assignmentId }: { id: number; assignmentId: number }) => {
-      const { error, response } = await api.DELETE(
-        '/api/admin/users/{user_id}/assignments/{assignment_id}/',
-        { params: { path: { user_id: id, assignment_id: assignmentId } } },
+      unwrap(
+        await api.DELETE(
+          '/api/admin/users/{user_id}/assignments/{assignment_id}/',
+          { params: { path: { user_id: id, assignment_id: assignmentId } } },
+        ),
       )
-      if (error) throw new ApiError(response.status, error)
     },
     onSettled: refresh,
   })

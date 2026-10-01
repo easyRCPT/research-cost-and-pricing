@@ -1,13 +1,26 @@
-import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo, useState } from 'react'
+
 import { useProjectsWithStatus } from '@/api/projects'
-import { columnHelper, DataTable, type DataTableColumns } from '@/components/data-table'
+import {
+  columnHelper,
+  DataTable,
+  type DataTableColumns,
+} from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
-import { money } from '@/lib/format/utils'
-import { shortDate } from '@/lib/format/dates'
+import { Skeleton } from '@/components/ui/skeleton'
+import { STATUS_LABELS } from '@/lib/status'
 import { cn } from '@/lib/utils'
-import { STATUS_LABELS } from '@/screens/projects/status'
+import {
+  ownerColumn,
+  priceColumn,
+  referenceColumn,
+  statusColumn,
+  titleColumn,
+  updatedColumn,
+} from '@/screens/projects/columns'
 import type { ProjectRow, Status } from '@/types'
+
 import { ApprovalsNav } from './ApprovalsNav'
 import { rememberApprovalsPage } from './returnTo'
 
@@ -19,59 +32,16 @@ const STATUSES = (Object.keys(STATUS_LABELS) as Status[]).filter(
   (status) => status !== 'draft' && status !== 'submitted',
 )
 
-const ownerName = (row: ProjectRow) => row.owner.name || row.owner.email
-const statusLabel = (status: ProjectRow['status']) =>
-  status === null ? 'No budget' : (STATUS_LABELS[status] ?? status)
-
-const col = columnHelper<ProjectRow>()
-
-const columns = (open: (row: ProjectRow) => void): DataTableColumns<ProjectRow> =>
-  col.columns([
-    col.accessor('reference', {
-      header: 'Reference',
-      meta: { className: 'w-[150px] whitespace-nowrap font-medium text-primary' },
-    }),
-    col.accessor('title', {
-      header: 'Title',
-      cell: ({ row }) => (
-        <div className="max-w-[320px] py-0.5 whitespace-normal">
-          <button
-            type="button"
-            onClick={() => open(row.original)}
-            className="cursor-pointer text-left font-medium hover:underline"
-          >
-            {row.original.title || 'Untitled'}
-          </button>
-          <div className="text-muted-foreground">{row.original.department}</div>
-        </div>
-      ),
-    }),
-    col.accessor(ownerName, {
-      id: 'owner',
-      header: 'Submitted by',
-      cell: ({ row }) => (
-        <div className="py-0.5">
-          <div>{ownerName(row.original)}</div>
-          {row.original.owner.name && <div className="text-muted-foreground">{row.original.owner.email}</div>}
-        </div>
-      ),
-      meta: { className: 'w-[220px]' },
-    }),
-    col.accessor((row) => statusLabel(row.status), {
-      id: 'status',
-      header: 'Status',
-      meta: { className: 'w-[200px] text-primary' },
-    }),
-    col.accessor('total_price_inc_gst', {
-      header: 'Total price (inc. GST)',
-      cell: ({ row }) => (row.original.budget_id === null ? '—' : money(row.original.total_price_inc_gst)),
-      meta: { align: 'right', className: 'w-[150px] whitespace-nowrap tabular' },
-    }),
-    col.accessor('updated_at', {
-      header: 'Last updated',
-      cell: ({ row }) => shortDate(row.original.updated_at),
-      meta: { align: 'right', className: 'w-[130px] whitespace-nowrap text-muted-foreground' },
-    }),
+const columns = (
+  open: (row: ProjectRow) => void,
+): DataTableColumns<ProjectRow> =>
+  columnHelper<ProjectRow>().columns([
+    referenceColumn<ProjectRow>(),
+    titleColumn(open),
+    ownerColumn<ProjectRow>('Submitted by'),
+    statusColumn<ProjectRow>(),
+    priceColumn<ProjectRow>(),
+    updatedColumn<ProjectRow>(),
   ])
 
 /**
@@ -83,14 +53,21 @@ const columns = (open: (row: ProjectRow) => void): DataTableColumns<ProjectRow> 
  */
 export function ApprovalRegister() {
   const [status, setStatus] = useState<Status | null>(null)
-  const { data: rows, isPending, isPlaceholderData } = useProjectsWithStatus(status)
+  const {
+    data: rows,
+    isPending,
+    isPlaceholderData,
+  } = useProjectsWithStatus(status)
   const navigate = useNavigate()
   useEffect(() => rememberApprovalsPage('/approvals/register'), [])
 
   const table = useMemo(
     () =>
       columns((row) =>
-        navigate({ to: '/projects/$projectId/$screen', params: { projectId: row.id, screen: 'details' } }),
+        navigate({
+          to: '/projects/$projectId/$screen',
+          params: { projectId: row.id, screen: 'details' },
+        }),
       ),
     [navigate],
   )
@@ -103,7 +80,11 @@ export function ApprovalRegister() {
         right={<ApprovalsNav current="register" />}
       />
 
-      <div role="group" aria-label="Status" className="mb-4 flex flex-wrap gap-2">
+      <div
+        role="group"
+        aria-label="Status"
+        className="mb-4 flex flex-wrap gap-2"
+      >
         {[null, ...STATUSES].map((value) => (
           <button
             key={value ?? 'all'}
@@ -112,7 +93,9 @@ export function ApprovalRegister() {
             onClick={() => setStatus(value)}
             className={cn(
               'rounded-full border px-3 py-1 text-[13px]',
-              status === value ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted',
+              status === value
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'bg-card hover:bg-muted',
             )}
           >
             {value === null ? 'All' : STATUS_LABELS[value]}
@@ -121,13 +104,23 @@ export function ApprovalRegister() {
       </div>
 
       {isPending ? (
-        <div className="space-y-3 rounded-lg border bg-card p-4" role="status" aria-label="Loading the register">
+        <div
+          className="space-y-3 rounded-lg border bg-card p-4"
+          role="status"
+          aria-label="Loading the register"
+        >
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-9 animate-pulse rounded bg-muted" />
+            <Skeleton key={i} className="h-9" />
           ))}
         </div>
       ) : rows && rows.length === 0 ? (
-        <Panel title={status === null ? 'Nothing has been decided in your area yet' : `Nothing is ${STATUS_LABELS[status].toLowerCase()}`}>
+        <Panel
+          title={
+            status === null
+              ? 'Nothing has been decided in your area yet'
+              : `Nothing is ${STATUS_LABELS[status].toLowerCase()}`
+          }
+        >
           <p className="max-w-[70ch] text-[13.5px] text-muted-foreground">
             {status === null
               ? 'Costings submitted from a department or faculty you are responsible for are listed here, whatever became of them.'
@@ -135,7 +128,12 @@ export function ApprovalRegister() {
           </p>
         </Panel>
       ) : (
-        <section className={cn('overflow-hidden rounded-lg border bg-card', isPlaceholderData && 'opacity-70')}>
+        <section
+          className={cn(
+            'overflow-hidden rounded-lg border bg-card',
+            isPlaceholderData && 'opacity-70',
+          )}
+        >
           <DataTable
             columns={table}
             rows={rows ?? []}

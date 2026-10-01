@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 import { useLookups } from '@/api/lookups'
-import { api, ApiError } from '@/lib/api'
+import { api, unwrap } from '@/lib/api'
 import {
   emptyDeliverable,
   isComplete,
@@ -11,15 +11,16 @@ import {
   typeCode,
 } from '@/lib/deliverables'
 import type { BudgetDetail, Deliverable } from '@/types'
+
 import { useBudgetId } from './context'
 import { budgetKey, useBudget } from './detail'
 import { getDrafts, isDraft, setDrafts, useDrafts } from './drafts'
 import {
+  type Command,
   reportWriteError,
   useEdit,
   writeKey,
   writeScope,
-  type Command,
 } from './write'
 
 export interface Deliverables {
@@ -80,15 +81,12 @@ export function useDeliverables(): Deliverables {
       const code = typeCode(lookups, row.deliverable_type)
       if (code === undefined) throw new Error('Unknown deliverable type')
 
-      const { data, error, response } = await api.POST(
-        '/api/budgets/{budget_id}/deliverables/',
-        {
+      return unwrap(
+        await api.POST('/api/budgets/{budget_id}/deliverables/', {
           params: { path: { budget_id: budgetId } },
           body: toDeliverableInput(row, code),
-        },
+        }),
       )
-      if (error) throw new ApiError(response.status, error)
-      return data
     },
     onSuccess: save,
     onError: (error, row) =>
@@ -99,16 +97,16 @@ export function useDeliverables(): Deliverables {
     mutationKey: writeKey,
     scope,
     mutationFn: async (deliverableId: number) => {
-      const { data, error, response } = await api.DELETE(
-        '/api/budgets/{budget_id}/deliverables/{deliverable_id}/',
-        {
-          params: {
-            path: { budget_id: budgetId, deliverable_id: deliverableId },
+      return unwrap(
+        await api.DELETE(
+          '/api/budgets/{budget_id}/deliverables/{deliverable_id}/',
+          {
+            params: {
+              path: { budget_id: budgetId, deliverable_id: deliverableId },
+            },
           },
-        },
+        ),
       )
-      if (error) throw new ApiError(response.status, error)
-      return data
     },
     onSuccess: save,
     // Wrapped: the mutation calls its handler with the line id, and the second

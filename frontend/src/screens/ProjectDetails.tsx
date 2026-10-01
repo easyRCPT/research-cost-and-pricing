@@ -1,20 +1,14 @@
+import { Panel } from '@/components/shell'
 import type { LookupTables, ProjectInfo } from '@/types'
-import { FieldRow, Panel } from '@/components/shell'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { EXTERNAL_PARTIES, OTHER_FUNDER_CATEGORIES } from '@/lib/constants'
+
 import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
-import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectDepartmentRow } from './project-details/ProjectDepartmentRow'
-import {
-  SettledTextInput,
-  SettledTextareaInput,
-} from '@/components/ui/text-input'
+import { ProjectDurationRow } from './project-details/ProjectDurationRow'
+import { ProjectFunderRow } from './project-details/ProjectFunderRow'
+import { ProjectInvestigatorRow } from './project-details/ProjectInvestigatorRow'
+import { ProjectNotesRow } from './project-details/ProjectNotesRow'
+import { ProjectSchemeRow } from './project-details/ProjectSchemeRow'
+import { ProjectTitleRow } from './project-details/ProjectTitleRow'
 
 interface ProjectDetailsProps {
   project: ProjectInfo
@@ -34,72 +28,11 @@ export function ProjectDetails({
   // selects commit at once, having nothing to wait for.
   return (
     <Panel>
-      <FieldRow label="Project title" htmlFor="title" required>
-        <SettledTextInput
-          id="title"
-          className="max-w-lg"
-          value={project.title}
-          onCommit={(title) => onChange({ title })}
-        />
-      </FieldRow>
+      <ProjectTitleRow project={project} onChange={onChange} />
 
-      <FieldRow label="Lead UoM chief investigator" required htmlFor="ci">
-        <SettledTextInput
-          id="ci"
-          className="max-w-lg"
-          value={project.chief_investigator}
-          onCommit={(chief_investigator) => onChange({ chief_investigator })}
-        />
-      </FieldRow>
+      <ProjectInvestigatorRow project={project} onChange={onChange} />
 
-      <FieldRow label="External party" required>
-        <Select
-          value={project.funder}
-          onValueChange={(v) => onChange({ funder: v })}
-        >
-          <SelectTrigger className="w-full max-w-lg">
-            <SelectValue placeholder="Select external party" />
-          </SelectTrigger>
-          <SelectContent>
-            {EXTERNAL_PARTIES.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FieldRow>
-
-      {project.funder === 'Other' && (
-        <>
-          <FieldRow label="Other party category" htmlFor="other-party-category">
-            <Select
-              value={project.other_funder_category}
-              onValueChange={(v) => onChange({ other_funder_category: v })}
-            >
-              <SelectTrigger className="w-full max-w-lg">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {OTHER_FUNDER_CATEGORIES.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FieldRow>
-
-          <FieldRow label="Specify Other Funder" htmlFor="other-funder">
-            <SettledTextInput
-              id="other-funder"
-              className="max-w-lg"
-              value={project.other_funder}
-              onCommit={(other_funder) => onChange({ other_funder })}
-            />
-          </FieldRow>
-        </>
-      )}
+      <ProjectFunderRow project={project} onChange={onChange} />
 
       <ProjectDepartmentRow
         project={project}
@@ -107,15 +40,7 @@ export function ProjectDetails({
         onChange={onChange}
       />
 
-      <FieldRow label="Scheme" htmlFor="scheme" hint="Grants only">
-        <SettledTextInput
-          id="scheme"
-          className="max-w-lg"
-          placeholder="e.g. Discovery Projects 2027"
-          value={project.scheme}
-          onCommit={(scheme) => onChange({ scheme })}
-        />
-      </FieldRow>
+      <ProjectSchemeRow project={project} onChange={onChange} />
 
       <ProjectDurationRow project={project} onChange={onChange} />
 
@@ -126,18 +51,7 @@ export function ProjectDetails({
         onChange={onChange}
       />
 
-      <FieldRow label="Additional information" htmlFor="notes">
-        <SettledTextareaInput
-          id="notes"
-          rows={3}
-          className="max-w-lg"
-          placeholder="Anything the Research Office should know about this costing"
-          value={project.additional_information}
-          onCommit={(additional_information) =>
-            onChange({ additional_information })
-          }
-        />
-      </FieldRow>
+      <ProjectNotesRow project={project} onChange={onChange} />
     </Panel>
   )
 }

@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 import { useDebounced } from '@/lib/use-debounced'
 import type { BudgetDetail, BudgetInfoInput, ProjectInfoInput } from '@/types'
-import { useBudget } from './detail'
+
 import { useCiFlag } from './ci-flag'
-import { useEdit, type Command } from './write'
+import { useBudget } from './detail'
+import { type Command, useEdit } from './write'
 
 /** What the saved budget says, which is what every input binds to. */
 export const useBudgetInfo = () => useBudget().data.budget_info

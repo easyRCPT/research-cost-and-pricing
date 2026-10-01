@@ -1,8 +1,8 @@
 import {
-  test,
   expect,
   goToScreen,
   newStaffRow,
+  test,
 } from './fixtures'
 
 /**
