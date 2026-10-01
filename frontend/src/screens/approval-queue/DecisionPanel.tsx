@@ -5,7 +5,7 @@ import { useMe } from '@/api/auth'
 import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ApiError } from '@/lib/api'
-import { describeTrigger } from '@/screens/approvals/triggers'
+import { DeanTriggers } from '@/screens/approvals/DeanTriggers'
 
 import { ChooseStage } from './decision/ChooseStage'
 import { ComposeStage } from './decision/ComposeStage'
@@ -72,20 +72,15 @@ export function DecisionPanel({
       <DecisionSummary budget={budget} />
 
       {row.dean_triggers.length > 0 && (
-        <Alert className="mt-4">
-          <AlertDescription>
-            <b>
-              {row.level === 'faculty'
-                ? 'This reached you because'
-                : 'After you, the Dean also has to authorise this, because'}
-            </b>
-            <ul className="mt-1 list-disc pl-5">
-              {row.dean_triggers.map((code) => (
-                <li key={code}>{describeTrigger(code)}.</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
+        <DeanTriggers
+          className="mt-4"
+          lead={
+            row.level === 'faculty'
+              ? 'This reached you because'
+              : 'After you, the Dean also has to authorise this, because'
+          }
+          triggers={row.dean_triggers}
+        />
       )}
 
       <p className="mt-4 text-[13px] text-muted-foreground">
