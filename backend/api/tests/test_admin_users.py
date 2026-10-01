@@ -1,23 +1,15 @@
-"""The users and approvers endpoints behind the console (#64)."""
-
-from django.contrib.auth.models import Group
 from django.test import TestCase
 
-from api.models import AuditLog, Department, Faculty, User, UserOrgAssignment
+from api.models import AuditLog, User, UserOrgAssignment
+from api.tests.factories import make_department, make_faculty, make_user
 
 BASE = "/api/admin/users/"
 
 
 class AdminUsersTest(TestCase):
     def setUp(self):
-        self.faculty = Faculty.objects.create(code="ENG", name="Engineering")
-        self.department = Department.objects.create(
-            code="CIS",
-            name="Computing",
-            school="Computing",
-            school_code="CIS",
-            faculty=self.faculty,
-        )
+        self.faculty = make_faculty("ENG", "Engineering")
+        self.department = make_department("CIS", self.faculty, name="Computing")
         self.admin = self.account("admin@unimelb.edu.au", "superadmin")
         self.ruth = self.account(
             "ruth@unimelb.edu.au", "staff", first="Ruth", last="Okafor"
@@ -26,8 +18,7 @@ class AdminUsersTest(TestCase):
 
     @staticmethod
     def account(email, group, first="", last="") -> User:
-        user = User.objects.create(email=email, first_name=first, last_name=last)
-        user.groups.set(Group.objects.filter(name=group))
+        user = make_user(email, groups=[group], first_name=first, last_name=last)
         if group == "superadmin":
             user.is_superuser = user.is_staff = True
             user.save()

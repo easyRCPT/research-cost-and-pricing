@@ -11,56 +11,24 @@ from api.models import (
     Deliverable,
     DeliverableType,
     Department,
-    Faculty,
     LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
     Project,
     Region,
     StaffCostLine,
-    User,
     YearAllocation,
     YearAmount,
 )
 from api.services import budget_update
+from api.tests.factories import make_budget, make_project
 
 LINE_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 class BudgetUpdateTestMixin:
-    @staticmethod
-    def create_department():
-        return Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
-
-    def create_project(self):
-        return Project.objects.create(
-            title="Test Project",
-            department=self.create_department(),
-            funder="Test Funder",
-            start_year=2025,
-            start_month=1,
-            end_year=2026,
-            end_month=12,
-            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
-        )
-
     def create_budget(self):
-        return Budget.objects.create(
-            project=self.create_project(),
-            cost_multiplier=Decimal("1.0"),
-            in_kind_multiplier=Decimal("1.0"),
-            margin=Decimal("0.30"),
-            gst_applicable=True,
-            cash_co_contribution=Decimal(0),
-        )
+        return make_budget(make_project(start_year=2025, end_year=2026))
 
     def create_staff_line(self, budget=None):
         if budget is None:

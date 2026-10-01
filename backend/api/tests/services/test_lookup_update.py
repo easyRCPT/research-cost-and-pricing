@@ -12,16 +12,15 @@ from api.models import (
     Faculty,
     LookupConfiguration,
     SalaryRate,
-    User,
 )
 from api.services.lookup_update import create, update
+from api.tests.factories import make_department, make_faculty, make_user
 
 
 class LookupUpdateTestMixin:
     @staticmethod
     def create_faculty(code: str = "SCI", name: str = "Science Faculty") -> Faculty:
-        faculty, _ = Faculty.objects.get_or_create(code=code, defaults={"name": name})
-        return faculty
+        return make_faculty(code, name)
 
     @classmethod
     def create_department(
@@ -32,12 +31,12 @@ class LookupUpdateTestMixin:
         school_code: str = "SCI",
         faculty_code: str = "SCI",
     ) -> Department:
-        return Department.objects.create(
-            code=code,
+        return make_department(
+            code,
+            cls.create_faculty(code=faculty_code),
             name=name,
             school=school,
             school_code=school_code,
-            faculty=cls.create_faculty(code=faculty_code),
         )
 
 
@@ -90,13 +89,7 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             ValidationError,
             "Invalid lookup table: invalid",
         ):
-            create(
-                "invalid",
-                {
-                    "code": "SCI",
-                },
-            )
-
+            create("invalid", {"code": "SCI"})
         self.assertEqual(Department.objects.count(), 0)
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
@@ -105,11 +98,7 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
         mock_invalidate_cache,
     ):
         faculty = self.create_faculty()
-
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         # The cache is cleared once the write commits.
         with self.captureOnCommitCallbacks(execute=True):
@@ -340,10 +329,7 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
     ):
         department = self.create_department()
 
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         # The cache is cleared once the write commits.
         with self.captureOnCommitCallbacks(execute=True):
@@ -390,10 +376,7 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             name="Engineering Faculty",
         )
 
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         # The cache is cleared once the write commits.
         with self.captureOnCommitCallbacks(execute=True):

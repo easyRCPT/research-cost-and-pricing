@@ -11,44 +11,20 @@ from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
 from api.models import (
-    Budget,
-    Department,
-    Faculty,
     LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
-    Project,
     StaffCostLine,
-    User,
 )
 from api.services.budget_update import update_non_staff, update_staff
-from api.services.project import budget_defaults
+from api.tests.factories import make_budget, make_project
 
 REASON = "Absorbed from the school's research support fund."
 
 
 class InKindReasonTestCase(TestCase):
     def setUp(self):
-        faculty, _ = Faculty.objects.get_or_create(
-            code="SCI", defaults={"name": "Science Faculty"}
-        )
-        department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=faculty,
-        )
-        project = Project.objects.create(
-            title="In kind",
-            department=department,
-            start_year=2026,
-            start_month=1,
-            end_year=2026,
-            end_month=12,
-            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
-        )
-        self.budget = Budget.objects.create(project=project, **budget_defaults())
+        self.budget = make_budget(make_project(title="In kind", end_year=2026))
         self.staff = StaffCostLine.objects.create(
             budget=self.budget,
             name_role="Dr A",

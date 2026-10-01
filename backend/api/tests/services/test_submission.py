@@ -8,14 +8,11 @@ from api.models import (
     AuditLog,
     Budget,
     CalculationConstant,
-    Department,
-    Faculty,
     LookupConfiguration,
     LookupVersion,
-    Project,
-    User,
 )
 from api.services.submission import submit_budget
+from api.tests.factories import make_budget, make_project, make_user
 
 
 class ForceRollbackError(Exception):
@@ -29,9 +26,7 @@ class SubmitBudgetTest(TestCase):
 
         LookupConfiguration.objects.update(current_version=cls.lookup_version)
 
-        cls.user = User.objects.create(
-            email="owner@unimelb.edu.au",
-        )
+        cls.user = make_user("owner@unimelb.edu.au")
 
         CalculationConstant.objects.create(
             name="minimum_margin",
@@ -40,36 +35,18 @@ class SubmitBudgetTest(TestCase):
             version=cls.lookup_version,
         )
 
-        faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science Faculty",
-        )
-
-        department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=faculty,
-        )
-
-        project = Project.objects.create(
-            title="Test Project",
-            department=department,
+        project = make_project(
+            cls.user,
             chief_investigator="Test Investigator",
             funder="Test Funder",
             start_year=2025,
-            start_month=1,
             end_year=2026,
-            end_month=12,
-            created_by=cls.user,
         )
 
-        cls.budget = Budget.objects.create(
+        cls.budget = make_budget(
             project=project,
             cost_multiplier=Decimal("1.0"),
             in_kind_multiplier=Decimal("1.0"),
-            margin=Decimal("0.30"),
             gst_applicable=True,
             cash_co_contribution=Decimal(0),
         )

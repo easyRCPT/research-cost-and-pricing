@@ -2,25 +2,18 @@ import {
   test,
   expect,
   createProject,
-  csrfToken,
-  DEMO,
-  makeReady,
+  readyProject,
   signIn,
+  submitBudget,
   uniqueTitle,
+  DEMO,
 } from './fixtures'
-import type { Page } from '@playwright/test'
-
-async function switchTo(page: Page, email: string, type: 'researcher' | 'staff') {
-  await page.context().clearCookies()
-  await signIn(page, email, type)
-}
 
 test('submitted, approved by the head of department, and recorded (#83, #84)', async ({
   page,
 }) => {
-  const title = uniqueTitle('Approved end to end')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
+  const project = await readyProject(page, 'Approved end to end')
+  const { title } = project
 
   // The owner submits, and the screen shows what the server did.
   await page.goto(`/projects/${project.id}/approvals`)
@@ -30,7 +23,7 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByRole('button', { name: 'Submit for approval' })).toHaveCount(0)
 
   // The head of department opens it from their queue, into the costing itself.
-  await switchTo(page, DEMO.hod, 'staff')
+  await signIn(page, 'hod')
   await page.goto('/approvals')
   await page.getByRole('link', { name: new RegExp(title) }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/approvals`)
@@ -59,18 +52,14 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
 
   // The owner sees who decided.
-  await switchTo(page, DEMO.researcher, 'researcher')
+  await signIn(page)
   await page.goto(`/projects/${project.id}/approvals`)
   await expect(page.getByText(/Approved\s+by Hana Head/)).toBeVisible()
 })
 
 test('a submitted costing is read-only on every screen', async ({ page }) => {
-  const project = await createProject(page, uniqueTitle('Frozen'), { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status()).toBe(200)
+  const project = await readyProject(page, 'Frozen')
+  await submitBudget(page, project.budget_id)
 
   await page.goto(`/projects/${project.id}/staff`)
   await expect(page.getByText(/so it is read-only/)).toBeVisible()
@@ -91,21 +80,20 @@ test('a costing that is not ready lists what the server wants', async ({ page })
 test('the owner withdraws a submission, it leaves the queue, and a new draft carries on (#95)', async ({
   page,
 }) => {
-  const title = uniqueTitle('Withdrawn')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
+  const project = await readyProject(page, 'Withdrawn')
+  const { title } = project
   await page.goto(`/projects/${project.id}/approvals`)
   await page.getByRole('button', { name: 'Submit for approval' }).click()
   await expect(page.getByText('Awaiting Head of Department')).toBeVisible()
 
   // The head of department can see it, but withdrawing is the owner's alone.
-  await switchTo(page, DEMO.hod, 'staff')
+  await signIn(page, 'hod')
   await page.goto(`/projects/${project.id}/approvals`)
   await expect(page.getByText('This costing is waiting on your authorisation')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Withdraw from review' })).toHaveCount(0)
 
   // The owner withdraws it, after a confirm that says what that means.
-  await switchTo(page, DEMO.researcher, 'researcher')
+  await signIn(page)
   await page.goto(`/projects/${project.id}/approvals`)
   await page.getByRole('button', { name: 'Withdraw from review' }).click()
   const ask = page.getByRole('alertdialog', { name: 'Withdraw from review' })
@@ -115,13 +103,13 @@ test('the owner withdraws a submission, it leaves the queue, and a new draft car
   await expect(page.getByRole('button', { name: 'Withdraw from review' })).toHaveCount(0)
 
   // It is in nobody's queue now.
-  await switchTo(page, DEMO.hod, 'staff')
+  await signIn(page, 'hod')
   await page.goto('/approvals')
   await expect(page.getByRole('heading', { name: /Approvals/ }).first()).toBeVisible()
   await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
 
   // The owner carries on from a new draft, and the withdrawn attempt is kept.
-  await switchTo(page, DEMO.researcher, 'researcher')
+  await signIn(page)
   await page.goto(`/projects/${project.id}/approvals`)
   await page.getByRole('button', { name: 'Make a new draft from it' }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/details`)
@@ -136,15 +124,11 @@ test('the owner withdraws a submission, it leaves the queue, and a new draft car
 })
 
 test("an approver's register lists their area at any status, and Back returns to it (#98)", async ({ page }) => {
-  const title = uniqueTitle('Register')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status(), await submitted.text()).toBe(200)
+  const project = await readyProject(page, 'Register')
+  const { title } = project
+  await submitBudget(page, project.budget_id)
 
-  await switchTo(page, DEMO.hod, 'staff')
+  await signIn(page, 'hod')
   await page.goto('/approvals')
   await page.getByRole('navigation', { name: 'Approvals' }).getByRole('link', { name: 'Register' }).click()
   await expect(page).toHaveURL('/approvals/register')

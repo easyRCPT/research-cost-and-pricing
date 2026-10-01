@@ -10,24 +10,20 @@ walks the whole chain can see the join.
 
 from decimal import Decimal
 
-from django.contrib.auth.models import Group
 from django.test import TestCase
 
 from api.models import (
     ApprovalStep,
     Budget,
     CalculationConstant,
-    Department,
-    Faculty,
     LookupConfiguration,
     LookupVersion,
-    Project,
-    User,
     UserOrgAssignment,
 )
 from api.services.approval_decide import decide
 from api.services.approval_queue import get_approval_steps
 from api.services.submission import submit_budget
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 class FlowFixture(TestCase):
@@ -43,21 +39,13 @@ class FlowFixture(TestCase):
             version=version,
         )
 
-        self.faculty = Faculty.objects.create(code="SCI", name="Science Faculty")
-        self.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=self.faculty,
-        )
+        self.department = make_department(name="Science")
+        self.faculty = self.department.faculty
 
-        self.owner = User.objects.create(email="owner@unimelb.edu.au")
-        self.owner.groups.set(Group.objects.filter(name="researcher"))
-        self.hod = User.objects.create(email="hod@unimelb.edu.au")
-        self.hod.groups.set(Group.objects.filter(name="staff"))
-        self.dean = User.objects.create(email="dean@unimelb.edu.au")
-        self.dean.groups.set(Group.objects.filter(name="staff"))
+        self.owner = make_user(groups=["researcher"])
+        self.hod = make_user("hod@unimelb.edu.au", groups=["staff"])
+        self.dean = make_user("dean@unimelb.edu.au", groups=["staff"])
+
         UserOrgAssignment.objects.create(
             user=self.hod, role="hod", department=self.department
         )
@@ -66,25 +54,15 @@ class FlowFixture(TestCase):
         )
 
     def a_budget(self, margin: str) -> Budget:
-        project = Project.objects.create(
+        project = make_project(
+            self.owner,
+            self.department,
             title="Flow",
-            department=self.department,
             chief_investigator="Dr A",
             funder="ARC",
-            start_year=2026,
-            start_month=1,
             end_year=2026,
-            end_month=12,
-            created_by=self.owner,
         )
-        return Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.70"),
-            in_kind_multiplier=Decimal("1.70"),
-            margin=Decimal(margin),
-            gst_applicable=True,
-            cash_co_contribution=Decimal(0),
-        )
+        return make_budget(project, margin=Decimal(margin))
 
     def step(self, budget: Budget, level: str) -> ApprovalStep:
         return budget.approval_steps.get(level=level)

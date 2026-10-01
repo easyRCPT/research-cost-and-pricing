@@ -1,58 +1,27 @@
-from pathlib import Path
-
-from django.conf import settings
-from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
 from api.models import (
-    Budget,
     Deliverable,
     DeliverableType,
-    Department,
-    Faculty,
     NonStaffCostCategory,
     NonStaffCostLine,
-    Project,
     StaffCostLine,
-    User,
 )
-from api.services.project import budget_defaults
+from api.tests.factories import make_budget, make_project, make_user, seed_lookups
 
 
 class BudgetOwnershipTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        # The owner's control request prices the budget, which needs rates.
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
 
     def setUp(self):
-        self.owner = User.objects.create_user("owner@unimelb.edu.au")
-        self.stranger = User.objects.create_user("stranger@unimelb.edu.au")
-        faculty, _ = Faculty.objects.get_or_create(
-            code="SCI", defaults={"name": "Science Faculty"}
+        self.owner = make_user()
+        self.stranger = make_user("stranger@unimelb.edu.au")
+        self.budget = make_budget(
+            make_project(self.owner, title="Owned", end_year=2026)
         )
-        department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=faculty,
-        )
-        project = Project.objects.create(
-            title="Owned",
-            department=department,
-            start_year=2026,
-            start_month=1,
-            end_year=2026,
-            end_month=12,
-            created_by=self.owner,
-        )
-        self.budget = Budget.objects.create(project=project, **budget_defaults())
         self.staff_line = StaffCostLine.objects.create(
             budget=self.budget,
             name_role="Dr A",

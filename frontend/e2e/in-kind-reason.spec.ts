@@ -1,11 +1,8 @@
 import {
   test,
   expect,
-  createProject,
-  openProject,
   goToScreen,
-  fillStaffRow,
-  uniqueTitle,
+  newStaffRow,
 } from './fixtures'
 
 /**
@@ -40,13 +37,7 @@ const REASON = 'Absorbed from the school research support fund'
 test('an in-kind line can say why, and the reason survives a reload', async ({
   page,
 }) => {
-  const title = uniqueTitle('In-kind reason')
-  await createProject(page, title, { start: 2026, end: 2026 })
-  await openProject(page, title)
-  await goToScreen(page, 'Staff Costs')
-
-  const staffRow = page.locator('tbody tr').first()
-  await fillStaffRow(page, staffRow, { name: 'Dr A. Rahman' })
+  const staffRow = await newStaffRow(page, 'In-kind reason', { name: 'Dr A. Rahman' })
   const time = staffRow.getByRole('spinbutton').first()
   await time.fill('0.5')
   await time.blur()
@@ -78,13 +69,7 @@ test('an in-kind line can say why, and the reason survives a reload', async ({
 })
 
 test('unticking a line takes its reason away with it', async ({ page }) => {
-  const title = uniqueTitle('In-kind untick')
-  await createProject(page, title, { start: 2026, end: 2026 })
-  await openProject(page, title)
-  await goToScreen(page, 'Staff Costs')
-
-  const staffRow = page.locator('tbody tr').first()
-  await fillStaffRow(page, staffRow, { name: 'Dr B. Okafor' })
+  const staffRow = await newStaffRow(page, 'In-kind untick', { name: 'Dr B. Okafor' })
   const time = staffRow.getByRole('spinbutton').first()
   await time.fill('0.5')
   await time.blur()

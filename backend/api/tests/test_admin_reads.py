@@ -3,7 +3,6 @@
 from datetime import timedelta
 from decimal import Decimal
 
-from django.contrib.auth.models import Group
 from django.db import connection
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
@@ -12,8 +11,6 @@ from django.utils import timezone
 from api.models import (
     AuditLog,
     Budget,
-    Department,
-    Faculty,
     LookupConfiguration,
     LookupVersion,
     Project,
@@ -21,6 +18,13 @@ from api.models import (
     UserOrgAssignment,
 )
 from api.services.audit import write_audit
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_faculty,
+    make_project,
+    make_user,
+)
 
 ADMIN = "/api/admin/"
 
@@ -29,13 +33,9 @@ class ConsoleFixture(TestCase):
     def setUp(self):
         version = LookupVersion.objects.create()
         LookupConfiguration.objects.update(current_version=version)
-        self.faculty = Faculty.objects.create(code="SCI", name="Science Faculty")
-        self.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=self.faculty,
+        self.faculty = make_faculty("SCI", "Science Faculty")
+        self.department = make_department(
+            "SCI", self.faculty, name="Science", school="Science School"
         )
         self.admin = self.account("admin@unimelb.edu.au", "superadmin")
         self.ruth = self.account("ruth@unimelb.edu.au", "researcher")
@@ -47,26 +47,15 @@ class ConsoleFixture(TestCase):
 
     @staticmethod
     def account(email, group) -> User:
-        user = User.objects.create(email=email)
-        user.groups.set(Group.objects.filter(name=group))
-        return user
+        return make_user(email, groups=[group])
 
     def a_project(self, owner, title="Project", statuses=("draft",)) -> Project:
-        project = Project.objects.create(
-            title=title,
-            department=self.department,
-            start_year=2026,
-            start_month=1,
-            end_year=2026,
-            end_month=12,
-            created_by=owner,
+        project = make_project(
+            owner, self.department, title=title, start_year=2026, end_year=2026
         )
         for i, status in enumerate(statuses):
-            budget = Budget.objects.create(
-                project=project,
-                cost_multiplier=Decimal("1.70"),
-                in_kind_multiplier=Decimal("1.70"),
-                margin=Decimal("0.30"),
+            budget = make_budget(
+                project,
                 status=status,
                 total_price_inc_gst=Decimal(1000 * (i + 1)),
             )
@@ -193,7 +182,7 @@ class OverviewTest(ConsoleFixture):
     def test_counts_are_one_row_per_status_and_group(self):
         self.a_project(self.ruth, statuses=("draft",))
         self.a_project(self.ruth, statuses=("rejected", "approved"))
-        User.objects.create(email="nobody@unimelb.edu.au", is_active=False)
+        make_user("nobody@unimelb.edu.au", is_active=False)
 
         body = self.client.get(f"{ADMIN}overview/").json()
 

@@ -1,9 +1,8 @@
-from django.contrib.auth.models import Group
 from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from api.models import User
+from api.tests.factories import make_user
 
 PASSWORD = "a-perfectly-ordinary-password"
 
@@ -19,8 +18,7 @@ class TestCsrfOnWrites(TestCase):
     def setUp(self):
         cache.clear()  # the sign-in throttle
         self.client = Client(enforce_csrf_checks=True)
-        user = User.objects.create_user(email="ruth@unimelb.edu.au", password=PASSWORD)
-        user.groups.set(Group.objects.filter(name="researcher"))
+        make_user("ruth@unimelb.edu.au", groups=["researcher"], password=PASSWORD)
 
     def token(self):
         """What a browser does on first paint, before anyone is signed in."""
@@ -74,12 +72,10 @@ class TestCsrfOnTheAnonymousDoors(TestCase):
     def setUp(self):
         cache.clear()  # the sign-in throttle
         self.client = Client(enforce_csrf_checks=True)
-        user = User.objects.create_user(email="ruth@unimelb.edu.au", password=PASSWORD)
-        user.groups.set(Group.objects.filter(name="researcher"))
+        make_user("ruth@unimelb.edu.au", groups=["researcher"], password=PASSWORD)
         # The admin door answers 403 for an ordinary account whatever the
         # token, so that test needs an account the door would otherwise admit.
-        boss = User.objects.create_user(email="boss@unimelb.edu.au", password=PASSWORD)
-        boss.groups.set(Group.objects.filter(name="superadmin"))
+        make_user("boss@unimelb.edu.au", groups=["superadmin"], password=PASSWORD)
 
     def credentials(self):
         return {

@@ -1,18 +1,14 @@
-import { test, expect, createProject, csrfToken, DEMO, makeReady, signIn, signInAsAdmin, uniqueTitle } from './fixtures'
+import { test, expect, apiWrite, DEMO, readyProject, signIn, submitBudget } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,
 }) => {
   // A researcher's costing, submitted: nothing the admin made.
-  const title = uniqueTitle('Register')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status(), await submitted.text()).toBe(200)
+  const project = await readyProject(page, 'Register')
+  const { title } = project
+  await submitBudget(page, project.budget_id)
 
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await page.goto('/admin')
   await expect(page.getByRole('heading', { name: 'Administration' })).toBeVisible()
   await expect(page.getByText('Projects by status')).toBeVisible()
@@ -40,13 +36,12 @@ test("the register finds anyone's costing, read-only, and the log has its submis
 })
 
 test('deactivating someone asks first, and the row says so afterwards (#69)', async ({ page }) => {
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   const email = `deactivate-${Date.now()}@unimelb.edu.au`
-  const made = await page.request.post('/api/admin/users/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  await apiWrite(page, 'post', '/api/admin/users/', {
+    status: 201,
     data: { email, first_name: 'Dee', last_name: 'Activate', password: 'demo12345', groups: ['researcher'] },
   })
-  expect(made.status(), await made.text()).toBe(201)
 
   await page.goto('/admin/users')
   await page.getByLabel('Search accounts').fill(email)
@@ -70,11 +65,11 @@ test('deactivating someone asks first, and the row says so afterwards (#69)', as
 
 test('a costing waiting on a role nobody holds is shown to RIC and named to its owner (#121)', async ({ page }) => {
   // A department of this test's own, with no head of department.
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   const code = `E2E${Date.now().toString(36).toUpperCase()}`.slice(0, 20)
   const lookups = await (await page.request.get('/api/lookups/')).json()
-  const made = await page.request.post('/api/admin/lookups/departments/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  await apiWrite(page, 'post', '/api/admin/lookups/departments/', {
+    status: 201,
     data: {
       values: {
         code,
@@ -86,25 +81,19 @@ test('a costing waiting on a role nobody holds is shown to RIC and named to its 
       },
     },
   })
-  expect(made.status(), await made.text()).toBe(201)
 
   // A researcher submits a costing from it.
-  await page.context().clearCookies()
   await signIn(page)
-  const title = uniqueTitle('Stranded')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, code)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status(), await submitted.text()).toBe(200)
+  const project = await readyProject(page, 'Stranded', code)
+  const { title } = project
+  await submitBudget(page, project.budget_id)
 
   // Its owner is told which unit is missing an approver.
   await page.goto(`/projects/${project.id}/approvals`)
   await expect(page.getByText(`Unheaded ${code} has no head of department assigned`)).toBeVisible()
 
   // RIC sees it on the console, and the department is flagged on its tab.
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await page.goto('/admin')
   await expect(page.getByRole('row').filter({ hasText: title })).toContainText(
     `Unheaded ${code} has no head of department`,

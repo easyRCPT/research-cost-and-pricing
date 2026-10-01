@@ -1,23 +1,9 @@
-import {
-  test,
-  expect,
-  createProject,
-  openProject,
-  goToScreen,
-  fillStaffRow,
-  uniqueTitle,
-} from './fixtures'
+import { test, expect, newStaffRow } from './fixtures'
 
 test('a staff row prices, and is still there after a reload', async ({
   page,
 }) => {
-  const title = uniqueTitle('Staff costs')
-  await createProject(page, title, { start: 2026, end: 2026 })
-  await openProject(page, title)
-  await goToScreen(page, 'Staff Costs')
-
-  const row = page.locator('tbody tr').first()
-  await fillStaffRow(page, row, { name: 'Dr A. Rahman' })
+  const row = await newStaffRow(page, 'Staff costs', { name: 'Dr A. Rahman' })
 
   const time = row.getByRole('spinbutton').first()
   await time.fill('0.5')

@@ -3,49 +3,21 @@ from decimal import Decimal
 from django.test import TestCase
 
 from api.models import (
-    Budget,
-    Department,
-    Faculty,
     LookupConfiguration,
     NonStaffCostCategory,
-    Project,
-    User,
 )
 from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
+from api.tests.factories import make_budget, make_project
 
 from .serializer_utils import get_errors, get_validated_data
 
 
 class NonStaffLineSerializerTestCase(TestCase):
     def setUp(self):
-        self.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
-
-        self.project = Project.objects.create(
-            title="Test Project",
-            department=self.department,
-            funder="Test Funder",
-            start_year=2025,
-            start_month=1,
-            end_year=2027,
-            end_month=12,
-            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
-        )
-
         self.lookup_version = LookupConfiguration.objects.get().current_version
 
-        self.budget = Budget.objects.create(
-            project=self.project,
-            cost_multiplier=Decimal("1.00"),
-            in_kind_multiplier=Decimal("1.00"),
-            margin=Decimal("0.30"),
+        self.budget = make_budget(
+            make_project(funder="Test Funder", start_year=2025, end_year=2027)
         )
 
         self.category = NonStaffCostCategory.objects.create(

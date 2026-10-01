@@ -3,22 +3,15 @@ from decimal import Decimal
 from django.test import TestCase
 from django.urls import reverse
 
-from api.models import Budget, Department, Faculty, Project, User
+from api.models import Budget, Project
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 class ProjectRoutesTestCase(TestCase):
     def setUp(self):
-        self.client.force_login(User.objects.create_user("owner@unimelb.edu.au"))
+        self.client.force_login(make_user())
         self.url = reverse("projects")
-        self.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
+        self.department = make_department(name="Science")
 
     def valid_body(self, **overrides) -> dict:
         return {
@@ -97,33 +90,10 @@ class ModelValidationTestCase(TestCase):
     """full_clean() failures are bad requests, not server errors."""
 
     def setUp(self):
-        owner = User.objects.create_user("owner@unimelb.edu.au")
+        owner = make_user()
         self.client.force_login(owner)
-        department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
-        project = Project.objects.create(
-            title="Test Project",
-            department=department,
-            funder="Test Funder",
-            start_year=2026,
-            start_month=1,
-            end_year=2028,
-            end_month=12,
-            created_by=owner,
-        )
-        self.budget = Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.70"),
-            in_kind_multiplier=Decimal("1.70"),
-            margin=Decimal("0.30"),
-        )
+        project = make_project(owner, funder="Test Funder")
+        self.budget = make_budget(project)
         self.url = reverse("budget-detail", args=[self.budget.id])
 
     def patch(self, body):

@@ -5,10 +5,8 @@ the HTTP write path: never edit a version a budget is pinned to.
 
 from decimal import Decimal
 from io import StringIO
-from pathlib import Path
 from unittest.mock import MagicMock
 
-from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -20,6 +18,7 @@ from api.models import (
     LookupVersion,
     SalaryRate,
 )
+from api.tests.factories import seed_lookups
 
 SENTINEL = Decimal("1.00")
 
@@ -31,11 +30,7 @@ def import_lookups():
 class TestImportLookups(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
 
     def setUp(self):
         self.config = LookupConfiguration.objects.get()

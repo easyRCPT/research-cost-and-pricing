@@ -2,12 +2,10 @@ import type { Page } from '@playwright/test'
 import {
   test,
   expect,
-  createProject,
-  csrfToken,
-  DEMO,
-  makeReady,
+  apiWrite,
+  readyProject,
   signIn,
-  signInAsAdmin,
+  submitBudget,
   uniqueTitle,
 } from './fixtures'
 
@@ -29,14 +27,13 @@ async function removeOurYears(page: Page) {
   const lookups = await (await page.request.get('/api/lookups/')).json()
   const left = (lookups.eba_increases as { year: number }[]).filter((row) => YEARS.includes(row.year))
   if (left.length === 0) return
-  const response = await page.request.post('/api/admin/lookups/changes/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  await apiWrite(page, 'post', '/api/admin/lookups/changes/', {
+    status: 201,
     data: {
       note: 'e2e clean-up',
       changes: left.map((row) => ({ table: 'eba_increases', op: 'delete', lookup: { year: row.year } })),
     },
   })
-  expect(response.status(), await response.text()).toBe(201)
 }
 
 const LEDGER = 99901
@@ -46,14 +43,13 @@ async function removeOurCategory(page: Page) {
   const lookups = await (await page.request.get('/api/lookups/')).json()
   const left = (lookups.non_staff_cost_categories as { ledger_id: number }[]).some((row) => row.ledger_id === LEDGER)
   if (!left) return
-  const response = await page.request.post('/api/admin/lookups/changes/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  await apiWrite(page, 'post', '/api/admin/lookups/changes/', {
+    status: 201,
     data: {
       note: 'e2e clean-up',
       changes: [{ table: 'non_staff_cost_categories', op: 'delete', lookup: { ledger_id: LEDGER } }],
     },
   })
-  expect(response.status(), await response.text()).toBe(201)
 }
 
 async function ebaYears(page: Page): Promise<number[]> {
@@ -80,14 +76,14 @@ async function reviewAndSave(page: Page, note: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await removeOurYears(page)
   await removeOurCategory(page)
 })
 
 test.afterAll(async ({ browser }) => {
   const page = await browser.newPage()
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await removeOurYears(page)
   await removeOurCategory(page)
   await page.close()
@@ -192,17 +188,12 @@ test('a set that starts a new version says who was priced on the old one, and li
   page,
 }) => {
   // A researcher's costing, submitted on the current rates.
-  await page.context().clearCookies()
   await signIn(page)
-  const title = uniqueTitle('Priced on')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status(), await submitted.text()).toBe(200)
+  const project = await readyProject(page, 'Priced on')
+  const { title } = project
+  await submitBudget(page, project.budget_id)
 
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await openEditor(page)
   await stageYear(page, 2090, '0.03')
   await page.getByRole('button', { name: 'Review changes' }).click()

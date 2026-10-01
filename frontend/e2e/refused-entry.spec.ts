@@ -1,12 +1,4 @@
-import {
-  test,
-  expect,
-  createProject,
-  openProject,
-  goToScreen,
-  fillStaffRow,
-  uniqueTitle,
-} from './fixtures'
+import { test, expect, newStaffRow } from './fixtures'
 
 /**
  * Regression for two faults that met on the same cell.
@@ -19,13 +11,7 @@ import {
 test('an over-cap entry stays on screen, marked, and the row survives', async ({
   page,
 }) => {
-  const title = uniqueTitle('Over cap')
-  await createProject(page, title, { start: 2026, end: 2026 })
-  await openProject(page, title)
-  await goToScreen(page, 'Staff Costs')
-
-  const row = page.locator('tbody tr').first()
-  await fillStaffRow(page, row, {
+  const row = await newStaffRow(page, 'Over cap', {
     name: 'Field technician',
     employment: 'Casual',
     basis: 'Hourly',

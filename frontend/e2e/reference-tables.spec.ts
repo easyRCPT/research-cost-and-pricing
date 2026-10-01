@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { test, expect, createProject, csrfToken, signIn, signInAsAdmin, uniqueTitle } from './fixtures'
+import { test, expect, apiWrite, createProject, signIn, uniqueTitle } from './fixtures'
 
 /**
  * The reference tables (#70, #144): saved a row at a time, in place, with no
@@ -24,7 +24,7 @@ async function addRow(page: Page, values: Record<string, string>) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
 })
 
 test('a faculty is added and renamed, and its code never changes (#70)', async ({ page }) => {
@@ -116,16 +116,13 @@ test('a region a project uses is refused, saying what uses it (#144)', async ({ 
   await expect(row).toBeVisible()
 
   // A researcher's project in that region.
-  await page.context().clearCookies()
   await signIn(page)
   const project = await createProject(page, uniqueTitle('Region'))
-  const placed = await page.request.patch(`/api/budgets/${project.budget_id}/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  await apiWrite(page, 'patch', `/api/budgets/${project.budget_id}/`, {
     data: { section: 'project', field: 'region', value: code },
   })
-  expect(placed.ok(), await placed.text()).toBe(true)
 
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await openTab(page, 'Regions')
   await row.getByRole('button', { name: `Remove ${code}` }).click()
   await row.getByRole('alert').getByRole('button', { name: 'Remove' }).click()

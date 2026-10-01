@@ -1,44 +1,28 @@
 from decimal import Decimal
-from pathlib import Path
 
-from django.conf import settings
-from django.contrib.auth.models import Group
-from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
 from api.models import (
     CalculationConstant,
     Department,
-    Faculty,
     LookupConfiguration,
     User,
 )
+from api.tests.factories import make_department, make_user, seed_lookups
 
 
 class LookupWriteAccessTestCase(TestCase):
     def setUp(self):
-        faculty = Faculty.objects.create(code="SCI", name="Science Faculty")
-        Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=faculty,
-        )
+        make_department(name="Science")
         # A whole set of rates: a set of changes is refused if it would leave
         # rates that cannot price a costing.
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
         self.fixed = CalculationConstant.objects.get(
             version=LookupConfiguration.objects.get().current_version,
             name="full_cost_recovery_multiplier",
         )
-        self.admin = User.objects.create_user("admin@unimelb.edu.au")
-        self.admin.groups.add(Group.objects.get(name="superadmin"))
+        self.admin = make_user("admin@unimelb.edu.au", groups=["superadmin"])
 
     def patch(self, table: str, body: dict):
         return self.client.patch(
@@ -67,8 +51,7 @@ class LookupWriteAccessTestCase(TestCase):
         )
 
     def test_a_researcher_cannot_write(self):
-        researcher = User.objects.create_user("researcher@unimelb.edu.au")
-        researcher.groups.add(Group.objects.get(name="researcher"))
+        researcher = make_user("researcher@unimelb.edu.au", groups=["researcher"])
         self.client.force_login(researcher)
 
         self.assertEqual(self.rename().status_code, 403)
@@ -82,7 +65,7 @@ class LookupWriteAccessTestCase(TestCase):
         self.assertEqual(self.rename().status_code, 403)
 
     def test_a_researcher_can_still_read(self):
-        self.client.force_login(User.objects.create_user("researcher@unimelb.edu.au"))
+        self.client.force_login(make_user("researcher@unimelb.edu.au"))
 
         self.assertEqual(self.client.get(reverse("lookups")).status_code, 200)
 
@@ -112,8 +95,7 @@ class LookupWriteAccessTestCase(TestCase):
         self.assertEqual(self.fixed.value, Decimal("1.700000"))
 
     def test_a_researcher_cannot_change_the_multiplier(self):
-        researcher = User.objects.create_user("researcher@unimelb.edu.au")
-        researcher.groups.add(Group.objects.get(name="researcher"))
+        researcher = make_user("researcher@unimelb.edu.au", groups=["researcher"])
         self.client.force_login(researcher)
 
         response = self.set_multiplier("1.80")
