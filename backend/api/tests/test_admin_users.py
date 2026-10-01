@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from api.models import AuditLog, User, UserOrgAssignment
 from api.services.auth import groups_of
@@ -193,6 +193,15 @@ class AdminUsersTest(TestCase):
         self.assertEqual(self.client.get(BASE).status_code, 200)
         self.assertNotEqual(self.client.get("/admin/").status_code, 200)
 
+    # Plain storage: CI renders the admin page without running collectstatic.
+    @override_settings(
+        STORAGES={
+            "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+            },
+        }
+    )
     def test_a_createsuperuser_account_reaches_django_admin(self):
         dev = User.objects.create_superuser(email="dev@unimelb.edu.au", password="x")
         self.client.force_login(dev)
