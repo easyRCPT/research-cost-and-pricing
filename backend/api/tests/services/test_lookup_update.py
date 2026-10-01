@@ -14,10 +14,10 @@ from api.models import (
     LookupVersion,
     SalaryRate,
     SalaryRateMultiplier,
-    User,
 )
 from api.services import lookup_update
 from api.services.lookup_update import create, update
+from api.tests.factories import make_user
 
 
 class LookupUpdateTestMixin:
@@ -91,13 +91,7 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             ValidationError,
             "Invalid lookup table: invalid",
         ):
-            create(
-                "invalid",
-                {
-                    "code": "SCI",
-                },
-            )
-
+            create("invalid", {"code": "SCI"})
         self.assertEqual(Department.objects.count(), 0)
 
     @patch("api.services.lookup_update.invalidate_lookup_cache")
@@ -106,11 +100,7 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
         mock_invalidate_cache,
     ):
         faculty = self.create_faculty()
-
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         create(
             "departments",
@@ -337,10 +327,7 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
     ):
         department = self.create_department()
 
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         update(
             "departments",
@@ -385,10 +372,7 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             name="Engineering Faculty",
         )
 
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         update(
             "departments",
@@ -495,10 +479,7 @@ class TestVersionedCreate(TestCase):
         self.config.referenced = True
         self.config.save(update_fields=["referenced"])
 
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         create(
             "salary_rates",
@@ -710,10 +691,7 @@ class TestVersionedUpdate(TestCase):
         self.config.referenced = True
         self.config.save(update_fields=["referenced"])
 
-        actor = User.objects.create(
-            email="admin@unimelb.edu.au",
-            is_superuser=True,
-        )
+        actor = make_user("admin@unimelb.edu.au", is_superuser=True)
 
         update(
             "salary_rates",

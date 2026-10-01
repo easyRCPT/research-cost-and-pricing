@@ -16,6 +16,7 @@ from api.models import (
 )
 from api.services import budget_update
 from api.services.project import budget_defaults, create, list_projects
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 def current_version():
@@ -26,15 +27,10 @@ def current_version():
 class ProjectTestMixin:
     @staticmethod
     def create_department(code: str = "SCI") -> Department:
-        return Department.objects.create(
-            code=code,
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
+        faculty = Faculty.objects.get_or_create(
+            code="SCI", defaults={"name": "Science Faculty"}
+        )[0]
+        return make_department(code, faculty, name="Science")
 
     def project_data(self, **overrides) -> dict:
         return {
@@ -55,29 +51,7 @@ class ProjectTestMixin:
         return User.objects.get_or_create(email="owner@unimelb.edu.au")[0]
 
     def create_project(self, department: Department, **overrides) -> Project:
-        return Project.objects.create(
-            **{
-                "title": "Test Project",
-                "department": department,
-                "created_by": self.owner(),
-                "funder": "Test Funder",
-                "start_year": 2026,
-                "start_month": 1,
-                "end_year": 2028,
-                "end_month": 12,
-                **overrides,
-            }
-        )
-
-    @staticmethod
-    def create_budget(project: Project, **overrides) -> Budget:
-        return Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.70"),
-            in_kind_multiplier=Decimal("1.70"),
-            margin=Decimal("0.30"),
-            **overrides,
-        )
+        return make_project(self.owner(), department, **overrides)
 
     @staticmethod
     def touch(budget: Budget, when: datetime) -> None:
@@ -112,7 +86,7 @@ class TestReference(ProjectTestMixin, TestCase):
 
 class TestTouch(ProjectTestMixin, TestCase):
     def test_moves_the_edit_time(self):
-        budget = self.create_budget(self.create_project(self.create_department()))
+        budget = make_budget(self.create_project(self.create_department()))
         self.touch(budget, datetime(2020, 1, 1, tzinfo=UTC))
 
         budget.touch()
@@ -124,7 +98,7 @@ class TestTouch(ProjectTestMixin, TestCase):
         )
 
     def test_changes_nothing_else(self):
-        budget = self.create_budget(
+        budget = make_budget(
             self.create_project(self.create_department()),
             status=Budget.Status.APPROVED,
             total_price_inc_gst=Decimal("500.00"),
@@ -140,7 +114,7 @@ class TestTouch(ProjectTestMixin, TestCase):
         # The point of touch(): a budget's own columns do not move when a cost
         # line is added, so without it the list would report a stale edit time.
         project = self.create_project(self.create_department())
-        budget = self.create_budget(project)
+        budget = make_budget(project)
         self.touch(budget, datetime(2020, 1, 1, tzinfo=UTC))
 
         before = list_projects(self.owner())[0]["updated_at"]
@@ -154,7 +128,7 @@ class TestDecimalFields(ProjectTestMixin, TestCase):
     """A JSON number reaching a DecimalField goes through its string form."""
 
     def setUp(self):
-        self.budget = self.create_budget(self.create_project(self.create_department()))
+        self.budget = make_budget(self.create_project(self.create_department()))
 
     def update(self, field, value):
         # The write is what is under test; pricing it needs seeded constants.
@@ -265,14 +239,14 @@ class TestCreate(ProjectTestMixin, TestCase):
         self.assertEqual(budget.margin, Decimal("0.2500"))
 
     def test_records_the_author(self):
-        user = User.objects.create_user(email="researcher@unimelb.edu.au")
+        user = make_user("researcher@unimelb.edu.au")
 
         row = create(self.project_data(), user)
 
         self.assertEqual(Project.objects.get(pk=row["id"]).created_by, user)
 
     def test_a_user_who_owns_a_project_cannot_be_deleted(self):
-        user = User.objects.create_user(email="researcher@unimelb.edu.au")
+        user = make_user("researcher@unimelb.edu.au")
         create(self.project_data(), user)
 
         with self.assertRaises(ProtectedError):
@@ -289,7 +263,7 @@ class TestListProjects(ProjectTestMixin, TestCase):
         self.assertEqual(list_projects(self.owner()), [])
 
     def test_reports_the_department_and_faculty_by_name(self):
-        self.create_budget(self.create_project(self.create_department()))
+        make_budget(self.create_project(self.create_department()))
 
         row = list_projects(self.owner())[0]
 
@@ -298,8 +272,8 @@ class TestListProjects(ProjectTestMixin, TestCase):
 
     def test_reports_the_most_recently_touched_budgets_status(self):
         project = self.create_project(self.create_department())
-        older = self.create_budget(project, status=Budget.Status.APPROVED)
-        newer = self.create_budget(project, status=Budget.Status.DRAFT)
+        older = make_budget(project, status=Budget.Status.APPROVED)
+        newer = make_budget(project, status=Budget.Status.DRAFT)
         self.touch(older, datetime(2026, 1, 1, tzinfo=UTC))
         self.touch(newer, datetime(2026, 6, 1, tzinfo=UTC))
 
@@ -311,7 +285,7 @@ class TestListProjects(ProjectTestMixin, TestCase):
 
     def test_reads_the_price_off_the_budget(self):
         project = self.create_project(self.create_department())
-        self.create_budget(project, total_price_inc_gst=Decimal("12345.67"))
+        make_budget(project, total_price_inc_gst=Decimal("12345.67"))
 
         self.assertEqual(
             list_projects(self.owner())[0]["total_price_inc_gst"],
@@ -334,8 +308,8 @@ class TestListProjects(ProjectTestMixin, TestCase):
         busy = self.create_project(department, title="Busy")
 
         # Busy was made first in wall-clock terms once its budget moves ahead.
-        self.touch(self.create_budget(quiet), datetime(2026, 1, 1, tzinfo=UTC))
-        self.touch(self.create_budget(busy), datetime(2027, 1, 1, tzinfo=UTC))
+        self.touch(make_budget(quiet), datetime(2026, 1, 1, tzinfo=UTC))
+        self.touch(make_budget(busy), datetime(2027, 1, 1, tzinfo=UTC))
 
         self.assertEqual(
             [row["title"] for row in list_projects(self.owner())],

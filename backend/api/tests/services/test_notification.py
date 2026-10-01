@@ -1,14 +1,9 @@
-from decimal import Decimal
 from unittest.mock import patch
 
 from django.test import TestCase
 
 from api.models import (
     Budget,
-    Department,
-    Faculty,
-    Project,
-    User,
     UserOrgAssignment,
 )
 from api.services.notification import (
@@ -16,48 +11,19 @@ from api.services.notification import (
     notify_dean_review,
     notify_hod_review,
 )
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 class NotificationTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.owner = User.objects.create_user(
-            email="owner@example.com",
-            password="password",
-        )
+        cls.owner = make_user("owner@example.com")
+        cls.hod = make_user("hod@example.com")
+        cls.dean = make_user("dean@example.com")
 
-        cls.hod = User.objects.create_user(
-            email="hod@example.com",
-            password="password",
-        )
-
-        cls.dean = User.objects.create_user(
-            email="dean@example.com",
-            password="password",
-        )
-
-        cls.faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science Faculty",
-        )
-
-        cls.department = Department.objects.create(
-            code="SCI-01",
-            name="Science Department",
-            school="Science School",
-            school_code="SCI",
-            faculty=cls.faculty,
-        )
-
-        cls.project = Project.objects.create(
-            title="Test Project",
-            department=cls.department,
-            start_year=2026,
-            start_month=1,
-            end_year=2027,
-            end_month=12,
-            created_by=cls.owner,
-        )
+        cls.department = make_department()
+        cls.faculty = cls.department.faculty
+        cls.project = make_project(cls.owner, cls.department, end_year=2027)
 
         UserOrgAssignment.objects.create(
             user=cls.hod,
@@ -71,27 +37,12 @@ class NotificationTest(TestCase):
             faculty=cls.faculty,
         )
 
-    def create_budget(
-        self,
-        *,
-        status: str,
-    ) -> Budget:
-        return Budget.objects.create(
-            project=self.project,
-            status=status,
-            cost_multiplier=Decimal("1.00"),
-            in_kind_multiplier=Decimal("1.00"),
-            margin=Decimal("0.3000"),
-        )
-
     @patch("api.services.notification.EmailMultiAlternatives")
     def test_notify_hod_review_sends_to_hod(
         self,
         mock_email,
     ) -> None:
-        budget = self.create_budget(
-            status=Budget.Status.HOD_REVIEW,
-        )
+        budget = make_budget(self.project, status=Budget.Status.HOD_REVIEW)
 
         notify_hod_review(budget)
 
@@ -114,9 +65,7 @@ class NotificationTest(TestCase):
         self,
         mock_email,
     ) -> None:
-        budget = self.create_budget(
-            status=Budget.Status.DEAN_REVIEW,
-        )
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
 
         budget.dean_triggers = [
             "High value",
@@ -147,9 +96,7 @@ class NotificationTest(TestCase):
         self,
         mock_email,
     ) -> None:
-        budget = self.create_budget(
-            status=Budget.Status.REJECTED,
-        )
+        budget = make_budget(self.project, status=Budget.Status.REJECTED)
 
         notify_budget_decision(
             budget,
@@ -177,9 +124,7 @@ class NotificationTest(TestCase):
         self,
         mock_render,
     ) -> None:
-        budget = self.create_budget(
-            status=Budget.Status.DEAN_REVIEW,
-        )
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
 
         notify_budget_decision(
             budget,
@@ -220,9 +165,7 @@ class NotificationTest(TestCase):
         self,
         mock_email,
     ) -> None:
-        budget = self.create_budget(
-            status=Budget.Status.HOD_REVIEW,
-        )
+        budget = make_budget(self.project, status=Budget.Status.HOD_REVIEW)
 
         mock_email.return_value.send.side_effect = Exception(
             "SMTP failed",

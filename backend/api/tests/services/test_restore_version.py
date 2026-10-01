@@ -7,7 +7,6 @@ nothing that already exists is rewritten.
 
 from decimal import Decimal
 
-from django.contrib.auth.models import Group
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
@@ -17,7 +16,6 @@ from api.models import (
     LookupConfiguration,
     LookupVersion,
     SalaryRate,
-    User,
 )
 from api.services.lookup_update import (
     get_versioned_models,
@@ -25,7 +23,7 @@ from api.services.lookup_update import (
     restore_version,
     update,
 )
-from api.tests.factories import seed_lookups
+from api.tests.factories import make_budget, make_project, make_user, seed_lookups
 
 LEVEL_A1 = {
     "classification": "Level A.1",
@@ -57,8 +55,8 @@ class RestoreVersionTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         seed_lookups()
-        cls.admin = User.objects.create(email="admin@unimelb.edu.au")
-        cls.admin.groups.set(Group.objects.filter(name="superadmin"))
+        cls.admin = make_user(email="admin@unimelb.edu.au", groups=["superadmin"])
+        cls.owner = make_user()
 
     def current(self) -> int:
         return LookupConfiguration.objects.get().current_version_id
@@ -98,26 +96,17 @@ class RestoreVersionTest(TestCase):
         )
 
     def test_a_budget_stamped_with_the_edited_version_still_reads_it(self):
-        from api.models import Department, Project
+        from api.models import Department
 
         original = self.current()
         edited = self.edit_rate("99999.0000")
-        project = Project.objects.create(
-            created_by=User.objects.create(email="owner@unimelb.edu.au"),
-            title="Stamped",
-            department=Department.objects.order_by("code").first(),
-            start_year=2026,
-            start_month=1,
+        project = make_project(
+            self.owner,
+            Department.objects.order_by("code").first(),
+            title="Stmaped",
             end_year=2026,
-            end_month=12,
         )
-        budget = Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.70"),
-            in_kind_multiplier=Decimal("1.70"),
-            margin=Decimal("0.30"),
-            lookup_version_id=edited,
-        )
+        budget = make_budget(project, lookup_version_id=edited)
 
         restore_version(original, self.admin)
 
@@ -126,23 +115,15 @@ class RestoreVersionTest(TestCase):
 
     def a_costing(self) -> Budget:
         """A draft with one Level A.1 line, so it prices on the live rates."""
-        from api.models import Department, Project, StaffCostLine, YearAllocation
+        from api.models import Department, StaffCostLine, YearAllocation
 
-        project = Project.objects.create(
-            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
+        project = make_project(
+            self.owner,
+            Department.objects.order_by("code").first(),
             title="Priced",
-            department=Department.objects.order_by("code").first(),
-            start_year=2026,
-            start_month=1,
             end_year=2026,
-            end_month=12,
         )
-        budget = Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.70"),
-            in_kind_multiplier=Decimal("1.70"),
-            margin=Decimal("0.30"),
-        )
+        budget = make_budget(project)
         line = StaffCostLine.objects.create(
             budget=budget,
             name_role="Dr A",
@@ -228,10 +209,8 @@ class RestoreRoutesTest(TestCase):
     """The endpoints sit behind the superadmin group."""
 
     def setUp(self):
-        self.researcher = User.objects.create(email="r@unimelb.edu.au")
-        self.researcher.groups.set(Group.objects.filter(name="researcher"))
-        self.admin = User.objects.create(email="a@unimelb.edu.au")
-        self.admin.groups.set(Group.objects.filter(name="superadmin"))
+        self.researcher = make_user("r@unimelb.edu.au", groups=["researcher"])
+        self.admin = make_user("a@unimelb.edu.au", groups=["superadmin"])
 
     def test_a_researcher_is_refused(self):
         self.client.force_login(self.researcher)
