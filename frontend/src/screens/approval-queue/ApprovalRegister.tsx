@@ -7,6 +7,7 @@ import {
   type DataTableColumns,
 } from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
+import { Skeleton } from '@/components/ui/skeleton'
 import { money } from '@/lib/format/utils'
 import { shortDate } from '@/lib/format/dates'
 import { cn } from '@/lib/utils'
@@ -161,7 +162,7 @@ export function ApprovalRegister() {
           aria-label="Loading the register"
         >
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-9 animate-pulse rounded bg-muted" />
+            <Skeleton key={i} className="h-9" />
           ))}
         </div>
       ) : rows && rows.length === 0 ? (
