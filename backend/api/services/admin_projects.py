@@ -38,14 +38,4 @@ def register(status: str = "", q: str = "") -> list[dict]:
     if q:
         projects = projects.filter(Q(title__icontains=q) | Q(reference__icontains=q))
 
-    return [
-        {
-            **build_row(project),
-            "owner": {
-                "id": project.created_by.id,
-                "email": project.created_by.email,
-                "name": project.created_by.get_full_name(),
-            },
-        }
-        for project in projects
-    ]
+    return [build_row(project) for project in projects]

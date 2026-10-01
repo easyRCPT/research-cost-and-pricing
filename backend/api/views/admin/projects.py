@@ -8,13 +8,8 @@ from rest_framework.views import APIView
 
 from api.models import Budget
 from api.permissions import IsSuperadmin
+from api.serializers.project_serializer import ProjectOwnerSerializer
 from api.services import admin_projects
-
-
-class ProjectOwnerSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    email = serializers.EmailField()
-    name = serializers.CharField(allow_blank=True)
 
 
 class AdminProjectSerializer(serializers.Serializer):

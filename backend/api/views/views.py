@@ -20,6 +20,7 @@ from api.serializers.lookup_serializer import LookupTablesSerializer
 from api.serializers.non_staff_line_serializer import NonStaffLineSerializer
 from api.serializers.project_serializer import (
     ProjectCreateSerializer,
+    ProjectListQuerySerializer,
     ProjectRowSerializer,
 )
 from api.serializers.staff_line_serializer import StaffLineSerializer
@@ -46,9 +47,16 @@ class ProjectView(APIView):
     services/project.visible_projects.
     """
 
-    @extend_schema(responses={200: ProjectRowSerializer(many=True)})
+    @extend_schema(
+        parameters=[ProjectListQuerySerializer],
+        responses={200: ProjectRowSerializer(many=True)},
+    )
     def get(self, request: Request) -> Response:
-        rows = project.list_projects(request.user)
+        query = ProjectListQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        rows = project.list_projects(
+            request.user, cast(dict, query.validated_data)["status"]
+        )
         return Response(ProjectRowSerializer(rows, many=True).data)
 
     @extend_schema(

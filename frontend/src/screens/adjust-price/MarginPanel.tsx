@@ -23,25 +23,33 @@ export function MarginPanel() {
   return (
     <Panel title="Margin" className="mt-4">
       <div className="flex flex-wrap items-center gap-4">
-        <Slider
-          className="max-w-[320px] min-w-[220px] flex-1"
-          min={0}
-          max={MAX_MARGIN}
-          step={1}
-          value={[percent]}
-          onValueChange={([next]) => setPercent(next)}
-          // Not a native control, so the read-only fieldset cannot reach it.
-          disabled={!editable}
-        />
-        <NumberInput
-          min={0}
-          max={MAX_MARGIN}
-          onOutOfRange={() => toastOutOfRange('Margin', 0, MAX_MARGIN)}
-          className="tabular h-9 w-[90px] text-right"
-          value={Number(percent.toFixed(2))}
-          onChange={setPercent}
-        />
-        <span className="text-[13.5px] text-muted-foreground">%</span>
+        {editable ? (
+          <>
+            <Slider
+              className="max-w-[320px] min-w-[220px] flex-1"
+              min={0}
+              max={MAX_MARGIN}
+              step={1}
+              value={[percent]}
+              onValueChange={([next]) => setPercent(next)}
+            />
+            <NumberInput
+              min={0}
+              max={MAX_MARGIN}
+              onOutOfRange={() => toastOutOfRange('Margin', 0, MAX_MARGIN)}
+              className="tabular h-9 w-[90px] text-right"
+              value={Number(percent.toFixed(2))}
+              onChange={setPercent}
+            />
+            <span className="text-[13.5px] text-muted-foreground">%</span>
+          </>
+        ) : (
+          // A value, not a disabled slider (#98): a greyed control still
+          // invites a reviewer to try to move it, and it isn't theirs to move.
+          <span className="tabular text-[22px] font-semibold">
+            {percent.toFixed(1)}%
+          </span>
+        )}
         {deanRequired && (
           <span className="rounded-md bg-warn-bg px-2 py-1 text-[12.5px] text-warn">
             Dean's authorisation required

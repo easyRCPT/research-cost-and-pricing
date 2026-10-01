@@ -22,6 +22,7 @@ import {
 } from '.'
 import { EditorScreenContent } from '@/screens/EditorScreenContent'
 import { BackToProjectsButton } from './BackToProjectsButton'
+import { approvalsPage } from '@/screens/approval-queue/returnTo'
 
 interface AppContentProps {
   screen: AppScreen
@@ -40,12 +41,13 @@ export function AppContent({ screen, setScreen, onLeave }: AppContentProps) {
   const navigate = useNavigate()
   const someoneElses = !!me && me.user.id !== budget.project_info.owner_id
   // Back to where they came from: an administrator from the register, an
-  // approver from their queue (#98), the owner from their projects.
+  // approver to the approvals page they opened it from (#98), the owner to
+  // their projects.
   const back =
     someoneElses && me.groups.includes(SUPERADMIN)
       ? { label: 'Project register', to: '/admin/projects' as const }
       : someoneElses && isApprover(me)
-        ? { label: 'Approvals', to: '/approvals' as const }
+        ? approvalsPage()
         : null
   const updateProject = useUpdateProject()
 
