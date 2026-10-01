@@ -9,10 +9,10 @@ import type {
   StaffLine,
   StaffLineInput,
 } from '@/types'
-import { useBudgetId } from '../context'
-import { useBudget } from '../detail'
-import { getDrafts, setDrafts, useDrafts } from '../drafts'
-import { useEdit, type Command } from '../write'
+import { useBudgetId } from '@/api/budget/context'
+import { useBudget } from '@/api/budget/detail'
+import { getDrafts, setDrafts, useDrafts } from '@/api/budget/drafts'
+import { useEdit, type Command } from '@/api/budget/write'
 import { useLineMutations } from './mutations'
 import {
   blankRows,

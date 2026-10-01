@@ -1,4 +1,4 @@
-import { type SidebarSection } from '.'
+import type { SidebarSection } from './Sidebar'
 
 export const SECTIONS = [
   { items: [{ id: 'details', label: 'Project Details' }] },

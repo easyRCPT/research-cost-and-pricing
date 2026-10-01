@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { asPercent, PERCENT_CONSTANTS } from '@/lib/format/constants'
-import type { RateTableSpec, ValueField } from '../rateTables'
-import { shown, type Staged } from '../stagedChanges'
+import type { RateTableSpec, ValueField } from '@/screens/admin/rateTables'
+import { shown, type Staged } from '@/screens/admin/stagedChanges'
 
 const signedPercent = (fraction: number) =>
   `${fraction > 0 ? '+' : fraction < 0 ? '−' : ''}${Math.abs(fraction * 100).toLocaleString('en-AU', { maximumFractionDigits: 1 })}%`

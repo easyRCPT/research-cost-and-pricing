@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import type { RateTableSpec } from '../rateTables'
-import type { Key, Values } from '../stagedChanges'
+import type { RateTableSpec } from '@/screens/admin/rateTables'
+import type { Key, Values } from '@/screens/admin/stagedChanges'
 
 /** A new row, held with the rest of the set until it is saved. */
 export function AddRateRow({

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { countText, type Staged } from '../stagedChanges'
+import { countText, type Staged } from '@/screens/admin/stagedChanges'
 
 export function ChangeBar({
   staged,

@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import type { RatesMoved } from '../versions/types'
+import type { RatesMoved } from '@/screens/admin/versions/types'
 
 /**
  * What a save or a restore did to the rates, and who was priced on the version

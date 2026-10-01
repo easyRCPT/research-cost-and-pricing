@@ -1,6 +1,6 @@
 import { Grid, Th } from '@/components/shell'
 import { cn } from '@/lib/utils'
-import type { RateTableSpec } from '../rateTables'
+import type { RateTableSpec } from '@/screens/admin/rateTables'
 import {
   idOf,
   keyOf,
@@ -11,7 +11,7 @@ import {
   without,
   type Row,
   type Staged,
-} from '../stagedChanges'
+} from '@/screens/admin/stagedChanges'
 import { RateRow } from './RateRow'
 import type { Refused } from './types'
 

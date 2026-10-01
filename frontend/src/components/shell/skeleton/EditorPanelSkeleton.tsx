@@ -1,4 +1,4 @@
-import { Panel } from '../Panel'
+import { Panel } from '@/components/shell/Panel'
 
 // TODO: Create dedicated skeletons for individual screens
 export function EditorPanelSkeleton() {

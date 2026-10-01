@@ -1,7 +1,7 @@
 import { useBudget, useStaffLines, type NonStaffLines } from '@/api/budget'
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { costRows } from '@/lib/in-kind'
-import { InKindFlagsTable } from '../inkind/InKindFlagsTable'
+import { InKindFlagsTable } from '@/screens/inkind/InKindFlagsTable'
 
 interface InKindPanelProps {
   nonStaff: NonStaffLines

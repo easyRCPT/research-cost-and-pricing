@@ -8,14 +8,14 @@ import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { RATE_TABLES } from '../rateTables'
+import { RATE_TABLES } from '@/screens/admin/rateTables'
 import {
   countText,
   idOf,
   keyText,
   toRequest,
   type Staged,
-} from '../stagedChanges'
+} from '@/screens/admin/stagedChanges'
 import { ChangeText } from './ChangeText'
 
 /** Every change, old → new, and where the set will go, before it is saved. */

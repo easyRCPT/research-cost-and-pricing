@@ -1,7 +1,7 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { NumberInput } from '@/components/ui/number-input'
-import type { ValueField } from '../rateTables'
+import type { ValueField } from '@/screens/admin/rateTables'
 import { ConstantInput } from './ConstantInput'
 
 export function ValueInput({
