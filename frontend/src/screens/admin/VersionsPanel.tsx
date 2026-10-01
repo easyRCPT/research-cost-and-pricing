@@ -98,7 +98,12 @@ function VersionRow({
   return (
     <tr id={`version-${version.id}`} className="align-top">
       <Td className="whitespace-nowrap">
-        #{version.id} {version.current && <Badge variant="secondary">Current</Badge>}
+        #{version.id} {version.current && <Badge variant="secondary">Current</Badge>}{' '}
+        {version.baseline && (
+          <Badge variant="outline" title="The rates as first loaded, kept so they can always be restored">
+            As first loaded
+          </Badge>
+        )}
       </Td>
       <Td className="whitespace-nowrap">{shortDate(version.created_at)}</Td>
       <Td>{version.updated_by ?? '—'}</Td>

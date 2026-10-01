@@ -41,6 +41,7 @@ from .lookup_loader import build_constants, invalidate_lookup_cache
 from .lookup_update import (
     create_lookup_version,
     get_definition,
+    is_baseline,
     plain,
     priced_on,
     save_validated_instance,
@@ -92,9 +93,10 @@ def _check_and_create_new_version(
 
     The current one, unless a costing has been submitted on it: then the rates
     are copied into a new version first, so the submitted costing's rates
-    never move.
+    never move. The same when the current version is the baseline, the rates
+    as first loaded: they stay as they were, so they can always be restored.
     """
-    if config.referenced:
+    if config.referenced or is_baseline(config.current_version):
         return create_lookup_version(config, actor)
     return config.current_version_id
 

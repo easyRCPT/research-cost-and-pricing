@@ -2740,6 +2740,7 @@ export interface components {
             budgets_priced: number;
             current: boolean;
             accepts_changes: boolean;
+            baseline: boolean;
             change_sets: components["schemas"]["ChangeSet"][];
         };
         LookupsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];

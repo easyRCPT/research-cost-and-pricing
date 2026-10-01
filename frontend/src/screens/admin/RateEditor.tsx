@@ -465,7 +465,9 @@ export function Review({
           <p className="text-[13px]">
             {current.accepts_changes
               ? `Saves into version #${current.id}.`
-              : `Starts a new version: costings are already priced on version #${current.id}, and they keep those rates.`}
+              : current.baseline
+                ? `Starts a new version: version #${current.id} is the rates as first loaded, kept as they are so they can always be restored.`
+                : `Starts a new version: costings are already priced on version #${current.id}, and they keep those rates.`}
           </p>
         )}
 

@@ -31,6 +31,7 @@ class LookupVersionSerializer(serializers.Serializer):
     budgets_priced = serializers.IntegerField()
     current = serializers.BooleanField()
     accepts_changes = serializers.BooleanField()
+    baseline = serializers.BooleanField()
     change_sets = ChangeSetSerializer(many=True)
 
 

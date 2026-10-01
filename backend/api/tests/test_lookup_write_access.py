@@ -100,8 +100,16 @@ class LookupWriteAccessTestCase(TestCase):
         response = self.set_multiplier("1.80")
 
         self.assertEqual(response.status_code, 201, response.content)
+        current = LookupConfiguration.objects.get().current_version
+        self.assertEqual(
+            CalculationConstant.objects.get(
+                version=current, name="full_cost_recovery_multiplier"
+            ).value,
+            Decimal("1.80"),
+        )
+        # The seeded rates are the baseline, kept as loaded.
         self.fixed.refresh_from_db()
-        self.assertEqual(self.fixed.value, Decimal("1.80"))
+        self.assertEqual(self.fixed.value, Decimal("1.700000"))
 
     def test_a_researcher_cannot_change_the_multiplier(self):
         researcher = User.objects.create_user("researcher@unimelb.edu.au")

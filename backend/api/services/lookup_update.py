@@ -79,6 +79,16 @@ def create_lookup_version(
     return new_version.id
 
 
+def is_baseline(version: LookupVersion) -> bool:
+    """
+    The rates as first loaded: imported from the workbook or seeded, so made
+    by nobody, and not changed since by any saved set. Never written into, so
+    they can always be restored (the first set after loading starts a new
+    version instead).
+    """
+    return version.updated_by_id is None and not version.change_sets.exists()
+
+
 def current_categories() -> dict[int, int]:
     """The current version's non-staff categories, by ledger ID: {ledger: row id}."""
     version_id = LookupConfiguration.objects.get().current_version_id
@@ -495,7 +505,8 @@ def list_versions() -> list[dict]:
     Every version, newest first: who made it, what it priced, and the sets of
     changes saved into it (#138).
     """
-    config = LookupConfiguration.objects.get()
+    config = LookupConfiguration.objects.select_related("current_version").get()
+    current_is_baseline = is_baseline(config.current_version)
     budgets_priced = dict(
         Budget.objects.filter(lookup_version__isnull=False)
         .values("lookup_version")
@@ -523,9 +534,16 @@ def list_versions() -> list[dict]:
             "current": version.id == config.current_version_id,
             # Whether the next set writes into this version. Only the current
             # one, and only until a costing is submitted on it; after that the
-            # next set starts a new version, so nothing priced moves.
+            # next set starts a new version, so nothing priced moves. Never the
+            # baseline, which is kept as first loaded.
             "accepts_changes": (
-                version.id == config.current_version_id and not config.referenced
+                version.id == config.current_version_id
+                and not config.referenced
+                and not current_is_baseline
+            ),
+            # The rates as first loaded, kept so they can always be restored.
+            "baseline": (
+                version.updated_by_id is None and not version.change_sets.all()
             ),
             "change_sets": [
                 {
