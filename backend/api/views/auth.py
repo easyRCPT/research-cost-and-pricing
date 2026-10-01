@@ -8,7 +8,7 @@ every unsafe method, which `me` hands out the cookie for.
 
 from typing import cast
 
-from django.contrib.auth import login, logout
+from django.contrib.auth import logout
 from django.contrib.auth.models import Group
 from django.db import IntegrityError, transaction
 from django.http import HttpRequest
@@ -77,7 +77,7 @@ class SignupView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        login(cast(HttpRequest, request), user)
+        auth.start_session(request, user)
         return Response(
             MeSerializer(auth.me_for(user)).data, status=status.HTTP_201_CREATED
         )
@@ -101,7 +101,7 @@ class LoginView(APIView):
             SignInThrottle.record_failure(request)
             raise AuthenticationFailed(WRONG)
 
-        login(cast(HttpRequest, request), user)  # rotates the session key
+        auth.start_session(request, user)
         return _me(user)
 
 
@@ -123,7 +123,7 @@ class AdminLoginView(APIView):
             SignInThrottle.record_failure(request)
             raise PermissionDenied(WRONG)
 
-        login(cast(HttpRequest, request), user)
+        auth.start_session(request, user)
         return _me(user)
 
 

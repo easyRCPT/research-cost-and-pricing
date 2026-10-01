@@ -7,7 +7,12 @@ carry *which* department, so the client is told the assignments too and never
 has to ask a second question to know whether someone approves anything.
 """
 
+from typing import cast
+
+from django.contrib.auth import login
 from django.contrib.auth.hashers import check_password, make_password
+from django.http import HttpRequest
+from rest_framework.request import Request
 
 from ..models import User
 
@@ -55,6 +60,14 @@ def authenticate_by_email(email: str, password: str) -> User | None:
         return None
 
     return user
+
+
+def start_session(request: Request, user: User) -> None:
+    """
+    Sign this user in. The only caller of Django's `login()`, so a second
+    factor is a check here and not in each view.
+    """
+    login(cast(HttpRequest, request), user)  # rotates the session key
 
 
 def me_for(user: User) -> dict:
