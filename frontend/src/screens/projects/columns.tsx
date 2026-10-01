@@ -1,7 +1,7 @@
 import { columnHelper, type DataTableColumns } from '@/components/data-table'
 import { money } from '@/lib/format/utils'
 import type { ProjectRow } from '@/types'
-import { STATUS_LABELS } from './status'
+import { STATUS_LABELS } from '@/lib/status'
 
 const dateFormat = new Intl.DateTimeFormat('en-AU', {
   day: 'numeric',

@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api'
 import { dateTime, shortDate } from '@/lib/format/dates'
 import { money } from '@/lib/format/utils'
-import { STATUS_LABELS } from '@/screens/projects/status'
+import { STATUS_LABELS } from '@/lib/status'
 
 export interface RatesMoved {
   title: string
@@ -37,7 +37,11 @@ interface VersionsPanelProps {
  * Restoring copies the old set into a new version and makes that current, so
  * nothing already priced moves and the restore itself is part of the history.
  */
-export function VersionsPanel({ shown, onShow, onRestored }: VersionsPanelProps) {
+export function VersionsPanel({
+  shown,
+  onShow,
+  onRestored,
+}: VersionsPanelProps) {
   const { data: versions } = useLookupVersions()
 
   return (
@@ -98,9 +102,13 @@ function VersionRow({
   return (
     <tr id={`version-${version.id}`} className="align-top">
       <Td className="whitespace-nowrap">
-        #{version.id} {version.current && <Badge variant="secondary">Current</Badge>}{' '}
+        #{version.id}{' '}
+        {version.current && <Badge variant="secondary">Current</Badge>}{' '}
         {version.baseline && (
-          <Badge variant="outline" title="The rates as first loaded, kept so they can always be restored">
+          <Badge
+            variant="outline"
+            title="The rates as first loaded, kept so they can always be restored"
+          >
             As first loaded
           </Badge>
         )}
@@ -117,7 +125,8 @@ function VersionRow({
                 <span className="font-medium">{set.note || 'No note'}</span>
                 <span className="text-muted-foreground">
                   {' · '}
-                  {set.change_count} {set.change_count === 1 ? 'change' : 'changes'}
+                  {set.change_count}{' '}
+                  {set.change_count === 1 ? 'change' : 'changes'}
                   {' · '}
                   {set.saved_by ?? 'System'} · {dateTime(set.saved_at)}
                 </span>
@@ -130,14 +139,24 @@ function VersionRow({
         {version.budgets_priced === 0 ? (
           0
         ) : (
-          <Button size="sm" variant="link" className="h-auto p-0" aria-expanded={shown} onClick={onShow}>
+          <Button
+            size="sm"
+            variant="link"
+            className="h-auto p-0"
+            aria-expanded={shown}
+            onClick={onShow}
+          >
             {shown ? 'Hide' : `${version.budgets_priced} — see them`}
           </Button>
         )}
       </Td>
       <Td className="w-[26rem]">
         {!version.current && !confirming && (
-          <Button size="sm" variant="outline" onClick={() => setConfirming(true)}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setConfirming(true)}
+          >
             Restore
           </Button>
         )}
@@ -163,14 +182,21 @@ function VersionRow({
                     },
                     onError: (error) =>
                       toast.error('Not restored', {
-                        description: error instanceof ApiError ? error.message : 'Try again.',
+                        description:
+                          error instanceof ApiError
+                            ? error.message
+                            : 'Try again.',
                       }),
                   })
                 }
               >
                 {restore.isPending ? 'Restoring…' : 'Restore these rates'}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setConfirming(false)}
+              >
                 Cancel
               </Button>
             </div>
@@ -185,11 +211,26 @@ function VersionRow({
 function VersionBudgets({ versionId }: { versionId: number }) {
   const { data: budgets, isPending, isError } = useVersionBudgets(versionId)
 
-  if (isPending) return <div className="h-6 animate-pulse rounded bg-muted" role="status" aria-label="Loading costings" />
-  if (isError) return <p className="text-destructive">The costings on this version could not be loaded.</p>
+  if (isPending)
+    return (
+      <div
+        className="h-6 animate-pulse rounded bg-muted"
+        role="status"
+        aria-label="Loading costings"
+      />
+    )
+  if (isError)
+    return (
+      <p className="text-destructive">
+        The costings on this version could not be loaded.
+      </p>
+    )
 
   return (
-    <table className="w-full text-[13px]" aria-label={`Costings priced on version #${versionId}`}>
+    <table
+      className="w-full text-[13px]"
+      aria-label={`Costings priced on version #${versionId}`}
+    >
       <thead className="text-left text-muted-foreground">
         <tr>
           <th className="py-1 pr-3 font-medium">Reference</th>
@@ -203,7 +244,9 @@ function VersionBudgets({ versionId }: { versionId: number }) {
       <tbody>
         {budgets.map((budget) => (
           <tr key={budget.id} className="border-t">
-            <td className="py-1 pr-3 whitespace-nowrap">{budget.reference ?? '—'}</td>
+            <td className="py-1 pr-3 whitespace-nowrap">
+              {budget.reference ?? '—'}
+            </td>
             <td className="py-1 pr-3">
               <Link
                 to="/projects/$projectId/$screen"
@@ -213,10 +256,16 @@ function VersionBudgets({ versionId }: { versionId: number }) {
                 {budget.title || 'Untitled'}
               </Link>
             </td>
-            <td className="py-1 pr-3">{budget.owner.name || budget.owner.email}</td>
+            <td className="py-1 pr-3">
+              {budget.owner.name || budget.owner.email}
+            </td>
             <td className="py-1 pr-3">{STATUS_LABELS[budget.status]}</td>
-            <td className="tabular py-1 pr-3 text-right">{money(budget.total_price_inc_gst)}</td>
-            <td className="py-1 whitespace-nowrap">{budget.submitted_at ? shortDate(budget.submitted_at) : '—'}</td>
+            <td className="tabular py-1 pr-3 text-right">
+              {money(budget.total_price_inc_gst)}
+            </td>
+            <td className="py-1 whitespace-nowrap">
+              {budget.submitted_at ? shortDate(budget.submitted_at) : '—'}
+            </td>
           </tr>
         ))}
       </tbody>

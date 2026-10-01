@@ -10,7 +10,7 @@ import {
 import { PageHead } from '@/components/shell'
 import { money } from '@/lib/format/utils'
 import { shortDate } from '@/lib/format/dates'
-import { STATUS_LABELS } from '@/screens/projects/status'
+import { STATUS_LABELS } from '@/lib/status'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Typed against the schema's enum, so a new status breaks the build here

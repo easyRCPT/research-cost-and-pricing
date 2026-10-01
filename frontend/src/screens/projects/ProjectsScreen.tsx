@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import type { ProjectRow } from '@/types'
 import { projectColumns } from './columns'
 import { NewProjectForm } from './NewProjectForm'
-import { STATUS_LABELS } from './status'
+import { STATUS_LABELS } from '@/lib/status'
 
 const FILTERS: DataTableFilter<ProjectRow>[] = [
   { id: 'department', label: 'Department', value: (row) => row.department },
