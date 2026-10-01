@@ -1,4 +1,5 @@
 import { useBlocker, useNavigate } from '@tanstack/react-router'
+import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { useApproverGaps } from '@/api/admin-console'
@@ -77,6 +78,10 @@ export function LookupEditor() {
     withResolver: true,
   })
 
+  const ratesOn = ADMIN_TABLES[tab as LookupTabValue].some(
+    (table) => table.kind === 'rate',
+  )
+
   const rowsOf = (id: string) =>
     (lookups[id as keyof typeof lookups] ?? []) as unknown as Row[]
 
@@ -150,11 +155,11 @@ export function LookupEditor() {
         />
       ) : (
         <Alert className="mb-4">
+          <InfoIcon />
           <AlertDescription>
-            Rate changes are held until you review and save them as one set,
-            which reprices every draft. Submitted costings keep their rates.
-            Faculties, departments and the lists a project picks from save a
-            row at a time.
+            {ratesOn
+              ? "Edits aren't saved until you review and save them. Saving updates all draft costings; submitted costings keep their old rates."
+              : 'Each edit is saved when you confirm it in its dialog, and applies straight away.'}
           </AlertDescription>
         </Alert>
       )}

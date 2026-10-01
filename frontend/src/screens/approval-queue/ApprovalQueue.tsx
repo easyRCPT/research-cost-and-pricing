@@ -20,16 +20,8 @@ import { rememberApprovalsPage } from './returnTo'
  * calculator's own screens, read-only, and decides on its Approvals screen.
  */
 const GROUPS = [
-  {
-    level: 'department',
-    title: 'Authorising as Head of Department',
-    note: 'The first authorisation. Every costing needs one.',
-  },
-  {
-    level: 'faculty',
-    title: 'Authorising as Dean or delegate',
-    note: 'The second authorisation, asked for only when a costing needs it.',
-  },
+  { level: 'department', title: 'Authorising as Head of Department' },
+  { level: 'faculty', title: 'Authorising as Dean or delegate' },
 ]
 
 export function ApprovalQueue() {

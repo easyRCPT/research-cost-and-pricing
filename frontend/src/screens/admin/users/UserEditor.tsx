@@ -112,11 +112,7 @@ export function UserEditor({ user }: { user: AdminUser }) {
           </div>
         )}
 
-        <h3 className="mb-1 text-[13px] font-semibold">Groups</h3>
-        <p className="mb-2 text-[12px] text-muted-foreground">
-          Which door this account signs in through. It grants no approving on
-          its own.
-        </p>
+        <h3 className="mb-2 text-[13px] font-semibold">Groups</h3>
         <div className="flex flex-wrap gap-x-6 gap-y-1">
           {allGroups.map((group) => (
             <label
