@@ -102,6 +102,7 @@ export function useLogout() {
 }
 
 export const SUPERADMIN = 'superadmin'
+export const RESEARCHER = 'researcher'
 
 /** Approving is an org assignment, never a group (#41). */
 export const isApprover = (me: Me) =>

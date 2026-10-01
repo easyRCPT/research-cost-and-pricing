@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
 import { type AdminUser, useRemoveAssignment } from '@/api/admin-users'
+import { RESEARCHER } from '@/api/auth'
+import { Panel } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import { InlineConfirm } from '@/components/ui/inline-confirm'
 
@@ -10,20 +12,23 @@ import { refused, ROLE_LABEL } from './labels'
 export function Assignments({ user }: { user: AdminUser }) {
   const remove = useRemoveAssignment()
   const [confirming, setConfirming] = useState<number | null>(null)
+  const researcher = user.groups.includes(RESEARCHER)
 
   return (
-    <section>
-      <h3 className="mb-2 text-[13px] font-semibold">Approves for</h3>
+    <Panel
+      title="Approves for"
+      description="Heads and members are assigned to a department, deans to a faculty."
+    >
       {user.assignments.length === 0 && (
-        <p className="text-[13px] text-muted-foreground">
+        <p className="rounded-md border px-3 py-6 text-center text-[13px] text-muted-foreground">
           Nothing yet. This account is in no approval queue.
         </p>
       )}
-      <ul className="space-y-1.5">
+      <ul className="divide-y rounded-md border empty:hidden">
         {user.assignments.map((a) => (
           <li
             key={a.id}
-            className="flex min-h-8 items-center justify-between gap-3 text-[13.5px]"
+            className="flex min-h-11 items-center justify-between gap-3 px-3 text-[13.5px]"
           >
             <span>
               <b>{ROLE_LABEL[a.role]}</b>, {a.department_name ?? a.faculty_name}
@@ -62,7 +67,14 @@ export function Assignments({ user }: { user: AdminUser }) {
           </li>
         ))}
       </ul>
-      <AddAssignment user={user} />
-    </section>
+      {researcher ? (
+        <p className="mt-4 border-t pt-3 text-[13px] text-muted-foreground">
+          A researcher cannot approve for a unit. Move this account to staff to
+          assign it a department or faculty.
+        </p>
+      ) : (
+        <AddAssignment user={user} />
+      )}
+    </Panel>
   )
 }

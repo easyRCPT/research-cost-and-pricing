@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { type AdminUser, useGroups, useUpdateUser } from '@/api/admin-users'
 import { SUPERADMIN, useMe } from '@/api/auth'
+import { Panel } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { InlineConfirm } from '@/components/ui/inline-confirm'
@@ -73,41 +74,41 @@ export function UserEditor({ user }: { user: AdminUser }) {
   }
 
   return (
-    <div className="mt-4 rounded-md border bg-muted/30 p-4">
-      <p className="mb-4 text-[12.5px] text-muted-foreground">
-        Joined {shortDate(user.date_joined)} ·{' '}
-        {user.last_login
-          ? `last signed in ${shortDate(user.last_login)}`
-          : 'never signed in'}
-      </p>
+    <div className="grid gap-4">
+      <Panel
+        title={nameOf(user)}
+        description={`${user.email} · joined ${shortDate(user.date_joined)} · ${
+          user.last_login
+            ? `last signed in ${shortDate(user.last_login)}`
+            : 'never signed in'
+        }`}
+      >
+        <Names user={user} />
 
-      <Names user={user} />
+        {pending && (
+          <div
+            className="mb-5 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-[13px]"
+            role="alert"
+          >
+            <p className="font-semibold text-destructive">{pending.title}</p>
+            <p className="mt-1">{pending.body}</p>
+            <InlineConfirm
+              className="mt-3"
+              confirm={pending.confirm}
+              variant="destructive"
+              pending={update.isPending}
+              onConfirm={() => save(pending.changes)}
+              onCancel={() => setPending(null)}
+            />
+          </div>
+        )}
 
-      {pending && (
-        <div
-          className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-[13px]"
-          role="alert"
-        >
-          <p className="font-semibold text-destructive">{pending.title}</p>
-          <p className="mt-1">{pending.body}</p>
-          <InlineConfirm
-            className="mt-3"
-            confirm={pending.confirm}
-            variant="destructive"
-            pending={update.isPending}
-            onConfirm={() => save(pending.changes)}
-            onCancel={() => setPending(null)}
-          />
-        </div>
-      )}
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <section>
-          <h3 className="mb-2 text-[13px] font-semibold">Groups</h3>
-          <p className="mb-2 text-[12px] text-muted-foreground">
-            Which door this account signs in through. It grants no approving on
-            its own.
-          </p>
+        <h3 className="mb-1 text-[13px] font-semibold">Groups</h3>
+        <p className="mb-2 text-[12px] text-muted-foreground">
+          Which door this account signs in through. It grants no approving on
+          its own.
+        </p>
+        <div className="flex flex-wrap gap-x-6 gap-y-1">
           {allGroups.map((group) => (
             <label
               key={group}
@@ -121,28 +122,28 @@ export function UserEditor({ user }: { user: AdminUser }) {
               {group}
             </label>
           ))}
+        </div>
 
-          <h3 className="mt-5 mb-2 text-[13px] font-semibold">Access</h3>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={update.isPending || !!pending}
-            className={
-              user.is_active ? 'border-destructive/40 text-destructive' : ''
-            }
-            onClick={toggleActive}
-          >
-            {user.is_active ? 'Deactivate' : 'Reactivate'}
-          </Button>
-          <p className="mt-1 text-[12px] text-muted-foreground">
-            {user.is_active
-              ? `Stops ${yourself ? 'you' : 'them'} signing in and takes ${yourself ? 'you' : 'them'} out of every approval queue. Their costings stay theirs. Accounts are never deleted.`
-              : 'This account cannot sign in.'}
-          </p>
-        </section>
+        <h3 className="mt-5 mb-2 text-[13px] font-semibold">Access</h3>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={update.isPending || !!pending}
+          className={
+            user.is_active ? 'border-destructive/40 text-destructive' : ''
+          }
+          onClick={toggleActive}
+        >
+          {user.is_active ? 'Deactivate' : 'Reactivate'}
+        </Button>
+        <p className="mt-1 text-[12px] text-muted-foreground">
+          {user.is_active
+            ? `Stops ${yourself ? 'you' : 'them'} signing in and takes ${yourself ? 'you' : 'them'} out of every approval queue. Their costings stay theirs. Accounts are never deleted.`
+            : 'This account cannot sign in.'}
+        </p>
+      </Panel>
 
-        <Assignments user={user} />
-      </div>
+      <Assignments user={user} />
     </div>
   )
 }

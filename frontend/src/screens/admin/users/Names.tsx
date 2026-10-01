@@ -19,7 +19,7 @@ export function Names({ user }: { user: AdminUser }) {
       <label className="grid gap-1 text-[12.5px] text-muted-foreground">
         First name
         <Input
-          className="h-8 w-48 bg-white"
+          className="h-8 w-48"
           value={first}
           onChange={(event) => setFirst(event.target.value)}
         />
@@ -27,7 +27,7 @@ export function Names({ user }: { user: AdminUser }) {
       <label className="grid gap-1 text-[12.5px] text-muted-foreground">
         Last name
         <Input
-          className="h-8 w-48 bg-white"
+          className="h-8 w-48"
           value={last}
           onChange={(event) => setLast(event.target.value)}
         />
