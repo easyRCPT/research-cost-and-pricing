@@ -6,11 +6,8 @@ nothing that already exists is rewritten.
 """
 
 from decimal import Decimal
-from pathlib import Path
 
-from django.conf import settings
 from django.contrib.auth.models import Group
-from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
@@ -28,6 +25,7 @@ from api.services.lookup_update import (
     restore_version,
     update,
 )
+from api.tests.factories import seed_lookups
 
 LEVEL_A1 = {
     "classification": "Level A.1",
@@ -58,11 +56,7 @@ def rows(version_id: int) -> dict:
 class RestoreVersionTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
         cls.admin = User.objects.create(email="admin@unimelb.edu.au")
         cls.admin.groups.set(Group.objects.filter(name="superadmin"))
 

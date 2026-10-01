@@ -19,10 +19,7 @@ costing reads as one chain rather than three unrelated assertions.
 """
 
 from decimal import Decimal
-from pathlib import Path
 
-from django.conf import settings
-from django.core.management import call_command
 from django.test import TestCase
 
 from api.models import (
@@ -33,6 +30,7 @@ from api.models import (
     User,
 )
 from api.services import non_staff_line, project, staff_line
+from api.tests.factories import seed_lookups
 
 CENTS = Decimal("0.01")
 
@@ -46,13 +44,7 @@ class TestGoldenCosting(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # The seeds are loaded by `manage.py seed`, not by a migration, so a
-        # test database has none of them unless it asks.
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
 
         row = project.create(
             {

@@ -1,13 +1,15 @@
-from pathlib import Path
-
-from django.conf import settings
-from django.contrib.auth.models import Group
-from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
-from api.models import Budget, Department, Faculty, Project, User, UserOrgAssignment
+from api.models import Budget, Department, Faculty, User, UserOrgAssignment
 from api.services.project import budget_defaults
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_project,
+    make_user,
+    seed_lookups,
+)
 
 DRAFT = Budget.Status.DRAFT
 SUBMITTED = Budget.Status.SUBMITTED
@@ -21,51 +23,31 @@ class ReviewAccessTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # Opening a budget prices it, which needs rates.
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
 
     def setUp(self):
         engineering = Faculty.objects.create(code="ENG", name="Engineering")
         arts = Faculty.objects.create(code="ART", name="Arts")
-        self.computing = self.department("CIS", engineering)
-        self.civil = self.department("CIV", engineering)
-        self.history = self.department("HIS", arts)
+        self.computing = make_department("CIS", engineering)
+        self.civil = make_department("CIV", engineering)
+        self.history = make_department("HIS", arts)
 
-        self.owner = User.objects.create_user("owner@unimelb.edu.au")
-        self.hod = User.objects.create_user("hod@unimelb.edu.au")
+        self.owner = make_user("owner@unimelb.edu.au")
+        self.hod = make_user("hod@unimelb.edu.au")
         UserOrgAssignment.objects.create(
             user=self.hod, role="hod", department=self.computing
         )
-        self.dean = User.objects.create_user("dean@unimelb.edu.au")
+        self.dean = make_user("dean@unimelb.edu.au")
         UserOrgAssignment.objects.create(
             user=self.dean, role="dean", faculty=engineering
         )
-        self.admin = User.objects.create_user("admin@unimelb.edu.au")
-        self.admin.groups.add(Group.objects.get(name="superadmin"))
-
-    @staticmethod
-    def department(code: str, faculty: Faculty) -> Department:
-        return Department.objects.create(
-            code=code, name=code, school=code, school_code=code, faculty=faculty
-        )
+        self.admin = make_user("admin@unimelb.edu.au", groups=["superadmin"])
 
     def budget(self, department: Department, status: str) -> Budget:
-        project = Project.objects.create(
-            title=f"{department.code} {status}",
-            department=department,
-            start_year=2026,
-            start_month=1,
-            end_year=2026,
-            end_month=12,
-            created_by=self.owner,
+        project = make_project(
+            self.owner, department, title=f"{department.code} {status}"
         )
-        return Budget.objects.create(
-            project=project, status=status, **budget_defaults()
-        )
+        return make_budget(project, status=status)
 
     def get(self, user: User, budget: Budget) -> int:
         self.client.force_login(user)
