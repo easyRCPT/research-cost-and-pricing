@@ -16,7 +16,7 @@ import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
 import { EditorRoute } from '@/routes/editor'
 import { ProjectsRoute } from '@/routes/projects'
-import { ApprovalsRoute } from '@/routes/approvals'
+import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
 import { AdminShell } from '@/screens/admin/AdminShell'
 import { LookupEditor } from '@/screens/admin/LookupEditor'
 import { Users } from '@/screens/admin/Users'
@@ -156,6 +156,13 @@ const approvalsRoute = createRoute({
   component: ApprovalsRoute,
 })
 
+const approvalRegisterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/approvals/register',
+  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
+  component: ApprovalRegisterRoute,
+})
+
 export const editorRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/$projectId/$screen',
@@ -202,6 +209,7 @@ const routeTree = rootRoute.addChildren([
   adminLoginRoute,
   projectsRoute,
   approvalsRoute,
+  approvalRegisterRoute,
   adminRoute.addChildren([
     adminIndexRoute,
     adminLookupsRoute,

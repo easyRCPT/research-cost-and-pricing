@@ -3019,6 +3019,7 @@ export interface components {
             total_price_inc_gst: number;
             /** Format: date-time */
             updated_at: string;
+            owner: components["schemas"]["ProjectOwner"];
         };
         ProjectUpdate: {
             value: unknown;
@@ -6636,7 +6637,18 @@ export interface operations {
     };
     projects_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description * `draft` - Draft
+                 *     * `submitted` - Submitted
+                 *     * `hod_review` - Head of Department review
+                 *     * `dean_review` - Dean review
+                 *     * `approved` - Approved
+                 *     * `rejected` - Rejected
+                 *     * `withdrawn` - Withdrawn
+                 */
+                status?: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "";
+            };
             header?: never;
             path?: never;
             cookie?: never;

@@ -134,3 +134,43 @@ test('the owner withdraws a submission, it leaves the queue, and a new draft car
   const row = budgets.find((candidate: { id: number }) => candidate.id === project.id)
   expect(row.budget_count).toBe(2)
 })
+
+test("an approver's register lists their area at any status, and Back returns to it (#98)", async ({ page }) => {
+  const title = uniqueTitle('Register')
+  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
+  await makeReady(page, project.budget_id)
+  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+  })
+  expect(submitted.status(), await submitted.text()).toBe(200)
+
+  await switchTo(page, DEMO.hod, 'staff')
+  await page.goto('/approvals')
+  await page.getByRole('navigation', { name: 'Approvals' }).getByRole('link', { name: 'Register' }).click()
+  await expect(page).toHaveURL('/approvals/register')
+  await page.getByPlaceholder('Search').fill(title)
+  const row = page.getByRole('row').filter({ hasText: title })
+  await expect(row).toContainText(DEMO.researcher)
+  await expect(row).toContainText('Head of Department review')
+
+  // The chips filter on the server.
+  const statuses = page.getByRole('group', { name: 'Status' })
+  await statuses.getByRole('button', { name: 'Approved', exact: true }).click()
+  await expect(row).toHaveCount(0)
+  await statuses.getByRole('button', { name: 'All', exact: true }).click()
+  await expect(row).toBeVisible()
+
+  // A row opens the whole costing, read-only, with the margin as a figure.
+  await row.getByRole('button', { name: title }).click()
+  await expect(page).toHaveURL(`/projects/${project.id}/details`)
+  await page
+    .getByRole('navigation', { name: 'Costing sections' })
+    .getByRole('button', { name: 'Adjust Price', exact: true })
+    .click()
+  await expect(page.getByText('30.0%', { exact: true })).toBeVisible()
+  await expect(page.getByRole('slider')).toHaveCount(0)
+
+  // Back goes to the register it came from, not the queue.
+  await page.locator('header').getByRole('button', { name: 'Register' }).click()
+  await expect(page).toHaveURL('/approvals/register')
+})
