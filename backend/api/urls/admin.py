@@ -20,6 +20,11 @@ urlpatterns = [
     # Admin
     path("overview/", overview.OverviewView.as_view(), name="admin-overview"),
     path(
+        "approver-gaps/",
+        overview.ApproverGapsView.as_view(),
+        name="admin-approver-gaps",
+    ),
+    path(
         "lookups/versions/",
         lookups.LookupVersionsView.as_view(),
         name="admin-lookup-versions",

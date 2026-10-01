@@ -250,6 +250,23 @@ def update_staff(
     raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
+def refuse_ten_percent(category: NonStaffCostCategory) -> None:
+    """
+    Contingency, Student Support and Shared Grant Payments never take the
+    additional 10% (#148): contingency is a flat row in the workbook, and its
+    macro forces the 10% off for the other two. The engine ignores it on them
+    anyway, so a tick there would only claim an uplift that isn't charged.
+    """
+    if category.excludes_additional_rate:
+        raise ValidationError(
+            {
+                "add_ten_percent": [
+                    f"{category.cost_category} doesn't take the additional 10%."
+                ]
+            }
+        )
+
+
 def update_non_staff(
     budget: Budget,
     row_id: UUID,
@@ -284,6 +301,8 @@ def update_non_staff(
         if field in {"in_kind", "in_kind_reason"}:
             _set_in_kind(non_staff_line, field, value)
         else:
+            if field == "add_ten_percent" and value is True:
+                refuse_ten_percent(non_staff_line.category)
             _set_field(non_staff_line, field, value)
         return True
 
@@ -297,7 +316,13 @@ def update_non_staff(
             raise ValidationError("Invalid category.")
 
         non_staff_line.category = category
-        _save(non_staff_line, ["category"])
+        changed = ["category"]
+        # Moved onto a category that never takes the 10%: the tick goes with
+        # it, rather than sitting on the line doing nothing (#148).
+        if category.excludes_additional_rate and non_staff_line.add_ten_percent:
+            non_staff_line.add_ten_percent = False
+            changed.append("add_ten_percent")
+        _save(non_staff_line, changed)
         return True
 
     if field == "year_value":

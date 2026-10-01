@@ -524,6 +524,56 @@ class TestConstants(RatesMixin, TestCase):
         self.assertEqual(self.value("salary_rate_year"), Decimal(2025))
 
 
+class TestRateConstants(RatesMixin, TestCase):
+    """The rate constants are decimals from 0 to 1 (#151)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.make_rates()
+
+    def value(self, name: str) -> Decimal:
+        return CalculationConstant.objects.get(
+            version_id=self.current(), name=name
+        ).value
+
+    def test_a_rate_is_saved_as_its_decimal(self):
+        self.save(set_constant("minimum_margin", "0.25"))
+
+        self.assertEqual(self.value("minimum_margin"), Decimal("0.25"))
+
+    def test_a_bare_percentage_is_refused_with_the_decimal_it_meant(self):
+        with self.assertRaises(ValidationError) as refused:
+            self.save(set_constant("minimum_margin", "25"))
+
+        message = str(refused.exception)
+        self.assertIn("Minimum margin is a decimal from 0 to 1", message)
+        self.assertIn("Did you mean 25%? Enter 0.25 or 25%.", message)
+        self.assertEqual(self.value("minimum_margin"), Decimal("0.300000"))
+
+    def test_every_rate_is_held_between_0_and_1(self):
+        for name in (
+            "default_margin",
+            "minimum_margin",
+            "gst_rate",
+            "max_payroll_tax",
+            "override_uom_oncosts",
+        ):
+            for value in ("-0.01", "1.01"):
+                with (
+                    self.subTest(name=name, value=value),
+                    self.assertRaises(ValidationError),
+                ):
+                    self.save(set_constant(name, value))
+
+    def test_leave_loading_is_dollars_and_can_be_above_1(self):
+        self.save(set_constant("max_leave_loading", "1700"))
+
+        self.assertEqual(self.value("max_leave_loading"), Decimal(1700))
+
+        with self.assertRaisesRegex(ValidationError, "negative"):
+            self.save(set_constant("max_leave_loading", "-1"))
+
+
 class TestAudit(RatesMixin, TestCase):
     @classmethod
     def setUpTestData(cls):

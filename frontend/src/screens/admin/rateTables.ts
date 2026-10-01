@@ -1,4 +1,5 @@
 import type { RateTable } from '@/api/admin-lookups'
+import { constantName } from '@/lib/format/constants'
 
 export interface KeyField {
   field: string
@@ -9,7 +10,11 @@ export interface KeyField {
 export interface ValueField {
   field: string
   label: string
-  kind: 'number' | 'text' | 'boolean'
+  /**
+   * `constant` is a constant's value: a decimal, or for a rate a percentage
+   * such as `30%`, saved as its decimal (#151).
+   */
+  kind: 'number' | 'text' | 'boolean' | 'constant'
   /** For a number: the step the field moves by. */
   step?: number
 }
@@ -28,6 +33,8 @@ export interface RateTableSpec {
    */
   addable?: boolean
   removable?: boolean
+  /** What a row is, for a person, when its key is a code name (#151). */
+  about?: (row: Record<string, unknown>) => { name: string; detail?: string }
 }
 
 export const RATE_TABLES: RateTableSpec[] = [
@@ -81,11 +88,15 @@ export const RATE_TABLES: RateTableSpec[] = [
     id: 'calculation_constants',
     label: 'Constants',
     key: [{ field: 'name', label: 'Name', kind: 'text' }],
-    values: [{ field: 'value', label: 'Value', kind: 'number', step: 0.0001 }],
+    values: [{ field: 'value', label: 'Value', kind: 'constant' }],
     // The engine reads each constant by name, so a new one would never be
     // used and a removed one would break every costing.
     addable: false,
     removable: false,
+    about: (row) => ({
+      name: constantName(String(row.name)),
+      detail: row.description ? String(row.description) : undefined,
+    }),
   },
 ]
 

@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/admin/approver-gaps/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Costings waiting on a role nobody holds, and the units missing one (#121). */
+        get: operations["admin_approver_gaps_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/audit/": {
         parameters: {
             query?: never;
@@ -646,6 +663,7 @@ export interface components {
             code: string;
             name: string;
         };
+        AdminApproverGapsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminAssignment: {
             id: number;
             role: components["schemas"]["RoleEnum"];
@@ -1345,7 +1363,7 @@ export interface components {
         };
         ApprovalStepRecord: {
             id: number;
-            level: components["schemas"]["LevelEnum"];
+            level: components["schemas"]["ApprovalStepRecordLevelEnum"];
             status: components["schemas"]["ApprovalStepStatusEnum"];
             decided_by: string | null;
             /** Format: date-time */
@@ -1353,6 +1371,12 @@ export interface components {
             comment: string;
             waiting_on: string[];
         };
+        /**
+         * @description * `department` - Head of Department
+         *     * `faculty` - Dean
+         * @enum {string}
+         */
+        ApprovalStepRecordLevelEnum: "department" | "faculty";
         /**
          * @description * `pending` - Pending
          *     * `approved` - Approved
@@ -1417,6 +1441,11 @@ export interface components {
             errors: components["schemas"]["ApprovalsDecideCreateError"][];
         };
         ApprovalsQueueListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        ApproverGaps: {
+            stranded: components["schemas"]["Stranded"][];
+            departments_without_head: string[];
+            faculties_without_dean: string[];
+        };
         Assignment: {
             id: number;
             role: string;
@@ -2654,12 +2683,6 @@ export interface components {
             level: string;
             max_steps: number;
         };
-        /**
-         * @description * `department` - Head of Department
-         *     * `faculty` - Dean
-         * @enum {string}
-         */
-        LevelEnum: "department" | "faculty";
         Login: {
             /** Format: email */
             email: string;
@@ -3369,6 +3392,25 @@ export interface components {
          * @enum {string}
          */
         StatusEnum: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn";
+        Stranded: {
+            budget_id: number;
+            project_id: number;
+            reference: string | null;
+            title: string;
+            /** Format: email */
+            owner: string;
+            status: components["schemas"]["StatusEnum"];
+            level: components["schemas"]["StrandedLevelEnum"];
+            unit: string;
+            /** Format: date-time */
+            submitted_at: string | null;
+        };
+        /**
+         * @description * `department` - department
+         *     * `faculty` - faculty
+         * @enum {string}
+         */
+        StrandedLevelEnum: "department" | "faculty";
         /**
          * @description * `salary_rates` - salary_rates
          *     * `salary_rate_multipliers` - salary_rate_multipliers
@@ -3452,6 +3494,89 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_approver_gaps_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApproverGaps"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminApproverGapsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     admin_audit_list: {
         parameters: {
             query?: {

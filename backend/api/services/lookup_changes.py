@@ -57,6 +57,19 @@ OPS = (CREATE, UPDATE, DELETE)
 MULTIPLIER_FLOOR = Decimal(1)
 MULTIPLIER_STEP = Decimal("0.01")
 
+# Constants that are rates, held as decimals: 0.30 is 30%. A costing's
+# margin runs from 0 to 100% (MAX_MARGIN in MarginPanel.tsx), so the margin
+# constants share that range and the floor can't sit where no costing could
+# reach it. #87 may move the margin's bounds; these follow (#151).
+RATE_CONSTANTS = {
+    "default_margin",
+    "minimum_margin",
+    "gst_rate",
+    "max_payroll_tax",
+    "override_uom_oncosts",
+}
+RATE_CEILING = Decimal(1)
+
 # The engine reads every one of these by name or uses every row, so a set may
 # change their values but never add or take one away.
 NO_CREATE = {
@@ -169,6 +182,36 @@ def _check_constant(instance: models.Model, values: dict) -> None:
         value <= 0 or value != value.to_integral_value()
     ):
         raise ValidationError("Salary rate year must be a positive whole year.")
+
+    if instance.name in RATE_CONSTANTS:
+        _check_rate(instance.name, value)
+
+    if instance.name == "max_leave_loading" and value < 0:
+        raise ValidationError(
+            "Max leave loading is a dollar cap and can't be negative."
+        )
+
+
+def _readable(name: str) -> str:
+    """'minimum_margin' as a person reads it: 'Minimum margin'."""
+    words = name.replace("_", " ")
+    return words[0].upper() + words[1:]
+
+
+def _check_rate(name: str, value: Decimal) -> None:
+    """
+    A rate is a decimal from 0 to 1 (#151). Anything above 1 is far more
+    likely a percentage typed bare than a rate of over 100%, so it is refused
+    with the decimal it probably meant, never converted by guesswork.
+    """
+    if value < 0:
+        raise ValidationError(f"{_readable(name)} can't be below 0.")
+    if value > RATE_CEILING:
+        raise ValidationError(
+            f"{_readable(name)} is a decimal from 0 to 1 (0% to 100%). "
+            f"Did you mean {value.normalize():f}%? Enter "
+            f"{(value / 100).normalize():f} or {value.normalize():f}%."
+        )
 
 
 def _find(definition: LookupDefinition, version_id: int, key: dict) -> models.Model:

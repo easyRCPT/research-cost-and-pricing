@@ -75,9 +75,10 @@ export function Approvals() {
       </div>
 
       <Panel>
-        <DepartmentSection step={step('department')} />
+        <DepartmentSection step={step('department')} department={budget.project_info.department} />
         <FacultySection
           step={step('faculty')}
+          faculty={budget.project_info.faculty}
           triggers={triggers}
           submitted={submitted}
         />

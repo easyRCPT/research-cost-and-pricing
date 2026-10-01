@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { useAdminProjects } from '@/api/admin-console'
 import { useReferenceWrite } from '@/api/admin-lookups'
 import { Grid, Panel, Td, Th } from '@/components/shell'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -36,10 +37,13 @@ export function ReferenceTableEditor({
   spec,
   rows,
   faculties,
+  flags,
 }: {
   spec: ReferenceTableSpec
   rows: Row[]
   faculties: Faculty[]
+  /** Rows to mark, by key, with what to say: "No head of department" (#121). */
+  flags?: { keys: Set<string>; label: string }
 }) {
   return (
     <Panel
@@ -58,7 +62,13 @@ export function ReferenceTableEditor({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <ReferenceRow key={text(row[spec.key.field])} spec={spec} row={row} faculties={faculties} />
+            <ReferenceRow
+              key={text(row[spec.key.field])}
+              spec={spec}
+              row={row}
+              faculties={faculties}
+              flag={flags?.keys.has(text(row[spec.key.field])) ? flags.label : undefined}
+            />
           ))}
         </tbody>
       </Grid>
@@ -69,7 +79,17 @@ export function ReferenceTableEditor({
 
 type Mode = 'view' | 'edit' | 'move' | 'remove'
 
-function ReferenceRow({ spec, row, faculties }: { spec: ReferenceTableSpec; row: Row; faculties: Faculty[] }) {
+function ReferenceRow({
+  spec,
+  row,
+  faculties,
+  flag,
+}: {
+  spec: ReferenceTableSpec
+  row: Row
+  faculties: Faculty[]
+  flag?: string
+}) {
   const write = useReferenceWrite()
   const key = text(row[spec.key.field])
   const saved = Object.fromEntries(spec.fields.map((f) => [f.field, text(row[f.field])]))
@@ -125,7 +145,14 @@ function ReferenceRow({ spec, row, faculties }: { spec: ReferenceTableSpec; row:
 
   return (
     <tr className="align-top">
-      <Td className={cn(PIN_LEFT, 'whitespace-nowrap font-medium', editing ? 'bg-amber-50' : 'bg-card')}>{key}</Td>
+      <Td className={cn(PIN_LEFT, 'whitespace-nowrap font-medium', editing ? 'bg-amber-50' : 'bg-card')}>
+        {key}
+        {flag && (
+          <Badge variant="destructive" className="ml-2">
+            {flag}
+          </Badge>
+        )}
+      </Td>
       {spec.fields.map((f) => (
         <Td key={f.field} className={cn(editing && 'bg-amber-50')}>
           {editing ? (

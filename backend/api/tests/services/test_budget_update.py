@@ -542,6 +542,8 @@ class TestUpdateNonStaff(SimpleTestCase):
     def setUp(self):
         self.budget = Mock(spec=Budget)
         self.non_staff_line = Mock(spec=NonStaffCostLine)
+        # An ordinary category, which takes the 10% (#148).
+        self.non_staff_line.category.excludes_additional_rate = False
         self.budget.non_staff_lines.get.return_value = self.non_staff_line
 
     def test_updates_non_calculation_field(self):
@@ -574,6 +576,7 @@ class TestUpdateNonStaff(SimpleTestCase):
     @patch("api.services.budget_update.NonStaffCostCategory.objects.get")
     def test_updates_category(self, mock_get):
         category = Mock(spec=NonStaffCostCategory)
+        category.excludes_additional_rate = False
         mock_get.return_value = category
 
         result = budget_update.update_non_staff(

@@ -62,12 +62,15 @@ interface SalaryRatesTabProps {
   salaryRates: LookupTables['salary_rates']
   incrementCaps: LookupTables['increment_caps']
   multipliers: LookupTables['salary_rate_multipliers']
+  /** The year the rates are for; later years add the EBA increase (#148). */
+  salaryRateYear: number | undefined
 }
 
 export function SalaryRatesTab({
   salaryRates,
   incrementCaps,
   multipliers,
+  salaryRateYear,
 }: SalaryRatesTabProps) {
   return (
     <div className="space-y-4">
@@ -75,6 +78,12 @@ export function SalaryRatesTab({
         <AlertDescription>
           Fortnightly rates are displayed <b>annual</b>; casual rates are
           displayed <b>hourly</b>.
+          {salaryRateYear !== undefined && (
+            <>
+              {' '}These are <b>{salaryRateYear}</b> rates: each later year adds
+              that year&rsquo;s EBA increase.
+            </>
+          )}
         </AlertDescription>
       </Alert>
       <TableCard

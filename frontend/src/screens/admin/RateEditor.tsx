@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { NumberInput } from '@/components/ui/number-input'
+import { asPercent, PERCENT_CONSTANTS } from '@/lib/format/constants'
 import { cn } from '@/lib/utils'
 import { RATE_TABLES, type RateTableSpec, type ValueField } from './rateTables'
 import {
@@ -73,6 +74,7 @@ export function RateTable({
               key={id}
               spec={spec}
               rowKey={key}
+              about={spec.about?.(row)}
               values={change?.op === 'update' ? { ...saved, ...change.value } : saved}
               was={change?.op === 'update' ? change.was : null}
               removed={change?.op === 'delete'}
@@ -113,6 +115,7 @@ export function RateTable({
 function RateRow({
   spec,
   rowKey,
+  about,
   values,
   was = null,
   added = false,
@@ -124,6 +127,7 @@ function RateRow({
 }: {
   spec: RateTableSpec
   rowKey: Key
+  about?: { name: string; detail?: string }
   values: Values
   was?: Values | null
   added?: boolean
@@ -147,9 +151,16 @@ function RateRow({
     >
       {spec.key.map((k, i) => (
         <Td key={k.field}>
-          <span className={cn(removed && 'line-through')}>
-            {rowKey[k.field] === null || rowKey[k.field] === '' ? '—' : String(rowKey[k.field])}
-          </span>
+          {about && i === 0 ? (
+            <div className="max-w-[46ch] py-0.5 whitespace-normal">
+              <div className="font-medium">{about.name}</div>
+              {about.detail && <div className="text-[12px] text-muted-foreground">{about.detail}</div>}
+            </div>
+          ) : (
+            <span className={cn(removed && 'line-through')}>
+              {rowKey[k.field] === null || rowKey[k.field] === '' ? '—' : String(rowKey[k.field])}
+            </span>
+          )}
           {i === 0 && added && <Badge variant="secondary" className="ml-2">New</Badge>}
           {i === 0 && removed && <Badge variant="destructive" className="ml-2">Removed</Badge>}
           {i === 0 && refusal && <div className="mt-0.5 text-[12px] text-destructive">{refusal}</div>}
@@ -163,6 +174,7 @@ function RateRow({
             <ValueInput
               field={field}
               value={values[field.field]}
+              constant={String(rowKey.name ?? '')}
               label={`${field.label} for ${name}`}
               onChange={(value) => onChange({ ...values, [field.field]: value })}
             />
@@ -194,15 +206,20 @@ function RateRow({
 function ValueInput({
   field,
   value,
+  constant,
   label,
   onChange,
 }: {
   field: ValueField
   value: unknown
+  /** The constant's name, for a `constant` field. */
+  constant: string
   label: string
   onChange: (value: unknown) => void
 }) {
   switch (field.kind) {
+    case 'constant':
+      return <ConstantInput name={constant} value={Number(value)} label={label} onChange={onChange} />
     case 'number':
       return (
         <NumberInput
@@ -226,6 +243,72 @@ function ValueInput({
     case 'boolean':
       return <Checkbox checked={Boolean(value)} onCheckedChange={(next) => onChange(next === true)} aria-label={label} />
   }
+}
+
+/**
+ * What was typed into a constant, read as a value (#151): a decimal, or for a
+ * rate a percentage such as `30%`, which is its decimal. Input reading only:
+ * whether the value is in range is the server's to say when the set is saved,
+ * and it says so against the row.
+ */
+function readConstant(raw: string, percent: boolean): { value?: number; error?: string } {
+  const typed = raw.trim()
+  if (typed === '') return { error: 'Enter a value.' }
+  if (typed.endsWith('%')) {
+    if (!percent) return { error: 'Enter this as a number, not a percentage.' }
+    const number = Number(typed.slice(0, -1).trim())
+    if (!Number.isFinite(number)) return { error: 'Enter a decimal such as 0.30, or a percentage such as 30%.' }
+    return { value: Number((number / 100).toFixed(8)) }
+  }
+  const number = Number(typed)
+  if (!Number.isFinite(number)) {
+    return { error: percent ? 'Enter a decimal such as 0.30, or a percentage such as 30%.' : 'Enter a number.' }
+  }
+  return { value: number }
+}
+
+function ConstantInput({
+  name,
+  value,
+  label,
+  onChange,
+}: {
+  name: string
+  value: number
+  label: string
+  onChange: (value: number) => void
+}) {
+  const percent = PERCENT_CONSTANTS.has(name)
+  // What is being typed, held while the field has focus so "30%" isn't
+  // rewritten as 0.3 under the cursor.
+  const [draft, setDraft] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  return (
+    <div className="grid justify-items-end gap-0.5">
+      <div className="flex items-center gap-2">
+        <Input
+          className="tabular h-8 w-32 text-right"
+          inputMode="decimal"
+          value={draft ?? String(value)}
+          aria-label={label}
+          aria-invalid={error ? true : undefined}
+          onFocus={() => setDraft(String(value))}
+          onChange={(event) => {
+            setDraft(event.target.value)
+            const read = readConstant(event.target.value, percent)
+            setError(read.error ?? null)
+            if (read.value !== undefined) onChange(read.value)
+          }}
+          onBlur={() => {
+            if (!error) setDraft(null)
+          }}
+        />
+        {percent && <span className="tabular w-20 text-left text-muted-foreground">= {asPercent(value)}</span>}
+      </div>
+      {error && <span className="text-[12px] text-destructive">{error}</span>}
+    </div>
+  )
 }
 
 /** A new row, held with the rest of the set until it is saved. */
@@ -320,11 +403,14 @@ export function ChangeBar({
 /** Every change, old → new, and where the set will go, before it is saved. */
 export function Review({
   staged,
+  warnings = [],
   onBack,
   onSaved,
   onRefused,
 }: {
   staged: Staged[]
+  /** Things worth knowing before saving that are not refusals. */
+  warnings?: string[]
   onBack: () => void
   onSaved: (saved: ChangesApplied, count: number) => void
   onRefused: (error: unknown) => void
@@ -369,6 +455,12 @@ export function Review({
           />
         </label>
 
+        {warnings.map((warning) => (
+          <Alert key={warning} className="border-warn/40 bg-warn-bg text-warn">
+            <AlertDescription className="text-warn">{warning}</AlertDescription>
+          </Alert>
+        ))}
+
         {current && (
           <p className="text-[13px]">
             {current.accepts_changes
@@ -395,6 +487,10 @@ const signedPercent = (fraction: number) =>
 
 function ChangeText({ spec, change }: { spec: RateTableSpec; change: Staged }) {
   const fields = spec.values.filter((v) => change.op === 'delete' || v.field in change.value)
+  // A rate constant reads as a percentage here, as it does beside its input.
+  const percent = PERCENT_CONSTANTS.has(String(change.key.name ?? ''))
+  const show = (field: ValueField, value: unknown) =>
+    percent && field.kind === 'constant' ? asPercent(Number(value)) : shown(field, value)
   switch (change.op) {
     case 'update':
       return (
@@ -404,9 +500,9 @@ function ChangeText({ spec, change }: { spec: RateTableSpec; change: Staged }) {
             const now = change.value[field.field]
             return (
               <span key={field.field}>
-                {field.label} {shown(field, was)} → {shown(field, now)}
+                {field.label} {show(field, was)} → {show(field, now)}
                 {/* Shown so a slip of the keyboard (a rate 100 times too big) stands out. */}
-                {field.kind === 'number' && Number(was) !== 0 && (
+                {(field.kind === 'number' || field.kind === 'constant') && Number(was) !== 0 && (
                   <span className="ml-1.5 text-muted-foreground">
                     ({signedPercent(Number(now) / Number(was) - 1)})
                   </span>

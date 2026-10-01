@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useBlocker } from '@tanstack/react-router'
 import { toast } from 'sonner'
+import { useApproverGaps } from '@/api/admin-console'
 import { useLookups } from '@/api/lookups'
 import type { ChangesApplied, RateTable } from '@/api/admin-lookups'
 import { PageHead, Panel } from '@/components/shell'
@@ -9,6 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ApiError } from '@/lib/api'
+import { asPercent } from '@/lib/format/constants'
+import { salaryRateYear } from '@/lib/salary-rate-year'
 import { AddRateRow, ChangeBar, RateTable as RateTableView, RatesMovedNotice, Review, type Refused } from './RateEditor'
 import { RATE_TABLES, isRateTable, tableSpec } from './rateTables'
 import { ReferenceTableEditor } from './ReferenceEditor'
@@ -35,6 +38,8 @@ import { VersionsPanel, type RatesMoved } from './VersionsPanel'
  */
 export function LookupEditor() {
   const { data: lookups } = useLookups()
+  // Which units have nobody to sign for them, flagged on their tabs (#121).
+  const gaps = useApproverGaps()
   const [tableId, setTableId] = useState<RateTable | ReferenceTable>(RATE_TABLES[0].id)
   const [staged, setStaged] = useState<Staged[]>([])
   const [refused, setRefused] = useState<Refused>(null)
@@ -43,6 +48,23 @@ export function LookupEditor() {
   const [shownVersion, setShownVersion] = useState<number | null>(null)
 
   const rowsOf = (id: RateTable | ReferenceTable) => (lookups[id] ?? []) as unknown as Row[]
+
+  // A constant's value once the staged set is saved: what is staged for it,
+  // or what it is now.
+  const constantAfter = (name: string) => {
+    const change = staged.find(
+      (candidate) => candidate.table === 'calculation_constants' && candidate.key.name === name,
+    )
+    if (change?.op === 'update' && 'value' in change.value) return Number(change.value.value)
+    return Number(lookups.calculation_constants.find((row) => row.name === name)?.value)
+  }
+  // A warning, not a refusal: it may be what policy wants (#151).
+  const warnings =
+    constantAfter('minimum_margin') > constantAfter('default_margin')
+      ? [
+          `The minimum margin (${asPercent(constantAfter('minimum_margin'))}) will be above the default margin (${asPercent(constantAfter('default_margin'))}), so every new costing will start out needing the Dean.`,
+        ]
+      : []
 
   // Every staged change is the set's, so any edit may clear the refusal.
   const stage = (next: Staged[]) => {
@@ -139,7 +161,14 @@ export function LookupEditor() {
       </Tabs>
 
       {isRateTable(tableId) ? (
-        <Panel title={tableSpec(tableId).label}>
+        <Panel
+          title={tableSpec(tableId).label}
+          description={
+            tableId === 'salary_rates' && salaryRateYear(lookups) !== undefined
+              ? `These are ${salaryRateYear(lookups)} rates: each later year adds that year's EBA increase. The year is the salary rate year, on the Constants tab.`
+              : undefined
+          }
+        >
           <RateTableView
             spec={tableSpec(tableId)}
             rows={rowsOf(tableId)}
@@ -160,12 +189,25 @@ export function LookupEditor() {
           spec={referenceSpec(tableId)}
           rows={rowsOf(tableId)}
           faculties={lookups.faculties}
+          flags={
+            gaps.data && tableId === 'departments'
+              ? { keys: new Set(gaps.data.departments_without_head), label: 'No head of department' }
+              : gaps.data && tableId === 'faculties'
+                ? { keys: new Set(gaps.data.faculties_without_dean), label: 'No dean' }
+                : undefined
+          }
         />
       )}
 
       {staged.length > 0 &&
         (reviewing ? (
-          <Review staged={staged} onBack={() => setReviewing(false)} onSaved={onSaved} onRefused={onRefused} />
+          <Review
+            staged={staged}
+            warnings={warnings}
+            onBack={() => setReviewing(false)}
+            onSaved={onSaved}
+            onRefused={onRefused}
+          />
         ) : (
           <ChangeBar staged={staged} onDiscard={() => stage([])} onReview={() => setReviewing(true)} />
         ))}

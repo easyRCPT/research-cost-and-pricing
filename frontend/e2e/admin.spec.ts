@@ -1,4 +1,4 @@
-import { test, expect, createProject, csrfToken, DEMO, makeReady, signInAsAdmin, uniqueTitle } from './fixtures'
+import { test, expect, createProject, csrfToken, DEMO, makeReady, signIn, signInAsAdmin, uniqueTitle } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,
@@ -66,4 +66,50 @@ test('deactivating someone asks first, and the row says so afterwards (#69)', as
   // Giving access back needs no confirm.
   await page.getByRole('button', { name: 'Reactivate' }).click()
   await expect(page.getByText('Deactivated', { exact: true })).toHaveCount(0)
+})
+
+test('a costing waiting on a role nobody holds is shown to RIC and named to its owner (#121)', async ({ page }) => {
+  // A department of this test's own, with no head of department.
+  await signInAsAdmin(page)
+  const code = `E2E${Date.now().toString(36).toUpperCase()}`.slice(0, 20)
+  const lookups = await (await page.request.get('/api/lookups/')).json()
+  const made = await page.request.post('/api/admin/lookups/departments/', {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+    data: {
+      values: {
+        code,
+        name: `Unheaded ${code}`,
+        school: 'School of Testing',
+        school_code: 'SCH',
+        budget_unit: '',
+        faculty_code: lookups.faculties[0].code,
+      },
+    },
+  })
+  expect(made.status(), await made.text()).toBe(201)
+
+  // A researcher submits a costing from it.
+  await page.context().clearCookies()
+  await signIn(page)
+  const title = uniqueTitle('Stranded')
+  const project = await createProject(page, title, { start: 2026, end: 2026 }, code)
+  await makeReady(page, project.budget_id)
+  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+  })
+  expect(submitted.status(), await submitted.text()).toBe(200)
+
+  // Its owner is told which unit is missing an approver.
+  await page.goto(`/projects/${project.id}/approvals`)
+  await expect(page.getByText(`Unheaded ${code} has no head of department assigned`)).toBeVisible()
+
+  // RIC sees it on the console, and the department is flagged on its tab.
+  await signInAsAdmin(page)
+  await page.goto('/admin')
+  await expect(page.getByRole('row').filter({ hasText: title })).toContainText(
+    `Unheaded ${code} has no head of department`,
+  )
+  await page.goto('/admin/lookups')
+  await page.getByRole('tablist', { name: 'Reference tables' }).getByRole('tab', { name: 'Departments' }).click()
+  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('No head of department')
 })

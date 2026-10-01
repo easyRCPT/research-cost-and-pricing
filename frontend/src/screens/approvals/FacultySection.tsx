@@ -9,13 +9,14 @@ interface FacultySectionProps {
   /** The server's reasons: frozen at submit, or the live ones for a draft. */
   triggers: string[]
   submitted: boolean
+  faculty: string
 }
 
 /**
  * Part D. One faculty step produces one decision, so there is one record --
  * there is no school in the approval model, and no second signature (#83).
  */
-export function FacultySection({ step, triggers, submitted }: FacultySectionProps) {
+export function FacultySection({ step, triggers, submitted, faculty }: FacultySectionProps) {
   return (
     <>
       <PartBar>PART D — Authorisation by Faculty</PartBar>
@@ -44,7 +45,7 @@ export function FacultySection({ step, triggers, submitted }: FacultySectionProp
         )
       )}
 
-      {submitted && <DecisionRecord title="Dean or delegate" step={step} />}
+      {submitted && <DecisionRecord title="Dean or delegate" step={step} missing={`${faculty} has no dean`} />}
     </>
   )
 }

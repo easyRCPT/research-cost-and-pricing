@@ -54,7 +54,9 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             "faculty": faculty,
         }
 
-        create("departments", data)
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            create("departments", data)
 
         department = Department.objects.get(code="SCI")
 
@@ -109,17 +111,19 @@ class TestCreate(TestCase, LookupUpdateTestMixin):
             is_superuser=True,
         )
 
-        create(
-            "departments",
-            {
-                "code": "SCI",
-                "name": "Science",
-                "school": "Science School",
-                "school_code": "SCI",
-                "faculty": faculty,
-            },
-            actor=actor,
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            create(
+                "departments",
+                {
+                    "code": "SCI",
+                    "name": "Science",
+                    "school": "Science School",
+                    "school_code": "SCI",
+                    "faculty": faculty,
+                },
+                actor=actor,
+            )
 
         audit = AuditLog.objects.get(
             action="admin.lookup.insert",
@@ -164,11 +168,13 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
     def test_updates_lookup_row(self, mock_invalidate_cache):
         department = self.create_department()
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"name": "Engineering"},
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"name": "Engineering"},
+            )
 
         department.refresh_from_db()
 
@@ -185,11 +191,13 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             name="Engineering Faculty",
         )
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"faculty_code": "ENG"},
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"faculty_code": "ENG"},
+            )
 
         department.refresh_from_db()
 
@@ -337,12 +345,14 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             is_superuser=True,
         )
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"name": "Engineering"},
-            actor=actor,
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"name": "Engineering"},
+                actor=actor,
+            )
 
         audit = AuditLog.objects.get(
             action="admin.lookup.update",
@@ -385,12 +395,14 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
             is_superuser=True,
         )
 
-        update(
-            "departments",
-            {"code": department.code},
-            {"faculty": engineering},
-            actor=actor,
-        )
+        # The cache is cleared once the write commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            update(
+                "departments",
+                {"code": department.code},
+                {"faculty": engineering},
+                actor=actor,
+            )
 
         audit = AuditLog.objects.get(
             action="admin.lookup.update",

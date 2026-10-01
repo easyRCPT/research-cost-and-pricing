@@ -29,6 +29,7 @@ export const valuesOf = (spec: RateTableSpec, row: Row): Values =>
 export function typed(field: ValueField, raw: unknown): unknown {
   switch (field.kind) {
     case 'number':
+    case 'constant':
       return Number(raw)
     case 'boolean':
       return Boolean(raw)

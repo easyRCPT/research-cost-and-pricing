@@ -248,7 +248,7 @@ def create(
         before=None,
         after=data,
     )
-    invalidate_lookup_cache()
+    transaction.on_commit(invalidate_lookup_cache)
 
 
 @transaction.atomic
@@ -297,7 +297,7 @@ def update(
         after=after,
         lookup=lookup,
     )
-    invalidate_lookup_cache()
+    transaction.on_commit(invalidate_lookup_cache)
 
 
 def plain(values: dict | None) -> dict | None:
@@ -352,7 +352,7 @@ def delete(table: str, key: str, actor: User | None = None) -> None:
         after=None,
         lookup=lookup,
     )
-    invalidate_lookup_cache()
+    transaction.on_commit(invalidate_lookup_cache)
 
 
 def _audit(

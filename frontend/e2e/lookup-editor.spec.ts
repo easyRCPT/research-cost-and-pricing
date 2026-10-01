@@ -99,6 +99,8 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
 
   // A change in another table, then back: both are still held.
   await page.getByRole('tab', { name: /Salary rates/ }).click()
+  // The rates say which year they are for (#148).
+  await expect(page.getByText(/These are \d{4} rates: each later year adds that year's EBA increase/)).toBeVisible()
   const firstRate = page.getByRole('spinbutton', { name: /^Rate for / }).first()
   const was = await firstRate.inputValue()
   await firstRate.fill(String(Number(was) + 1))
@@ -248,4 +250,39 @@ test('a non-staff category is a rate: added, changed and removed through sets (#
   await row.getByRole('button', { name: `Remove ${LEDGER}` }).click()
   await reviewAndSave(page, 'e2e: the category again')
   await expect.poll(flag).toBeUndefined()
+})
+
+test('constants read as what they are, take 30% or 0.30, and refuse a bare 25 (#151)', async ({ page }) => {
+  await openEditor(page)
+  await page.getByRole('tablist', { name: 'Rate tables' }).getByRole('tab', { name: /Constants/ }).click()
+  const floor = page.getByRole('row').filter({ hasText: 'Minimum Margin' })
+  await expect(floor).toContainText('A budget priced below this margin needs the Dean')
+  const value = floor.getByRole('textbox', { name: 'Value for minimum_margin' })
+
+  // A bare 25 is refused by the server, against the row, and nothing is saved.
+  await value.fill('25')
+  await page.getByRole('button', { name: 'Review changes' }).click()
+  await page.getByRole('button', { name: 'Save changes' }).click()
+  await expect(floor).toHaveAttribute('aria-invalid', 'true')
+  await expect(floor).toContainText('Did you mean 25%? Enter 0.25 or 25%.')
+
+  // A percentage reads as its decimal, and a floor above the default warns.
+  await value.fill('35%')
+  await expect(floor).toContainText('= 35%')
+  await page.getByRole('button', { name: 'Review changes' }).click()
+  const review = page.getByRole('region', { name: 'Constants' })
+  await expect(review).toContainText('30% → 35%')
+  await expect(page.getByText('will be above the default margin (30%)')).toBeVisible()
+  await page.getByRole('button', { name: 'Keep editing' }).click()
+
+  // A multiplier is not a percentage.
+  const multiplier = page
+    .getByRole('row')
+    .filter({ hasText: 'Full Cost Recovery Multiplier' })
+    .getByRole('textbox', { name: 'Value for full_cost_recovery_multiplier' })
+  await multiplier.fill('170%')
+  await expect(page.getByText('Enter this as a number, not a percentage.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Discard all' }).click()
+  await expect(page.getByRole('region', { name: 'Unsaved changes' })).toHaveCount(0)
 })
