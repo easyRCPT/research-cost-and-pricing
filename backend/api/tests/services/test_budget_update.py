@@ -397,18 +397,32 @@ class TestUpdateBudget(SimpleTestCase):
 
     def test_refuses_the_cost_multiplier_and_says_why(self):
         # Not a typo but a rule: the multiplier is the University's full cost
-        # recovery rate, copied onto the budget at creation, and it decides
-        # whether the budget needs a Dean. The message has to be sayable in
-        # the UI, so it is not the generic refusal.
+        # recovery rate, set by an administrator as a lookup rate (#149). The
+        # message has to be sayable in the UI, so it is not the generic refusal.
         with self.assertRaisesMessage(
             ValidationError,
-            "The cost multiplier is fixed at the University's full cost "
-            "recovery rate and is not editable per budget.",
+            "The cost multiplier is the University's full cost recovery rate "
+            "and is not editable per budget.",
         ):
             budget_update.update_budget(
                 self.budget,
                 "cost_multiplier",
                 "1.00",
+            )
+
+        self.budget.save.assert_not_called()
+
+    def test_refuses_the_in_kind_multiplier_the_same_way(self):
+        # In-kind staff are costed at the same rate (#149).
+        with self.assertRaisesMessage(
+            ValidationError,
+            "The cost multiplier is the University's full cost recovery rate "
+            "and is not editable per budget.",
+        ):
+            budget_update.update_budget(
+                self.budget,
+                "in_kind_multiplier",
+                "2.00",
             )
 
         self.budget.save.assert_not_called()

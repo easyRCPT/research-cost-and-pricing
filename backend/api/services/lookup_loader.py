@@ -26,6 +26,7 @@ REQUIRED_CONSTANTS = {
     "default_margin",
     "minimum_margin",
     "salary_rate_year",
+    "full_cost_recovery_multiplier",
 }
 
 

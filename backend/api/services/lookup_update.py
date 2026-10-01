@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
@@ -19,10 +20,11 @@ from .audit import write_audit
 from .lookup_definitions import LOOKUP_DEFINITIONS
 from .lookup_loader import invalidate_lookup_cache
 
-# Fixed by the University at its full cost recovery rate (#60). It sets the
-# price of every budget; it no longer decides Dean review, which reads the
-# margin and in-kind costs (calculation/pricing.py).
-FIXED_CONSTANTS = frozenset({"full_cost_recovery_multiplier"})
+# Below 1 the multiplier prices staff under their own salary and on-costs,
+# which is never a cost recovery rate. Two places, because each budget keeps a
+# copy of the rate it was priced at in a two-place column.
+MULTIPLIER_FLOOR = Decimal(1)
+MULTIPLIER_STEP = Decimal("0.01")
 
 
 def get_versioned_models() -> list[type[models.Model]]:
@@ -82,17 +84,27 @@ def create_lookup_version(
     return new_version.id
 
 
-def _reject_fixed_constant(model: type[models.Model], *sources: dict) -> None:
-    """Refuse any write that names a constant the API does not get to change."""
-    if model is not CalculationConstant:
+def _reject_invalid_multiplier(instance: models.Model, data: dict) -> None:
+    """
+    The full cost recovery multiplier is an administrator's to change (#149),
+    within a range. Checked on the row rather than the request's lookup, which
+    may name the row by id.
+    """
+    if not isinstance(instance, CalculationConstant):
+        return
+    if instance.name != "full_cost_recovery_multiplier" or "value" not in data:
         return
 
-    for source in sources:
-        name = source.get("name")
-        if name in FIXED_CONSTANTS:
-            raise ValidationError(
-                f"'{name}' is fixed and cannot be changed through the API.",
-            )
+    value = Decimal(str(data["value"]))
+    if value < MULTIPLIER_FLOOR:
+        raise ValidationError(
+            "The full cost recovery multiplier can't be below 1.00: that would "
+            "price staff below their own salary and on-costs."
+        )
+    if value != value.quantize(MULTIPLIER_STEP):
+        raise ValidationError(
+            "The full cost recovery multiplier takes at most two decimal places."
+        )
 
 
 def _reject_invalid_salary_rate_year(
@@ -153,7 +165,6 @@ def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
 
 
 def _validate_update(model: type[models.Model], lookup: dict, data: dict) -> None:
-    _reject_fixed_constant(model, lookup, data)
     _reject_invalid_salary_rate_year(model, lookup, data)
     _reject_update_to_constant_name(model, lookup, data)
 
@@ -270,8 +281,7 @@ def update(
             f"Multiple matching rows found in lookup table '{table}'.",
         )
 
-    # The lookup may name the row by id rather than by name.
-    _reject_fixed_constant(model, model_to_dict(instance))
+    _reject_invalid_multiplier(instance, data)
 
     before = model_to_dict(instance, fields=data.keys())
 

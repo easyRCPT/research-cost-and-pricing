@@ -4515,7 +4515,7 @@
   "pk": 2,
   "fields": {
     "name": "full_cost_recovery_multiplier",
-    "description": "Default cost recovery multiplier",
+    "description": "The full cost recovery multiplier, for staff and in-kind staff.",
     "value": "1.700000",
     "version": 1
   }
@@ -4537,16 +4537,6 @@
     "name": "override_uom_oncosts",
     "description": "Override multiplier for UoM on-costs",
     "value": "0.000000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 5,
-  "fields": {
-    "name": "in_kind_multiplier",
-    "description": "Matches full cost recovery.",
-    "value": "1.700000",
     "version": 1
   }
 },

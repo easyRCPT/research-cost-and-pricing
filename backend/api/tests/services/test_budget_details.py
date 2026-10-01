@@ -9,6 +9,7 @@ from api.services.budget_details import (
     get_budget_details,
     get_lookup_version_for_budget,
     merge_staff_table_with_result,
+    store_multipliers,
     store_price,
 )
 
@@ -183,7 +184,7 @@ class TestMergeStaffTableWithResult(SimpleTestCase):
 class TestBuildBudgetDetails(SimpleTestCase):
     def setUp(self):
         self.constants = {
-            "constants": {},
+            "constants": {"full_cost_recovery_multiplier": Decimal("1.80")},
         }
 
         self.budget_data = {
@@ -243,12 +244,17 @@ class TestBuildBudgetDetails(SimpleTestCase):
             self.budget_data,
         )
 
+        # Priced at the version's multiplier, for in-kind staff too (#149).
+        priced_info = {
+            "cost_multiplier": Decimal("1.80"),
+            "in_kind_multiplier": Decimal("1.80"),
+        }
         mock_pricing.assert_called_once_with(
             self.constants,
             self.budget_data["project_duration"],
             self.budget_data["staff_table"],
             self.budget_data["non_staff_table"],
-            self.budget_data["budget_info"],
+            priced_info,
         )
 
         expected_staff_table = {
@@ -286,7 +292,7 @@ class TestBuildBudgetDetails(SimpleTestCase):
 
         expected = {
             "project_info": {},
-            "budget_info": {},
+            "budget_info": priced_info,
             "staff_table": expected_staff_table,
             "non_staff_table": {},
             "budget_summary": {},
@@ -296,7 +302,13 @@ class TestBuildBudgetDetails(SimpleTestCase):
 
 
 def details_with_price(price: Decimal) -> dict:
-    return {"budget_summary": {"price_summary": {"total_price_inc_gst": price}}}
+    return {
+        "budget_info": {
+            "cost_multiplier": Decimal("1.70"),
+            "in_kind_multiplier": Decimal("1.70"),
+        },
+        "budget_summary": {"price_summary": {"total_price_inc_gst": price}},
+    }
 
 
 class TestGetBudgetDetails(SimpleTestCase):
@@ -355,5 +367,40 @@ class TestStorePrice(SimpleTestCase):
         budget.total_price_inc_gst = Decimal("1234.57")
 
         store_price(budget, details_with_price(Decimal("1234.5678")))
+
+        budget.save.assert_not_called()
+
+
+def details_with_multiplier(multiplier: Decimal) -> dict:
+    return {
+        "budget_info": {
+            "cost_multiplier": multiplier,
+            "in_kind_multiplier": multiplier,
+        }
+    }
+
+
+class TestStoreMultipliers(SimpleTestCase):
+    """The budget's copy follows the rate it was last priced at (#149)."""
+
+    def test_records_the_rate_the_budget_was_priced_at(self):
+        budget = Mock(spec=Budget)
+        budget.cost_multiplier = Decimal("1.70")
+        budget.in_kind_multiplier = Decimal("1.70")
+
+        store_multipliers(budget, details_with_multiplier(Decimal("1.800000")))
+
+        self.assertEqual(budget.cost_multiplier, Decimal("1.800000"))
+        self.assertEqual(budget.in_kind_multiplier, Decimal("1.800000"))
+        budget.save.assert_called_once_with(
+            update_fields=["cost_multiplier", "in_kind_multiplier"],
+        )
+
+    def test_does_not_write_when_the_rate_has_not_moved(self):
+        budget = Mock(spec=Budget)
+        budget.cost_multiplier = Decimal("1.70")
+        budget.in_kind_multiplier = Decimal("1.70")
+
+        store_multipliers(budget, details_with_multiplier(Decimal("1.700000")))
 
         budget.save.assert_not_called()
