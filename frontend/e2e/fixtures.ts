@@ -164,13 +164,17 @@ export async function apiWrite(
   return response
 }
 
-/** A single-year project in the HoD's department, with everything submission checks for. */
-export async function readyProject(page: Page, what: string): Promise<Project> {
+/** A single-year project, in the HoD's department unless told otherwise, with everything submission checks for. */
+export async function readyProject(
+  page: Page,
+  what: string,
+  department: string = DEMO.hodDepartment,
+): Promise<Project> {
   const project = await createProject(
     page,
     uniqueTitle(what),
     { start: 2026, end: 2026 },
-    DEMO.hodDepartment,
+    department,
   )
   const budget = `/api/budgets/${project.budget_id}/`
   for (const [field, value] of [

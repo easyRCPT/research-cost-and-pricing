@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from api.models import Budget
 from api.permissions import IsSuperadmin
+from api.services import approver_gaps
 from api.services.admin_overview import overview
 
 from .audit import AuditEntrySerializer
@@ -56,3 +57,31 @@ class OverviewView(APIView):
     @extend_schema(responses=OverviewSerializer)
     def get(self, request: Request) -> Response:
         return Response(OverviewSerializer(overview()).data)
+
+
+class StrandedSerializer(serializers.Serializer):
+    budget_id = serializers.IntegerField()
+    project_id = serializers.IntegerField()
+    reference = serializers.CharField(allow_null=True)
+    title = serializers.CharField(allow_blank=True)
+    owner = serializers.EmailField()
+    status = serializers.ChoiceField(choices=Budget.Status.choices)
+    level = serializers.ChoiceField(choices=["department", "faculty"])
+    unit = serializers.CharField()
+    submitted_at = serializers.DateTimeField(allow_null=True)
+
+
+class ApproverGapsSerializer(serializers.Serializer):
+    stranded = StrandedSerializer(many=True)
+    departments_without_head = serializers.ListField(child=serializers.CharField())
+    faculties_without_dean = serializers.ListField(child=serializers.CharField())
+
+
+class ApproverGapsView(APIView):
+    """Costings waiting on a role nobody holds, and the units missing one (#121)."""
+
+    permission_classes = [IsSuperadmin]
+
+    @extend_schema(responses=ApproverGapsSerializer)
+    def get(self, request: Request) -> Response:
+        return Response(ApproverGapsSerializer(approver_gaps.gaps()).data)

@@ -38,14 +38,9 @@ def register(status: str = "", q: str = "") -> list[dict]:
     if q:
         projects = projects.filter(Q(title__icontains=q) | Q(reference__icontains=q))
 
+    # The owner is on every project row now (#98); the register adds the
+    # department's code, so a department's move can count its costings (#70).
     return [
-        {
-            **build_row(project),
-            "owner": {
-                "id": project.created_by.id,
-                "email": project.created_by.email,
-                "name": project.created_by.get_full_name(),
-            },
-        }
+        {**build_row(project), "department_code": project.department.code}
         for project in projects
     ]

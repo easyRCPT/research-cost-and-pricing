@@ -24,7 +24,12 @@ BUDGET_DEFAULTS = {
         Decimal("1.70"),
         Decimal("0.01"),
     ),
-    "in_kind_multiplier": ("in_kind_multiplier", Decimal("1.70"), Decimal("0.01")),
+    # In-kind staff are costed at the full cost recovery rate too (#149).
+    "in_kind_multiplier": (
+        "full_cost_recovery_multiplier",
+        Decimal("1.70"),
+        Decimal("0.01"),
+    ),
     "margin": ("default_margin", Decimal("0.30"), Decimal("0.0001")),
 }
 
@@ -73,19 +78,25 @@ def visible_budgets(user):
     )
 
 
-def list_projects(user) -> list[dict]:
-    """One row per project, newest activity first."""
+def list_projects(user, status: str = "") -> list[dict]:
+    """
+    One row per project, newest activity first. With a status, only the
+    projects whose current budget -- the one the row shows -- has it (#98).
+    """
     # Prefetched so the whole list costs two queries rather than one per
     # project. Which budget is the latest is decided in build_row, not here.
     projects = (
         visible_projects(user)
-        .select_related("department__faculty")
+        .select_related("department__faculty", "created_by")
         .prefetch_related(Prefetch("budgets", queryset=visible_budgets(user)))
         .annotate(last_activity=Greatest("updated_at", Max("budgets__updated_at")))
         .order_by("-last_activity", "-id")
     )
 
-    return [build_row(project) for project in projects]
+    rows = [build_row(project) for project in projects]
+    # Filtered on the row rather than in the query: "current" is build_row's
+    # rule, and a second copy of it in SQL would drift from the first.
+    return [row for row in rows if not status or row["status"] == status]
 
 
 def build_row(project: Project) -> dict:
@@ -119,6 +130,12 @@ def build_row(project: Project) -> dict:
         "budget_count": len(budgets),
         "total_price_inc_gst": (latest.total_price_inc_gst if latest else Decimal(0)),
         "updated_at": getattr(project, "last_activity", project.updated_at),
+        # An approver's list has a different owner on every row (#98).
+        "owner": {
+            "id": project.created_by.id,
+            "email": project.created_by.email,
+            "name": project.created_by.get_full_name(),
+        },
     }
 
 

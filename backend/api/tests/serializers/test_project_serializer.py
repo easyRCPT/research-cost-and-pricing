@@ -101,6 +101,7 @@ class ProjectRowSerializerTestCase(TestCase):
             "budget_count": 1,
             "total_price_inc_gst": Decimal("1234.5678"),
             "updated_at": "2026-09-17T00:00:00Z",
+            "owner": {"id": 1, "email": "owner@unimelb.edu.au", "name": ""},
             **overrides,
         }
 

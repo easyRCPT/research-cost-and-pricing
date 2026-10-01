@@ -1,6 +1,7 @@
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
+from django.core.cache import cache
 from django.test import SimpleTestCase, TestCase
 
 from api.models import (
@@ -184,6 +185,10 @@ class TestGetLookupTables(SimpleTestCase):
 
 class TestGetConstants(SimpleTestCase):
     def setUp(self):
+        # The cache outlives every other test's rolled-back database, so a
+        # version priced elsewhere in this process could answer from it.
+        cache.clear()
+        self.addCleanup(cache.clear)
         self.salary_rate_1 = Mock(spec=SalaryRate)
         self.salary_rate_1.payroll_type = "Fortnight"
         self.salary_rate_1.category = "Academic"
@@ -244,6 +249,10 @@ class TestGetConstants(SimpleTestCase):
         self.constant_7.name = "salary_rate_year"
         self.constant_7.value = Decimal(2025)
 
+        self.constant_8 = Mock(spec=CalculationConstant)
+        self.constant_8.name = "full_cost_recovery_multiplier"
+        self.constant_8.value = Decimal("1.70")
+
     def _build_tables(self):
         return {
             "salary_rates": [
@@ -268,6 +277,7 @@ class TestGetConstants(SimpleTestCase):
                 self.constant_5,
                 self.constant_6,
                 self.constant_7,
+                self.constant_8,
             ],
         }
 
@@ -347,6 +357,7 @@ class TestGetConstants(SimpleTestCase):
                 "default_margin": Decimal("0.30"),
                 "minimum_margin": Decimal("0.00"),
                 "salary_rate_year": Decimal(2025),
+                "full_cost_recovery_multiplier": Decimal("1.70"),
             },
         )
 
@@ -414,6 +425,7 @@ class TestGetConstants(SimpleTestCase):
             self.constant_3,
             self.constant_5,
             self.constant_6,
+            self.constant_8,
         ]
 
         mock_get_versioned_lookup_querysets.return_value = self._mock_querysets(tables)
@@ -454,6 +466,7 @@ class TestValidateConstants(SimpleTestCase):
             "default_margin": Decimal("0.30"),
             "minimum_margin": Decimal("0.00"),
             "salary_rate_year": Decimal(2025),
+            "full_cost_recovery_multiplier": Decimal("1.70"),
         }
 
         validate_constants(constants)
@@ -467,7 +480,8 @@ class TestValidateConstants(SimpleTestCase):
         with self.assertRaisesRegex(
             KeyError,
             "Missing required calculation constants: "
-            "default_margin,gst_rate,minimum_margin,override_uom_oncosts,salary_rate_year",
+            "default_margin,full_cost_recovery_multiplier,gst_rate,minimum_margin,"
+            "override_uom_oncosts,salary_rate_year",
         ):
             validate_constants(constants)
 

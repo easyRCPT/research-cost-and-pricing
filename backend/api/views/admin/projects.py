@@ -8,13 +8,8 @@ from rest_framework.views import APIView
 
 from api.models import Budget
 from api.permissions import IsSuperadmin
+from api.serializers.project_serializer import ProjectOwnerSerializer
 from api.services import admin_projects
-
-
-class ProjectOwnerSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    email = serializers.EmailField()
-    name = serializers.CharField(allow_blank=True)
 
 
 class AdminProjectSerializer(serializers.Serializer):
@@ -23,6 +18,8 @@ class AdminProjectSerializer(serializers.Serializer):
     title = serializers.CharField(allow_blank=True)
     owner = ProjectOwnerSerializer()
     department = serializers.CharField()
+    # So a department's move can say how many of its costings wait on a dean (#70).
+    department_code = serializers.CharField()
     faculty = serializers.CharField()
     budget_id = serializers.IntegerField(allow_null=True)
     status = serializers.ChoiceField(choices=Budget.Status.choices, allow_null=True)

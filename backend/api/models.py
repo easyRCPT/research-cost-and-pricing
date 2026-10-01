@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 class LookupVersion(models.Model):
     if TYPE_CHECKING:
         id: int
+        change_sets: RelatedManager["LookupChangeSet"]
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -42,6 +43,40 @@ class LookupConfiguration(models.Model):
     # Whether current version is referenced by authorised budget.
     # Determines whether a new version should be created when updating current version.
     referenced = models.BooleanField(default=False)
+
+
+class LookupChangeSet(models.Model):
+    """
+    One saved set of rate changes (#138), applied all at once or not at all.
+
+    Many sets can go into one version: a version is "the rates some costing was
+    priced on", and a set writes into the current version until a costing is
+    submitted on it. So restore undoes a whole version, and this is the record
+    of the sets that made it. What each change said before and after is in the
+    set's audit entry.
+    """
+
+    if TYPE_CHECKING:
+        id: int
+        version_id: int
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        related_name="change_sets",
+        on_delete=models.PROTECT,
+    )
+    note = models.CharField(max_length=200, blank=True, default="")
+    saved_by = models.ForeignKey(
+        "User",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+    saved_at = models.DateTimeField(auto_now_add=True)
+    change_count = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.change_count} changes into version {self.version_id}"
 
 
 class Faculty(models.Model):
@@ -688,8 +723,9 @@ class Budget(models.Model):
     )
     mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.FULL)
 
-    # Seeded from CalculationConstant when the budget is created, not by a
-    # field default, because the current values live in the database.
+    # A record of the rate the budget was last priced at, kept in step by
+    # services/budget_details.py. The engine reads the rate from the budget's
+    # lookup version, not from here (#149); in-kind staff use the same rate.
     cost_multiplier = models.DecimalField(
         max_digits=4,
         decimal_places=2,

@@ -1,3 +1,4 @@
+import { salaryRateYear } from '@/lib/salary-rate-year'
 import type { ReactNode } from 'react'
 import type { LookupTables } from '@/types'
 import {
@@ -31,6 +32,7 @@ export const LOOKUP_TABS = [
         salaryRates={lookups.salary_rates}
         incrementCaps={lookups.increment_caps}
         multipliers={lookups.salary_rate_multipliers}
+        salaryRateYear={salaryRateYear(lookups)}
       />
     ),
   },

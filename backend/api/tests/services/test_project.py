@@ -149,12 +149,12 @@ class TestDecimalFields(ProjectTestMixin, TestCase):
 
         self.assertEqual(self.budget.margin, Decimal("0.35"))
 
-    def test_a_multiplier_that_has_no_exact_float(self):
-        # in_kind_multiplier rather than cost_multiplier: the cost multiplier
-        # is not writable over HTTP, and this is about the decimal conversion.
-        self.update("in_kind_multiplier", 1.15)
+    def test_a_contribution_that_has_no_exact_float(self):
+        # Neither multiplier is writable per budget (#149), so the two-place
+        # conversion is checked on the cash contribution instead.
+        self.update("cash_co_contribution", 1000.15)
 
-        self.assertEqual(self.budget.in_kind_multiplier, Decimal("1.15"))
+        self.assertEqual(self.budget.cash_co_contribution, Decimal("1000.15"))
 
     def test_a_whole_number_still_saves(self):
         self.update("cash_co_contribution", 5000)
@@ -175,11 +175,6 @@ class TestBudgetDefaults(ProjectTestMixin, TestCase):
             version=current_version(),
         )
         CalculationConstant.objects.create(
-            name="in_kind_multiplier",
-            value=Decimal("1.25"),
-            version=current_version(),
-        )
-        CalculationConstant.objects.create(
             name="default_margin",
             value=Decimal("0.25"),
             version=current_version(),
@@ -189,7 +184,8 @@ class TestBudgetDefaults(ProjectTestMixin, TestCase):
             budget_defaults(),
             {
                 "cost_multiplier": Decimal("1.90"),
-                "in_kind_multiplier": Decimal("1.25"),
+                # In-kind staff are costed at the same rate (#149).
+                "in_kind_multiplier": Decimal("1.90"),
                 # Four decimal places, not the multipliers' two.
                 "margin": Decimal("0.2500"),
             },

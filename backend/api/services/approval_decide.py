@@ -124,7 +124,12 @@ def get_decidable_step(user: User, step_id: int) -> ApprovalStep:
     )
 
     # Raise 409 if the step is not active
-    # This can happen when two requests try to decide the same step concurrently.
+    # This can happen when two requests try to decide the same step concurrently,
+    # or when the owner withdrew the costing while the approver had it open (#95).
+    if step.budget.status == Budget.Status.WITHDRAWN:
+        raise Conflict(
+            "This costing was withdrawn by its owner: there is nothing to decide."
+        )
     if step.status != ApprovalStep.Status.PENDING:
         raise Conflict("Approval step has already been decided.")
 

@@ -11,10 +11,12 @@ import { useBudget } from './detail'
  */
 export function useEditable(): boolean {
   const { data: budget } = useBudget()
+  return useOwnsBudget() && budget.budget_info.status === 'draft'
+}
+
+/** Whether the signed-in user made this budget's project. */
+export function useOwnsBudget(): boolean {
+  const { data: budget } = useBudget()
   const { data: me } = useMe()
-  return (
-    budget.budget_info.status === 'draft' &&
-    me != null &&
-    me.user.id === budget.project_info.owner_id
-  )
+  return me != null && me.user.id === budget.project_info.owner_id
 }

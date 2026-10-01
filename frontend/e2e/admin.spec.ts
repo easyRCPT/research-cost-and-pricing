@@ -62,3 +62,43 @@ test('deactivating someone asks first, and the row says so afterwards (#69)', as
   await page.getByRole('button', { name: 'Reactivate' }).click()
   await expect(page.getByText('Deactivated', { exact: true })).toHaveCount(0)
 })
+
+test('a costing waiting on a role nobody holds is shown to RIC and named to its owner (#121)', async ({ page }) => {
+  // A department of this test's own, with no head of department.
+  await signIn(page, 'admin')
+  const code = `E2E${Date.now().toString(36).toUpperCase()}`.slice(0, 20)
+  const lookups = await (await page.request.get('/api/lookups/')).json()
+  await apiWrite(page, 'post', '/api/admin/lookups/departments/', {
+    status: 201,
+    data: {
+      values: {
+        code,
+        name: `Unheaded ${code}`,
+        school: 'School of Testing',
+        school_code: 'SCH',
+        budget_unit: '',
+        faculty_code: lookups.faculties[0].code,
+      },
+    },
+  })
+
+  // A researcher submits a costing from it.
+  await signIn(page)
+  const project = await readyProject(page, 'Stranded', code)
+  const { title } = project
+  await submitBudget(page, project.budget_id)
+
+  // Its owner is told which unit is missing an approver.
+  await page.goto(`/projects/${project.id}/approvals`)
+  await expect(page.getByText(`Unheaded ${code} has no head of department assigned`)).toBeVisible()
+
+  // RIC sees it on the console, and the department is flagged on its tab.
+  await signIn(page, 'admin')
+  await page.goto('/admin')
+  await expect(page.getByRole('row').filter({ hasText: title })).toContainText(
+    `Unheaded ${code} has no head of department`,
+  )
+  await page.goto('/admin/lookups')
+  await page.getByRole('tablist', { name: 'Reference tables' }).getByRole('tab', { name: 'Departments' }).click()
+  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('No head of department')
+})

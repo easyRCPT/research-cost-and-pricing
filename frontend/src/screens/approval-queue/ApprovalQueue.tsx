@@ -1,9 +1,12 @@
+import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useApprovalQueue, type QueueRow } from '@/api/approvals'
 import { PageHead, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { shortDate } from '@/lib/format/dates'
 import { money } from '@/lib/format/utils'
+import { ApprovalsNav } from './ApprovalsNav'
+import { rememberApprovalsPage } from './returnTo'
 
 /**
  * Grouped by the authorisation being asked for, rather than a level column to
@@ -28,10 +31,15 @@ const GROUPS = [
 
 export function ApprovalQueue() {
   const { data: rows } = useApprovalQueue()
+  useEffect(() => rememberApprovalsPage('/approvals'), [])
 
   return (
     <>
-      <PageHead title="Approvals" subtitle="Costings waiting on your authorisation" />
+      <PageHead
+        title="Approvals"
+        subtitle="Costings waiting on your authorisation"
+        right={<ApprovalsNav current="queue" />}
+      />
 
       {rows.length === 0 && (
         <Panel title="Nothing is waiting on you">

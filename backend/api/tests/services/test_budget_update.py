@@ -365,18 +365,32 @@ class TestUpdateBudget(SimpleTestCase):
 
     def test_refuses_the_cost_multiplier_and_says_why(self):
         # Not a typo but a rule: the multiplier is the University's full cost
-        # recovery rate, copied onto the budget at creation, and it decides
-        # whether the budget needs a Dean. The message has to be sayable in
-        # the UI, so it is not the generic refusal.
+        # recovery rate, set by an administrator as a lookup rate (#149). The
+        # message has to be sayable in the UI, so it is not the generic refusal.
         with self.assertRaisesMessage(
             ValidationError,
-            "The cost multiplier is fixed at the University's full cost "
-            "recovery rate and is not editable per budget.",
+            "The cost multiplier is the University's full cost recovery rate "
+            "and is not editable per budget.",
         ):
             budget_update.update_budget(
                 self.budget,
                 "cost_multiplier",
                 "1.00",
+            )
+
+        self.budget.save.assert_not_called()
+
+    def test_refuses_the_in_kind_multiplier_the_same_way(self):
+        # In-kind staff are costed at the same rate (#149).
+        with self.assertRaisesMessage(
+            ValidationError,
+            "The cost multiplier is the University's full cost recovery rate "
+            "and is not editable per budget.",
+        ):
+            budget_update.update_budget(
+                self.budget,
+                "in_kind_multiplier",
+                "2.00",
             )
 
         self.budget.save.assert_not_called()
@@ -496,6 +510,8 @@ class TestUpdateNonStaff(SimpleTestCase):
     def setUp(self):
         self.budget = Mock(spec=Budget)
         self.non_staff_line = Mock(spec=NonStaffCostLine)
+        # An ordinary category, which takes the 10% (#148).
+        self.non_staff_line.category.excludes_additional_rate = False
         self.budget.non_staff_lines.get.return_value = self.non_staff_line
 
     def test_updates_non_calculation_field(self):
@@ -528,6 +544,7 @@ class TestUpdateNonStaff(SimpleTestCase):
     @patch("api.services.budget_update.NonStaffCostCategory.objects.get")
     def test_updates_category(self, mock_get):
         category = Mock(spec=NonStaffCostCategory)
+        category.excludes_additional_rate = False
         mock_get.return_value = category
 
         result = budget_update.update_non_staff(
