@@ -10,7 +10,11 @@ import { shortDate } from '@/lib/format/dates'
 import { DataTableDateRangeMenu } from './DataTableDateRangeMenu'
 import { DataTableFilterMenu } from './DataTableFilterMenu'
 import type { DataTableFilter } from './features'
-import { filterOptions, type FilterState } from './filtering'
+import {
+  type FilterOption,
+  filterOptions,
+  type FilterState,
+} from './filtering'
 
 /** Values named in a badge before the rest collapse to a count. */
 const VALUES_SHOWN = 3
@@ -31,6 +35,8 @@ interface DataTableToolbarProps<T extends RowData> {
   onSearch: (value: string) => void
   state: FilterState
   onState: (state: FilterState) => void
+  /** Each filter's values from the server, in place of counting `rows`. */
+  options?: Record<string, FilterOption[]>
   actions?: ReactNode
 }
 
@@ -42,6 +48,7 @@ export function DataTableToolbar<T extends RowData>({
   onSearch,
   state,
   onState,
+  options,
   actions,
 }: DataTableToolbarProps<T>) {
   const toggle = (id: string, value: string, checked: boolean) => {
@@ -51,6 +58,9 @@ export function DataTableToolbar<T extends RowData>({
       [id]: checked ? [...current, value] : current.filter((v) => v !== value),
     })
   }
+
+  const labelOf = (id: string, value: string) =>
+    options?.[id]?.find((option) => option.value === value)?.label ?? value
 
   const active = filters
     .map((filter) => ({ filter, values: state[filter.id] ?? [] }))
@@ -72,7 +82,10 @@ export function DataTableToolbar<T extends RowData>({
               <DataTableFilterMenu
                 key={filter.id}
                 label={filter.label}
-                options={filterOptions(rows, filters, filter, state, search)}
+                options={
+                  options?.[filter.id] ??
+                  filterOptions(rows, filters, filter, state, search)
+                }
                 selected={state[filter.id] ?? []}
                 onToggle={(value, checked) => toggle(filter.id, value, checked)}
                 onSet={(values) => onState({ ...state, [filter.id]: values })}
@@ -106,7 +119,10 @@ export function DataTableToolbar<T extends RowData>({
                 <span className="text-muted-foreground">{filter.label}: </span>
                 {filter.range
                   ? rangeText(values)
-                  : values.slice(0, VALUES_SHOWN).join(', ')}
+                  : values
+                      .slice(0, VALUES_SHOWN)
+                      .map((value) => labelOf(filter.id, value))
+                      .join(', ')}
               </span>
               {!filter.range && values.length > VALUES_SHOWN && (
                 <span className="shrink-0 text-muted-foreground">

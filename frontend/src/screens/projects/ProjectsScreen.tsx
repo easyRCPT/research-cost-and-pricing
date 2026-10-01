@@ -1,16 +1,25 @@
 import { PlusIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import { useLookups } from '@/api/lookups'
-import { useProjects } from '@/api/projects'
-import { DataTable, type DataTableFilter } from '@/components/data-table'
+import {
+  useCreateProject,
+  useProjectFilters,
+  useProjects,
+} from '@/api/projects'
+import {
+  DataTable,
+  type DataTableFilter,
+  useRemote,
+} from '@/components/data-table'
 import { PageHead } from '@/components/shell'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { Button } from '@/components/ui/button'
 import { statusLabel } from '@/lib/status'
+import { cn } from '@/lib/utils'
 import type { ProjectRow } from '@/types'
 
 import { projectColumns } from './columns'
-import { NewProjectForm } from './NewProjectForm'
+import { projectFilterOptions, projectFilterQuery } from './filters'
 
 const FILTERS: DataTableFilter<ProjectRow>[] = [
   { id: 'department', label: 'Department', value: (row) => row.department },
@@ -21,18 +30,26 @@ const FILTERS: DataTableFilter<ProjectRow>[] = [
 const byId = (row: ProjectRow) => String(row.id)
 
 interface ProjectsScreenProps {
-  onOpen: (budgetId: number) => void
+  onOpen: (projectId: number) => void
 }
 
 export function ProjectsScreen({ onOpen }: ProjectsScreenProps) {
-  const { data: projects } = useProjects()
-  const { data: lookups } = useLookups()
-  const [creating, setCreating] = useState(false)
+  const paged = useRemote()
+  const projects = useProjects({
+    ...projectFilterQuery(paged.filters),
+    ...paged.query,
+  })
+  const values = useProjectFilters({
+    ...projectFilterQuery(paged.filters),
+    q: paged.query.q,
+  }).data
+  const options = useMemo(() => projectFilterOptions(values), [values])
+  const create = useCreateProject()
 
   const columns = useMemo(
     () =>
       projectColumns<ProjectRow>({
-        open: (row) => row.budget_id !== null && onOpen(row.budget_id),
+        open: (row) => onOpen(row.id),
         openable: (row) => row.budget_id !== null,
       }),
     [onOpen],

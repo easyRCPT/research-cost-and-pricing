@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { projectsQuery } from '@/api/projects'
+import { projectKeys } from '@/api/projects'
 import { useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 
@@ -48,7 +48,7 @@ export function useSubmitBudget() {
     onSettled: () => {
       // Refetched on a refusal too: a 409 means another tab already
       // submitted, and the screen should show that rather than an error.
-      invalidate(budgetKeys.detail(budgetId), projectsQuery.queryKey)
+      invalidate(budgetKeys.detail(budgetId), projectKeys.all)
     },
   })
 }

@@ -118,8 +118,7 @@ test('the owner withdraws a submission, it leaves the queue, and a new draft car
     .getByRole('button', { name: 'Approvals', exact: true })
     .click()
   await expect(page.getByRole('button', { name: 'Submit for approval' })).toBeVisible()
-  const budgets = await (await page.request.get('/api/projects/')).json()
-  const row = budgets.find((candidate: { id: number }) => candidate.id === project.id)
+  const row = await (await page.request.get(`/api/projects/${project.id}/`)).json()
   expect(row.budget_count).toBe(2)
 })
 

@@ -6,8 +6,10 @@ export type FilterState = Record<string, string[]>
 
 export interface FilterOption {
   value: string
+  /** Shown in place of the value, such as a name for an email. */
+  label?: string
   /** Rows this value would leave, with the search and every other filter applied. */
-  count: number
+  count?: number
 }
 
 const collator = new Intl.Collator('en', { numeric: true })

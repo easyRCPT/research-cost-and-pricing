@@ -1,7 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
-import { projectsQuery, useProjects } from '@/api/projects'
 import { AppBoundary, AppShell, ProjectsSkeleton } from '@/components/shell'
 import { ProjectsScreen } from '@/screens'
 
@@ -22,29 +20,15 @@ export function ProjectsRoute() {
 
 function Projects() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  useProjects()
 
-  /**
-   * The list opens a budget; the URL names a project.
-   *
-   * `ProjectsScreen` hands back the budget id its row was rendered from, so
-   * the row is found again here to get the project it belongs to. #46 rewrites
-   * this screen and should hand back the project id, at which point this goes.
-   *
-   * Read from the cache rather than from a rendered array: creating a project
-   * opens it in the same breath, and the new row reaches the cache through the
-   * mutation before it reaches this component through a render.
-   */
-  const open = (budgetId: number) => {
-    const rows = queryClient.getQueryData(projectsQuery.queryKey) ?? []
-    const project = rows.find((row) => row.budget_id === budgetId)
-    if (!project) return
-    navigate({
-      to: '/projects/$projectId/$screen',
-      params: { projectId: project.id, screen: 'details' },
-    })
-  }
-
-  return <ProjectsScreen onOpen={open} />
+  return (
+    <ProjectsScreen
+      onOpen={(projectId) =>
+        navigate({
+          to: '/projects/$projectId/$screen',
+          params: { projectId, screen: 'details' },
+        })
+      }
+    />
+  )
 }

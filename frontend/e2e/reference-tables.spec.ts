@@ -129,7 +129,7 @@ test('an unused activity can be removed, and the log has every write (#144)', as
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(row).toHaveCount(0)
 
-  const log = await (await page.request.get('/api/admin/audit/?action=admin.lookup.delete&limit=20')).json()
+  const { results: log } = await (await page.request.get('/api/admin/audit/?action=admin.lookup.delete&limit=20')).json()
   expect(log.some((entry: { object_id: string }) => entry.object_id === code)).toBe(true)
 })
 

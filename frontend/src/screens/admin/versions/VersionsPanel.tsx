@@ -1,8 +1,20 @@
 import { useMemo, useState } from 'react'
 
-import { type LookupVersion, useLookupVersions } from '@/api/admin-lookups'
-import { DataTable, type DataTableFilter } from '@/components/data-table'
+import {
+  type LookupVersion,
+  useLookupVersion,
+  useLookupVersions,
+  useVersionFilters,
+} from '@/api/admin-lookups'
+import {
+  DataTable,
+  type DataTableFilter,
+  useRemote,
+} from '@/components/data-table'
+import type { FilterState } from '@/components/data-table/filtering'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { isoDay } from '@/lib/format/dates'
+import { cn } from '@/lib/utils'
 
 import { versionColumns } from './columns'
 import { RestoreDialog } from './RestoreDialog'
@@ -16,6 +28,9 @@ interface VersionsPanelProps {
   onRestored: (moved: RatesMoved) => void
 }
 
+/** The By filter's value for a version made by nobody, as the API takes it. */
+const SYSTEM = 'system'
+
 const FILTERS: DataTableFilter<LookupVersion>[] = [
   {
     id: 'made',
@@ -26,11 +41,17 @@ const FILTERS: DataTableFilter<LookupVersion>[] = [
   {
     id: 'by',
     label: 'By',
-    value: (version) => version.updated_by_name ?? 'System',
+    value: (version) => version.updated_by ?? SYSTEM,
   },
 ]
 
 const byId = (version: LookupVersion) => String(version.id)
+
+const toQuery = ({ made = [], by }: FilterState) => ({
+  by,
+  since: made[0] || undefined,
+  until: made[1] || undefined,
+})
 
 /**
  * Every set of rates the tool has had, the changes saved into each, and a way
@@ -44,10 +65,32 @@ export function VersionsPanel({
   onShow,
   onRestored,
 }: VersionsPanelProps) {
-  const { data: versions } = useLookupVersions()
+  const paged = useRemote()
+  const versions = useLookupVersions({
+    ...toQuery(paged.filters),
+    ...paged.query,
+  })
+  const values = useVersionFilters({
+    ...toQuery(paged.filters),
+    q: paged.query.q,
+  }).data
   const [restoring, setRestoring] = useState<LookupVersion | null>(null)
 
-  const opened = versions.find((version) => version.id === shown?.id)
+  const onPage = versions.data?.results.find(
+    (version) => version.id === shown?.id,
+  )
+  // A link can name a version on some other page.
+  const fetched = useLookupVersion(shown && !onPage ? shown.id : null).data
+  const opened = onPage ?? fetched
+
+  const options = useMemo(
+    () => ({
+      by: (values?.by ?? []).map((option) =>
+        option.value === SYSTEM ? { ...option, label: 'System' } : option,
+      ),
+    }),
+    [values],
+  )
 
   const columns = useMemo(
     () =>
@@ -59,16 +102,27 @@ export function VersionsPanel({
   )
 
   return (
-    <section className="overflow-hidden rounded-lg border bg-card">
-      <DataTable
-        columns={columns}
-        rows={versions}
-        getRowId={byId}
-        emptyMessage="No versions yet."
-        sortable
-        filters={FILTERS}
-        flush
-      />
+    <section
+      className={cn(
+        'overflow-hidden rounded-lg border bg-card',
+        versions.isPlaceholderData && 'opacity-70',
+      )}
+    >
+      {versions.data ? (
+        <DataTable
+          columns={columns}
+          rows={versions.data.results}
+          getRowId={byId}
+          emptyMessage="No versions yet."
+          sortable
+          searchable
+          filters={FILTERS}
+          flush
+          remote={paged.remote(versions.data, options)}
+        />
+      ) : (
+        <RowsSkeleton label="Loading versions" className="p-4" />
+      )}
       {opened && shown && (
         <VersionDialog
           version={opened}

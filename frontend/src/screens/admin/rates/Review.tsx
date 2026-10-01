@@ -3,7 +3,7 @@ import { useState } from 'react'
 import {
   type ChangesApplied,
   useApplyChanges,
-  useLookupVersions,
+  useCurrentVersion,
 } from '@/api/admin-lookups'
 import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -36,9 +36,8 @@ export function Review({
   onRefused: (error: unknown) => void
 }) {
   const apply = useApplyChanges()
-  const { data: versions } = useLookupVersions()
+  const { data: current } = useCurrentVersion()
   const [note, setNote] = useState('')
-  const current = versions.find((version) => version.current)
 
   const save = () =>
     apply.mutate(
@@ -92,15 +91,13 @@ export function Review({
           </Alert>
         ))}
 
-        {current && (
-          <p className="text-[13px]">
-            {current.accepts_changes
-              ? `Saves into version #${current.id}.`
-              : current.baseline
-                ? `Starts a new version: version #${current.id} is the rates as first loaded, kept as they are so they can always be restored.`
-                : `Starts a new version: costings are already priced on version #${current.id}, and they keep those rates.`}
-          </p>
-        )}
+        <p className="text-[13px]">
+          {current.accepts_changes
+            ? `Saves into version #${current.id}.`
+            : current.baseline
+              ? `Starts a new version: version #${current.id} is the rates as first loaded, kept as they are so they can always be restored.`
+              : `Starts a new version: costings are already priced on version #${current.id}, and they keep those rates.`}
+        </p>
 
         <div className="flex gap-2">
           <Button size="sm" disabled={apply.isPending} onClick={save}>

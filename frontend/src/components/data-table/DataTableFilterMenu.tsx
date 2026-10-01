@@ -50,10 +50,14 @@ export function DataTableFilterMenu({
                 disabled={option.count === 0 && !checked}
                 onToggle={() => onToggle(option.value, !checked)}
               >
-                <span className="flex-1 truncate">{option.value}</span>
-                <span className="tabular text-muted-foreground">
-                  ({option.count})
+                <span className="flex-1 truncate">
+                  {option.label ?? option.value}
                 </span>
+                {option.count !== undefined && (
+                  <span className="tabular text-muted-foreground">
+                    ({option.count})
+                  </span>
+                )}
               </MenuCheckbox>
             )
           })}

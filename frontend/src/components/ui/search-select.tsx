@@ -1,7 +1,8 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 import { CheckIcon, ChevronDownIcon } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
+import { type CursorPage, pageOptions, useCursor } from '@/api/cursor'
 import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { Input } from '@/components/ui/input'
 import {
@@ -19,8 +20,6 @@ export interface SearchOption {
   hint?: string
 }
 
-/** Letters typed before anything is asked of the server. */
-export const SEARCH_MIN_CHARS = 3
 const SEARCH_DELAY_MS = 300
 
 interface SearchSelectProps {
@@ -28,7 +27,11 @@ interface SearchSelectProps {
   onChange: (option: SearchOption) => void
   /** What is being searched, so two lists never share a cached answer. */
   searchKey: string
-  search: (q: string, signal: AbortSignal) => Promise<SearchOption[]>
+  search: (
+    q: string,
+    cursor: string | null,
+    signal: AbortSignal,
+  ) => Promise<CursorPage<SearchOption>>
   placeholder?: string
   size?: 'sm' | 'default'
   className?: string
@@ -38,8 +41,8 @@ interface SearchSelectProps {
 }
 
 /**
- * A picker for a list too long to scroll: nothing is fetched until
- * SEARCH_MIN_CHARS are typed, and the answer comes from the server.
+ * A picker for a list too long to load whole: the server sends it a page at a
+ * time as it scrolls, and typing narrows it there.
  */
 export function SearchSelect({
   value,
@@ -58,23 +61,52 @@ export function SearchSelect({
   const [draft, setDraft] = useState('')
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
-  const settle = useDebounced(
-    (typed: string) => setQuery(typed.trim()),
-    SEARCH_DELAY_MS,
-  )
+  const cursor = useCursor()
+  const { next } = cursor
+  const scroller = useRef<HTMLDivElement>(null)
+  const sentinel = useRef<HTMLDivElement>(null)
+  const settle = useDebounced((typed: string) => {
+    setQuery(typed.trim())
+    cursor.reset()
+  }, SEARCH_DELAY_MS)
 
-  const typedEnough = draft.trim().length >= SEARCH_MIN_CHARS
-  const { data, isPending } = useQuery({
-    queryKey: ['search', searchKey, query],
-    queryFn: ({ signal }) => search(query, signal),
-    enabled: query.length >= SEARCH_MIN_CHARS,
-    placeholderData: keepPreviousData,
-    staleTime: 60_000,
+  const pages = useQueries({
+    queries: cursor.cursors.map((at) => ({
+      queryKey: ['search', searchKey, query, at],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        search(query, at, signal),
+      enabled: open,
+      ...pageOptions(at),
+    })),
   })
-  const results = typedEnough ? (data ?? []) : []
+  const results = pages.flatMap((page) => page.data?.results ?? [])
+  const last = pages[pages.length - 1]
+  // Not while the last search's page stands in: its link leads through that search.
+  const more = last.data?.next && !last.isPlaceholderData ? last.data : null
   // Still waiting on the answer for what is now in the box.
-  const waiting = typedEnough && (isPending || draft.trim() !== query)
+  const waiting = pages[0].isPending || draft.trim() !== query
+  const loadingMore = pages.length > 1 && last.isPending
   const current = Math.min(active, results.length - 1)
+
+  // A fresh observer reports at once, so a short list that leaves the
+  // sentinel in view keeps asking until it fills the box or runs out.
+  useEffect(() => {
+    if (!open || !more || !sentinel.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => entry.isIntersecting && next(more),
+      { root: scroller.current },
+    )
+    observer.observe(sentinel.current)
+    return () => observer.disconnect()
+  }, [open, more, next])
+
+  const move = (index: number) => {
+    setActive(index)
+    document
+      .getElementById(`${listId}-${index}`)
+      ?.scrollIntoView({ block: 'nearest' })
+    if (index === results.length - 1 && more) cursor.next(more)
+  }
 
   const pick = (option: SearchOption) => {
     onChange(option)
@@ -87,6 +119,7 @@ export function SearchSelect({
       setDraft('')
       setQuery('')
       setActive(0)
+      cursor.reset()
     }
   }
 
@@ -119,7 +152,7 @@ export function SearchSelect({
         <Input
           autoFocus
           value={draft}
-          placeholder={`Type ${SEARCH_MIN_CHARS} or more letters`}
+          placeholder="Search by name or code"
           aria-label="Search"
           role="combobox"
           aria-expanded
@@ -136,28 +169,23 @@ export function SearchSelect({
           onKeyDown={(event) => {
             if (event.key === 'ArrowDown' && results.length > 0) {
               event.preventDefault()
-              setActive(Math.min(current + 1, results.length - 1))
+              move(Math.min(current + 1, results.length - 1))
             } else if (event.key === 'ArrowUp' && results.length > 0) {
               event.preventDefault()
-              setActive(Math.max(current - 1, 0))
+              move(Math.max(current - 1, 0))
             } else if (event.key === 'Enter' && results[current]) {
               event.preventDefault()
               pick(results[current])
             }
           }}
         />
-        <div className="mt-2 max-h-64 overflow-y-auto">
-          {!typedEnough && (
-            <p className="px-2 py-3 text-[13px] text-muted-foreground">
-              Start typing to search.
-            </p>
-          )}
+        <div ref={scroller} className="mt-2 max-h-64 overflow-y-auto">
           {waiting && results.length === 0 && (
             <RowsSkeleton label="Searching" rows={3} rowClassName="h-8" />
           )}
-          {typedEnough && !waiting && results.length === 0 && (
+          {!waiting && results.length === 0 && (
             <p className="px-2 py-3 text-[13px] text-muted-foreground">
-              No match for “{draft.trim()}”.
+              {query ? `No match for “${query}”.` : 'Nothing to pick from.'}
             </p>
           )}
           <ul
@@ -190,6 +218,15 @@ export function SearchSelect({
               </li>
             ))}
           </ul>
+          {loadingMore && (
+            <RowsSkeleton
+              label="Loading more"
+              rows={1}
+              rowClassName="h-8"
+              className="mt-1"
+            />
+          )}
+          <div ref={sentinel} className="h-px" />
         </div>
       </PopoverContent>
     </Popover>

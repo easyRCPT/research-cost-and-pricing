@@ -1,11 +1,21 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo } from 'react'
 
-import { useProjects } from '@/api/projects'
-import { DataTable, type DataTableFilter } from '@/components/data-table'
+import { useProjectFilters, useProjects } from '@/api/projects'
+import {
+  DataTable,
+  type DataTableFilter,
+  useRemote,
+} from '@/components/data-table'
 import { PageHead } from '@/components/shell'
+import { RowsSkeleton } from '@/components/shell/skeleton/RowsSkeleton'
 import { ownerName, statusLabel } from '@/lib/status'
+import { cn } from '@/lib/utils'
 import { projectColumns } from '@/screens/projects/columns'
+import {
+  projectFilterOptions,
+  projectFilterQuery,
+} from '@/screens/projects/filters'
 import type { ProjectRow } from '@/types'
 
 import { ApprovalsNav } from './ApprovalsNav'
@@ -28,7 +38,16 @@ const byId = (row: ProjectRow) => String(row.id)
  * sees nothing. A row opens the costing itself, read-only.
  */
 export function ApprovalRegister() {
-  const { data: rows } = useProjects()
+  const paged = useRemote()
+  const rows = useProjects({
+    ...projectFilterQuery(paged.filters),
+    ...paged.query,
+  })
+  const values = useProjectFilters({
+    ...projectFilterQuery(paged.filters),
+    q: paged.query.q,
+  }).data
+  const options = useMemo(() => projectFilterOptions(values), [values])
   const navigate = useNavigate()
   useEffect(() => rememberApprovalsPage('/approvals/register'), [])
 
@@ -53,18 +72,28 @@ export function ApprovalRegister() {
         right={<ApprovalsNav current="register" />}
       />
 
-      <section className="overflow-hidden rounded-lg border bg-card">
-        <DataTable
-          columns={table}
-          rows={rows}
-          getRowId={byId}
-          emptyMessage="Costings submitted from a department or faculty you are responsible for are listed here, whatever became of them."
-          sortable
-          searchable
-          hideable
-          filters={FILTERS}
-          flush
-        />
+      <section
+        className={cn(
+          'overflow-hidden rounded-lg border bg-card',
+          rows.isPlaceholderData && 'opacity-70',
+        )}
+      >
+        {rows.data ? (
+          <DataTable
+            columns={table}
+            rows={rows.data.results}
+            getRowId={byId}
+            emptyMessage="Costings submitted from a department or faculty you are responsible for are listed here, whatever became of them."
+            sortable
+            searchable
+            hideable
+            filters={FILTERS}
+            flush
+            remote={paged.remote(rows.data, options)}
+          />
+        ) : (
+          <RowsSkeleton label="Loading projects" className="p-4" />
+        )}
       </section>
     </>
   )

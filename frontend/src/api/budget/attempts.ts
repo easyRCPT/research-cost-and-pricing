@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { projectsQuery } from '@/api/projects'
+import { projectKeys } from '@/api/projects'
 import { useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 
@@ -26,7 +26,7 @@ export function useWithdrawBudget() {
     // Refetched on a refusal too: a 409 means an approver decided first, and
     // the screen should show where it went rather than an error.
     onSettled: () => {
-      invalidate(budgetKeys.detail(budgetId), projectsQuery.queryKey)
+      invalidate(budgetKeys.detail(budgetId), projectKeys.all)
     },
   })
 }
@@ -50,6 +50,6 @@ export function useNewDraftFrom() {
         }),
       )
     },
-    onSuccess: () => invalidate(projectsQuery.queryKey),
+    onSuccess: () => invalidate(projectKeys.all),
   })
 }

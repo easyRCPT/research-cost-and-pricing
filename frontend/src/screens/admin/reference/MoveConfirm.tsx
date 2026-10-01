@@ -1,6 +1,9 @@
 import { useAdminProjects } from '@/api/admin-console'
 import { InlineConfirm } from '@/components/ui/inline-confirm'
 
+/** The most the register returns in one page. */
+const COUNTED = 500
+
 /**
  * Moving a department moves its costings waiting on a dean to the new
  * faculty's dean: the dean queue reads the department's faculty when it is
@@ -19,12 +22,12 @@ export function MoveConfirm({
   onConfirm: () => void
   onCancel: () => void
 }) {
-  const { data: projects, isPending } = useAdminProjects()
-  const waiting = (projects ?? []).filter(
-    (project) =>
-      project.department_code === department &&
-      project.status === 'dean_review',
-  ).length
+  const { data: page, isPending } = useAdminProjects({
+    department_code: department,
+    status: ['dean_review'],
+    limit: COUNTED,
+  })
+  const waiting = page?.results.length ?? 0
 
   return (
     <div role="alert" className="grid gap-2 text-[12.5px]">
@@ -36,7 +39,7 @@ export function MoveConfirm({
           ? 'Counting the costings waiting on a dean…'
           : waiting === 0
             ? 'No costing from this department is waiting on a dean.'
-            : `${waiting} ${waiting === 1 ? 'costing' : 'costings'} waiting on a dean will go to the dean of ${to} instead.`}
+            : `${page?.next ? `${COUNTED} or more` : waiting} ${waiting === 1 ? 'costing' : 'costings'} waiting on a dean will go to the dean of ${to} instead.`}
       </span>
       <InlineConfirm
         confirm="Move"

@@ -136,12 +136,10 @@ test('a head of department is found by searching, not scrolling (#69)', async ({
   await page.getByRole('combobox', { name: 'Department' }).click()
   const box = page.getByRole('combobox', { name: 'Search' })
 
-  // Nothing is offered until three letters are in.
-  await box.fill('se')
-  await expect(page.getByText('Start typing to search.')).toBeVisible()
-  await expect(page.getByRole('option')).toHaveCount(0)
-
+  // The list is offered on open, and typing narrows it.
+  await expect(page.getByRole('option').first()).toBeVisible()
   await box.fill(name)
+  await expect(page.getByRole('option')).toHaveCount(1)
   await page.getByRole('option', { name: new RegExp(name) }).click()
   await expect(page.getByRole('combobox', { name: 'Department' })).toHaveText(name)
 

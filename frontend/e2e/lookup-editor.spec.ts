@@ -156,7 +156,7 @@ test('edits across tabs are held until reviewed, then saved as one set (#138)', 
   await openEditor(page)
 
   // And one entry in the log for the whole set.
-  const log = await (await page.request.get('/api/admin/audit/?action=admin.lookup.changes&limit=5')).json()
+  const { results: log } = await (await page.request.get('/api/admin/audit/?action=admin.lookup.changes&limit=5')).json()
   const entry = log.find((row: { detail: { note: string } }) => row.detail.note === note)
   expect(entry.detail.changes).toHaveLength(2)
 
