@@ -1,4 +1,5 @@
 import { NotReady } from '@/api/budget'
+import { ApiErrorAlert } from '@/components/shell/ApiErrorAlert'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ApiError } from '@/lib/api'
 
@@ -35,20 +36,10 @@ export function SubmitErrors({
         </Alert>
       )}
       {error instanceof ApiError && error.status !== 409 && (
-        <Alert variant="destructive" className="mt-6">
-          <AlertDescription>{error.message}</AlertDescription>
-        </Alert>
+        <ApiErrorAlert error={error} className="mt-6" />
       )}
-      {withdrawError instanceof ApiError && (
-        <Alert className="mt-6">
-          <AlertDescription>{withdrawError.message}</AlertDescription>
-        </Alert>
-      )}
-      {newDraftError instanceof ApiError && (
-        <Alert variant="destructive" className="mt-6">
-          <AlertDescription>{newDraftError.message}</AlertDescription>
-        </Alert>
-      )}
+      <ApiErrorAlert error={withdrawError} variant="default" className="mt-6" />
+      <ApiErrorAlert error={newDraftError} className="mt-6" />
     </>
   )
 }

@@ -1,12 +1,11 @@
 import {
-  queryOptions,
   useMutation,
   useQuery,
-  useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
 import { lookupsQuery } from '@/api/lookups'
+import { adminQuery, useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 import type { ReferenceTable } from '@/screens/admin/referenceTables'
 import type { components } from '@/types/api'
@@ -32,12 +31,9 @@ export type RateTable =
   | 'non_staff_cost_categories'
   | 'calculation_constants'
 
-export const versionsQuery = queryOptions({
-  queryKey: ['admin', 'lookup-versions'] as const,
-  queryFn: async (): Promise<LookupVersion[]> => {
-    return unwrap(await api.GET('/api/admin/lookups/versions/'))
-  },
-})
+const versionsQuery = adminQuery(['lookup-versions'], () =>
+  api.GET('/api/admin/lookups/versions/'),
+)
 
 export function useLookupVersions() {
   return useSuspenseQuery(versionsQuery)
@@ -45,16 +41,13 @@ export function useLookupVersions() {
 
 /** The costings stamped with one version (#142), fetched when asked for. */
 export function useVersionBudgets(versionId: number) {
-  return useQuery({
-    queryKey: [...versionsQuery.queryKey, versionId, 'budgets'] as const,
-    queryFn: async (): Promise<VersionBudget[]> => {
-      return unwrap(
-        await api.GET('/api/admin/lookups/versions/{version_id}/budgets/', {
-          params: { path: { version_id: versionId } },
-        }),
-      )
-    },
-  })
+  return useQuery(
+    adminQuery(['lookup-versions', versionId, 'budgets'], () =>
+      api.GET('/api/admin/lookups/versions/{version_id}/budgets/', {
+        params: { path: { version_id: versionId } },
+      }),
+    ),
+  )
 }
 
 /**
@@ -62,12 +55,8 @@ export function useVersionBudgets(versionId: number) {
  * changed. Returned so a mutation is not done until the screen is current.
  */
 function useRefresh() {
-  const queryClient = useQueryClient()
-  return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: lookupsQuery.queryKey }),
-      queryClient.invalidateQueries({ queryKey: versionsQuery.queryKey }),
-    ])
+  const invalidate = useInvalidate()
+  return () => invalidate(lookupsQuery.queryKey, versionsQuery.queryKey)
 }
 
 /**
@@ -114,7 +103,7 @@ export type ReferenceWrite =
   | { op: 'delete'; table: ReferenceTable; key: string }
 
 export function useReferenceWrite() {
-  const queryClient = useQueryClient()
+  const invalidate = useInvalidate()
   return useMutation({
     mutationFn: async (write: ReferenceWrite) => {
       const params = { path: { table: write.table } }
@@ -134,6 +123,6 @@ export function useReferenceWrite() {
               })),
       )
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: lookupsQuery.queryKey }),
+    onSuccess: () => invalidate(lookupsQuery.queryKey),
   })
 }

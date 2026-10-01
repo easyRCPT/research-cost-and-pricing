@@ -1,11 +1,12 @@
 import {
   queryOptions,
   useMutation,
-  useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
+import { budgetKeys } from '@/api/budget/detail'
 import { projectsQuery } from '@/api/projects'
+import { useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
@@ -14,7 +15,7 @@ export type Decision = 'approve' | 'reject'
 
 export const queueQuery = queryOptions({
   queryKey: ['approvals', 'queue'] as const,
-  queryFn: async (): Promise<QueueRow[]> => {
+  queryFn: async () => {
     return unwrap(await api.GET('/api/approvals/queue/'))
   },
   // A queue is other people's work arriving, so it is worth asking again
@@ -36,7 +37,7 @@ export function useApprovalQueue() {
  * first and the row is stale.
  */
 export function useDecide() {
-  const queryClient = useQueryClient()
+  const invalidate = useInvalidate()
 
   return useMutation({
     mutationFn: async ({
@@ -58,12 +59,8 @@ export function useDecide() {
     // Returned, not fired and forgotten: the mutation stays pending until the
     // queue has refetched, so "you approved it" never shows beside a list that
     // still offers it.
+    // Any open copy of the budget now has a new status and a new step.
     onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queueQuery.queryKey }),
-        queryClient.invalidateQueries({ queryKey: projectsQuery.queryKey }),
-        // Any open copy of the budget now has a new status and a new step.
-        queryClient.invalidateQueries({ queryKey: ['budget'] }),
-      ]),
+      invalidate(queueQuery.queryKey, projectsQuery.queryKey, budgetKeys.all),
   })
 }

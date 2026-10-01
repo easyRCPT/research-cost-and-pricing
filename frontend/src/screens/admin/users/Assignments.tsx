@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { type AdminUser, useRemoveAssignment } from '@/api/admin-users'
 import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 
 import { AddAssignment } from './AddAssignment'
 import { refused, ROLE_LABEL } from './labels'
@@ -32,11 +33,12 @@ export function Assignments({ user }: { user: AdminUser }) {
                 <span className="text-[12.5px] text-muted-foreground">
                   Remove it?
                 </span>
-                <Button
-                  size="sm"
+                <InlineConfirm
+                  className="gap-1.5"
+                  confirm="Remove"
                   variant="destructive"
-                  disabled={remove.isPending}
-                  onClick={() =>
+                  pending={remove.isPending}
+                  onConfirm={() =>
                     remove.mutate(
                       { id: user.id, assignmentId: a.id },
                       {
@@ -45,16 +47,8 @@ export function Assignments({ user }: { user: AdminUser }) {
                       },
                     )
                   }
-                >
-                  Remove
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setConfirming(null)}
-                >
-                  Cancel
-                </Button>
+                  onCancel={() => setConfirming(null)}
+                />
               </span>
             ) : (
               <Button

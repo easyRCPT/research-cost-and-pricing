@@ -1,8 +1,6 @@
-import { QueryErrorResetBoundary } from '@tanstack/react-query'
-import { type ReactNode, Suspense } from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
+import type { ReactNode } from 'react'
 
-import { AppErrorState, AppShell, ProjectsSkeleton } from '@/components/shell'
+import { AppBoundary, AppShell, ProjectsSkeleton } from '@/components/shell'
 import { ApprovalQueue } from '@/screens/approval-queue/ApprovalQueue'
 import { ApprovalRegister } from '@/screens/approval-queue/ApprovalRegister'
 
@@ -30,17 +28,8 @@ export function ApprovalRegisterRoute() {
 
 function ApprovalsFrame({ children }: { children: ReactNode }) {
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={(props) => <AppErrorState {...props} />}
-        >
-          <Suspense fallback={<ProjectsSkeleton />}>
-            <AppShell>{children}</AppShell>
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AppBoundary fallback={<ProjectsSkeleton />}>
+      <AppShell>{children}</AppShell>
+    </AppBoundary>
   )
 }

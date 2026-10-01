@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { projectsQuery } from '@/api/projects'
+import { useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 
 import { useBudgetId } from './context'
-import { budgetKey } from './detail'
+import { budgetKeys } from './detail'
 
 /**
  * The server said the budget is not ready, and listed why.
@@ -31,7 +32,7 @@ export class NotReady extends Error {
  */
 export function useSubmitBudget() {
   const budgetId = useBudgetId()
-  const queryClient = useQueryClient()
+  const invalidate = useInvalidate()
 
   return useMutation({
     mutationFn: async () => {
@@ -47,8 +48,7 @@ export function useSubmitBudget() {
     onSettled: () => {
       // Refetched on a refusal too: a 409 means another tab already
       // submitted, and the screen should show that rather than an error.
-      queryClient.invalidateQueries({ queryKey: budgetKey(budgetId) })
-      queryClient.invalidateQueries({ queryKey: projectsQuery.queryKey })
+      invalidate(budgetKeys.detail(budgetId), projectsQuery.queryKey)
     },
   })
 }

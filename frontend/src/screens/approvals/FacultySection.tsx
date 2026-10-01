@@ -1,9 +1,8 @@
 import { PartBar } from '@/components/shell'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { ApprovalStepRecord } from '@/types'
 
+import { DeanTriggers } from './DeanTriggers'
 import { DecisionRecord } from './DecisionRecord'
-import { describeTrigger } from './triggers'
 
 interface FacultySectionProps {
   step: ApprovalStepRecord | undefined
@@ -23,20 +22,15 @@ export function FacultySection({ step, triggers, submitted, faculty }: FacultySe
       <PartBar>PART D — Authorisation by Faculty</PartBar>
 
       {triggers.length > 0 ? (
-        <Alert className="my-4">
-          <AlertDescription>
-            <b>
-              {submitted
-                ? "The Dean's authorisation is required because"
-                : "If submitted now, this costing will also need the Dean's authorisation, because"}
-            </b>
-            <ul className="mt-1 list-disc pl-5">
-              {triggers.map((code) => (
-                <li key={code}>{describeTrigger(code)}.</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
+        <DeanTriggers
+          className="my-4"
+          lead={
+            submitted
+              ? "The Dean's authorisation is required because"
+              : "If submitted now, this costing will also need the Dean's authorisation, because"
+          }
+          triggers={triggers}
+        />
       ) : (
         !submitted && (
           <p className="my-3 text-[13px] text-muted-foreground">

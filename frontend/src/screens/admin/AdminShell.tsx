@@ -1,10 +1,7 @@
-import { QueryErrorResetBoundary } from '@tanstack/react-query'
 import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
-import { Suspense } from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
 
 import { LookupSkeleton } from '@/components/lookups-tabs/LookupSkeleton'
-import { AppErrorState, AppShell, Sidebar, type SidebarSection } from '@/components/shell'
+import { AppBoundary, AppShell, Sidebar, type SidebarSection } from '@/components/shell'
 
 type AdminScreen = 'overview' | 'lookups' | 'users' | 'projects' | 'audit'
 
@@ -44,15 +41,9 @@ export function AdminShell() {
         />
       }
     >
-      <QueryErrorResetBoundary>
-        {({ reset }) => (
-          <ErrorBoundary onReset={reset} fallbackRender={(props) => <AppErrorState {...props} />}>
-            <Suspense fallback={<LookupSkeleton />}>
-              <Outlet />
-            </Suspense>
-          </ErrorBoundary>
-        )}
-      </QueryErrorResetBoundary>
+      <AppBoundary fallback={<LookupSkeleton />}>
+        <Outlet />
+      </AppBoundary>
     </AppShell>
   )
 }

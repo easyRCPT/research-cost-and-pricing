@@ -1,10 +1,10 @@
-import { useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
+import { AddRowForm, type Entered } from '@/screens/admin/AddRowForm'
+import { KINDS } from '@/screens/admin/fieldKinds'
 import type { RateTableSpec } from '@/screens/admin/rateTables'
 import type { Key, Values } from '@/screens/admin/stagedChanges'
+
+const trimmed = (raw: string | boolean) =>
+  typeof raw === 'string' ? raw.trim() : raw
 
 /** A new row, held with the rest of the set until it is saved. */
 export function AddRateRow({
@@ -14,79 +14,31 @@ export function AddRateRow({
   spec: RateTableSpec
   onAdd: (key: Key, values: Values) => void
 }) {
-  const blank = (): Record<string, string | boolean> =>
-    Object.fromEntries([
-      ...spec.key.map((k) => [k.field, '']),
-      ...spec.values.map((v) => [v.field, v.kind === 'boolean' ? false : '']),
-    ])
-  const [entered, setEntered] = useState(blank)
-  const ready =
-    spec.key.every(
-      (k) => k.kind === 'number' || String(entered[k.field]).trim(),
-    ) &&
+  const ready = (entered: Entered) =>
+    spec.key.every((k) => k.kind === 'number' || trimmed(entered[k.field])) &&
     spec.values.every((v) => v.kind === 'boolean' || entered[v.field] !== '')
 
-  const add = () => {
-    const key: Key = {}
-    for (const k of spec.key) {
-      const raw = String(entered[k.field]).trim()
-      key[k.field] =
-        k.kind === 'number' ? (raw === '' ? null : Number(raw)) : raw || null
-    }
-    const values: Values = {}
-    for (const v of spec.values) {
-      const raw = entered[v.field]
-      values[v.field] =
-        v.kind === 'number'
-          ? Number(raw)
-          : v.kind === 'text'
-            ? String(raw).trim()
-            : raw
-    }
-    onAdd(key, values)
-    setEntered(blank())
-  }
-
-  const fields = [...spec.key, ...spec.values]
   return (
-    <div className="mt-5 border-t pt-4">
-      <div className="mb-2 text-[13px] font-medium">Add a row</div>
-      <div className="flex flex-wrap items-end gap-3">
-        {fields.map((f) =>
-          f.kind === 'boolean' ? (
-            <label
-              key={f.field}
-              className="flex h-8 items-center gap-2 text-[12px] text-muted-foreground"
-            >
-              <Checkbox
-                checked={entered[f.field] === true}
-                onCheckedChange={(next) =>
-                  setEntered({ ...entered, [f.field]: next === true })
-                }
-              />
-              {f.label}
-            </label>
-          ) : (
-            <label
-              key={f.field}
-              className="grid gap-1 text-[12px] text-muted-foreground"
-            >
-              {f.label}
-              <Input
-                className="h-8 w-40"
-                type={f.kind === 'number' ? 'number' : 'text'}
-                value={String(entered[f.field])}
-                onChange={(event) =>
-                  setEntered({ ...entered, [f.field]: event.target.value })
-                }
-              />
-            </label>
-          ),
-        )}
-        <Button size="sm" variant="outline" disabled={!ready} onClick={add}>
-          Add
-        </Button>
-      </div>
-    </div>
+    <AddRowForm
+      title="Add a row"
+      fields={[...spec.key, ...spec.values]}
+      ready={ready}
+      onAdd={(entered, clear) => {
+        const key = Object.fromEntries(
+          spec.key.map((k) => {
+            const raw = trimmed(entered[k.field])
+            return [k.field, raw === '' ? null : KINDS[k.kind].parse(raw)]
+          }),
+        )
+        const values = Object.fromEntries(
+          spec.values.map((v) => [
+            v.field,
+            KINDS[v.kind].parse(trimmed(entered[v.field])),
+          ]),
+        )
+        onAdd(key, values)
+        clear()
+      }}
+    />
   )
 }

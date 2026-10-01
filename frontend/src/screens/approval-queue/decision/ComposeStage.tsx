@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
 import { Textarea } from '@/components/ui/textarea'
 
 export function ComposeStage({
@@ -25,17 +25,14 @@ export function ComposeStage({
         value={comment}
         onChange={(event) => onCommentChange(event.target.value)}
       />
-      <div className="mt-3 flex gap-3">
-        <Button
-          disabled={rejecting && comment.trim() === ''}
-          onClick={onContinue}
-        >
-          Continue
-        </Button>
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
+      <InlineConfirm
+        className="mt-3 gap-3"
+        size="default"
+        confirm="Continue"
+        disabled={rejecting && comment.trim() === ''}
+        onConfirm={onContinue}
+        onCancel={onCancel}
+      />
     </div>
   )
 }

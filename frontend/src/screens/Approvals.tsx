@@ -4,6 +4,7 @@ import { useBudget, useEditable, useField, useOwnsBudget } from '@/api/budget'
 import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { shortDate } from '@/lib/format/dates'
+import { isDraftStatus } from '@/lib/status'
 import { DecisionPanel } from '@/screens/approval-queue/DecisionPanel'
 import { ApprovalActions } from '@/screens/approvals/ApprovalActions'
 import { ApprovalStatusBadge } from '@/screens/approvals/ApprovalStatusBadge'
@@ -38,7 +39,7 @@ export function Approvals() {
 
   const status = budget.budget_info.status
   const { approval } = budget
-  const submitted = status !== 'draft'
+  const submitted = !isDraftStatus(status)
   const step = (level: 'department' | 'faculty') =>
     approval.steps.find((candidate) => candidate.level === level)
 

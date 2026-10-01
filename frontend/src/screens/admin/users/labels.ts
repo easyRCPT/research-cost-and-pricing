@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 
 import type { AdminUser, Role } from '@/api/admin-users'
-import { ApiError } from '@/lib/api'
+import { messageOf } from '@/lib/api'
 
 export const ROLE_LABEL: Record<Role, string> = {
   hod: 'Head of Department',
@@ -11,7 +11,7 @@ export const ROLE_LABEL: Record<Role, string> = {
 
 export const refused = (error: unknown) =>
   toast.error('Not saved', {
-    description: error instanceof ApiError ? error.message : 'Try again.',
+    description: messageOf(error),
   })
 
 export const nameOf = (user: AdminUser) =>

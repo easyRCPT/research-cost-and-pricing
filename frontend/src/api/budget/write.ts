@@ -9,7 +9,7 @@ import { api, ApiError, unwrap } from '@/lib/api'
 import type { BudgetDetail, BudgetUpdate } from '@/types'
 
 import { useBudgetId } from './context'
-import { budgetKey } from './detail'
+import { budgetKeys } from './detail'
 
 export const writeKey = ['budget-write'] as const
 
@@ -68,7 +68,7 @@ export type Command = BudgetUpdate
  * the cache; and even when it answers 200, the reply was composed before any
  * later keystroke. Applying the echo on top of whatever comes back covers both.
  */
-export type Echo = (budget: BudgetDetail) => BudgetDetail
+type Echo = (budget: BudgetDetail) => BudgetDetail
 
 const identity: Echo = (budget) => budget
 
@@ -115,7 +115,7 @@ const describe = (error: unknown) => {
  * Read from the budget the screen is showing, because the server answers with
  * a row id and the reader has never seen one.
  */
-export function rowLabel(
+function rowLabel(
   budget: BudgetDetail | undefined,
   command: Command | undefined,
 ): string | undefined {
@@ -192,7 +192,7 @@ export function reportWriteError(error: unknown, where?: string) {
 export function useEdit() {
   const budgetId = useBudgetId()
   const queryClient = useQueryClient()
-  const key = budgetKey(budgetId)
+  const key = budgetKeys.detail(budgetId)
 
   const write = useMutation({
     mutationKey: writeKey,

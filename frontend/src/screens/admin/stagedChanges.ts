@@ -1,6 +1,7 @@
 import type { LookupChange, RateTable } from '@/api/admin-lookups'
-import { ApiError } from '@/lib/api'
+import { fieldErrors } from '@/lib/api'
 
+import { KINDS } from './fieldKinds'
 import { type RateTableSpec, tableSpec, type ValueField } from './rateTables'
 
 export type Row = Record<string, unknown>
@@ -27,23 +28,10 @@ export const keyOf = (spec: RateTableSpec, row: Row): Key =>
 export const valuesOf = (spec: RateTableSpec, row: Row): Values =>
   Object.fromEntries(spec.values.map((v) => [v.field, typed(v, row[v.field])]))
 
-export function typed(field: ValueField, raw: unknown): unknown {
-  switch (field.kind) {
-    case 'number':
-    case 'constant':
-      return Number(raw)
-    case 'boolean':
-      return Boolean(raw)
-    case 'text':
-      return raw == null ? '' : String(raw)
-  }
-}
+export const typed = (field: ValueField, raw: unknown) => KINDS[field.kind].parse(raw)
 
 /** A field's value as the review and the "was" line show it. */
-export function shown(field: ValueField, value: unknown): string {
-  if (field.kind === 'boolean') return value ? 'Yes' : 'No'
-  return value === '' || value == null ? '—' : String(value)
-}
+export const shown = (field: ValueField, value: unknown) => KINDS[field.kind].show(value)
 
 /** "Fortnight · Academic · Level A.1", as a person reads a row's name. */
 export const keyText = (spec: RateTableSpec, key: Key) =>
@@ -104,8 +92,7 @@ export function toRequest(change: Staged): LookupChange {
  * in the request, which is its place in `staged`.
  */
 export function refusedChange(error: unknown, staged: Staged[]): { id: string; message: string } | null {
-  if (!(error instanceof ApiError)) return null
-  for (const [attr, message] of Object.entries(error.fields)) {
+  for (const [attr, message] of Object.entries(fieldErrors(error))) {
     const index = /^changes\.(\d+)/.exec(attr)?.[1]
     const change = index === undefined ? undefined : staged[Number(index)]
     if (change) return { id: idOf(change), message }

@@ -1,6 +1,6 @@
 import { useBudget } from '@/api/budget'
+import { useLookups } from '@/api/lookups'
 import { Panel } from '@/components/shell'
-import type { LookupTables } from '@/types'
 
 import { BudgetPrintDocument } from './budget-form/BudgetPrintDocument'
 import { DeliverablesSection } from './budget-form/DeliverablesSection'
@@ -10,12 +10,9 @@ import { PriceSummarySection } from './budget-form/PriceSummarySection'
 import { ProjectDetailsSection } from './budget-form/ProjectDetailsSection'
 import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
 
-export interface BudgetFormProps {
-  lookups: LookupTables
-}
-
-export function BudgetForm({ lookups }: BudgetFormProps) {
+export function BudgetForm() {
   const { data: budget } = useBudget()
+  const { data: lookups } = useLookups()
 
   const info = budget.budget_info
   const summary = budget.budget_summary.price_summary

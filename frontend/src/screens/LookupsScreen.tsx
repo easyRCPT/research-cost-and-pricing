@@ -1,4 +1,4 @@
-import { LOOKUP_TABS } from '@/components/lookups-tabs'
+import { LOOKUP_TABS, LookupTabPanel } from '@/components/lookups-tabs'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { LookupTables } from '@/types'
 
@@ -21,7 +21,7 @@ export function LookupsScreen({ lookups }: { lookups: LookupTables }) {
 
       {LOOKUP_TABS.map((tab) => (
         <TabsContent key={tab.value} value={tab.value}>
-          {tab.render(lookups)}
+          <LookupTabPanel tab={tab} lookups={lookups} />
         </TabsContent>
       ))}
     </Tabs>

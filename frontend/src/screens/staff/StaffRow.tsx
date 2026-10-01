@@ -1,15 +1,17 @@
-import { X } from 'lucide-react'
-
-import { CellChoice, CellTd, CellText, Td } from '@/components/shell'
+import {
+  CellChoice,
+  CellTd,
+  CellText,
+  RemoveRowButton,
+} from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   categoryPatch,
-  clampedByYear,
   classificationsFor,
   EMPLOYMENT_TYPES,
   employmentTypePatch,
   timeBasesFor,
+  timeBasisPatch,
 } from '@/lib/staff'
 import { cn } from '@/lib/utils'
 import type {
@@ -120,11 +122,8 @@ export function StaffRow({
           sizeOptions={bases}
           placeholder="—"
           disabled={!line.employment_type}
-          onChange={(time_basis) =>
-            patchLine(line.id, {
-              time_basis: time_basis as EditableStaffLine['time_basis'],
-              by_year: clampedByYear(line, time_basis),
-            })
+          onChange={(timeBasis) =>
+            patchLine(line.id, timeBasisPatch(line, timeBasis))
           }
         />
       </CellTd>
@@ -136,19 +135,12 @@ export function StaffRow({
         patchLine={patchLine}
       />
       <StaffFigureCell value={line.total} excluded={excluded} struck />
-      <Td align="center">
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          // The CI's row belongs to the project, so it stays.
-          disabled={isCi}
-          aria-label={`Remove ${line.name_role || 'row'}`}
-          className="text-muted-foreground hover:bg-bad-bg hover:text-bad"
-          onClick={() => removeLine(line.id)}
-        >
-          <X />
-        </Button>
-      </Td>
+      <RemoveRowButton
+        label={`Remove ${line.name_role || 'row'}`}
+        // The CI's row belongs to the project, so it stays.
+        disabled={isCi}
+        onRemove={() => removeLine(line.id)}
+      />
     </tr>
   )
 }

@@ -1,13 +1,10 @@
-import { QueryErrorResetBoundary } from '@tanstack/react-query'
 import { Navigate, useNavigate } from '@tanstack/react-router'
-import { Suspense } from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
 
 import { BudgetProvider } from '@/api/budget'
 import { useProjects } from '@/api/projects'
-import { AppErrorState, AppSkeleton } from '@/components/shell'
-import { AppContent, type AppScreen } from '@/components/shell/AppContent'
+import { AppBoundary, AppSkeleton } from '@/components/shell'
 import { editorRoute } from '@/router'
+import { AppContent, type AppScreen } from '@/screens/editor/AppContent'
 
 /**
  * The costing flow, addressed by project.
@@ -22,19 +19,10 @@ export function EditorRoute() {
   const { screen } = editorRoute.useParams()
 
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={(props) => <AppErrorState {...props} />}
-        >
-          {/* Per-screen, so a deep link waits on the screen it asked for. */}
-          <Suspense fallback={<AppSkeleton screen={screen} />}>
-            <Editor />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    // Per-screen, so a deep link waits on the screen it asked for.
+    <AppBoundary fallback={<AppSkeleton screen={screen} />}>
+      <Editor />
+    </AppBoundary>
   )
 }
 

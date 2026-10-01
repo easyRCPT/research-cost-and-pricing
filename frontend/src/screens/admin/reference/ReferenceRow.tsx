@@ -1,12 +1,14 @@
 import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { FieldInput } from '@/screens/admin/FieldInput'
 import { EditActions } from '@/screens/admin/reference/EditActions'
-import { FieldInput } from '@/screens/admin/reference/FieldInput'
 import { MoveConfirm } from '@/screens/admin/reference/MoveConfirm'
 import { RemoveConfirm } from '@/screens/admin/reference/RemoveConfirm'
 import {
   type Faculty,
+  facultyOptions,
+  fieldError,
   PIN_LEFT,
   PIN_RIGHT,
   type Row,
@@ -67,15 +69,12 @@ export function ReferenceRow({
         <Td key={f.field} className={cn(editing && 'bg-amber-50')}>
           {editing ? (
             <FieldInput
-              field={f}
+              kind={f.kind}
               value={draft[f.field]}
-              faculties={faculties}
+              options={facultyOptions(faculties)}
               label={`${f.label} for ${key}`}
-              error={
-                refusal?.fields[f.field] ??
-                (f.kind === 'faculty' ? refusal?.fields.faculty : undefined)
-              }
-              onChange={(value) => setField(f.field, value)}
+              error={fieldError(refusal, f)}
+              onChange={(value) => setField(f.field, String(value))}
             />
           ) : f.kind === 'faculty' ? (
             text(row.faculty) || facultyName(saved[f.field])

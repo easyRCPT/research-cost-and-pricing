@@ -1,8 +1,9 @@
 import { FieldRow } from '@/components/shell'
 import { OptionSelect } from '@/components/ui/option-select'
-import { SettledTextInput } from '@/components/ui/text-input'
 import { EXTERNAL_PARTIES, OTHER_FUNDER_CATEGORIES } from '@/lib/constants'
 import type { ProjectInfo } from '@/types'
+
+import { ProjectTextRow } from './ProjectTextRow'
 
 interface ProjectFunderRowProps {
   project: ProjectInfo
@@ -34,14 +35,13 @@ export function ProjectFunderRow({ project, onChange }: ProjectFunderRowProps) {
             />
           </FieldRow>
 
-          <FieldRow label="Specify Other Funder" htmlFor="other-funder">
-            <SettledTextInput
-              id="other-funder"
-              className="max-w-lg"
-              value={project.other_funder}
-              onCommit={(other_funder) => onChange({ other_funder })}
-            />
-          </FieldRow>
+          <ProjectTextRow
+            project={project}
+            onChange={onChange}
+            field="other_funder"
+            label="Specify Other Funder"
+            id="other-funder"
+          />
         </>
       )}
     </>
