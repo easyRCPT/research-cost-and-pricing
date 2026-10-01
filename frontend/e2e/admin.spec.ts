@@ -1,30 +1,14 @@
-import { test, expect, createProject, csrfToken, DEMO, makeReady, uniqueTitle } from './fixtures'
-import type { Page } from '@playwright/test'
-
-/** The admin door, by API, as signIn does for the others. */
-async function signInAsAdmin(page: Page) {
-  await page.context().clearCookies()
-  await page.request.get('/api/auth/csrf/')
-  const response = await page.request.post('/api/auth/admin-login/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-    data: { email: DEMO.admin, password: DEMO.password },
-  })
-  expect(response.status(), await response.text()).toBe(200)
-}
+import { test, expect, apiWrite, DEMO, readyProject, signIn, submitBudget } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,
 }) => {
   // A researcher's costing, submitted: nothing the admin made.
-  const title = uniqueTitle('Register')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status(), await submitted.text()).toBe(200)
+  const project = await readyProject(page, 'Register')
+  const { title } = project
+  await submitBudget(page, project.budget_id)
 
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   await page.goto('/admin')
   await expect(page.getByRole('heading', { name: 'Administration' })).toBeVisible()
   await expect(page.getByText('Projects by status')).toBeVisible()
@@ -52,13 +36,12 @@ test("the register finds anyone's costing, read-only, and the log has its submis
 })
 
 test('deactivating someone asks first, and the row says so afterwards (#69)', async ({ page }) => {
-  await signInAsAdmin(page)
+  await signIn(page, 'admin')
   const email = `deactivate-${Date.now()}@unimelb.edu.au`
-  const made = await page.request.post('/api/admin/users/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  await apiWrite(page, 'post', '/api/admin/users/', {
+    status: 201,
     data: { email, first_name: 'Dee', last_name: 'Activate', password: 'demo12345', groups: ['researcher'] },
   })
-  expect(made.status(), await made.text()).toBe(201)
 
   await page.goto('/admin/users')
   await page.getByLabel('Search accounts').fill(email)

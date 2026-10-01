@@ -26,8 +26,8 @@ export async function createProject(
     department = lookups.departments[0].code as string
   }
 
-  const response = await page.request.post('/api/projects/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
+  const response = await apiWrite(page, 'post', '/api/projects/', {
+    status: 201,
     data: {
       title,
       department,
@@ -37,7 +37,6 @@ export async function createProject(
       end_month: 12,
     },
   })
-  expect(response.status(), await response.text()).toBe(201)
   return response.json()
 }
 
@@ -66,6 +65,25 @@ export async function goToScreen(page: Page, label: string) {
   ).toBeVisible()
 }
 
+interface StaffRowFields {
+  name: string
+  employment?: string
+  category?: string
+  classification?: string
+  basis?: string
+}
+
+/** A new single-year project open on Staff Costs, with its first row filled in. Returns that row. */
+export async function newStaffRow(page: Page, what: string, fields: StaffRowFields) {
+  const title = uniqueTitle(what)
+  await createProject(page, title, { start: 2026, end: 2026 })
+  await openProject(page, title)
+  await goToScreen(page, 'Staff Costs')
+  const row = page.locator('tbody tr').first()
+  await fillStaffRow(page, row, fields)
+  return row
+}
+
 /**
  * Fills the four choices that make a staff row real enough to price.
  *
@@ -73,7 +91,7 @@ export async function goToScreen(page: Page, label: string) {
  * type narrows the time bases and selects the first of them, so the basis is
  * never blank by the time it is reached.
  */
-export async function fillStaffRow(
+async function fillStaffRow(
   page: Page,
   row: Locator,
   {
@@ -82,13 +100,7 @@ export async function fillStaffRow(
     category = 'Academic',
     classification = 'Level A.1',
     basis = 'FTE',
-  }: {
-    name: string
-    employment?: string
-    category?: string
-    classification?: string
-    basis?: string
-  },
+  }: StaffRowFields,
 ) {
   await row.getByRole('textbox').first().fill(name)
 
@@ -130,26 +142,47 @@ async function chooseOption(page: Page, trigger: Locator, value: string) {
 export const uniqueTitle = (what: string) =>
   `${what} ${Date.now()}-${Math.floor(Math.random() * 1e4)}`
 
-export async function csrfToken(page: Page) {
+async function csrfToken(page: Page) {
   const cookies = await page.context().cookies()
   return cookies.find((c) => c.name === 'csrftoken')?.value ?? ''
 }
 
-/** Everything submission checks for, filled through the same API the screens use. */
-export async function makeReady(page: Page, budgetId: number) {
-  const headers = { 'X-CSRFToken': await csrfToken(page) }
+/** A write through the API with the CSRF header. Fails the test unless it answers `status`, or any 2xx when none is given. */
+export async function apiWrite(
+  page: Page,
+  method: 'post' | 'patch',
+  url: string,
+  { status, data }: { status?: number; data?: object } = {},
+) {
+  const response = await page.request[method](url, {
+    headers: { 'X-CSRFToken': await csrfToken(page) },
+    data,
+  })
+  const body = await response.text()
+  if (status) expect(response.status(), body).toBe(status)
+  else expect(response.ok(), body).toBe(true)
+  return response
+}
+
+/** A single-year project in the HoD's department, with everything submission checks for. */
+export async function readyProject(page: Page, what: string): Promise<Project> {
+  const project = await createProject(
+    page,
+    uniqueTitle(what),
+    { start: 2026, end: 2026 },
+    DEMO.hodDepartment,
+  )
+  const budget = `/api/budgets/${project.budget_id}/`
   for (const [field, value] of [
     ['chief_investigator', 'Dr Ruth Researcher'],
     ['funder', 'Australian Research Council'],
   ]) {
-    const response = await page.request.patch(`/api/budgets/${budgetId}/`, {
-      headers,
+    await apiWrite(page, 'patch', budget, {
       data: { section: 'project', field, value },
     })
-    expect(response.ok(), await response.text()).toBe(true)
   }
-  const line = await page.request.post(`/api/budgets/${budgetId}/staff-lines/`, {
-    headers,
+  await apiWrite(page, 'post', `${budget}staff-lines/`, {
+    status: 201,
     data: {
       name_role: 'Dr Chen',
       employment_type: 'Continuing',
@@ -161,7 +194,12 @@ export async function makeReady(page: Page, budgetId: number) {
       allocations: [{ year: 2026, time: 0.5 }],
     },
   })
-  expect(line.status(), await line.text()).toBe(201)
+  return project
+}
+
+/** Submits a budget for approval as whoever is signed in. */
+export async function submitBudget(page: Page, budgetId: number) {
+  await apiWrite(page, 'post', `/api/budgets/${budgetId}/submit/`, { status: 200 })
 }
 
 export const DEMO = {
@@ -174,6 +212,13 @@ export const DEMO = {
   password: 'demo1234',
 }
 
+const ACCOUNTS = {
+  researcher: { email: DEMO.researcher, door: '/api/auth/login/', account_type: 'researcher' },
+  hod: { email: DEMO.hod, door: '/api/auth/login/', account_type: 'staff' },
+  // The admin door has no tabs, so it takes no account type.
+  admin: { email: DEMO.admin, door: '/api/auth/admin-login/', account_type: undefined },
+}
+
 /**
  * Put a session in the browser, without going through the form.
  *
@@ -182,17 +227,15 @@ export const DEMO = {
  * API keeps a spec that is not about signing in from breaking when the login
  * screen changes, and from spending a form fill on every test.
  */
-export async function signIn(
-  page: Page,
-  email: string = DEMO.researcher,
-  accountType: 'researcher' | 'staff' = 'researcher',
-) {
+export async function signIn(page: Page, role: keyof typeof ACCOUNTS = 'researcher') {
+  const { email, door, account_type } = ACCOUNTS[role]
+  await page.context().clearCookies()
   const csrf = await page.request.get('/api/auth/csrf/')
   expect(csrf.status(), await csrf.text()).toBe(204)
 
-  const response = await page.request.post('/api/auth/login/', {
+  const response = await page.request.post(door, {
     headers: { 'X-CSRFToken': await csrfToken(page) },
-    data: { email, password: DEMO.password, account_type: accountType },
+    data: { email, password: DEMO.password, account_type },
   })
   // A 401 here is almost always a database without the demo accounts rather
   // than anything the test did, and it fails every signed-in spec at once, so

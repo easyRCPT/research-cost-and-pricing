@@ -2,25 +2,17 @@ import {
   test,
   expect,
   createProject,
-  csrfToken,
-  DEMO,
-  makeReady,
+  readyProject,
   signIn,
+  submitBudget,
   uniqueTitle,
 } from './fixtures'
-import type { Page } from '@playwright/test'
-
-async function switchTo(page: Page, email: string, type: 'researcher' | 'staff') {
-  await page.context().clearCookies()
-  await signIn(page, email, type)
-}
 
 test('submitted, approved by the head of department, and recorded (#83, #84)', async ({
   page,
 }) => {
-  const title = uniqueTitle('Approved end to end')
-  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
+  const project = await readyProject(page, 'Approved end to end')
+  const { title } = project
 
   // The owner submits, and the screen shows what the server did.
   await page.goto(`/projects/${project.id}/approvals`)
@@ -30,7 +22,7 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByRole('button', { name: 'Submit for approval' })).toHaveCount(0)
 
   // The head of department opens it from their queue, into the costing itself.
-  await switchTo(page, DEMO.hod, 'staff')
+  await signIn(page, 'hod')
   await page.goto('/approvals')
   await page.getByRole('link', { name: new RegExp(title) }).click()
   await expect(page).toHaveURL(`/projects/${project.id}/approvals`)
@@ -59,18 +51,14 @@ test('submitted, approved by the head of department, and recorded (#83, #84)', a
   await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
 
   // The owner sees who decided.
-  await switchTo(page, DEMO.researcher, 'researcher')
+  await signIn(page)
   await page.goto(`/projects/${project.id}/approvals`)
   await expect(page.getByText(/Approved\s+by Hana Head/)).toBeVisible()
 })
 
 test('a submitted costing is read-only on every screen', async ({ page }) => {
-  const project = await createProject(page, uniqueTitle('Frozen'), { start: 2026, end: 2026 }, DEMO.hodDepartment)
-  await makeReady(page, project.budget_id)
-  const submitted = await page.request.post(`/api/budgets/${project.budget_id}/submit/`, {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-  })
-  expect(submitted.status()).toBe(200)
+  const project = await readyProject(page, 'Frozen')
+  await submitBudget(page, project.budget_id)
 
   await page.goto(`/projects/${project.id}/staff`)
   await expect(page.getByText(/so it is read-only/)).toBeVisible()
