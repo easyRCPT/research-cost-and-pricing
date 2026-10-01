@@ -1,5 +1,6 @@
 from django.urls import path
 
+from api.views.org_search import DepartmentSearchView, FacultySearchView
 from api.views.views import (
     BudgetCloneView,
     BudgetDetailView,
@@ -18,6 +19,17 @@ urlpatterns = [
         "lookups/",
         LookupView.as_view(http_method_names=["get"]),
         name="lookups",
+    ),
+    # Pickers over the org tables, searched rather than scrolled
+    path(
+        "departments/",
+        DepartmentSearchView.as_view(http_method_names=["get"]),
+        name="department-search",
+    ),
+    path(
+        "faculties/",
+        FacultySearchView.as_view(http_method_names=["get"]),
+        name="faculty-search",
     ),
     # Projects
     path(
