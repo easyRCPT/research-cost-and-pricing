@@ -1,16 +1,4 @@
-import { test, expect, createProject, csrfToken, DEMO, makeReady, uniqueTitle } from './fixtures'
-import type { Page } from '@playwright/test'
-
-/** The admin door, by API, as signIn does for the others. */
-async function signInAsAdmin(page: Page) {
-  await page.context().clearCookies()
-  await page.request.get('/api/auth/csrf/')
-  const response = await page.request.post('/api/auth/admin-login/', {
-    headers: { 'X-CSRFToken': await csrfToken(page) },
-    data: { email: DEMO.admin, password: DEMO.password },
-  })
-  expect(response.status(), await response.text()).toBe(200)
-}
+import { test, expect, createProject, csrfToken, DEMO, makeReady, signInAsAdmin, uniqueTitle } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,

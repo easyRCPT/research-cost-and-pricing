@@ -1,30 +1,33 @@
 import json
-from decimal import Decimal
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
+from django.db.models import Count, Prefetch
 from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ValidationError
 
 from ..exceptions import Conflict
 from ..models import (
-    CalculationConstant,
+    Budget,
     Department,
     Faculty,
+    LookupChangeSet,
     LookupConfiguration,
     LookupVersion,
     User,
 )
 from .audit import write_audit
-from .lookup_definitions import LOOKUP_DEFINITIONS
+from .lookup_definitions import LOOKUP_DEFINITIONS, LookupDefinition
 from .lookup_loader import invalidate_lookup_cache
 
-# Below 1 the multiplier prices staff under their own salary and on-costs,
-# which is never a cost recovery rate. Two places, because each budget keeps a
-# copy of the rate it was priced at in a two-place column.
-MULTIPLIER_FLOOR = Decimal(1)
-MULTIPLIER_STEP = Decimal("0.01")
+# A costing stamped with a version and still waiting on an approver. It can be
+# rejected and resubmitted on newer rates; an approved one cannot (#142).
+IN_REVIEW = (
+    Budget.Status.SUBMITTED,
+    Budget.Status.HOD_REVIEW,
+    Budget.Status.DEAN_REVIEW,
+)
 
 
 def get_versioned_models() -> list[type[models.Model]]:
@@ -41,6 +44,9 @@ def create_lookup_version(
 ) -> int:
     """
     Create a new Lookup Version and point current version to it.
+
+    Not audited here: the set of changes that needed the new version records
+    it, so one save reads as one event in the log (#138).
     """
     old_version_id = config.current_version_id
 
@@ -67,76 +73,7 @@ def create_lookup_version(
     config.referenced = False
     config.save(update_fields=["current_version", "referenced"])
 
-    # Audit lookup version creation only when triggered by a superadmin.
-    # Initial import creates versions without an actor and should not create audit records.
-    # A lookup edit can create both an edit log and a version creation log.
-    if actor is not None:
-        write_audit(
-            actor=actor,
-            action="admin.lookup_version.create",
-            object_type="lookup_version",
-            object_id=str(new_version.id),
-            detail={
-                "source_version_id": old_version_id,
-            },
-        )
-
     return new_version.id
-
-
-def _reject_invalid_multiplier(instance: models.Model, data: dict) -> None:
-    """
-    The full cost recovery multiplier is an administrator's to change (#149),
-    within a range. Checked on the row rather than the request's lookup, which
-    may name the row by id.
-    """
-    if not isinstance(instance, CalculationConstant):
-        return
-    if instance.name != "full_cost_recovery_multiplier" or "value" not in data:
-        return
-
-    value = Decimal(str(data["value"]))
-    if value < MULTIPLIER_FLOOR:
-        raise ValidationError(
-            "The full cost recovery multiplier can't be below 1.00: that would "
-            "price staff below their own salary and on-costs."
-        )
-    if value != value.quantize(MULTIPLIER_STEP):
-        raise ValidationError(
-            "The full cost recovery multiplier takes at most two decimal places."
-        )
-
-
-def _reject_invalid_salary_rate_year(
-    model: type[models.Model], lookup: dict, data: dict
-) -> None:
-    """Salary rate year must be a positive integer."""
-    if model is not CalculationConstant:
-        return
-
-    name = lookup.get("name")
-    value = data.get("value")
-    if name != "salary_rate_year" or value is None:
-        return
-
-    if value <= 0 or value != value.to_integral_value():
-        raise ValidationError("Salary Rate Year must be a positive small integer.")
-
-
-def _reject_update_to_constant_name(
-    model: type[models.Model], lookup: dict, data: dict
-) -> None:
-    """
-    Names of calculation constant are used in the engine and cannot be updated by admin.
-    """
-
-    if model is not CalculationConstant:
-        return
-
-    name = data.get("name")
-
-    if name is not None:
-        raise ValidationError("Name of calculation constant cannot be updated.")
 
 
 def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
@@ -164,39 +101,35 @@ def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
             )
 
 
-def _validate_update(model: type[models.Model], lookup: dict, data: dict) -> None:
-    _reject_invalid_salary_rate_year(model, lookup, data)
-    _reject_update_to_constant_name(model, lookup, data)
-
-    _validate_model_fields(model, lookup, data)
-
-
-def _get_model(table: str) -> type[models.Model]:
+def get_definition(table: str) -> LookupDefinition:
     definition = LOOKUP_DEFINITIONS.get(table)
 
     if definition is None:
         raise ValidationError(f"Invalid lookup table: {table}")
 
+    return definition
+
+
+def _get_unversioned_model(table: str) -> type[models.Model]:
+    """
+    The tables a single-row write may change.
+
+    The versioned ones price a costing, so they change only as a reviewed set
+    (lookup_changes.apply_changes, #138). A row at a time, a costing submitted
+    halfway through a many-row change was frozen onto half the new rates.
+    """
+    definition = get_definition(table)
+
+    if definition.versioned:
+        raise ValidationError(
+            f"'{table}' prices costings, so it is changed only as a reviewed set "
+            "of changes: POST /api/admin/lookups/changes/."
+        )
+
     return definition.model
 
 
-def _check_and_create_new_version(
-    model: type[models.Model],
-    actor: User | None = None,
-) -> int:
-    """
-    Determines whether a new version should be created.
-    Return id of current version or the created new version.
-    """
-    config = LookupConfiguration.objects.select_for_update().get()
-
-    if model in get_versioned_models() and config.referenced:
-        return create_lookup_version(config, actor)
-
-    return config.current_version_id
-
-
-def _save_validated_instance(
+def save_validated_instance(
     instance: models.Model,
     update_fields: list[str] | None = None,
 ) -> None:
@@ -218,25 +151,10 @@ def create(
     data: dict,
     actor: User | None = None,
 ) -> None:
-    # Get model
-    model = _get_model(table)
+    model = _get_unversioned_model(table)
 
-    # Calculation constants are part of application logic and cannot be
-    # created dynamically after deployment.
-    if model == CalculationConstant:
-        raise ValidationError("Calculation Constant cannot be created.")
-
-    if model in get_versioned_models():
-        # Determines whether a new version should be created
-        version_id = _check_and_create_new_version(model, actor)
-        instance = model(
-            **data,
-            version_id=version_id,
-        )
-    else:
-        instance = model(**data)
-
-    _save_validated_instance(instance)
+    instance = model(**data)
+    save_validated_instance(instance)
 
     _audit(
         actor,
@@ -256,20 +174,12 @@ def update(
     data: dict,
     actor: User | None = None,
 ) -> None:
-    model = _get_model(table)
+    model = _get_unversioned_model(table)
 
-    _validate_update(model, lookup, data)
+    _validate_model_fields(model, lookup, data)
 
     try:
-        if model in get_versioned_models():
-            # Determines whether a new version should be created
-            version_id = _check_and_create_new_version(model, actor)
-            instance = model.objects.get(
-                **lookup,
-                version_id=version_id,
-            )
-        else:
-            instance = model.objects.get(**lookup)
+        instance = model.objects.get(**lookup)
     except model.DoesNotExist:
         # Raise a validation error if no matching row is found
         raise ValidationError(
@@ -281,14 +191,12 @@ def update(
             f"Multiple matching rows found in lookup table '{table}'.",
         )
 
-    _reject_invalid_multiplier(instance, data)
-
     before = model_to_dict(instance, fields=data.keys())
 
     # Lookup fields may also be included in data and updated.
     for field, value in data.items():
         setattr(instance, field, value)
-    _save_validated_instance(instance, update_fields=list(data))
+    save_validated_instance(instance, update_fields=list(data))
 
     after = model_to_dict(instance, fields=data.keys())
 
@@ -306,6 +214,21 @@ def update(
     invalidate_lookup_cache()
 
 
+def plain(values: dict | None) -> dict | None:
+    """A row's values as the audit log's JSON column can hold them."""
+    if values is None:
+        return None
+
+    # Convert model instances to their primary keys
+    values = {
+        key: value.pk if isinstance(value, models.Model) else value
+        for key, value in values.items()
+    }
+
+    # Decimals and dates, as the log's JSON column can hold them.
+    return json.loads(json.dumps(values, cls=DjangoJSONEncoder))
+
+
 def _audit(
     actor: User | None,
     action: str,
@@ -316,27 +239,14 @@ def _audit(
     lookup: dict | None = None,
 ) -> None:
     """
-    Who changed a lookup row and what it said before (#73), for every table.
+    Who changed a lookup row and what it said before (#73), for the tables
+    changed a row at a time.
 
-    Only the fields the write touched, so a rate change reads as that rate's
-    old and new value rather than two copies of the row. The versioned tables
-    also keep their old rows in the older version; the in-place ones (a
-    department renamed, a category re-coded) have nothing but this.
+    Only the fields the write touched, so a rename reads as that field's old
+    and new value rather than two copies of the row. These tables are changed
+    in place (a department renamed, a category re-coded), so this is the only
+    record of what they said before.
     """
-
-    def plain(values: dict | None) -> dict | None:
-        if values is None:
-            return None
-
-        # Convert model instances to their primary keys
-        values = {
-            key: value.pk if isinstance(value, models.Model) else value
-            for key, value in values.items()
-        }
-
-        # Decimals and dates, as the log's JSON column can hold them.
-        return json.loads(json.dumps(values, cls=DjangoJSONEncoder))
-
     write_audit(
         actor=actor,
         action=action,
@@ -351,8 +261,57 @@ def _audit(
     )
 
 
+def priced_on(version_id: int) -> dict:
+    """
+    How many costings in review and approved were priced on a version (#142).
+
+    What an administrator needs to hear when the rates move away from it: the
+    ones in review can be sent back and resubmitted on the new rates, and the
+    approved ones keep their price. Drafts are never stamped, so never counted.
+    """
+    counts = (
+        Budget.objects.filter(lookup_version_id=version_id)
+        .values("status")
+        .annotate(n=Count("id"))
+    )
+    by_status = {row["status"]: row["n"] for row in counts}
+    return {
+        "version_id": version_id,
+        "in_review": sum(by_status.get(status, 0) for status in IN_REVIEW),
+        "approved": by_status.get(Budget.Status.APPROVED, 0),
+    }
+
+
+def budgets_on(version_id: int) -> list[dict]:
+    """Every costing stamped with a version, newest submission first (#142)."""
+    if not LookupVersion.objects.filter(id=version_id).exists():
+        raise ValidationError(f"There is no lookup version {version_id}.")
+
+    budgets = (
+        Budget.objects.filter(lookup_version_id=version_id)
+        .select_related("project__created_by")
+        .order_by("-submitted_at", "-id")
+    )
+    return [
+        {
+            "id": budget.id,
+            "project_id": budget.project.id,
+            "reference": budget.project.reference,
+            "title": budget.project.title,
+            "owner": {
+                "email": budget.project.created_by.email,
+                "name": budget.project.created_by.get_full_name(),
+            },
+            "status": budget.status,
+            "total_price_inc_gst": budget.total_price_inc_gst,
+            "submitted_at": budget.submitted_at,
+        }
+        for budget in budgets
+    ]
+
+
 @transaction.atomic
-def restore_version(version_id: int, actor: User | None) -> int:
+def restore_version(version_id: int, actor: User | None) -> dict:
     """
     Put the rates back to how they were in an older version (#137).
 
@@ -366,13 +325,16 @@ def restore_version(version_id: int, actor: User | None) -> int:
 
     Possible at all because each version holds every row, not a diff: the old
     version's rows are the whole answer.
+
+    Returns the new version and who was priced on the one it replaced (#142).
     """
     config = LookupConfiguration.objects.select_for_update().get()
     try:
         source = LookupVersion.objects.get(id=version_id)
     except LookupVersion.DoesNotExist:
         raise ValidationError(f"There is no lookup version {version_id}.")
-    if source.id == config.current_version_id:
+    replaced = config.current_version_id
+    if source.id == replaced:
         raise ValidationError(f"Version {version_id} is already the current rates.")
 
     restored = LookupVersion.objects.create(updated_by=actor)
@@ -396,29 +358,61 @@ def restore_version(version_id: int, actor: User | None) -> int:
         action="admin.lookup.restore",
         object_type="lookup_version",
         object_id=str(restored.id),
-        detail={"restored_from": source.id},
+        detail={"restored_from": source.id, "replaced": replaced},
     )
-    invalidate_lookup_cache()
-    return restored.id
+    transaction.on_commit(invalidate_lookup_cache)
+    return {"version_id": restored.id, "replaced": priced_on(replaced)}
 
 
 def list_versions() -> list[dict]:
-    """Every version, newest first, with who made it and what it priced."""
-    from django.db.models import Count
-
-    current = LookupConfiguration.objects.get().current_version_id
+    """
+    Every version, newest first: who made it, what it priced, and the sets of
+    changes saved into it (#138).
+    """
+    config = LookupConfiguration.objects.get()
+    budgets_priced = dict(
+        Budget.objects.filter(lookup_version__isnull=False)
+        .values("lookup_version")
+        .annotate(n=Count("id"))
+        .values_list("lookup_version", "n")
+    )
     versions = (
         LookupVersion.objects.order_by("-id")
-        .values("id", "created_at", "updated_by__email")
-        .annotate(budgets_priced=Count("budget"))
+        .select_related("updated_by")
+        .prefetch_related(
+            Prefetch(
+                "change_sets",
+                queryset=LookupChangeSet.objects.select_related("saved_by").order_by(
+                    "-saved_at", "-id"
+                ),
+            )
+        )
     )
     return [
         {
-            "id": version["id"],
-            "created_at": version["created_at"],
-            "updated_by": version["updated_by__email"],
-            "budgets_priced": version["budgets_priced"],
-            "current": version["id"] == current,
+            "id": version.id,
+            "created_at": version.created_at,
+            "updated_by": version.updated_by.email if version.updated_by else None,
+            "budgets_priced": budgets_priced.get(version.id, 0),
+            "current": version.id == config.current_version_id,
+            # Whether the next set writes into this version. Only the current
+            # one, and only until a costing is submitted on it; after that the
+            # next set starts a new version, so nothing priced moves.
+            "accepts_changes": (
+                version.id == config.current_version_id and not config.referenced
+            ),
+            "change_sets": [
+                {
+                    "id": change_set.id,
+                    "note": change_set.note,
+                    "saved_by": (
+                        change_set.saved_by.email if change_set.saved_by else None
+                    ),
+                    "saved_at": change_set.saved_at,
+                    "change_count": change_set.change_count,
+                }
+                for change_set in version.change_sets.all()
+            ],
         }
         for version in versions
     ]

@@ -65,7 +65,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Create or update a lookup table.
+         * @description Create or update a row of a table that does not price costings: the
+         *     faculties, departments and reference lists. The rate tables are changed
+         *     only as a set, through LookupChangesView.
          *
          *     Moved into the admin namespace from api/lookups/..
          */
@@ -74,11 +76,35 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * @description Create or update a lookup table.
+         * @description Create or update a row of a table that does not price costings: the
+         *     faculties, departments and reference lists. The rate tables are changed
+         *     only as a set, through LookupChangesView.
          *
          *     Moved into the admin namespace from api/lookups/..
          */
         patch: operations["admin_lookups_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/lookups/changes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Save a reviewed set of rate changes, all at once or not at all (#138).
+         *
+         *     The only way the rate tables change. A refused change refuses the whole
+         *     set, and the error names the change by its index (`changes.<index>`).
+         */
+        post: operations["admin_lookups_changes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/admin/lookups/versions/": {
@@ -90,6 +116,23 @@ export interface paths {
         };
         /** @description Every set of rates the tool has had, newest first (#137). */
         get: operations["admin_lookups_versions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/budgets/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every costing priced on one version, newest submission first (#142). */
+        get: operations["admin_lookups_versions_budgets_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -582,6 +625,166 @@ export interface components {
             email: string;
             password: string;
         };
+        AdminLookupsChangesCreateChangesINDEXLookupErrorComponent: {
+            /**
+             * @description * `changes.INDEX.lookup` - changes.INDEX.lookup (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.lookup";
+            /**
+             * @description * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_dict" | "null";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXLookupKEYErrorComponent: {
+            /**
+             * @description * `changes.INDEX.lookup.KEY` - changes.INDEX.lookup.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.lookup.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `changes.INDEX.non_field_errors` - changes.INDEX.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXOpErrorComponent: {
+            /**
+             * @description * `changes.INDEX.op` - changes.INDEX.op (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.op";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXTableErrorComponent: {
+            /**
+             * @description * `changes.INDEX.table` - changes.INDEX.table (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.table";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXValuesErrorComponent: {
+            /**
+             * @description * `changes.INDEX.values` - changes.INDEX.values (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.values";
+            /**
+             * @description * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_dict" | "null";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXValuesKEYErrorComponent: {
+            /**
+             * @description * `changes.INDEX.values.KEY` - changes.INDEX.values.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.values.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `changes.non_field_errors` - changes.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.non_field_errors";
+            /**
+             * @description * `empty` - empty
+             *     * `not_a_list` - not_a_list
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "empty" | "not_a_list" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateError: components["schemas"]["AdminLookupsChangesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateNoteErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXTableErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXOpErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXLookupErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXLookupKEYErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXValuesErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXValuesKEYErrorComponent"];
+        AdminLookupsChangesCreateErrorResponse400: components["schemas"]["AdminLookupsChangesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminLookupsChangesCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminLookupsChangesCreateNoteErrorComponent: {
+            /**
+             * @description * `note` - note (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "note";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminLookupsChangesCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminLookupsChangesCreateError"][];
+        };
         AdminLookupsCreateError: components["schemas"]["AdminLookupsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsCreateValuesErrorComponent"] | components["schemas"]["AdminLookupsCreateValuesKEYErrorComponent"];
         AdminLookupsCreateErrorResponse400: components["schemas"]["AdminLookupsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         AdminLookupsCreateNonFieldErrorsErrorComponent: {
@@ -722,6 +925,7 @@ export interface components {
             code: "invalid" | "null" | "required";
             detail: string;
         };
+        AdminLookupsVersionsBudgetsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminOverviewRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
@@ -2187,6 +2391,20 @@ export interface components {
          * @enum {string}
          */
         CategoryEnum: "Academic" | "Professional";
+        ChangeSet: {
+            id: number;
+            note: string;
+            saved_by: string | null;
+            /** Format: date-time */
+            saved_at: string;
+            change_count: number;
+        };
+        ChangesApplied: {
+            change_set_id: number;
+            version_id: number;
+            new_version: boolean;
+            replaced: components["schemas"]["PricedOn"] | null;
+        };
         /**
          * @description * `client_error` - Client Error
          * @enum {string}
@@ -2408,6 +2626,21 @@ export interface components {
             password: string;
             account_type: components["schemas"]["AccountTypeEnum"];
         };
+        LookupChange: {
+            table: components["schemas"]["TableEnum"];
+            op: components["schemas"]["OpEnum"];
+            lookup?: {
+                [key: string]: unknown;
+            };
+            values?: {
+                [key: string]: unknown;
+            };
+        };
+        LookupChanges: {
+            /** @default  */
+            note: string;
+            changes: components["schemas"]["LookupChange"][];
+        };
         LookupCreate: {
             values: {
                 [key: string]: unknown;
@@ -2443,6 +2676,8 @@ export interface components {
             updated_by: string | null;
             budgets_priced: number;
             current: boolean;
+            accepts_changes: boolean;
+            change_sets: components["schemas"]["ChangeSet"][];
         };
         LookupsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         /**
@@ -2580,6 +2815,13 @@ export interface components {
          * @enum {string}
          */
         OnCostTypeEnum: "superannuation" | "workcover" | "leave_loading" | "long_service_leave" | "parental_leave" | "annual_leave_provision";
+        /**
+         * @description * `create` - create
+         *     * `update` - update
+         *     * `delete` - delete
+         * @enum {string}
+         */
+        OpEnum: "create" | "update" | "delete";
         Overview: {
             accounts: components["schemas"]["AccountsSummary"];
             projects: components["schemas"]["ProjectsSummary"];
@@ -2645,6 +2887,12 @@ export interface components {
             total_cash_co_contribution: number;
             /** Format: double */
             university_position: number;
+        };
+        /** @description Who was priced on the version the rates just moved away from (#142). */
+        PricedOn: {
+            version_id: number;
+            in_review: number;
+            approved: number;
         };
         /**
          * @description What it takes to start a project.
@@ -2935,6 +3183,7 @@ export interface components {
         };
         Restored: {
             version_id: number;
+            replaced: components["schemas"]["PricedOn"];
         };
         RevenueCategory: {
             budget_ledger_id: number;
@@ -3080,6 +3329,16 @@ export interface components {
          */
         StatusEnum: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn";
         /**
+         * @description * `salary_rates` - salary_rates
+         *     * `salary_rate_multipliers` - salary_rate_multipliers
+         *     * `eba_increases` - eba_increases
+         *     * `on_cost_rates` - on_cost_rates
+         *     * `non_staff_cost_categories` - non_staff_cost_categories
+         *     * `calculation_constants` - calculation_constants
+         * @enum {string}
+         */
+        TableEnum: "salary_rates" | "salary_rate_multipliers" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants";
+        /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily
          *     * `Hourly` - Hourly
@@ -3112,6 +3371,23 @@ export interface components {
          * @enum {string}
          */
         ValidationErrorEnum: "validation_error";
+        VersionBudget: {
+            id: number;
+            project_id: number;
+            reference: string | null;
+            title: string;
+            owner: components["schemas"]["VersionBudgetOwner"];
+            status: components["schemas"]["StatusEnum"];
+            /** Format: double */
+            total_price_inc_gst: number;
+            /** Format: date-time */
+            submitted_at: string | null;
+        };
+        VersionBudgetOwner: {
+            /** Format: email */
+            email: string;
+            name: string;
+        };
         VersionsSummary: {
             total: number;
             latest: components["schemas"]["LookupVersion"][];
@@ -3567,6 +3843,95 @@ export interface operations {
             };
         };
     };
+    admin_lookups_changes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookupChanges"];
+                "application/x-www-form-urlencoded": components["schemas"]["LookupChanges"];
+                "multipart/form-data": components["schemas"]["LookupChanges"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangesApplied"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsChangesCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     admin_lookups_versions_list: {
         parameters: {
             query?: never;
@@ -3590,6 +3955,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsVersionsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_budgets_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionBudget"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsBudgetsListErrorResponse400"];
                 };
             };
             401: {

@@ -30,6 +30,17 @@ urlpatterns = [
         name="admin-lookup-version-restore",
     ),
     path(
+        "lookups/versions/<int:version_id>/budgets/",
+        lookups.LookupVersionBudgetsView.as_view(),
+        name="admin-lookup-version-budgets",
+    ),
+    # Before the table route, which would otherwise take "changes" for a table.
+    path(
+        "lookups/changes/",
+        lookups.LookupChangesView.as_view(),
+        name="admin-lookup-changes",
+    ),
+    path(
         "lookups/<str:table>/",
         lookups.LookupTableView.as_view(http_method_names=["post", "patch"]),
         name="lookup-table",

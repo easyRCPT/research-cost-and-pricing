@@ -22,11 +22,11 @@ from api.models import (
     SalaryRate,
     User,
 )
+from api.services.lookup_changes import apply_changes
 from api.services.lookup_update import (
     get_versioned_models,
     list_versions,
     restore_version,
-    update,
 )
 
 LEVEL_A1 = {
@@ -75,15 +75,29 @@ class RestoreVersionTest(TestCase):
     def edit_rate(self, to: str) -> int:
         """An edit that has to mint a version, as one after an approval does."""
         LookupConfiguration.objects.update(referenced=True)
-        update("salary_rates", LEVEL_A1, {"rate": Decimal(to)})
+        apply_changes(
+            [
+                {
+                    "table": "salary_rates",
+                    "op": "update",
+                    "lookup": LEVEL_A1,
+                    "values": {"rate": to},
+                }
+            ],
+            note="",
+            actor=self.admin,
+        )
         return self.current()
+
+    def restore(self, version_id: int) -> int:
+        return restore_version(version_id, self.admin)["version_id"]
 
     def test_restoring_mints_a_copy_and_leaves_the_original_alone(self):
         original = self.current()
         before = rows(original)
         self.edit_rate("99999.0000")
 
-        restored = restore_version(original, self.admin)
+        restored = self.restore(original)
 
         self.assertNotEqual(restored, original)
         self.assertEqual(self.current(), restored)
@@ -95,7 +109,7 @@ class RestoreVersionTest(TestCase):
         original = self.current()
         edited = self.edit_rate("99999.0000")
 
-        restore_version(original, self.admin)
+        self.restore(original)
 
         self.assertTrue(LookupVersion.objects.filter(id=edited).exists())
         self.assertEqual(
@@ -125,7 +139,7 @@ class RestoreVersionTest(TestCase):
             lookup_version_id=edited,
         )
 
-        restore_version(original, self.admin)
+        self.restore(original)
 
         budget.refresh_from_db()
         self.assertEqual(budget.lookup_version_id, edited)
@@ -174,7 +188,7 @@ class RestoreVersionTest(TestCase):
         # The edit has to move the price, or matching it afterwards proves nothing.
         self.assertNotEqual(self.price(self.a_costing()), original)
 
-        restore_version(version, self.admin)
+        self.restore(version)
 
         self.assertEqual(self.price(self.a_costing()), original)
 
@@ -188,18 +202,18 @@ class RestoreVersionTest(TestCase):
 
     def test_it_is_recorded_as_who_did_it_and_from_what(self):
         original = self.current()
-        self.edit_rate("99999.0000")
+        edited = self.edit_rate("99999.0000")
 
-        restored = restore_version(original, self.admin)
+        restored = self.restore(original)
 
         self.assertEqual(LookupVersion.objects.get(id=restored).updated_by, self.admin)
         entry = AuditLog.objects.get(action="admin.lookup.restore")
-        self.assertEqual(entry.detail, {"restored_from": original})
+        self.assertEqual(entry.detail, {"restored_from": original, "replaced": edited})
 
     def test_the_list_marks_the_current_one_newest_first(self):
         original = self.current()
         self.edit_rate("99999.0000")
-        restored = restore_version(original, self.admin)
+        restored = self.restore(original)
 
         listed = list_versions()
 
@@ -207,26 +221,22 @@ class RestoreVersionTest(TestCase):
         self.assertTrue(listed[0]["current"])
         self.assertEqual(sum(v["current"] for v in listed), 1)
 
-    def test_an_edit_records_who_and_what_it_said_before(self):
-        # #73: the old rate survives in the log as well as in the old version.
-        was = self.rate()
-        LookupConfiguration.objects.update(referenced=True)
-        update("salary_rates", LEVEL_A1, {"rate": Decimal("1234.5")}, actor=self.admin)
+    def test_it_says_who_was_priced_on_the_version_it_replaced(self):
+        # #142: the costings an administrator may need to send back.
+        original = self.current()
+        edited = self.edit_rate("99999.0000")
+        for status in ("hod_review", "dean_review", "approved", "rejected"):
+            budget = self.a_costing()
+            budget.status = status
+            budget.lookup_version_id = edited
+            budget.save(update_fields=["status", "lookup_version"])
+        self.a_costing()  # a draft, never stamped
 
-        entry = AuditLog.objects.get(action="admin.lookup.update")
-        self.assertEqual(entry.actor, self.admin)
-        self.assertEqual(entry.object_type, "salary_rates")
-        self.assertEqual(entry.detail["lookup"], LEVEL_A1)
-        self.assertEqual(entry.detail["version"], self.current())
-        self.assertEqual(Decimal(entry.detail["before"]["rate"]), was)
-        self.assertEqual(Decimal(entry.detail["after"]["rate"]), Decimal("1234.5"))
-
-    def test_the_version_an_edit_mints_names_the_editor(self):
-        LookupConfiguration.objects.update(referenced=True)
-        update("salary_rates", LEVEL_A1, {"rate": Decimal(90000)}, actor=self.admin)
+        restored = restore_version(original, self.admin)
 
         self.assertEqual(
-            LookupVersion.objects.get(id=self.current()).updated_by, self.admin
+            restored["replaced"],
+            {"version_id": edited, "in_review": 2, "approved": 1},
         )
 
 
@@ -244,6 +254,16 @@ class RestoreRoutesTest(TestCase):
         self.assertEqual(
             self.client.get("/api/admin/lookups/versions/").status_code, 403
         )
+
+    def test_a_researcher_cannot_restore(self):
+        self.client.force_login(self.researcher)
+        current = LookupConfiguration.objects.get().current_version_id
+        older = LookupVersion.objects.create()
+
+        response = self.client.post(f"/api/admin/lookups/versions/{older.id}/restore/")
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(LookupConfiguration.objects.get().current_version_id, current)
 
     def test_a_superadmin_lists_the_versions(self):
         self.client.force_login(self.admin)

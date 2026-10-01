@@ -121,6 +121,15 @@ def _get_salary_rate_year(constants: dict) -> int:
     return int(salary_rate_year)
 
 
+# The salary table's payroll type for each employment type: the workbook keys
+# its rate lookup on CONCATENATE(payroll_type, category, classification).
+PAYROLL_TYPE = {
+    "Continuing": "Fortnight",
+    "Fixed-Term": "Fortnight",
+    "Casual": "Casual",
+}
+
+
 def _get_eba_rate(eba: dict, year: int) -> Decimal:
     # First eba increase rate year is the next year of the tool's initiation.
     # First record is 2026: 3% in Excel workbook.
@@ -237,12 +246,7 @@ def find_salary_rate(
     classification = info_data["classification"]
     time_basis = info_data["time_basis"]
 
-    # Get payroll type
-    mapping = {
-        "Continuing": "Fortnight",
-        "Fixed-Term": "Fortnight",
-    }
-    payroll_type = mapping.get(employment_type, employment_type)
+    payroll_type = PAYROLL_TYPE.get(employment_type, employment_type)
 
     # Continuing and Fixed-term staff progress based on years employed
     # Casual staff do not progress classification.
