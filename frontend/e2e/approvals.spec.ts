@@ -87,3 +87,50 @@ test('a costing that is not ready lists what the server wants', async ({ page })
   await expect(page.getByText('Chief investigator is required.')).toBeVisible()
   await expect(page.getByText('Draft', { exact: true })).toBeVisible()
 })
+
+test('the owner withdraws a submission, it leaves the queue, and a new draft carries on (#95)', async ({
+  page,
+}) => {
+  const title = uniqueTitle('Withdrawn')
+  const project = await createProject(page, title, { start: 2026, end: 2026 }, DEMO.hodDepartment)
+  await makeReady(page, project.budget_id)
+  await page.goto(`/projects/${project.id}/approvals`)
+  await page.getByRole('button', { name: 'Submit for approval' }).click()
+  await expect(page.getByText('Awaiting Head of Department')).toBeVisible()
+
+  // The head of department can see it, but withdrawing is the owner's alone.
+  await switchTo(page, DEMO.hod, 'staff')
+  await page.goto(`/projects/${project.id}/approvals`)
+  await expect(page.getByText('This costing is waiting on your authorisation')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Withdraw from review' })).toHaveCount(0)
+
+  // The owner withdraws it, after a confirm that says what that means.
+  await switchTo(page, DEMO.researcher, 'researcher')
+  await page.goto(`/projects/${project.id}/approvals`)
+  await page.getByRole('button', { name: 'Withdraw from review' }).click()
+  const ask = page.getByRole('alertdialog', { name: 'Withdraw from review' })
+  await expect(ask).toContainText('can’t be undone')
+  await ask.getByRole('button', { name: 'Withdraw' }).click()
+  await expect(page.getByText('You withdrew this costing from review.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Withdraw from review' })).toHaveCount(0)
+
+  // It is in nobody's queue now.
+  await switchTo(page, DEMO.hod, 'staff')
+  await page.goto('/approvals')
+  await expect(page.getByRole('heading', { name: /Approvals/ }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: new RegExp(title) })).toHaveCount(0)
+
+  // The owner carries on from a new draft, and the withdrawn attempt is kept.
+  await switchTo(page, DEMO.researcher, 'researcher')
+  await page.goto(`/projects/${project.id}/approvals`)
+  await page.getByRole('button', { name: 'Make a new draft from it' }).click()
+  await expect(page).toHaveURL(`/projects/${project.id}/details`)
+  await page
+    .getByRole('navigation', { name: 'Costing sections' })
+    .getByRole('button', { name: 'Approvals', exact: true })
+    .click()
+  await expect(page.getByRole('button', { name: 'Submit for approval' })).toBeVisible()
+  const budgets = await (await page.request.get('/api/projects/')).json()
+  const row = budgets.find((candidate: { id: number }) => candidate.id === project.id)
+  expect(row.budget_count).toBe(2)
+})

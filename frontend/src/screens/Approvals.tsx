@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useBudget, useBudgetId, useEditable, useField } from '@/api/budget'
+import { useBudget, useBudgetId, useEditable, useField, useOwnsBudget } from '@/api/budget'
 import { useDecidableStep } from '@/api/decidable'
 import type { QueueRow } from '@/api/approvals'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -30,6 +30,7 @@ const WHERE_IT_WENT: Record<string, string> = {
 export function Approvals() {
   const { data: budget } = useBudget()
   const editable = useEditable()
+  const owns = useOwnsBudget()
   // An approver opens the costing itself from their queue, reads it through
   // the calculator's own screens, and decides here.
   const budgetId = useBudgetId()
@@ -103,7 +104,7 @@ export function Approvals() {
       )}
       {decidable && !decided && <DecisionPanel row={decidable} onDecided={setDecided} />}
 
-      <ApprovalActions status={status} canSubmit={editable} />
+      <ApprovalActions status={status} canSubmit={editable} owns={owns} />
     </>
   )
 }

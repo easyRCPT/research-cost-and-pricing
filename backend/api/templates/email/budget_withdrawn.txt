@@ -1,0 +1,11 @@
+A budget waiting on your review has been withdrawn by its owner.
+
+Project:
+{{ budget.project.title }}
+
+Department:
+{{ budget.project.department.name }}
+
+There is nothing for you to decide. If it is revised, it will come back to you as a new submission.
+
+{{ url }}

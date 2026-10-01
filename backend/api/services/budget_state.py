@@ -21,8 +21,13 @@ def require_draft(budget: Budget) -> None:
         )
 
 
-def require_rejected(budget: Budget) -> None:
-    if budget.status != Budget.Status.REJECTED:
+def require_clonable(budget: Budget) -> None:
+    """
+    A new draft is made from an attempt that ended without approval: one an
+    approver rejected (#81), or one its owner withdrew (#95). Both are kept
+    as they were; the clone is where the work carries on.
+    """
+    if budget.status not in (Budget.Status.REJECTED, Budget.Status.WITHDRAWN):
         raise Conflict(
             f"Budget {budget.id} is {budget.get_status_display().lower()} "
             f"and cannot be cloned.",

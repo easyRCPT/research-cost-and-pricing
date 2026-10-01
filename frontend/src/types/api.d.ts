@@ -565,6 +565,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/budgets/{budget_id}/withdraw/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The owner pulls a costing back out of review (#95). */
+        post: operations["budgets_withdraw_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/lookups/": {
         parameters: {
             query?: never;
@@ -2401,6 +2418,7 @@ export interface components {
         };
         BudgetsStaffLinesDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         BudgetsSubmitCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        BudgetsWithdrawCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         CalculationConstant: {
             name: string;
             description?: string;
@@ -6412,6 +6430,83 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BudgetsSubmitCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    budgets_withdraw_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                budget_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetsWithdrawCreateErrorResponse400"];
                 };
             };
             401: {
