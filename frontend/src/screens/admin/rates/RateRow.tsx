@@ -6,6 +6,7 @@ import { KINDS } from '@/screens/admin/fieldKinds'
 import type { RateTableSpec } from '@/screens/admin/rateTables'
 import { type Key, keyText, shown, type Values } from '@/screens/admin/stagedChanges'
 
+import type { Refused } from './types'
 import { ValueInput } from './ValueInput'
 
 export function RateRow({
@@ -28,7 +29,7 @@ export function RateRow({
   was?: Values | null
   added?: boolean
   removed?: boolean
-  refusal: string | null
+  refusal: Refused
   onChange: (values: Values) => void
   onRemove?: () => void
   onUndo: () => void
@@ -73,8 +74,10 @@ export function RateRow({
               Removed
             </Badge>
           )}
-          {i === 0 && refusal && (
-            <div className="mt-0.5 text-[12px] text-destructive">{refusal}</div>
+          {i === 0 && refusal?.message && (
+            <div className="mt-0.5 text-[12px] text-destructive">
+              {refusal.message}
+            </div>
           )}
         </Td>
       ))}
@@ -93,6 +96,7 @@ export function RateRow({
               value={values[field.field]}
               constant={String(rowKey.name ?? '')}
               label={`${field.label} for ${name}`}
+              error={refusal?.fields[field.field]}
               onChange={(value) =>
                 onChange({ ...values, [field.field]: value })
               }

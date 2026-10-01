@@ -68,7 +68,7 @@ export function RateTable({
               }
               was={change?.op === 'update' ? change.was : null}
               removed={change?.op === 'delete'}
-              refusal={refused?.id === id ? refused.message : null}
+              refusal={refused?.id === id ? refused : null}
               onChange={(edited) => {
                 const update = updateOf(spec, key, saved, edited)
                 onStage(update ? upsert(staged, update) : without(staged, id))
@@ -99,7 +99,7 @@ export function RateTable({
               rowKey={change.key}
               values={change.value}
               added
-              refusal={refused?.id === id ? refused.message : null}
+              refusal={refused?.id === id ? refused : null}
               onChange={(value) =>
                 onStage(upsert(staged, { ...change, value }))
               }

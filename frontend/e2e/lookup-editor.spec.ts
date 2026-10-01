@@ -157,10 +157,14 @@ test('a set with one refused change saves nothing and marks that row (#138)', as
   const refused = page.getByRole('row').filter({ hasText: '2093' })
   await expect(refused).toHaveAttribute('aria-invalid', 'true')
   await expect(refused).toContainText('greater than or equal to 0')
+  const increase = refused.getByRole('spinbutton')
+  await expect(increase).toHaveAttribute('aria-invalid', 'true')
+  await expect(increase).toHaveAccessibleDescription(/greater than or equal to 0/)
   expect(await ebaYears(page)).not.toContain(2092)
 
   // Still held, so it can be put right and saved.
-  await refused.getByRole('spinbutton').fill('0.04')
+  await increase.fill('0.04')
+  await expect(increase).not.toHaveAttribute('aria-describedby')
   await page.getByRole('button', { name: 'Review changes' }).click()
   await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(page.getByRole('status').filter({ hasText: '2 changes saved' })).toBeVisible()

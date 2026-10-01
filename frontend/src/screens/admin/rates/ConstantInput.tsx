@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { asPercent, PERCENT_CONSTANTS } from '@/lib/format/constants'
@@ -39,11 +39,16 @@ export function ConstantInput({
   name,
   value,
   label,
+  refusal,
+  refusalId,
   onChange,
 }: {
   name: string
   value: number
   label: string
+  /** The server's complaint, which `ValueInput` shows under this with `refusalId`. */
+  refusal?: string
+  refusalId?: string
   onChange: (value: number) => void
 }) {
   const percent = PERCENT_CONSTANTS.has(name)
@@ -51,6 +56,7 @@ export function ConstantInput({
   // rewritten as 0.3 under the cursor.
   const [draft, setDraft] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const errorId = useId()
 
   return (
     <div className="grid justify-items-end gap-0.5">
@@ -60,7 +66,8 @@ export function ConstantInput({
           inputMode="decimal"
           value={draft ?? String(value)}
           aria-label={label}
-          aria-invalid={error ? true : undefined}
+          aria-invalid={error || refusal ? true : undefined}
+          aria-describedby={error ? errorId : refusal ? refusalId : undefined}
           onFocus={() => setDraft(String(value))}
           onChange={(event) => {
             setDraft(event.target.value)
@@ -78,7 +85,11 @@ export function ConstantInput({
           </span>
         )}
       </div>
-      {error && <span className="text-[12px] text-destructive">{error}</span>}
+      {error && (
+        <span id={errorId} className="text-[12px] text-destructive">
+          {error}
+        </span>
+      )}
     </div>
   )
 }
