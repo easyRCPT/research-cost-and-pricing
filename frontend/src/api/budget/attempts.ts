@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { projectsQuery } from '@/api/projects'
+import { useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 
 import { useBudgetId } from './context'
-import { budgetKey } from './detail'
+import { budgetKeys } from './detail'
 
 /**
  * Pull this costing back out of review (#95). It becomes `withdrawn`: kept,
@@ -12,7 +13,7 @@ import { budgetKey } from './detail'
  */
 export function useWithdrawBudget() {
   const budgetId = useBudgetId()
-  const queryClient = useQueryClient()
+  const invalidate = useInvalidate()
 
   return useMutation({
     mutationFn: async () => {
@@ -25,8 +26,7 @@ export function useWithdrawBudget() {
     // Refetched on a refusal too: a 409 means an approver decided first, and
     // the screen should show where it went rather than an error.
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: budgetKey(budgetId) })
-      queryClient.invalidateQueries({ queryKey: projectsQuery.queryKey })
+      invalidate(budgetKeys.detail(budgetId), projectsQuery.queryKey)
     },
   })
 }
@@ -40,7 +40,7 @@ export function useWithdrawBudget() {
  */
 export function useNewDraftFrom() {
   const budgetId = useBudgetId()
-  const queryClient = useQueryClient()
+  const invalidate = useInvalidate()
 
   return useMutation({
     mutationFn: async () => {
@@ -50,6 +50,6 @@ export function useNewDraftFrom() {
         }),
       )
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: projectsQuery.queryKey }),
+    onSuccess: () => invalidate(projectsQuery.queryKey),
   })
 }

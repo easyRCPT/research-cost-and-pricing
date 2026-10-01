@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useBudgetId } from '@/api/budget/context'
-import { budgetKey } from '@/api/budget/detail'
+import { budgetKeys } from '@/api/budget/detail'
 import { getDrafts, setDrafts } from '@/api/budget/drafts'
 import { reportWriteError, writeKey, writeScope } from '@/api/budget/write'
 import type { BudgetDetail } from '@/types'
@@ -14,7 +14,7 @@ export function useLineMutations<K extends LineKind>(kind: K) {
   const spec = LINE_KINDS[kind]
   const budgetId = useBudgetId()
   const queryClient = useQueryClient()
-  const key = budgetKey(budgetId)
+  const key = budgetKeys.detail(budgetId)
   const scope = writeScope(budgetId)
 
   const onError = (error: unknown, where?: string) => {

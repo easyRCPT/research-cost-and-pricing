@@ -13,7 +13,7 @@ import {
 import type { BudgetDetail, Deliverable } from '@/types'
 
 import { useBudgetId } from './context'
-import { budgetKey, useBudget } from './detail'
+import { budgetKeys, useBudget } from './detail'
 import { getDrafts, isDraft, setDrafts, useDrafts } from './drafts'
 import {
   type Command,
@@ -64,7 +64,7 @@ export function useDeliverables(): Deliverables {
   const edit = useEdit()
   const queryClient = useQueryClient()
 
-  const key = budgetKey(budgetId)
+  const key = budgetKeys.detail(budgetId)
   const scope = writeScope(budgetId)
 
   const onError = (error: unknown, where?: string) => {

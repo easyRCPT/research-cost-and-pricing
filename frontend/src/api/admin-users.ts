@@ -1,13 +1,12 @@
 import {
   keepPreviousData,
-  queryOptions,
   useMutation,
   useQuery,
-  useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
 import { meQuery } from '@/api/auth'
+import { adminQuery, useInvalidate } from '@/api/query'
 import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
@@ -18,24 +17,19 @@ const usersKey = ['admin', 'users'] as const
 
 /** Filtered on the server, and the last list held while the next one loads. */
 export function useAdminUsers(q: string) {
-  return useQuery({
-    queryKey: [...usersKey, q],
-    queryFn: async (): Promise<AdminUser[]> => {
-      return unwrap(
-        await api.GET('/api/admin/users/', {
+  return useQuery(
+    adminQuery(
+      ['users', q],
+      () =>
+        api.GET('/api/admin/users/', {
           params: { query: q ? { q } : {} },
         }),
-      )
-    },
-    placeholderData: keepPreviousData,
-  })
+      { placeholderData: keepPreviousData },
+    ),
+  )
 }
 
-const groupsQuery = queryOptions({
-  queryKey: ['admin', 'groups'] as const,
-  queryFn: async (): Promise<string[]> => {
-    return unwrap(await api.GET('/api/admin/groups/'))
-  },
+const groupsQuery = adminQuery(['groups'], () => api.GET('/api/admin/groups/'), {
   staleTime: Infinity,
 })
 
@@ -45,13 +39,9 @@ export function useGroups() {
 }
 
 function useRefresh() {
-  const queryClient = useQueryClient()
-  return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: usersKey }),
-      // An administrator editing their own account changes who `me` is.
-      queryClient.invalidateQueries({ queryKey: meQuery.queryKey }),
-    ])
+  const invalidate = useInvalidate()
+  // An administrator editing their own account changes who `me` is.
+  return () => invalidate(usersKey, meQuery.queryKey)
 }
 
 export function useUpdateUser() {

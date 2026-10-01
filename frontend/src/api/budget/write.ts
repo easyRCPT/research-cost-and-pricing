@@ -9,7 +9,7 @@ import { api, ApiError, unwrap } from '@/lib/api'
 import type { BudgetDetail, BudgetUpdate } from '@/types'
 
 import { useBudgetId } from './context'
-import { budgetKey } from './detail'
+import { budgetKeys } from './detail'
 
 export const writeKey = ['budget-write'] as const
 
@@ -192,7 +192,7 @@ export function reportWriteError(error: unknown, where?: string) {
 export function useEdit() {
   const budgetId = useBudgetId()
   const queryClient = useQueryClient()
-  const key = budgetKey(budgetId)
+  const key = budgetKeys.detail(budgetId)
 
   const write = useMutation({
     mutationKey: writeKey,
