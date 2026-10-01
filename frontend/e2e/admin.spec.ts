@@ -165,7 +165,8 @@ test('a researcher cannot be given anything to approve (#69)', async ({ page }) 
   await expect(page.getByRole('combobox', { name: 'Department' })).toHaveCount(0)
 
   // Moved to staff, the form is back.
-  await page.getByRole('checkbox', { name: 'researcher' }).click()
-  await page.getByRole('checkbox', { name: 'staff' }).click()
+  await page.getByRole('button', { name: 'Move to staff' }).click()
+  await expect(page.getByRole('checkbox', { name: 'researcher' })).not.toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'staff' })).toBeChecked()
   await expect(page.getByRole('combobox', { name: 'Department' })).toBeVisible()
 })

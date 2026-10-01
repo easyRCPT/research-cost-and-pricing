@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { type AdminUser, useGroups, useUpdateUser } from '@/api/admin-users'
-import { SUPERADMIN, useMe } from '@/api/auth'
+import { STAFF, SUPERADMIN, useMe } from '@/api/auth'
 import { Panel } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -49,6 +49,15 @@ export function UserEditor({ user }: { user: AdminUser }) {
       return setPending({
         ...LOCKOUT,
         confirm: 'Yes, remove my superadmin group',
+        changes: { groups },
+      })
+    }
+    const approvals = user.assignments.length
+    if (!on && group === STAFF && approvals > 0) {
+      return setPending({
+        title: `Remove ${nameOf(user)} from staff?`,
+        body: `Only staff approve, so ${approvals === 1 ? 'their approval goes' : `all ${approvals} of their approvals go`} too. Costings waiting on them stay pending until someone else is assigned.`,
+        confirm: 'Remove from staff',
         changes: { groups },
       })
     }

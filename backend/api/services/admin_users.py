@@ -21,7 +21,7 @@ from django.db.models import Q, QuerySet
 from ..exceptions import Conflict, UnprocessableEntity
 from ..models import Department, Faculty, User, UserOrgAssignment
 from .audit import write_audit
-from .auth import RESEARCHER, SUPERADMIN, groups_of
+from .auth import STAFF, SUPERADMIN, groups_of
 
 Role = UserOrgAssignment.Role
 
@@ -140,6 +140,11 @@ def update_user(actor: User, user: User, data: dict) -> User:
             object_id=str(user.id),
             detail={"email": user.email, **detail},
         )
+    # Only staff approve, so losing staff ends it. The costings wait for the
+    # next holder rather than staying with this account.
+    if "groups" in data and STAFF not in data["groups"]:
+        for assignment in user.org_assignments.all():
+            _delete_assignment(actor, user, assignment)
     return user
 
 
@@ -170,9 +175,9 @@ def _scope(role: str, department: str | None, faculty: str | None):
 def add_assignment(
     actor: User, user: User, role: str, department: str | None, faculty: str | None
 ) -> UserOrgAssignment:
-    if RESEARCHER in groups_of(user):
+    if STAFF not in groups_of(user):
         raise UnprocessableEntity(
-            "A researcher cannot approve for a unit. Move the account to staff first."
+            "Only staff can approve for a unit. Move the account to staff first."
         )
     dept, fac = _scope(role, department, faculty)
     if UserOrgAssignment.objects.filter(
@@ -206,6 +211,10 @@ def remove_assignment(actor: User, user: User, assignment_id: int) -> None:
         assignment = user.org_assignments.get(id=assignment_id)
     except UserOrgAssignment.DoesNotExist:
         raise UnprocessableEntity("That assignment does not belong to this account.")
+    _delete_assignment(actor, user, assignment)
+
+
+def _delete_assignment(actor: User, user: User, assignment: UserOrgAssignment) -> None:
     detail = {
         "email": user.email,
         "role": assignment.role,

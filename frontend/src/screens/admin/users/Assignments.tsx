@@ -1,7 +1,11 @@
 import { useState } from 'react'
 
-import { type AdminUser, useRemoveAssignment } from '@/api/admin-users'
-import { RESEARCHER } from '@/api/auth'
+import {
+  type AdminUser,
+  useRemoveAssignment,
+  useUpdateUser,
+} from '@/api/admin-users'
+import { RESEARCHER, STAFF } from '@/api/auth'
 import { Panel } from '@/components/shell'
 import { Button } from '@/components/ui/button'
 import { InlineConfirm } from '@/components/ui/inline-confirm'
@@ -11,8 +15,20 @@ import { refused, ROLE_LABEL } from './labels'
 
 export function Assignments({ user }: { user: AdminUser }) {
   const remove = useRemoveAssignment()
+  const update = useUpdateUser()
   const [confirming, setConfirming] = useState<number | null>(null)
   const researcher = user.groups.includes(RESEARCHER)
+
+  const moveToStaff = () =>
+    update.mutate(
+      {
+        id: user.id,
+        changes: {
+          groups: [...user.groups.filter((g) => g !== RESEARCHER), STAFF],
+        },
+      },
+      { onError: refused },
+    )
 
   return (
     <Panel
@@ -67,13 +83,25 @@ export function Assignments({ user }: { user: AdminUser }) {
           </li>
         ))}
       </ul>
-      {researcher ? (
-        <p className="mt-4 border-t pt-3 text-[13px] text-muted-foreground">
-          A researcher cannot approve for a unit. Move this account to staff to
-          assign it a department or faculty.
-        </p>
-      ) : (
+      {user.groups.includes(STAFF) ? (
         <AddAssignment user={user} />
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+          <p className="text-[13px] text-muted-foreground">
+            {researcher
+              ? 'A researcher cannot approve for a unit.'
+              : 'Only staff can approve for a unit.'}{' '}
+            Move this account to staff to assign it a department or faculty.
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={update.isPending}
+            onClick={moveToStaff}
+          >
+            Move to staff
+          </Button>
+        </div>
       )}
     </Panel>
   )
