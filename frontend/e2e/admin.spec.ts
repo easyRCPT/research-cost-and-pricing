@@ -1,4 +1,4 @@
-import { apiWrite, DEMO, expect, readyProject, signIn, submitBudget,test } from './fixtures'
+import { apiWrite, DEMO, expect, readyProject, signIn, submitBudget, test } from './fixtures'
 
 test("the register finds anyone's costing, read-only, and the log has its submission (#71, #72)", async ({
   page,

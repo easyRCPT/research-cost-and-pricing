@@ -1,4 +1,4 @@
-import { expect, newStaffRow,test } from './fixtures'
+import { expect, newStaffRow, test } from './fixtures'
 
 /**
  * Regression for two faults that met on the same cell.

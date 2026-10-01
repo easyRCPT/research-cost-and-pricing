@@ -22,7 +22,7 @@ import { PageHead } from './PageHead'
 import { ReadOnlyNotice } from './ReadOnlyNotice'
 import { ScreenNav } from './ScreenNav'
 import { SECTIONS } from './sections'
-import { type EditorScreen,SideBar as Sidebar } from './Sidebar'
+import { type EditorScreen, SideBar as Sidebar } from './Sidebar'
 import { useBackTarget } from './useBackTarget'
 
 interface AppContentProps {

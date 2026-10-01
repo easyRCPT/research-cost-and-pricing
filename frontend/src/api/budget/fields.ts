@@ -5,7 +5,7 @@ import type { BudgetDetail, BudgetInfoInput, ProjectInfoInput } from '@/types'
 
 import { useCiFlag } from './ci-flag'
 import { useBudget } from './detail'
-import { type Command,useEdit } from './write'
+import { type Command, useEdit } from './write'
 
 /** What the saved budget says, which is what every input binds to. */
 export const useBudgetInfo = () => useBudget().data.budget_info

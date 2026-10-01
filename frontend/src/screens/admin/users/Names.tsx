@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { type AdminUser,useUpdateUser } from '@/api/admin-users'
+import { type AdminUser, useUpdateUser } from '@/api/admin-users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 

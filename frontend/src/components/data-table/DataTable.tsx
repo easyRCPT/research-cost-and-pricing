@@ -1,4 +1,4 @@
-import { type RowData,useTable } from '@tanstack/react-table'
+import { type RowData, useTable } from '@tanstack/react-table'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 

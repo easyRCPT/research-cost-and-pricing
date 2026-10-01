@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { type LookupVersion,useRestoreVersion } from '@/api/admin-lookups'
+import { type LookupVersion, useRestoreVersion } from '@/api/admin-lookups'
 import { Td } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

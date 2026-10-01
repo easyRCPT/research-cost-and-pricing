@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { type Decision, type QueueRow,useDecide } from '@/api/approvals'
+import { type Decision, type QueueRow, useDecide } from '@/api/approvals'
 import { useMe } from '@/api/auth'
 import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'

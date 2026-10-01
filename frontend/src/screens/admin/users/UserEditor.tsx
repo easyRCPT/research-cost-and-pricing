@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { type AdminUser,useGroups, useUpdateUser } from '@/api/admin-users'
+import { type AdminUser, useGroups, useUpdateUser } from '@/api/admin-users'
 import { SUPERADMIN, useMe } from '@/api/auth'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'

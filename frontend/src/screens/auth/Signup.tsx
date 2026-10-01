@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import { type AccountType,homeFor, useSignup } from '@/api/auth'
+import { type AccountType, homeFor, useSignup } from '@/api/auth'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api'
 

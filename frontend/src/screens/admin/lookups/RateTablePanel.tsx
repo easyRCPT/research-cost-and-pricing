@@ -5,7 +5,7 @@ import { AddRateRow } from '@/screens/admin/rates/AddRateRow'
 import { RateTable as RateTableView } from '@/screens/admin/rates/RateTable'
 import type { Refused } from '@/screens/admin/rates/types'
 import { tableSpec } from '@/screens/admin/rateTables'
-import { type Row, type Staged,upsert } from '@/screens/admin/stagedChanges'
+import { type Row, type Staged, upsert } from '@/screens/admin/stagedChanges'
 import type { LookupTables } from '@/types'
 
 interface RateTablePanelProps {

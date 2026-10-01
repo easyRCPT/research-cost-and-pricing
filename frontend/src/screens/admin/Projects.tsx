@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useMemo } from 'react'
 
-import { type AdminProject,useAdminProjects } from '@/api/admin-console'
+import { type AdminProject, useAdminProjects } from '@/api/admin-console'
 import {
   columnHelper,
   DataTable,

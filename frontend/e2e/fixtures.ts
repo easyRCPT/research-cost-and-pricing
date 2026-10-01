@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page,test as base } from '@playwright/test'
+import { expect, type Locator, type Page, test as base } from '@playwright/test'
 
 export interface Project {
   id: number

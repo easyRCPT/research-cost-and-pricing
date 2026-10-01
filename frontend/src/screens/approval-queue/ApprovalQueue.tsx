@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
-import { type QueueRow,useApprovalQueue } from '@/api/approvals'
+import { type QueueRow, useApprovalQueue } from '@/api/approvals'
 import { PageHead, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import { shortDate } from '@/lib/format/dates'

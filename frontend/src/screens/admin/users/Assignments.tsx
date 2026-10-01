@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-import { type AdminUser,useRemoveAssignment } from '@/api/admin-users'
+import { type AdminUser, useRemoveAssignment } from '@/api/admin-users'
 import { Button } from '@/components/ui/button'
 
 import { AddAssignment } from './AddAssignment'
-import { refused,ROLE_LABEL } from './labels'
+import { refused, ROLE_LABEL } from './labels'
 
 export function Assignments({ user }: { user: AdminUser }) {
   const remove = useRemoveAssignment()

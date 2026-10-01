@@ -15,7 +15,7 @@ import { useStagedChanges } from '@/screens/admin/lookups/useStagedChanges'
 import { ChangeBar } from '@/screens/admin/rates/ChangeBar'
 import { RatesMovedNotice } from '@/screens/admin/rates/RatesMovedNotice'
 import { Review } from '@/screens/admin/rates/Review'
-import { isRateTable,RATE_TABLES } from '@/screens/admin/rateTables'
+import { isRateTable, RATE_TABLES } from '@/screens/admin/rateTables'
 import { ReferenceTableEditor } from '@/screens/admin/reference/ReferenceTableEditor'
 import {
   referenceSpec,

@@ -1,4 +1,4 @@
-import { columnHelper,DataTable, TableCard } from '@/components/data-table'
+import { columnHelper, DataTable, TableCard } from '@/components/data-table'
 import { Alert, AlertDescription } from '@/components/ui/alert.tsx'
 import type { LookupTables } from '@/types'
 

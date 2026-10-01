@@ -1,4 +1,4 @@
-import { columnHelper,DataTable, TableCard } from '@/components/data-table'
+import { columnHelper, DataTable, TableCard } from '@/components/data-table'
 import { constantName } from '@/lib/format/constants'
 import { money } from '@/lib/format/utils'
 import type { LookupTables } from '@/types'
