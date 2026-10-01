@@ -39,8 +39,8 @@ class FlowFixture(TestCase):
             version=version,
         )
 
-        self.faculty = self.department.faculty
         self.department = make_department(name="Science")
+        self.faculty = self.department.faculty
 
         self.owner = make_user(groups=["researcher"])
         self.hod = make_user("hod@unimelb.edu.au", groups=["staff"])
