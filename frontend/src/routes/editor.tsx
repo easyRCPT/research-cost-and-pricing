@@ -3,8 +3,8 @@ import { Navigate, useNavigate } from '@tanstack/react-router'
 import { BudgetProvider } from '@/api/budget'
 import { useProjects } from '@/api/projects'
 import { AppBoundary, AppSkeleton } from '@/components/shell'
-import { AppContent, type AppScreen } from '@/components/shell/AppContent'
 import { editorRoute } from '@/router'
+import { AppContent, type AppScreen } from '@/screens/editor/AppContent'
 
 /**
  * The costing flow, addressed by project.

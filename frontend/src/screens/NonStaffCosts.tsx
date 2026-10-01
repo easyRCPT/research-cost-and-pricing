@@ -1,22 +1,16 @@
-import { type NonStaffLines, useBudget } from '@/api/budget'
+import { useBudget, useLines } from '@/api/budget'
+import { useLookups } from '@/api/lookups'
 import { Panel } from '@/components/shell'
-import type { LookupTables } from '@/types'
 
 import { NonStaffTable } from './nonstaff/NonStaffTable'
 
-export interface NonStaffCostsProps extends NonStaffLines {
-  lookups: LookupTables
-}
-
-export function NonStaffCosts({
-  lines,
-  years,
-  patchLine,
-  addLine,
-  removeLine,
-  lookups,
-}: NonStaffCostsProps) {
+export function NonStaffCosts() {
   const { data: budget } = useBudget()
+  const { data: lookups } = useLookups()
+  const { lines, years, patchLine, addLine, removeLine } = useLines(
+    'non_staff',
+    budget.years,
+  )
 
   return (
     <Panel>

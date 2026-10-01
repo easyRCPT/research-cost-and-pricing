@@ -1,19 +1,16 @@
 import { useBudget, useCiFlag, useLines } from '@/api/budget'
+import { useLookups } from '@/api/lookups'
 import { Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { ciLineId, withCiName, withCosts } from '@/lib/staff'
-import type { LookupTables } from '@/types'
 
 import { StaffTable } from './staff/StaffTable'
 
-export interface StaffCostsProps {
-  lookups: LookupTables
-}
-
-export function StaffCosts({ lookups }: StaffCostsProps) {
+export function StaffCosts() {
   const { data: budget } = useBudget()
+  const { data: lookups } = useLookups()
   const staff = useLines('staff', budget.years)
   const { included, setIncluded } = useCiFlag()
 
