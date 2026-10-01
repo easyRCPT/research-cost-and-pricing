@@ -710,6 +710,34 @@ class TestRoutes(RatesMixin, TestCase):
         )
         self.assertEqual(LookupChangeSet.objects.get().note, "Two rates")
 
+    def test_a_row_named_with_a_blank_key_field_can_be_changed(self):
+        # An on-cost's rate for every year has no year: its key holds a null.
+        self.client.force_login(self.admin)
+        lookup = {
+            "on_cost_type": "annual_leave_provision",
+            "employment_type": "Casual",
+            "year": None,
+        }
+
+        response = self.post(
+            {
+                "changes": [
+                    {
+                        "table": "on_cost_rates",
+                        "op": "update",
+                        "lookup": lookup,
+                        "values": {"rate": "0.0007"},
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(
+            OnCostRate.objects.get(version_id=self.current(), **lookup).rate,
+            Decimal("0.0007"),
+        )
+
     def test_a_refusal_names_the_change_by_its_index(self):
         self.client.force_login(self.admin)
 

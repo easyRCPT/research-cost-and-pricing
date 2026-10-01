@@ -702,11 +702,10 @@ export interface components {
             attr: "changes.INDEX.lookup.KEY";
             /**
              * @description * `invalid` - invalid
-             *     * `null` - null
              *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "null" | "required";
+            code: "invalid" | "required";
             detail: string;
         };
         AdminLookupsChangesCreateChangesINDEXNonFieldErrorsErrorComponent: {
@@ -776,11 +775,10 @@ export interface components {
             attr: "changes.INDEX.values.KEY";
             /**
              * @description * `invalid` - invalid
-             *     * `null` - null
              *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "null" | "required";
+            code: "invalid" | "required";
             detail: string;
         };
         AdminLookupsChangesCreateChangesNonFieldErrorsErrorComponent: {
