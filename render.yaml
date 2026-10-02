@@ -39,6 +39,12 @@ services:
       # Prompted for during Blueprint setup: paste the Neon pooled URL here.
       - key: DATABASE_URL
         sync: false
+      # Prompted for during Blueprint setup. The from address must be on a
+      # domain verified in Resend.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: DJANGO_DEFAULT_FROM_EMAIL
+        sync: false
 
   # ------------------------------------------------------------------
   # Vite/React single-page app (static site, assets served by Render).

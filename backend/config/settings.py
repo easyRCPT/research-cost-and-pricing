@@ -167,6 +167,19 @@ ALLOWED_EMAIL_DOMAINS = [
     for domain in _env_list("DJANGO_ALLOWED_EMAIL_DOMAINS", ["unimelb.edu.au"])
 ]
 
+# Resend in deployed environments, over HTTPS: Render's free plan blocks the
+# SMTP ports. Without a key, mail goes over SMTP to Mailpit (`make mail-up`).
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+if RESEND_API_KEY:
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+    ANYMAIL = {"RESEND_API_KEY": RESEND_API_KEY}
+else:
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", "127.0.0.1")
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "1025"))
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DJANGO_DEFAULT_FROM_EMAIL", "easyRCPT <noreply@easyrcpt.local>"
+)
+
 # Two weeks, HttpOnly so no script can read it, Lax so it survives a normal
 # navigation but not a cross-site form post. Secure follows DEBUG: a cookie
 # marked Secure is never sent over plain http, which would break local work.
