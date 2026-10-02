@@ -7,6 +7,7 @@ from django.test import SimpleTestCase, TestCase
 from api.models import (
     Budget,
     CalculationConstant,
+    Currency,
     EbaIncrease,
     LookupConfiguration,
     OnCostRate,
@@ -205,6 +206,10 @@ class TestGetConstants(SimpleTestCase):
         self.multiplier.time_basis = "FTE"
         self.multiplier.multiplier = Decimal(1)
 
+        self.currency = Mock(spec=Currency)
+        self.currency.code = "USD"
+        self.currency.rate = Decimal("0.70285")
+
         self.eba = Mock(spec=EbaIncrease)
         self.eba.year = 2026
         self.eba.rate = Decimal("0.03")
@@ -269,6 +274,7 @@ class TestGetConstants(SimpleTestCase):
                 self.on_cost_1,
                 self.on_cost_2,
             ],
+            "currencies": [self.currency],
             "calculation_constants": [
                 self.constant_1,
                 self.constant_2,
@@ -333,6 +339,12 @@ class TestGetConstants(SimpleTestCase):
             {
                 2026: Decimal("0.03"),
             },
+        )
+
+        # AUD is the base at 1, whether or not the version holds a row for it.
+        self.assertEqual(
+            result["currencies"],
+            {"AUD": Decimal(1), "USD": Decimal("0.70285")},
         )
 
         self.assertEqual(

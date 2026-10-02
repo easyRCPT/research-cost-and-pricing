@@ -13,6 +13,7 @@ from django.test import TestCase
 from api.management.commands.import_lookups import import_eba_increases
 from api.models import (
     CalculationConstant,
+    Currency,
     EbaIncrease,
     LookupConfiguration,
     LookupVersion,
@@ -76,6 +77,21 @@ class TestImportLookups(TestCase):
             classification=self.rate.classification,
         )
         self.assertNotEqual(imported.rate, SENTINEL)
+
+    def test_imports_the_workbooks_currencies(self):
+        # dCurrencyRates: 21 currencies, each at "1 AUD =" (#152).
+        Currency.objects.all().delete()
+        self.set_referenced(False)
+
+        import_lookups()
+
+        currencies = Currency.objects.filter(version_id=self.pinned_id)
+        self.assertEqual(currencies.count(), 21)
+        usd = currencies.get(code="USD")
+        self.assertEqual(
+            (usd.name, usd.rate), ("United States Dollar", Decimal("0.70285"))
+        )
+        self.assertEqual(currencies.get(code="AUD").rate, Decimal(1))
 
     def test_importing_twice_mints_one_version(self):
         self.set_referenced(True)

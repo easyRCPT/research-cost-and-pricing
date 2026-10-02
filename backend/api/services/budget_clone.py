@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import cast
 
 from django.db import transaction
@@ -11,6 +12,7 @@ from api.models import (
     YearAllocation,
     YearAmount,
 )
+from api.services import lookup_loader
 from api.services.audit import write_audit
 from api.services.lookup_update import current_categories
 
@@ -33,6 +35,8 @@ def clone_budget(user: User, budget: Budget) -> Budget:
         margin=budget.margin,
         gst_applicable=budget.gst_applicable,
         cash_co_contribution=budget.cash_co_contribution,
+        currency=budget.currency,
+        exchange_rate_override=_rate_to_carry(budget),
         comments=budget.comments,
         justification=budget.justification,
         justification_notes=budget.justification_notes,
@@ -152,3 +156,17 @@ def _clone_deliverables(source_budget: Budget, target_budget: Budget) -> None:
     ]
 
     Deliverable.objects.bulk_create(new_deliverables)
+
+
+def _rate_to_carry(budget: Budget) -> Decimal | None:
+    """
+    The researcher's own rate goes with the new draft (#152). If the currency
+    has since left the rates table, the draft keeps the rate the old attempt
+    was priced at as its own, rather than having nothing to price at.
+    """
+    if budget.exchange_rate_override is not None or budget.currency == "AUD":
+        return budget.exchange_rate_override
+    current = lookup_loader.get_constants(lookup_loader.current_version_id())
+    if budget.currency in current["currencies"]:
+        return None
+    return lookup_loader.constants_for(budget)["currencies"][budget.currency]

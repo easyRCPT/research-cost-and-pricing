@@ -24,10 +24,12 @@ export function BudgetForm() {
           project={budget.project_info}
           years={budget.years}
           summary={summary}
+          info={info}
         />
         <PriceSummarySection
           summary={summary}
           gstApplicable={info.gst_applicable}
+          inAud={budget.budget_summary.in_aud.price_summary}
         />
         <StaffBudgetSection staffBudget={budget.budget_summary.staff_budget} />
         <NonStaffBudgetSection

@@ -1,5 +1,5 @@
 import { MONTHS } from '@/lib/constants'
-import { money } from '@/lib/format/utils'
+import { useMoney } from '@/lib/format/currency'
 import type { BudgetDetail, LookupTables } from '@/types'
 
 import { CoverDetail } from './CoverDetail'
@@ -25,6 +25,7 @@ export function BudgetPrintDocument({
   lookups,
   generatedAt = new Date(),
 }: BudgetPrintDocumentProps) {
+  const money = useMoney()
   const { budget_info: info, budget_summary: summary } = budget
   const project = budget.project_info
   const duration =
@@ -64,12 +65,14 @@ export function BudgetPrintDocument({
           project={budget.project_info}
           years={budget.years}
           summary={summary.price_summary}
+          info={info}
         />
       </section>
       <section className="budget-print-section">
         <PriceSummarySection
           summary={summary.price_summary}
           gstApplicable={info.gst_applicable}
+          inAud={summary.in_aud.price_summary}
         />
       </section>
       <section className="budget-print-section">

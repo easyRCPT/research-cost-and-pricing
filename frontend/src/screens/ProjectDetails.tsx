@@ -3,6 +3,7 @@ import { useLookups } from '@/api/lookups'
 import { Panel } from '@/components/shell'
 
 import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
+import { ProjectCurrencyRow } from './project-details/ProjectCurrencyRow'
 import { ProjectDepartmentRow } from './project-details/ProjectDepartmentRow'
 import { ProjectDurationRow } from './project-details/ProjectDurationRow'
 import { ProjectFunderRow } from './project-details/ProjectFunderRow'
@@ -58,6 +59,11 @@ export function ProjectDetails() {
       />
 
       <ProjectDurationRow project={project} onChange={onChange} />
+
+      <ProjectCurrencyRow
+        info={budget.budget_info}
+        currencies={lookups.currencies}
+      />
 
       <ProjectAttributesRow
         project={project}

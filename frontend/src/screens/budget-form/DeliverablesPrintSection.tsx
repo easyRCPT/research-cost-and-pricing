@@ -1,8 +1,9 @@
 import { PartBar } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { useMoney } from '@/lib/format/currency'
 import type { BudgetDetail } from '@/types'
 
 export function DeliverablesPrintSection({ budget }: { budget: BudgetDetail }) {
+  const money = useMoney()
   const rows = budget.budget_info.deliverables
 
   return (

@@ -1,5 +1,5 @@
 import { Calc, Derived } from '@/components/shell'
-import { dash } from '@/lib/format/utils'
+import { useDash } from '@/lib/format/currency'
 import { cn } from '@/lib/utils'
 
 interface StaffFigureCellProps {
@@ -13,6 +13,7 @@ export function StaffFigureCell({
   excluded,
   struck = false,
 }: StaffFigureCellProps) {
+  const dash = useDash()
   return (
     <Calc
       className={cn(

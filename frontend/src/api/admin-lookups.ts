@@ -34,6 +34,7 @@ export type RateTable =
   | 'on_cost_rates'
   | 'non_staff_cost_categories'
   | 'calculation_constants'
+  | 'currencies'
 
 export type VersionsQuery = NonNullable<
   operations['admin_lookups_versions_list']['parameters']['query']
@@ -58,7 +59,8 @@ export function useVersionFilters(query: VersionsQuery) {
   return useQuery(
     adminQuery(
       ['lookup-versions', 'filters', query],
-      () => api.GET('/api/admin/lookups/versions/filters/', { params: { query } }),
+      () =>
+        api.GET('/api/admin/lookups/versions/filters/', { params: { query } }),
       { placeholderData: keepPreviousData },
     ),
   )
@@ -124,7 +126,13 @@ function useRefresh() {
 export function useApplyChanges() {
   const refresh = useRefresh()
   return useMutation({
-    mutationFn: async ({ note, changes }: { note: string; changes: LookupChange[] }) => {
+    mutationFn: async ({
+      note,
+      changes,
+    }: {
+      note: string
+      changes: LookupChange[]
+    }) => {
       return unwrap(
         await api.POST('/api/admin/lookups/changes/', {
           body: { note, changes },
@@ -156,7 +164,12 @@ export function useRestoreVersion() {
  */
 export type ReferenceWrite =
   | { op: 'create'; table: ReferenceTable; values: Record<string, unknown> }
-  | { op: 'update'; table: ReferenceTable; lookup: Record<string, unknown>; values: Record<string, unknown> }
+  | {
+      op: 'update'
+      table: ReferenceTable
+      lookup: Record<string, unknown>
+      values: Record<string, unknown>
+    }
   | { op: 'delete'; table: ReferenceTable; key: string }
 
 export function useReferenceWrite() {

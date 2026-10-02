@@ -17,6 +17,7 @@ type Multiplier = LookupTables['salary_rate_multipliers'][number]
 type Department = LookupTables['departments'][number]
 type Category = LookupTables['non_staff_cost_categories'][number]
 type RevenueCategory = LookupTables['revenue_categories'][number]
+type Currency = LookupTables['currencies'][number]
 
 const percentage = (value: number) => `${(value * 100).toFixed(2)}%`
 
@@ -88,6 +89,29 @@ const EBA_COLUMNS = eba.columns([
   eba.accessor('rate', {
     header: 'Rate',
     cell: ({ getValue }) => getValue().toFixed(4),
+    meta: { align: 'right', className: 'tabular' },
+  }),
+])
+
+// The workbook's dCurrencyRates (Lookup Tables U35:Y56), as it lays it out.
+const currency = columnHelper<Currency>()
+const CURRENCY_COLUMNS = currency.columns([
+  currency.accessor((row) => `${row.code} - ${row.name}`, {
+    id: 'display',
+    header: 'Currency',
+  }),
+  currency.accessor('code', {
+    header: 'Code',
+    meta: { className: 'text-muted-foreground' },
+  }),
+  currency.accessor('rate', {
+    header: '1 AUD =',
+    cell: ({ getValue }) => getValue().toFixed(6),
+    meta: { align: 'right', className: 'tabular' },
+  }),
+  currency.accessor('inverse', {
+    header: 'Inv. 1 AUD',
+    cell: ({ getValue }) => getValue().toFixed(6),
     meta: { align: 'right', className: 'tabular' },
   }),
 ])
@@ -221,6 +245,23 @@ export const LOOKUP_TABS = [
     ],
   },
   { value: 'oncosts', title: 'On-costs', tables: ON_COST_TABLES },
+  {
+    value: 'currencies',
+    title: 'Currencies',
+    notice: () =>
+      'What 1 AUD buys of each currency a costing can be priced in. A costing in another currency converts staff costs from AUD at this rate, unless a rate of its own is set for it.',
+    tables: [
+      lookupTable({
+        value: 'currencies',
+        title: 'Currency rates',
+        columns: CURRENCY_COLUMNS,
+        rows: (lookups) => lookups.currencies,
+        getRowId: (row) => row.code,
+        sortable: true,
+        searchable: true,
+      }),
+    ],
+  },
   {
     value: 'orgunits',
     title: 'Org Units',

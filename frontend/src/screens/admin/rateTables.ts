@@ -54,7 +54,12 @@ export const RATE_TABLES: RateTableSpec[] = [
     id: 'on_cost_rates',
     label: 'On-costs',
     key: [
-      { field: 'on_cost_type', label: 'On-cost', kind: 'text', format: displayName },
+      {
+        field: 'on_cost_type',
+        label: 'On-cost',
+        kind: 'text',
+        format: displayName,
+      },
       { field: 'employment_type', label: 'Employment', kind: 'text' },
       { field: 'year', label: 'Year', kind: 'number' },
     ],
@@ -64,13 +69,22 @@ export const RATE_TABLES: RateTableSpec[] = [
     id: 'eba_increases',
     label: 'EBA increases',
     key: [{ field: 'year', label: 'Year', kind: 'number' }],
-    values: [{ field: 'rate', label: 'Increase', kind: 'number', step: 0.0001 }],
+    values: [
+      { field: 'rate', label: 'Increase', kind: 'number', step: 0.0001 },
+    ],
   },
   {
     id: 'salary_rate_multipliers',
     label: 'Time basis multipliers',
     key: [{ field: 'time_basis', label: 'Time basis', kind: 'text' }],
-    values: [{ field: 'multiplier', label: 'Multiplier', kind: 'number', step: 0.0001 }],
+    values: [
+      {
+        field: 'multiplier',
+        label: 'Multiplier',
+        kind: 'number',
+        step: 0.0001,
+      },
+    ],
     // Every staff line is priced on one of these.
     removable: false,
   },
@@ -83,7 +97,23 @@ export const RATE_TABLES: RateTableSpec[] = [
     values: [
       { field: 'cost_category', label: 'Cost group', kind: 'text' },
       { field: 'cost_subcategory', label: 'Expense type', kind: 'text' },
-      { field: 'excludes_additional_rate', label: 'No 10% or indirect rate', kind: 'boolean' },
+      {
+        field: 'excludes_additional_rate',
+        label: 'No 10% or indirect rate',
+        kind: 'boolean',
+      },
+    ],
+  },
+  {
+    // Versioned with the rates (#152): the rate prices a costing in that
+    // currency. The server holds AUD at 1 and refuses to remove it, or a
+    // currency a draft is priced in.
+    id: 'currencies',
+    label: 'Currencies',
+    key: [{ field: 'code', label: 'Code', kind: 'text' }],
+    values: [
+      { field: 'name', label: 'Name', kind: 'text' },
+      { field: 'rate', label: '1 AUD =', kind: 'number', step: 0.000001 },
     ],
   },
   {

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import cast
 
 from django.core.cache import cache
@@ -7,6 +8,7 @@ from django.db.models import QuerySet
 from ..models import (
     Budget,
     CalculationConstant,
+    Currency,
     EbaIncrease,
     LookupConfiguration,
     OnCostRate,
@@ -169,7 +171,16 @@ def build_constants(version_id: int) -> dict:
 
     validate_constants(constants)
 
+    # What 1 AUD buys of each currency (#152). AUD is the base, at 1 whether
+    # or not a version holds a row for it, so a costing priced before
+    # currencies existed still prices.
+    currencies = {"AUD": Decimal(1)}
+    currencies.update(
+        {row.code: row.rate for row in cast(list[Currency], tables["currencies"])}
+    )
+
     result = {
+        "currencies": currencies,
         "salary_rate": salary_rate,
         "salary_rate_multiplier": salary_rate_multiplier,
         "eba": eba_rate,

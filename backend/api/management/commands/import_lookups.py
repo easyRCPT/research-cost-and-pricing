@@ -23,6 +23,7 @@ from openpyxl.cell.cell import Cell
 from api.models import (
     Activity,
     CalculationConstant,
+    Currency,
     DeliverableType,
     Department,
     EbaIncrease,
@@ -412,6 +413,31 @@ def import_salary_rate_multipliers(workbook, version):
     return count
 
 
+def import_currencies(workbook, version):
+    """
+    The currencies a costing can be priced in (#152): dCurrencyRates, Lookup
+    Tables U35:Y56. "AUD - Australian Dollar" names the currency; "1 AUD ="
+    is the rate a costing is priced at. The inverse column is display only.
+    """
+    count = 0
+    for row in rows(workbook, "dCurrencyRates"):
+        display, code, _description, rate = row[:4]
+        if not code or not is_number(rate) or len(str(code)) != 3:
+            continue
+
+        Currency.objects.update_or_create(
+            version=version,
+            code=code,
+            defaults={
+                "name": str(display).split(" - ", 1)[-1],
+                "rate": dec(rate),
+            },
+        )
+        count += 1
+
+    return count
+
+
 def import_constants(workbook, version):
     # Numbers that belong to no table. Leave loading cap,
     # working day count, default multiplier
@@ -557,6 +583,7 @@ class Command(BaseCommand):
             ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
             ("non-staff categories", import_non_staff_categories),
+            ("currencies", import_currencies),
         )
 
         # One transaction, a failure halfway leaves no partial lookup
