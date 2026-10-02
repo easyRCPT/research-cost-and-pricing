@@ -29,13 +29,15 @@ from api.models import (
     LookupChangeSet,
     LookupConfiguration,
     LookupVersion,
+    NonStaffCostCategory,
+    NonStaffCostLine,
     OnCostRate,
     Project,
     SalaryRate,
     StaffCostLine,
     User,
 )
-from api.services import lookup_changes
+from api.services import lookup_changes, lookup_update
 from api.services.lookup_changes import apply_changes
 from api.services.lookup_update import (
     changes_in,
@@ -521,6 +523,64 @@ class TestAddAndRemove(RatesMixin, TestCase):
             OnCostRate.objects.filter(
                 version=self.version, employment_type=None
             ).exists()
+        )
+
+    def test_a_category_a_draft_line_uses_is_refused_saying_what_uses_it(self):
+        category = NonStaffCostCategory.objects.filter(version=self.version).first()
+        assert category is not None
+        self.draft_line_on("Level A.1")
+        NonStaffCostLine.objects.create(
+            budget=Budget.objects.get(lookup_version=None), category=category
+        )
+
+        # The same refusal as a reference row in use, from the shared delete_row.
+        with self.assertRaisesRegex(
+            ValidationError,
+            "1 non staff cost line uses this non staff cost category, so it "
+            "can't be removed.",
+        ):
+            self.save(
+                {
+                    "table": "non_staff_cost_categories",
+                    "op": "delete",
+                    "lookup": {"ledger_id": category.ledger_id},
+                }
+            )
+
+        self.assertTrue(NonStaffCostCategory.objects.filter(pk=category.pk).exists())
+
+
+class TestOneWritePath(RatesMixin, TestCase):
+    """
+    A rate set and a reference table's single-row write save rows the same
+    way, through lookup_update's insert_row, write_row and delete_row, so a
+    change to how a row is saved reaches both.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.make_rates()
+
+    def test_both_entry_points_share_the_row_writes(self):
+        self.assertIs(lookup_changes.insert_row, lookup_update.insert_row)
+        self.assertIs(lookup_changes.write_row, lookup_update.write_row)
+        self.assertIs(lookup_changes.delete_row, lookup_update.delete_row)
+
+    def test_both_entry_points_validate_through_the_same_save(self):
+        faculty = Faculty.objects.order_by("code").first()
+        assert faculty is not None
+        save = lookup_update.save_validated_instance
+        with patch(
+            "api.services.lookup_update.save_validated_instance", wraps=save
+        ) as saved:
+            self.save(set_rate(LEVEL_A1, "110000"))
+            lookup_update.update(
+                "faculties", lookup={"code": faculty.code}, data={"name": "Sciences"}
+            )
+
+        self.assertEqual(
+            [type(call.args[0]) for call in saved.call_args_list],
+            [SalaryRate, Faculty],
         )
 
 

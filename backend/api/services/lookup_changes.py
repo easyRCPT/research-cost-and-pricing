@@ -11,6 +11,11 @@ the new rates for good (#52).
 When a version is made does not change: a set writes into the current version
 until a costing is submitted on it, and the first set after that copies the
 rates into a new version and writes there.
+
+Each row is written through lookup_update's insert_row, write_row and
+delete_row, the same as the reference tables' single-row writes. This module
+adds what a set needs on top: the lock, the version, the rate checks, and one
+change set and audit entry for the whole set.
 """
 
 from decimal import Decimal
@@ -18,7 +23,6 @@ from typing import Any, cast
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import models, transaction
-from django.db.models import ProtectedError
 from django.forms.models import model_to_dict
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, ValidationError
@@ -42,11 +46,13 @@ from .lookup_definitions import LookupDefinition
 from .lookup_loader import build_constants, invalidate_lookup_cache
 from .lookup_update import (
     create_lookup_version,
+    delete_row,
     get_definition,
+    insert_row,
     is_baseline,
     plain,
     priced_on,
-    save_validated_instance,
+    write_row,
 )
 
 CREATE = "create"
@@ -239,7 +245,7 @@ def _create(definition: LookupDefinition, version_id: int, change: dict) -> dict
             f"There is already a {_label(definition)} for {_describe(key)}."
         )
 
-    save_validated_instance(model(**values, version_id=version_id))
+    insert_row(model, {**values, "version_id": version_id})
     return {"key": key, "before": None, "after": values}
 
 
@@ -258,12 +264,8 @@ def _update(definition: LookupDefinition, version_id: int, change: dict) -> dict
     _check_constant(instance, values)
     _check_aud(instance, values)
 
-    before = model_to_dict(instance, fields=list(values))
-    for field, value in values.items():
-        setattr(instance, field, value)
-    save_validated_instance(instance, update_fields=list(values))
-
-    return {"key": key, "before": before, "after": values}
+    before, after = write_row(instance, values)
+    return {"key": key, "before": before, "after": after}
 
 
 def _reject_removing_a_rate_in_use(instance: models.Model) -> None:
@@ -346,12 +348,7 @@ def _delete(definition: LookupDefinition, version_id: int, change: dict) -> dict
 
     # Only from this version. Costings priced on older versions keep the row,
     # because each version holds every row of its own.
-    try:
-        instance.delete()
-    except ProtectedError:
-        raise ValidationError(
-            f"Draft costings use this {_label(definition)}, so it can't be removed."
-        )
+    delete_row(instance)
 
     return {"key": key, "before": before, "after": None}
 
