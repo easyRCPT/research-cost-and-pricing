@@ -39,6 +39,9 @@ services:
       # Prompted for during Blueprint setup: paste the Neon pooled URL here.
       - key: DATABASE_URL
         sync: false
+      # Where links in emails point.
+      - key: DJANGO_FRONTEND_URL
+        value: https://easyrcpt.onrender.com
       # Prompted for during Blueprint setup. The from address must be on a
       # domain verified in Resend.
       - key: RESEND_API_KEY

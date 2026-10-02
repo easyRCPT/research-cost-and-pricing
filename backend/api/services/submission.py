@@ -73,8 +73,7 @@ def submit_budget(actor: User, budget: Budget) -> None:
     config.referenced = True
     config.save(update_fields=["referenced"])
 
-    # Notify HOD review
-    notify_hod_review(budget)
+    transaction.on_commit(lambda: notify_hod_review(budget))
 
     write_audit(
         actor=actor,

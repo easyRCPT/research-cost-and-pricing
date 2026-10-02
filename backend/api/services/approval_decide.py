@@ -73,9 +73,7 @@ def decide(
         # Approved by HoD, progress to dean review
         if faculty_step.status == ApprovalStep.Status.PENDING:
             budget.status = Budget.Status.DEAN_REVIEW
-
-            # Notify Dean review
-            notify_dean_review(budget)
+            transaction.on_commit(lambda: notify_dean_review(budget))
 
         # Mark budget as approved if HoD approves and dean review not required
         elif faculty_step.status == ApprovalStep.Status.NOT_REQUIRED:
@@ -87,8 +85,11 @@ def decide(
     # is on the price that was submitted, not on whatever the rates are now.
     budget.save(update_fields=["status"])
 
-    # Notify budget owner that a decision is made
-    notify_budget_decision(budget, decision=decision, comment=comment, approver=user)
+    transaction.on_commit(
+        lambda: notify_budget_decision(
+            budget, decision=decision, comment=comment, approver=user
+        )
+    )
 
     write_audit(
         actor=user,

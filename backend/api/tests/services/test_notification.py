@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.core import mail
 from django.test import TestCase
 
 from api.models import (
@@ -57,7 +58,7 @@ class NotificationTest(TestCase):
 
         self.assertEqual(
             kwargs["subject"],
-            "Budget requires HOD review",
+            "Approval needed: Test Project",
         )
 
     @patch("api.services.notification.EmailMultiAlternatives")
@@ -88,7 +89,7 @@ class NotificationTest(TestCase):
 
         self.assertEqual(
             kwargs["subject"],
-            "Budget requires Dean review",
+            "Dean approval needed: Test Project",
         )
 
     @patch("api.services.notification.EmailMultiAlternatives")
@@ -116,7 +117,7 @@ class NotificationTest(TestCase):
 
         self.assertEqual(
             kwargs["subject"],
-            "Budget approval updated",
+            "Rejected: Test Project",
         )
 
     @patch("api.services.notification.render_to_string")
@@ -159,6 +160,30 @@ class NotificationTest(TestCase):
         self.assertTrue(
             context["requires_dean_review"],
         )
+
+    @patch("api.services.notification.render_to_string")
+    def test_links_to_the_costings_approvals_screen(self, mock_render) -> None:
+        budget = make_budget(self.project, status=Budget.Status.HOD_REVIEW)
+
+        with self.settings(FRONTEND_URL="https://easyrcpt.example"):
+            notify_hod_review(budget)
+
+        context = mock_render.call_args.args[1]
+        self.assertEqual(
+            context["url"],
+            f"https://easyrcpt.example/projects/{self.project.id}/approvals",
+        )
+
+    def test_dean_email_says_why_in_words(self) -> None:
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
+        budget.dean_triggers = ["margin_below_minimum", "something_new"]
+
+        notify_dean_review(budget)
+
+        [email] = mail.outbox
+        self.assertIn("The margin is below the University's minimum.", email.body)
+        self.assertIn("something_new", email.body)
+        self.assertNotIn("margin_below_minimum", email.body)
 
     @patch("api.services.notification.EmailMultiAlternatives")
     def test_email_failure_does_not_raise(

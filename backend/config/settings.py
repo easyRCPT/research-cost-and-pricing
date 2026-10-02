@@ -180,6 +180,11 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "DJANGO_DEFAULT_FROM_EMAIL", "easyRCPT <noreply@easyrcpt.local>"
 )
 
+# Where links in emails point. The browser app, not this API.
+FRONTEND_URL = os.environ.get("DJANGO_FRONTEND_URL", "http://localhost:5173").rstrip(
+    "/"
+)
+
 # Two weeks, HttpOnly so no script can read it, Lax so it survives a normal
 # navigation but not a cross-site form post. Secure follows DEBUG: a cookie
 # marked Secure is never sent over plain http, which would break local work.
