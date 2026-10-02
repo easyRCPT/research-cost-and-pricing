@@ -1,3 +1,18 @@
+"""
+Writing lookup rows.
+
+Every lookup row is added, changed and removed through insert_row, write_row
+and delete_row, which validate and save it. Two entry points call them:
+
+- create, update and delete here: a row at a time, for the reference tables
+  (faculties, departments and the reference lists), changed in place (#70,
+  #144). They refuse the rate tables.
+- lookup_changes.apply_changes: the rate tables, which price costings, so they
+  change only as a reviewed set, under the submission lock (#138).
+
+Also the versioning helpers both share: making, listing and restoring versions.
+"""
+
 import json
 from datetime import date
 
@@ -263,8 +278,7 @@ def create(
 ) -> None:
     model = _get_unversioned(table).model
 
-    instance = model(**data)
-    save_validated_instance(instance)
+    instance = insert_row(model, data)
 
     _audit(
         actor,
@@ -290,27 +304,8 @@ def update(
     _reject_a_new_key(definition, data)
     _validate_model_fields(model, lookup, data)
 
-    try:
-        instance = model.objects.get(**lookup)
-    except model.DoesNotExist:
-        # Raise a validation error if no matching row is found
-        raise ValidationError(
-            f"No matching row found in lookup table '{table}'.",
-        )
-    except model.MultipleObjectsReturned:
-        # Raise a validation error if multiple matching rows found
-        raise ValidationError(
-            f"Multiple matching rows found in lookup table '{table}'.",
-        )
-
-    before = model_to_dict(instance, fields=data.keys())
-
-    # Lookup fields may also be included in data and updated.
-    for field, value in data.items():
-        setattr(instance, field, value)
-    save_validated_instance(instance, update_fields=list(data))
-
-    after = model_to_dict(instance, fields=data.keys())
+    instance = find_row(model, table, lookup)
+    before, after = write_row(instance, data)
 
     # Audit records use the service/model layer representation rather than the
     # original API field names. ForeignKey values are recorded as primary keys.
@@ -324,6 +319,49 @@ def update(
         lookup=lookup,
     )
     transaction.on_commit(invalidate_lookup_cache)
+
+
+def insert_row(model: type[models.Model], data: dict) -> models.Model:
+    """
+    Add a lookup row. The one way a row is added, a row at a time or as part
+    of a reviewed set (lookup_changes, #138).
+    """
+    instance = model(**data)
+    save_validated_instance(instance)
+    return instance
+
+
+def find_row(model: type[models.Model], table: str, lookup: dict) -> models.Model:
+    """The one row `lookup` names."""
+    try:
+        return model.objects.get(**lookup)
+    except model.DoesNotExist:
+        # Raise a validation error if no matching row is found
+        raise ValidationError(
+            f"No matching row found in lookup table '{table}'.",
+        )
+    except model.MultipleObjectsReturned:
+        # Raise a validation error if multiple matching rows found
+        raise ValidationError(
+            f"Multiple matching rows found in lookup table '{table}'.",
+        )
+
+
+def write_row(instance: models.Model, data: dict) -> tuple[dict, dict]:
+    """
+    Save new values to a lookup row and return what the changed fields said
+    before and after. The one way a row is changed, a row at a time or as part
+    of a reviewed set (lookup_changes, #138).
+    """
+    before = model_to_dict(instance, fields=data.keys())
+
+    # Lookup fields may also be included in data and updated.
+    for field, value in data.items():
+        setattr(instance, field, value)
+    save_validated_instance(instance, update_fields=list(data))
+
+    after = model_to_dict(instance, fields=data.keys())
+    return before, after
 
 
 def plain(values: dict | None) -> dict | None:
@@ -362,12 +400,7 @@ def delete(table: str, key: str, actor: User | None = None) -> None:
 
     object_id = str(instance.pk)
     before = model_to_dict(instance)
-    try:
-        instance.delete()
-    except ProtectedError as exc:
-        raise ValidationError(
-            f"{_in_use(exc)} this {model._meta.verbose_name}, so it can't be removed."
-        ) from exc
+    delete_row(instance)
 
     _audit(
         actor,
@@ -379,6 +412,21 @@ def delete(table: str, key: str, actor: User | None = None) -> None:
         lookup=lookup,
     )
     transaction.on_commit(invalidate_lookup_cache)
+
+
+def delete_row(instance: models.Model) -> None:
+    """
+    Remove a lookup row. The one way a row is removed, a row at a time or as
+    part of a reviewed set (lookup_changes, #138). One in use is refused,
+    saying what uses it, because PROTECT would refuse it anyway.
+    """
+    try:
+        instance.delete()
+    except ProtectedError as exc:
+        raise ValidationError(
+            f"{_in_use(exc)} this {instance._meta.verbose_name}, so it can't be "
+            "removed."
+        ) from exc
 
 
 def _audit(
