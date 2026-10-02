@@ -1,10 +1,9 @@
 import type { NonStaffLines, StaffLines } from '@/api/budget'
-import { lineTotal } from '@/lib/non-staff'
 import { withCosts } from '@/lib/staff'
-import type { BudgetDetail, StaffLine } from '@/types'
 import type { CostRow } from '@/screens/inkind/InKindFlagsTable'
+import type { BudgetDetail, EditableStaffLine } from '@/types'
 
-const detailOf = (line: StaffLine) =>
+const detailOf = (line: EditableStaffLine) =>
   [line.category, line.employment_type, line.classification]
     .filter(Boolean)
     .join(' · ') || '—'
@@ -24,6 +23,9 @@ export const costRows = (
       cost: line.total,
       inKind: line.in_kind,
       toggle: (value: boolean) => staff.patchLine(line.id, { in_kind: value }),
+      reason: line.in_kind_reason ?? '',
+      setReason: (value: string) =>
+        staff.patchLine(line.id, { in_kind_reason: value }),
     })),
   ...nonStaff.lines
     .filter((line) => line.cost_group || line.description)
@@ -32,9 +34,12 @@ export const costRows = (
       kind: 'non-staff' as const,
       label: line.description || line.cost_group || '(untitled cost)',
       detail: line.cost_group || '—',
-      cost: lineTotal(line, nonStaff.years),
+      cost: line.total,
       inKind: line.in_kind,
       toggle: (value: boolean) =>
         nonStaff.patchLine(line.id, { in_kind: value }),
+      reason: line.in_kind_reason ?? '',
+      setReason: (value: string) =>
+        nonStaff.patchLine(line.id, { in_kind_reason: value }),
     })),
 ]

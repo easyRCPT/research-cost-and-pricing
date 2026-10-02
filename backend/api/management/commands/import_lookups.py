@@ -5,7 +5,8 @@ Table ranges resolved through defined names where able to,
 otherwise cell ranges are used. Names stay put even if tables may shift.
 
 Re-running is safe since rows are matched on their
-natural key.
+natural key. If a budget is pinned to the current version,
+the import goes into a new one instead.
 
 """
 
@@ -25,7 +26,10 @@ from api.models import (
     DeliverableType,
     Department,
     EbaIncrease,
+    Faculty,
     IncrementCap,
+    LookupConfiguration,
+    LookupVersion,
     NonStaffCostCategory,
     OnCostRate,
     Region,
@@ -33,9 +37,16 @@ from api.models import (
     SalaryRate,
     SalaryRateMultiplier,
 )
+from api.services.lookup_update import create_lookup_version
 
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
+
+# Cost groups that do not apply additional direct rate or indirect rate
+EXCLUDED_NON_STAFF_GROUPS = {
+    "Student Support",
+    "Shared Grant Payments",
+}
 
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
@@ -55,13 +66,9 @@ CONSTANTS = {
         "vl_Max_Leave_Loading",
         "Leave loading is capped at this many dollars per year",
     ),
-    "working_days_per_year": (
-        "vl_working_days_per_year",
-        "Weekdays in a year. Used only for the annual leave deduction.",
-    ),
     "full_cost_recovery_multiplier": (
         "dfullrecovery",
-        "Default cost recovery multiplier",
+        "The full cost recovery multiplier, for staff and in-kind staff.",
     ),
     "max_payroll_tax": ("vl_MaxPayrollTax", "Maximum payroll tax rate"),
     "override_uom_oncosts": (
@@ -71,8 +78,21 @@ CONSTANTS = {
 }
 
 LITERAL_CONSTANTS = {
-    "in_kind_multiplier": (Decimal("1.7"), "Matches full cost recovery."),
     "gst_rate": (Decimal("0.10"), "Goods and Services Tax Amount"),
+    "default_margin": (
+        Decimal("0.30"),
+        "The margin a new budget starts at. Editable per budget.",
+    ),
+    # Matches backend/seeds/lookups.json. Held at the default margin until
+    # Frank sets the floor (#87), so an import doesn't drop Dean review.
+    "minimum_margin": (
+        Decimal("0.30"),
+        "A budget priced below this margin needs the Dean as well as the HoD.",
+    ),
+    "salary_rate_year": (
+        Decimal(2025),
+        "The year of recorded salary rate that eba increase starts from.",
+    ),
 }
 
 
@@ -129,7 +149,7 @@ def import_departments(workbook):
     # AC3:AH207 is tb_Org_Units. Budget unit sits at AJ, past an empty AI,
     # so the range is widened rather than read through the defined name.
     for row in workbook["Lookup Tables"]["AC3:AJ207"]:
-        # the spreadsheet's header row lavels
+        # the spreadsheet's header row labels
         # last two columns "faculty code" and
         # "faculty" when they should be swapped around
         # depending on the data stored
@@ -142,6 +162,12 @@ def import_departments(workbook):
         if not dept_code or dept_code == "Dept code":
             continue
 
+        # The faculty is a row of its own now, created from the same two
+        # columns the department used to carry as strings.
+        faculty_row, _ = Faculty.objects.update_or_create(
+            code=faculty_code, defaults={"name": faculty}
+        )
+
         # Store each department
         Department.objects.update_or_create(
             code=dept_code,
@@ -149,8 +175,7 @@ def import_departments(workbook):
                 "name": dept_name,
                 "school": school,
                 "school_code": school_code,
-                "faculty": faculty,
-                "faculty_code": faculty_code,
+                "faculty": faculty_row,
                 "budget_unit": budget_unit or "",
             },
         )
@@ -160,7 +185,7 @@ def import_departments(workbook):
     return count
 
 
-def import_salary_rates(workbook):
+def import_salary_rates(workbook, version):
     """
     Imports every salary rate, covering academic
     and professional staff at each clssification, split by
@@ -180,6 +205,7 @@ def import_salary_rates(workbook):
 
         # Store the salary rates
         SalaryRate.objects.update_or_create(
+            version=version,
             payroll_type=payroll_type,
             category=category,
             classification=classification,
@@ -213,32 +239,38 @@ def import_increment_caps(workbook):
     return count
 
 
-def import_eba_increases(workbook):
+def import_eba_increases(workbook, version):
     """
-    Salary inflation by calendar year, as a compounding multipler.
+    Salary inflation by calendar year.
+    Only store years when the EBA rate changes.
     """
     count = 0
+    last_rate = None
 
-    for year, _annual_rate, multiplier in rows(workbook, "tEBA"):
-        # The middle column is the yearly percentaage
-        # the multiplier was built from. Engine only needs
-        # compounded figure, but it is nice to have
-        # the annual rate for sync purposes.
+    for year, annual_rate, _multiplier in rows(workbook, "tEBA"):
+        # Multiplier is calculated in engine using eba increase rate.
 
         # Skip headers
-        if not is_number(year) or multiplier is None:
+        if not is_number(year) or not is_number(annual_rate):
+            continue
+        rate = dec(annual_rate)
+        # Only store changes in rate
+        if rate == last_rate:
             continue
         # Store EBA Rates
         EbaIncrease.objects.update_or_create(
-            year=int(year), defaults={"multiplier": dec(multiplier)}
+            version=version,
+            year=int(year),
+            defaults={"rate": rate},
         )
 
+        last_rate = rate
         count += 1
 
     return count
 
 
-def import_on_costs(workbook):
+def import_on_costs(workbook, version):
     """
     The employment costs added on top of salary:
     supperannuation, WorkCover, and the other leave provisions.
@@ -260,6 +292,7 @@ def import_on_costs(workbook):
 
             # Store flat oncosts
             OnCostRate.objects.update_or_create(
+                version=version,
                 on_cost_type=on_cost_type,
                 employment_type=employment_type,
                 year=None,
@@ -278,6 +311,7 @@ def import_on_costs(workbook):
             continue
 
         OnCostRate.objects.update_or_create(
+            version=version,
             on_cost_type=OnCostRate.OnCostType.SUPERANNUATION,
             employment_type=employment_type,
             year=int(year),
@@ -292,6 +326,7 @@ def import_on_costs(workbook):
             continue
 
         OnCostRate.objects.update_or_create(
+            version=version,
             on_cost_type=OnCostRate.OnCostType.SUPERANNUATION,
             employment_type=employment_type,
             year=None,
@@ -303,7 +338,7 @@ def import_on_costs(workbook):
     return count
 
 
-def import_non_staff_categories(workbook):
+def import_non_staff_categories(workbook, version):
     """
     Import function for non-staff expense types and finance ledger IDs.
     """
@@ -320,43 +355,45 @@ def import_non_staff_categories(workbook):
         if not is_number(ledger_id):
             continue
 
-        # Avoids key errpr
+        # Avoids key error
         if subcategory not in categories:
             raise CommandError(
                 f"no cost category found for '{subcategory}' "
                 f"(ledger {int(ledger_id)}) - the two lookup ranges disagree"
             )
 
+        category = categories[subcategory]
+        excludes_additional_rate = category in EXCLUDED_NON_STAFF_GROUPS
+
         NonStaffCostCategory.objects.update_or_create(
             ledger_id=int(ledger_id),
+            version=version,
             defaults={
-                "cost_category": categories.get(subcategory, ""),
+                "cost_category": category,
                 "cost_subcategory": subcategory,
+                "excludes_additional_rate": excludes_additional_rate,
             },
         )
 
         count += 1
 
-        # Contingency is handled separately in the Excel workbook,
-        # but is a category option in RCPT.
-        NonStaffCostCategory.objects.update_or_create(
-            ledger_id=CONTINGENCY_LEDGER_ID,
-            defaults={
-                "cost_category": "Contingency",
-                "cost_subcategory": "Contingency",
-            },
-        )
+    # Contingency is handled separately in the Excel workbook,
+    # but is a category option in RCPT.
+    NonStaffCostCategory.objects.update_or_create(
+        ledger_id=CONTINGENCY_LEDGER_ID,
+        version=version,
+        defaults={
+            "cost_category": "Contingency",
+            "cost_subcategory": "Contingency",
+            # Contingency does not apply additional direct rate or indirect rate
+            "excludes_additional_rate": True,
+        },
+    )
 
     return count
 
 
-# Saved for sprint 2 (?), currently 2.2 on notebook
-# Client said that the cost recovery multiplier (1.7)
-# should not be changed
-# def import_minimum_multipliers(workbook):
-
-
-def import_salary_rate_multipliers(workbook):
+def import_salary_rate_multipliers(workbook, version):
     # Converts a stored rate to the entered time basis.
     # FTE 1, Daily 1/220, Hourly 1.
     count = 0
@@ -365,7 +402,9 @@ def import_salary_rate_multipliers(workbook):
             continue
 
         SalaryRateMultiplier.objects.update_or_create(
-            time_basis=time_basis, defaults={"multiplier": dec(multiplier)}
+            version=version,
+            time_basis=time_basis,
+            defaults={"multiplier": dec(multiplier)},
         )
 
         count += 1
@@ -373,12 +412,13 @@ def import_salary_rate_multipliers(workbook):
     return count
 
 
-def import_constants(workbook):
+def import_constants(workbook, version):
     # Numbers that belong to no table. Leave loading cap,
     # working day count, default multiplier
 
     for name, (defined_name, description) in CONSTANTS.items():
         CalculationConstant.objects.update_or_create(
+            version=version,
             name=name,
             defaults={
                 "value": dec(scalar(workbook, defined_name)),
@@ -389,7 +429,9 @@ def import_constants(workbook):
     # Import literal constants
     for name, (value, description) in LITERAL_CONSTANTS.items():
         CalculationConstant.objects.update_or_create(
-            name=name, defaults={"value": value, "description": description}
+            version=version,
+            name=name,
+            defaults={"value": value, "description": description},
         )
 
     return len(CONSTANTS) + len(LITERAL_CONSTANTS)
@@ -458,6 +500,23 @@ def import_revenue_categories(workbook):
     return count
 
 
+def version_to_import_into() -> LookupVersion:
+    """The current version, or a fresh copy of it if a budget is pinned to it."""
+
+    try:
+        config = LookupConfiguration.objects.select_for_update().get()
+    except LookupConfiguration.DoesNotExist:
+        # Create the lookup configuration singleton on the first run of import_lookups
+        version = LookupVersion.objects.create()
+        LookupConfiguration.objects.create(current_version=version)
+        return version
+
+    if config.referenced:
+        create_lookup_version(config)
+
+    return config.current_version
+
+
 class Command(BaseCommand):
     help = "Import lookup tables from the RCPT workbook (idempotent; safe to re-run)."
 
@@ -482,29 +541,39 @@ class Command(BaseCommand):
         # as none
         workbook = load_workbook(path, data_only=True, keep_vba=False)
 
-        importers = (
+        unversioned_importers = (
             ("departments", import_departments),
-            ("salary rates", import_salary_rates),
             ("increment caps", import_increment_caps),
-            ("EBA increases", import_eba_increases),
-            ("on-cost rates", import_on_costs),
-            ("non-staff categories", import_non_staff_categories),
-            # ("minimum multipliers", import_minimum_multipliers),
-            ("salary rate multipliers", import_salary_rate_multipliers),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
             ("revenue categories", import_revenue_categories),
+        )
+
+        versioned_importers = (
+            ("salary rates", import_salary_rates),
+            ("EBA increases", import_eba_increases),
+            ("on-cost rates", import_on_costs),
+            ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
+            ("non-staff categories", import_non_staff_categories),
         )
 
         # One transaction, a failure halfway leaves no partial lookup
         # tables
         with transaction.atomic():
-            for label, importer in importers:
+            version = version_to_import_into()
+
+            for label, importer in unversioned_importers:
                 self.stdout.write(f"  {label} ... ", ending="")
                 self.stdout.flush()
                 count = importer(workbook)
+                self.stdout.write(self.style.SUCCESS(str(count)))
+
+            for label, importer in versioned_importers:
+                self.stdout.write(f"  {label} ... ", ending="")
+                self.stdout.flush()
+                count = importer(workbook, version)
                 self.stdout.write(self.style.SUCCESS(str(count)))
 
         self.stdout.write(self.style.SUCCESS("Lookup tables imported."))

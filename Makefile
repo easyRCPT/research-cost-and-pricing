@@ -6,7 +6,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help setup secretkey hooks preflight db-up db-down \
         db-down-v db-reset db-logs db-shell db-list db-prune branch-env migrate \
-        makemigrations seed seed-list superuser backend frontend test lint gen-api
+        makemigrations fixture seed seed-list superuser backend frontend test lint gen-api
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -80,6 +80,13 @@ migrate: ## Apply migrations
 makemigrations: ## Generate migrations from model changes
 	cd backend && uv run python manage.py makemigrations
 
+fixture: ## Reset the database, import lookups, and regenerate the lookup fixture
+	docker compose down -v
+	$(MAKE) db-up
+	$(MAKE) migrate
+	cd backend && uv run python manage.py import_lookups
+	cd backend && uv run python manage.py export_lookups
+
 seed: ## Load reference data from backend/seeds/ (idempotent)
 	cd backend && uv run python manage.py seed
 
@@ -88,6 +95,9 @@ seed-list: ## Show which seed files would run, in order
 
 superuser: ## Create a Django admin user
 	cd backend && uv run python manage.py createsuperuser
+
+demo-users: ## Create the four demo accounts the e2e suite signs in with
+	cd backend && uv run python manage.py create_demo_users
 
 backend: preflight ## Run the Django dev server on :8000
 	cd backend && uv run python manage.py runserver

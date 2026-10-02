@@ -7,11 +7,13 @@ def load_budget_data(budget: Budget) -> dict:
     """
     project_info = build_project_info(budget.project)
 
+    # Until the end date is set the engine costs the start month alone, and
+    # every screen but Project Details is locked.
     project_duration = {
         "start_year": project_info["start_year"],
         "start_month": project_info["start_month"],
-        "end_year": project_info["end_year"],
-        "end_month": project_info["end_month"],
+        "end_year": project_info["end_year"] or project_info["start_year"],
+        "end_month": project_info["end_month"] or project_info["start_month"],
     }
 
     staff_lines = list(budget.staff_lines.all())
@@ -38,37 +40,44 @@ def load_budget_data(budget: Budget) -> dict:
 
 
 def build_project_info(project: Project) -> dict:
+    department = project.department
     return {
         "title": project.title,
         "chief_investigator": project.chief_investigator,
         "funder": project.funder,
-        "department": project.department.name,
-        "faculty": project.department.faculty,
+        "department": department.name if department else "",
+        "faculty": department.faculty.name if department else "",
         "scheme": project.scheme,
         "start_year": project.start_year,
         "start_month": project.start_month,
         "end_year": project.end_year,
         "end_month": project.end_month,
         "company": project.COMPANY_CODE,
-        "cost_centre": project.department.code,
+        "cost_centre": department.code if department else "",
         "account_string": project.account_string,
         "activity": project.activity.code if project.activity else None,
         "region": project.region.code if project.region else None,
         "additional_information": project.additional_information,
         "other_funder": project.other_funder,
         "other_funder_category": project.other_funder_category,
+        # So the screen can tell "yours, and still a draft" from everything
+        # else and render read-only, rather than offering edits the server will
+        # refuse (#83).
+        "owner_id": project.created_by_id,
     }
 
 
 def build_staff_info_table(staff_lines: list[StaffCostLine]) -> dict:
     return {
         line.id: {
+            "position": line.position,
             "name_role": line.name_role,
             "employment_type": line.employment_type,
             "category": line.category,
             "classification": line.classification,
             "time_basis": line.time_basis,
             "in_kind": line.in_kind,
+            "in_kind_reason": line.in_kind_reason,
         }
         for line in staff_lines
     }
@@ -86,10 +95,13 @@ def build_staff_numeric_table(staff_lines: list[StaffCostLine]) -> dict:
 def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
     return {
         line.id: {
+            "position": line.position,
             "cost_group": line.category.cost_category,
             "expense_type": line.category.cost_subcategory,
+            "excludes_additional_rate": line.category.excludes_additional_rate,
             "description": line.description,
             "in_kind": line.in_kind,
+            "in_kind_reason": line.in_kind_reason,
             "add_ten_percent": line.add_ten_percent,
             "indirect_rate_multiplier": line.indirect_rate_multiplier,
         }
@@ -117,8 +129,13 @@ def build_budget_info(budget: Budget) -> dict:
         "justification_notes": budget.justification_notes,
         "dean_exemption_reason": budget.dean_exemption_reason,
         "status": budget.status,
+        "cloned_from_id": budget.cloned_from_id,
         "deliverables": [
             {
+                # The row id, so an edit can name the row it is editing. The
+                # number is what a reader quotes; it is not stable under a
+                # delete, so it is not an identifier.
+                "id": deliverable.id,
                 "number": deliverable.number,
                 "description": deliverable.description,
                 "deliverable_type": deliverable.deliverable_type.name,
@@ -127,6 +144,9 @@ def build_budget_info(budget: Budget) -> dict:
                 "dependency": deliverable.dependency,
                 "sponsor": deliverable.sponsor,
             }
-            for deliverable in budget.deliverables.all()
+            # Ordered: Postgres returns rows in whatever order it likes, and a
+            # numbered list that reshuffles on reload is worse than an unsorted
+            # one. See #93 for the same fix on the cost lines.
+            for deliverable in budget.deliverables.order_by("number")
         ],
     }

@@ -2,6 +2,10 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
+from api.models import ApprovalStep, Budget, OnCostRate, SalaryRate, StaffCostLine
+
+from ..services.approval_record import EMPTY_RECORD
+
 # ------------------------------------------------------------------
 # Rounding
 # ------------------------------------------------------------------
@@ -31,20 +35,21 @@ class CostDecimalField(serializers.DecimalField):
 
 
 class ProjectInfoSerializer(serializers.Serializer):
-    title = serializers.CharField()
+    owner_id = serializers.IntegerField()
+    title = serializers.CharField(allow_blank=True)
     chief_investigator = serializers.CharField(allow_blank=True)
-    funder = serializers.CharField()
-    department = serializers.CharField()
-    faculty = serializers.CharField()
+    funder = serializers.CharField(allow_blank=True)
+    department = serializers.CharField(allow_blank=True)
+    faculty = serializers.CharField(allow_blank=True)
     scheme = serializers.CharField(allow_blank=True)
 
     start_year = serializers.IntegerField()
     start_month = serializers.IntegerField()
-    end_year = serializers.IntegerField()
-    end_month = serializers.IntegerField()
+    end_year = serializers.IntegerField(allow_null=True)
+    end_month = serializers.IntegerField(allow_null=True)
 
     company = serializers.CharField()
-    cost_centre = serializers.CharField()
+    cost_centre = serializers.CharField(allow_blank=True)
     activity = serializers.CharField(allow_null=True)
     region = serializers.CharField(allow_null=True)
     account_string = serializers.CharField(allow_blank=True)
@@ -59,6 +64,7 @@ class ProjectInfoSerializer(serializers.Serializer):
 
 
 class DeliverableResultSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     number = serializers.IntegerField()
     description = serializers.CharField()
     deliverable_type = serializers.CharField()
@@ -73,8 +79,6 @@ class DeliverableResultSerializer(serializers.Serializer):
 
 
 class BudgetInfoSerializer(serializers.Serializer):
-    from ..models import Budget
-
     mode = serializers.ChoiceField(choices=Budget.Mode.choices)
     cost_multiplier = serializers.DecimalField(
         max_digits=4,
@@ -104,6 +108,11 @@ class BudgetInfoSerializer(serializers.Serializer):
     dean_exemption_reason = serializers.CharField(allow_blank=True)
     status = serializers.ChoiceField(choices=Budget.Status.choices)
 
+    cloned_from_id = serializers.IntegerField(
+        allow_null=True,
+        required=False,
+    )
+
     deliverables = DeliverableResultSerializer(many=True)
 
 
@@ -127,16 +136,17 @@ class StaffYearSerializer(serializers.Serializer):
 
 
 class StaffLineSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.UUIDField()
+    position = serializers.IntegerField()
     name_role = serializers.CharField()
-    employment_type = serializers.CharField()
-    category = serializers.CharField()
+    employment_type = serializers.ChoiceField(OnCostRate.EmploymentType.choices)
+    category = serializers.ChoiceField(SalaryRate.Category.choices)
     classification = serializers.CharField()
-    # TODO: ChoiceField(StaffCostLine.TimeBasis.choices) so the response type matches the input
-    time_basis = serializers.CharField()
+    time_basis = serializers.ChoiceField(StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField()
+    in_kind_reason = serializers.CharField(allow_blank=True)
 
-    rate_2025 = serializers.DecimalField(
+    rate = serializers.DecimalField(
         max_digits=12,
         decimal_places=4,
     )
@@ -187,11 +197,13 @@ class NonStaffYearSerializer(serializers.Serializer):
 
 
 class NonStaffLineSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.UUIDField()
+    position = serializers.IntegerField()
     cost_group = serializers.CharField()
     expense_type = serializers.CharField()
     description = serializers.CharField(allow_blank=True)
     in_kind = serializers.BooleanField()
+    in_kind_reason = serializers.CharField(allow_blank=True)
     add_ten_percent = serializers.BooleanField()
 
     indirect_rate_multiplier = serializers.DecimalField(
@@ -387,6 +399,27 @@ class BudgetSummarySerializer(serializers.Serializer):
     non_staff_budget = NonStaffBudgetSerializer()
     in_kind_costs = InKindCostsSerializer()
     dean_required = serializers.BooleanField()
+    # Why a dean is required, as the engine sees it now. The screen renders
+    # these instead of redoing the arithmetic (#83).
+    dean_triggers = serializers.ListField(child=serializers.CharField())
+
+
+class ApprovalStepRecordSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    level = serializers.ChoiceField(choices=ApprovalStep.Level.choices)
+    status = serializers.ChoiceField(choices=ApprovalStep.Status.choices)
+    decided_by = serializers.CharField(allow_null=True)
+    decided_at = serializers.DateTimeField(allow_null=True)
+    comment = serializers.CharField(allow_blank=True)
+    waiting_on = serializers.ListField(child=serializers.CharField())
+
+
+class ApprovalRecordSerializer(serializers.Serializer):
+    submitted_at = serializers.DateTimeField(allow_null=True)
+    lookup_version = serializers.IntegerField(allow_null=True)
+    # Frozen at submit: what the approvers were asked about.
+    dean_triggers = serializers.ListField(child=serializers.CharField())
+    steps = ApprovalStepRecordSerializer(many=True)
 
 
 # ------------------------------------------------------------------
@@ -407,16 +440,15 @@ class BudgetDetailSerializer(serializers.Serializer):
     non_staff_in_kind_cost = NonStaffCostSerializer()
 
     budget_summary = BudgetSummarySerializer()
+    approval = ApprovalRecordSerializer()
 
     def to_representation(self, instance):
         staff_table = instance["staff_table"]
         non_staff_table = instance["non_staff_table"]
 
+        info = instance["project_info"]
         years = list(
-            range(
-                instance["project_info"]["start_year"],
-                instance["project_info"]["end_year"] + 1,
-            )
+            range(info["start_year"], (info["end_year"] or info["start_year"]) + 1)
         )
 
         data = {
@@ -454,6 +486,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 **self._build_non_staff_totals(non_staff_table["in_kind_cost_results"]),
             },
             "budget_summary": instance["budget_summary"],
+            "approval": instance.get("approval", EMPTY_RECORD),
         }
 
         return super().to_representation(data)
@@ -463,13 +496,15 @@ class BudgetDetailSerializer(serializers.Serializer):
         return [
             {
                 "id": row_id,
+                "position": row["info"]["position"],
                 "name_role": row["info"]["name_role"],
                 "employment_type": row["info"]["employment_type"],
                 "category": row["info"]["category"],
                 "classification": row["info"]["classification"],
                 "time_basis": row["info"]["time_basis"],
                 "in_kind": row["info"]["in_kind"],
-                "rate_2025": row["rate_2025"],
+                "in_kind_reason": row["info"]["in_kind_reason"],
+                "rate": row["rate"],
                 "by_year": [
                     {
                         "year": year,
@@ -504,10 +539,12 @@ class BudgetDetailSerializer(serializers.Serializer):
         return [
             {
                 "id": row_id,
+                "position": row["info"]["position"],
                 "cost_group": row["info"]["cost_group"],
                 "expense_type": row["info"]["expense_type"],
                 "description": row["info"]["description"],
                 "in_kind": row["info"]["in_kind"],
+                "in_kind_reason": row["info"]["in_kind_reason"],
                 "add_ten_percent": row["info"]["add_ten_percent"],
                 "indirect_rate_multiplier": row["info"]["indirect_rate_multiplier"],
                 "by_year": [

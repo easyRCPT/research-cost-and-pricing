@@ -30,6 +30,10 @@ make frontend   # http://localhost:5173, in a second terminal
 editing by hand. Postgres is on **5433, not 5432**, so it cannot collide with a native
 install.
 
+Django admin is for developers only. The console never grants it, so a superadmin made
+there is refused at `/admin/`. Get access with `make superuser` (`manage.py createsuperuser`),
+or set `is_staff` and `is_superuser` on your account in the shell.
+
 ## Commands
 
 ```
@@ -106,7 +110,7 @@ Budget 30–50 MB each, and `make db-prune` deletes the ones whose branch is gon
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs on pull requests and pushes to `main`: **backend** (Postgres
+`.github/workflows/ci.yml` runs on pull requests and pushes to `dev` and `main`: **backend** (Postgres
 18 service container, `uv sync --locked`, drift gates, `migrate`, tests), **backend lint**
 (`ruff check`, `ruff format --check`, `pyright`) and **frontend** (`pnpm lint`, `pnpm
 build`). The two drift gates say the same thing — the source is committed, so the artefact

@@ -1,13 +1,11 @@
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
-import type { LookupTables } from '@/types'
+
+import { api, unwrap } from '@/lib/api'
 
 export const lookupsQuery = queryOptions({
   queryKey: ['lookups'] as const,
-  queryFn: async (): Promise<LookupTables> => {
-    const { data, error, response } = await api.GET('/api/lookups/')
-    if (error) throw new ApiError(response.status, error)
-    return data
+  queryFn: async () => {
+    return unwrap(await api.GET('/api/lookups/'))
   },
   staleTime: Infinity,
 })

@@ -149,11 +149,53 @@ DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 CORS_ALLOWED_ORIGINS = _env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS", ["http://localhost:5173"]
 )
+
+# A browser drops a cross-origin Set-Cookie unless the response says otherwise,
+# so without this the session cookie never arrives and every request after a
+# successful login is anonymous.
+CORS_ALLOW_CREDENTIALS = True
+
+# Django checks the Origin of an unsafe request against this list before it
+# even looks at the CSRF token.
+CSRF_TRUSTED_ORIGINS = _env_list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS", ["http://localhost:5173"]
+)
+
+# Sign-up is only open to these addresses. Existing accounts are not re-checked.
+ALLOWED_EMAIL_DOMAINS = [
+    domain.lower()
+    for domain in _env_list("DJANGO_ALLOWED_EMAIL_DOMAINS", ["unimelb.edu.au"])
+]
+
+# Two weeks, HttpOnly so no script can read it, Lax so it survives a normal
+# navigation but not a cross-site form post. Secure follows DEBUG: a cookie
+# marked Secure is never sent over plain http, which would break local work.
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    # Named explicitly to drop BasicAuthentication, which DRF includes by
+    # default and which would take credentials on every request.
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "api.authentication.SessionAuthentication",
+    ],
+    # Signed in unless a view says otherwise. Only the sign-in routes opt out,
+    # so a new route can't ship open by forgetting a line.
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_THROTTLE_RATES": {"sign_in": "5/min"},
     "COERCE_DECIMAL_TO_STRING": False,
     "DEFAULT_SCHEMA_CLASS": "drf_standardized_errors.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+}
+
+# The handler stays drf-standardized-errors' own -- its schema generator checks
+# for it by identity, and a replacement drops every error response from the
+# schema. Ours subclasses it instead, so model validation reads as a 400.
+DRF_STANDARDIZED_ERRORS = {
+    "EXCEPTION_HANDLER_CLASS": "api.exceptions.ExceptionHandler",
 }
 
 SPECTACULAR_SETTINGS = {
@@ -175,6 +217,11 @@ SPECTACULAR_SETTINGS = {
         "ErrorCode415Enum": "drf_standardized_errors.openapi_serializers.ErrorCode415Enum.choices",
         "ErrorCode429Enum": "drf_standardized_errors.openapi_serializers.ErrorCode429Enum.choices",
         "ErrorCode500Enum": "drf_standardized_errors.openapi_serializers.ErrorCode500Enum.choices",
+        # A budget's status and an approval step's status are both "status";
+        # left to itself the generator names one Status328Enum, and the
+        # frontend's `Status` type breaks whenever that number moves.
+        "StatusEnum": "api.models.Budget.Status",
+        "ApprovalStepStatusEnum": "api.models.ApprovalStep.Status",
         # Named enums for each project field
         "ProjectFieldEnum": "api.serializers.budget_update_serializer.PROJECT_FIELDS",
         "BudgetFieldEnum": "api.serializers.budget_update_serializer.BUDGET_FIELDS",

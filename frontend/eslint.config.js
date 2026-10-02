@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
@@ -15,6 +16,8 @@ export default defineConfig([
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
+    plugins: { 'simple-import-sort': simpleImportSort },
+    rules: { 'simple-import-sort/imports': 'error' },
     languageOptions: {
       globals: globals.browser,
     },
@@ -23,6 +26,15 @@ export default defineConfig([
     files: ['src/components/ui/**/*.{ts,tsx}'],
     rules: {
       'react-refresh/only-export-components': 'off',
+      'simple-import-sort/imports': 'off',
+    },
+  },
+  {
+    // Playwright fixtures take a parameter named `use`, which the React rule
+    // reads as a hook called outside a component. There is no React here.
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
     },
   },
 ])

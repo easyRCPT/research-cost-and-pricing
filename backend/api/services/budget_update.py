@@ -1,7 +1,9 @@
 from decimal import Decimal, InvalidOperation
 from typing import cast
+from uuid import UUID
 
-from django.db import transaction
+from django.core.exceptions import FieldDoesNotExist
+from django.db import models, transaction
 from django.db.models import Model
 from rest_framework.exceptions import ValidationError
 
@@ -99,7 +101,7 @@ def update_project(
         except Department.DoesNotExist:
             raise ValidationError("Invalid department.")
 
-        project.save(update_fields=["department"])
+        _save(project, ["department"])
         return False
 
     if field == "activity":
@@ -113,7 +115,7 @@ def update_project(
             except Activity.DoesNotExist:
                 raise ValidationError("Invalid activity.")
 
-        project.save(update_fields=["activity"])
+        _save(project, ["activity"])
         return False
 
     if field == "region":
@@ -127,7 +129,7 @@ def update_project(
             except Region.DoesNotExist:
                 raise ValidationError("Invalid region.")
 
-        project.save(update_fields=["region"])
+        _save(project, ["region"])
         return False
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -143,13 +145,10 @@ def update_budget(
         "justification",
         "justification_notes",
         "dean_exemption_reason",
-        "status",
     }
 
     fields_requiring_calculation = {
         "mode",
-        "cost_multiplier",
-        "in_kind_multiplier",
         "margin",
         "cash_co_contribution",
         "gst_applicable",
@@ -163,12 +162,48 @@ def update_budget(
         _set_field(budget, field, value)
         return True
 
+    # Said in its own words rather than as the generic refusal below, because
+    # this one is a rule rather than a typo. Both multipliers are the
+    # University's full cost recovery rate, set by an administrator as a
+    # lookup rate (#149). The cost is the cost (#97): a budget changes its
+    # price through the margin, which is also what routes it to a Dean.
+    if field in {"cost_multiplier", "in_kind_multiplier"}:
+        raise ValidationError(
+            "The cost multiplier is the University's full cost recovery rate "
+            "and is not editable per budget."
+        )
+
     raise ValidationError(f"Field '{field}' cannot be updated.")
+
+
+def _set_in_kind(line, field: str, value: object) -> None:
+    """
+    Keep the reason and the tick in step.
+
+    Unticking clears the sentence: a reason the University is absorbing a cost
+    it is not absorbing is worse than no reason, and the database refuses the
+    pair anyway. Writing a reason onto an unticked line is refused rather than
+    silently ticking it, because which of the two the caller meant is a guess.
+    """
+    if field == "in_kind":
+        line.in_kind = value
+        if not value:
+            line.in_kind_reason = ""
+        line.full_clean()
+        _save(line, ["in_kind", "in_kind_reason"])
+        return
+
+    if not line.in_kind:
+        raise ValidationError(
+            "A line has to be marked in-kind before it can be given a reason.",
+        )
+
+    _set_field(line, field, value)
 
 
 def update_staff(
     budget: Budget,
-    row_id: int,
+    row_id: UUID,
     field: str,
     value: object,
     year: int | None,
@@ -182,6 +217,7 @@ def update_staff(
 
     fields_without_calculation = {
         "name_role",
+        "position",
     }
 
     fields_requiring_calculation = {
@@ -190,6 +226,7 @@ def update_staff(
         "category",
         "time_basis",
         "in_kind",
+        "in_kind_reason",
     }
 
     if field in fields_without_calculation:
@@ -197,21 +234,42 @@ def update_staff(
         return False
 
     if field in fields_requiring_calculation:
-        _set_field(staff_line, field, value)
+        if field in {"in_kind", "in_kind_reason"}:
+            _set_in_kind(staff_line, field, value)
+        else:
+            _set_field(staff_line, field, value)
         return True
 
     if field == "year_value":
         if year is None:
             raise ValidationError("year is required for year_value.")
         update_year_allocation(staff_line, year, value)
+        _save(staff_line, [])
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
+def refuse_ten_percent(category: NonStaffCostCategory) -> None:
+    """
+    Contingency, Student Support and Shared Grant Payments never take the
+    additional 10% (#148): contingency is a flat row in the workbook, and its
+    macro forces the 10% off for the other two. The engine ignores it on them
+    anyway, so a tick there would only claim an uplift that isn't charged.
+    """
+    if category.excludes_additional_rate:
+        raise ValidationError(
+            {
+                "add_ten_percent": [
+                    f"{category.cost_category} doesn't take the additional 10%."
+                ]
+            }
+        )
+
+
 def update_non_staff(
     budget: Budget,
-    row_id: int,
+    row_id: UUID,
     field: str,
     value: object,
     year: int | None,
@@ -225,10 +283,12 @@ def update_non_staff(
 
     fields_without_calculation = {
         "description",
+        "position",
     }
 
     fields_requiring_calculation = {
         "in_kind",
+        "in_kind_reason",
         "add_ten_percent",
         "indirect_rate_multiplier",
     }
@@ -238,7 +298,12 @@ def update_non_staff(
         return False
 
     if field in fields_requiring_calculation:
-        _set_field(non_staff_line, field, value)
+        if field in {"in_kind", "in_kind_reason"}:
+            _set_in_kind(non_staff_line, field, value)
+        else:
+            if field == "add_ten_percent" and value is True:
+                refuse_ten_percent(non_staff_line.category)
+            _set_field(non_staff_line, field, value)
         return True
 
     if field == "category":
@@ -251,13 +316,20 @@ def update_non_staff(
             raise ValidationError("Invalid category.")
 
         non_staff_line.category = category
-        non_staff_line.save(update_fields=["category"])
+        changed = ["category"]
+        # Moved onto a category that never takes the 10%: the tick goes with
+        # it, rather than sitting on the line doing nothing (#148).
+        if category.excludes_additional_rate and non_staff_line.add_ten_percent:
+            non_staff_line.add_ten_percent = False
+            changed.append("add_ten_percent")
+        _save(non_staff_line, changed)
         return True
 
     if field == "year_value":
         if year is None:
             raise ValidationError("year is required for year_value.")
         update_year_amount(non_staff_line, year, value)
+        _save(non_staff_line, [])
         return True
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -344,9 +416,10 @@ def _validate_year_and_convert_value(
     # Check in project duration
     project = line.budget.project
 
-    if year < project.start_year or year > project.end_year:
+    end_year = project.end_year or project.start_year
+    if year < project.start_year or year > end_year:
         raise ValidationError(
-            f"Year must be between {project.start_year} and {project.end_year}."
+            f"Year must be between {project.start_year} and {end_year}."
         )
 
     # Return None to delete the year value
@@ -401,7 +474,7 @@ def update_deliverable(
         except DeliverableType.DoesNotExist:
             raise ValidationError("Invalid deliverable type.")
 
-        deliverable.save(update_fields=["deliverable_type"])
+        _save(deliverable, ["deliverable_type"])
         return False
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
@@ -412,6 +485,46 @@ def _set_field(
     field: str,
     value: object,
 ) -> None:
-    setattr(instance, field, value)
+    setattr(instance, field, _as_decimal(instance, field, value))
     instance.full_clean()
-    instance.save(update_fields=[field])
+    _save(instance, [field])
+
+
+def _as_decimal(instance: Model, field: str, value: object) -> object:
+    """
+    Convert a JSON number bound for a DecimalField through its string form.
+
+    A float is not exactly the number that was typed: a margin of 0.35 arrives
+    as 0.34999999999999997779553950749686919152736663818359375, which
+    full_clean rejects for having more decimal places than the field allows.
+    str() gives back what the user actually entered. Year values already take
+    this route -- see _validate_year_and_convert_value.
+    """
+    if not isinstance(value, float):
+        return value
+
+    try:
+        model_field = instance._meta.get_field(field)
+    except FieldDoesNotExist:
+        return value
+
+    if not isinstance(model_field, models.DecimalField):
+        return value
+
+    try:
+        return Decimal(str(value))
+    except InvalidOperation:
+        return value
+
+
+def _save(instance: Model, fields: list[str]) -> None:
+    """
+    Save the named fields, and the row's edit time with them.
+
+    auto_now is skipped for any field left out of update_fields, so a partial
+    save would otherwise leave updated_at reading as the creation time no
+    matter how much the row had changed.
+    """
+    if hasattr(instance, "updated_at"):
+        fields = [*fields, "updated_at"]
+    instance.save(update_fields=fields)

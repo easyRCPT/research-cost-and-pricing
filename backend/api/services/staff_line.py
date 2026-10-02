@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Max
 
 from ..models import Budget, StaffCostLine, YearAllocation
 from . import budget_details
@@ -8,8 +9,10 @@ from . import budget_details
 def create(budget: Budget, data: dict) -> dict:
     allocations = data.pop("allocations", [])
 
+    last = budget.staff_lines.aggregate(Max("position"))["position__max"]
     staff_line = StaffCostLine(
         budget=budget,
+        position=0 if last is None else last + 1,
         **data,
     )
     staff_line.full_clean()
@@ -28,11 +31,15 @@ def create(budget: Budget, data: dict) -> dict:
 
     YearAllocation.objects.bulk_create(year_allocations)
 
+    budget.touch()
+
     return budget_details.get_budget_details(budget)
 
 
 @transaction.atomic
 def delete(budget: Budget, line: StaffCostLine) -> dict:
     line.delete()
+
+    budget.touch()
 
     return budget_details.get_budget_details(budget)

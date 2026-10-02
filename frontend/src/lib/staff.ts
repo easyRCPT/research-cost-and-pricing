@@ -1,12 +1,10 @@
 import type {
   BudgetDetail,
-  CalculateStaffLine,
+  EditableStaffLine,
   EmploymentType,
+  RatedStaffLine,
   SalaryRate,
   SalaryRateMultiplier,
-  StaffCategory,
-  StaffLine,
-  TimeBasis,
 } from '@/types'
 
 export const EMPLOYMENT_TYPES: readonly EmploymentType[] = [
@@ -52,13 +50,20 @@ export const allTimeBases = (multipliers: readonly SalaryRateMultiplier[]) => [
 ]
 
 /**
- * An FTE row is a fraction of one full-time position. Daily and hourly rows count
- * days and hours, which the workbook leaves open-ended; a full year is as much as
- * either can mean. Kept in step with the backend's TIME_LIMITS.
+ * An FTE row is a fraction of one full-time position.
+ *
+ * A Daily row stops at 220, which is not a calendar figure: the Salary Rate
+ * Multiplier holds 1/220 for Daily, and that is what turns a daily rate into
+ * an annual salary, so 220 days is a full year on a Daily row by
+ * construction. Hourly has no such number -- its multiplier is 1 because
+ * Casual rates are already hourly -- so a full calendar year is as much as it
+ * can mean.
+ *
+ * Kept in step with the backend's TIME_LIMITS, which validates the same caps.
  */
 const TIME_LIMITS: Record<string, { label: string; max: number }> = {
   FTE: { label: 'FTE', max: 1 },
-  Daily: { label: 'Days', max: 366 },
+  Daily: { label: 'Days', max: 220 },
   Hourly: { label: 'Hours', max: 366 * 24 },
 }
 
@@ -69,7 +74,7 @@ export const timeLabelFor = (timeBasis: string) =>
   TIME_LIMITS[timeBasis]?.label ?? 'Time'
 
 /** Re-clamps the entered time after a change of basis. */
-export const clampedByYear = (line: StaffLine, timeBasis: string) => {
+export const clampedByYear = (line: EditableStaffLine, timeBasis: string) => {
   const max = maxTimeFor(timeBasis)
   if (max === undefined) return line.by_year
   return line.by_year.map((entry) => ({
@@ -78,14 +83,63 @@ export const clampedByYear = (line: StaffLine, timeBasis: string) => {
   }))
 }
 
-export const timeFor = (line: StaffLine, year: number) =>
+/** The patch for a new time basis, clamping the entered time to its limit. */
+export const timeBasisPatch = (
+  line: EditableStaffLine,
+  timeBasis: string,
+): Partial<EditableStaffLine> => ({
+  time_basis: timeBasis as EditableStaffLine['time_basis'],
+  by_year: clampedByYear(line, timeBasis),
+})
+
+/** The patch for a new employment type, moving the time basis if it no longer fits. */
+export const employmentTypePatch = (
+  line: EditableStaffLine,
+  multipliers: readonly SalaryRateMultiplier[],
+  employmentType: string,
+): Partial<EditableStaffLine> => {
+  const employment_type = employmentType as EditableStaffLine['employment_type']
+  const allowed = timeBasesFor(multipliers, employment_type)
+  if (allowed.includes(line.time_basis)) return { employment_type }
+  const time_basis = (allowed[0] ??
+    line.time_basis) as EditableStaffLine['time_basis']
+  return {
+    employment_type,
+    time_basis,
+    by_year: clampedByYear(line, time_basis),
+  }
+}
+
+/** The patch for a new category, moving the classification if it no longer fits. */
+export const categoryPatch = (
+  line: EditableStaffLine,
+  rates: readonly SalaryRate[],
+  category: string,
+): Partial<EditableStaffLine> => {
+  const options = classificationsFor(rates, category)
+  return {
+    category: category as EditableStaffLine['category'],
+    ...(options.includes(line.classification)
+      ? {}
+      : { classification: options[0] ?? line.classification }),
+  }
+}
+
+export const timeFor = (line: EditableStaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.time ?? 0
 
-export const costFor = (line: StaffLine, year: number) =>
+export const costFor = (line: EditableStaffLine, year: number) =>
   line.by_year.find((entry) => entry.year === year)?.cost ?? 0
 
+/**
+ * The by_year array with one year's time changed.
+ *
+ * The costs are copied across unchanged because only the engine can price a
+ * new time. Nothing should read them: the optimistic echo takes the time from
+ * here and the money from the server's reply. See withEnteredTime.
+ */
 export const withTime = (
-  line: StaffLine,
+  line: EditableStaffLine,
   years: number[],
   year: number,
   time: number,
@@ -96,21 +150,27 @@ export const withTime = (
     cost: costFor(line, y),
   }))
 
-export const emptyStaffLine = (id: number, years: number[]): StaffLine => ({
+export const emptyStaffLine = (
+  id: string,
+  years: number[],
+): EditableStaffLine => ({
   id,
+  // The server appends it on create.
+  position: 0,
   name_role: '',
   employment_type: '',
   category: '',
   classification: '',
   time_basis: '',
   in_kind: false,
-  rate_2025: 0,
+  in_kind_reason: '',
+  rate: 0,
   by_year: years.map((year) => ({ year, time: 0, cost: 0 })),
   total: 0,
 })
 
 /** Rows the engine can rate. The name is echoed back, never priced. */
-export const isRated = (line: StaffLine) =>
+export const isRated = (line: EditableStaffLine): line is RatedStaffLine =>
   line.employment_type !== '' &&
   line.category !== '' &&
   line.classification !== '' &&
@@ -120,30 +180,24 @@ export const isRated = (line: StaffLine) =>
  * The CI's own row, which is the first one. Their name is typed on Project
  * Details, so the row carries it rather than letting the two drift apart.
  */
-export const ciLineId = (lines: StaffLine[], chiefInvestigator: string) =>
-  chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null)
+export const ciLineId = (
+  lines: EditableStaffLine[],
+  chiefInvestigator: string,
+) => (chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null))
 
 /** Puts the CI's name on their row, wherever it was last edited. */
-export const withCiName = (lines: StaffLine[], chiefInvestigator: string) => {
+export const withCiName = (
+  lines: EditableStaffLine[],
+  chiefInvestigator: string,
+) => {
   const id = ciLineId(lines, chiefInvestigator)
   if (id === null) return lines
   const name_role = chiefInvestigator.trim()
   return lines.map((line) => (line.id === id ? { ...line, name_role } : line))
 }
 
-export const toInput = (line: StaffLine): CalculateStaffLine => ({
-  id: line.id,
-  name_role: line.name_role,
-  employment_type: line.employment_type as EmploymentType,
-  category: line.category as StaffCategory,
-  classification: line.classification,
-  time_basis: line.time_basis as TimeBasis,
-  in_kind: line.in_kind,
-  by_year: line.by_year.map(({ year, time }) => ({ year, time })),
-})
-
-/** Entry columns from the store; rate and cost columns from whichever block priced the row. */
-export const withCosts = (lines: StaffLine[], budget: BudgetDetail) => {
+/** Rate and cost columns from whichever block priced the row. */
+export const withCosts = (lines: EditableStaffLine[], budget: BudgetDetail) => {
   const priced = new Map(
     [...budget.staff_cost.lines, ...budget.staff_in_kind_cost.lines].map(
       (line) => [line.id, line],
@@ -155,7 +209,7 @@ export const withCosts = (lines: StaffLine[], budget: BudgetDetail) => {
     if (!cost) return line
     return {
       ...line,
-      rate_2025: cost.rate_2025,
+      rate: cost.rate,
       total: cost.total,
       by_year: line.by_year.map((entry) => ({
         ...entry,

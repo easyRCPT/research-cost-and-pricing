@@ -4,30 +4,30 @@ import {
   CellNumber,
   CellTd,
   CellText,
+  EmptyRow,
+  RemoveRowButton,
   Td,
 } from '@/components/shell'
-import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { dash } from '@/lib/format/utils'
-import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 import {
   allExpenseTypes,
   amountFor,
+  costGroupPatch,
   costGroups,
   expenseTypesFor,
-  lineTotal,
   tenPercentAllowed,
   withAmount,
 } from '@/lib/non-staff'
+import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 import type { NonStaffCategory, NonStaffLine } from '@/types'
-import { X } from 'lucide-react'
 
 interface NonStaffTableBodyProps {
   lines: NonStaffLine[]
   years: number[]
   categories: NonStaffCategory[]
-  patchLine: (id: number, patch: Partial<NonStaffLine>) => void
-  removeLine: (id: number) => void
+  patchLine: (id: string, patch: Partial<NonStaffLine>) => void
+  removeLine: (id: string) => void
 }
 
 export function NonStaffTableBody({
@@ -40,18 +40,10 @@ export function NonStaffTableBody({
   const groups = costGroups(categories)
   const expenseTypes = allExpenseTypes(categories)
 
-  function setCostGroup(line: NonStaffLine, cost_group: string) {
-    patchLine(line.id, {
-      cost_group,
-      expense_type: '',
-      add_ten_percent: line.add_ten_percent && tenPercentAllowed(cost_group),
-    })
-  }
-
   return (
     <tbody>
       {lines.map((line) => {
-        const rowTotal = lineTotal(line, years)
+        const rowTotal = line.direct_total
 
         return (
           <tr key={line.id}>
@@ -60,7 +52,12 @@ export function NonStaffTableBody({
                 value={line.cost_group}
                 options={groups}
                 placeholder="Select…"
-                onChange={(v) => setCostGroup(line, v)}
+                onChange={(costGroup) =>
+                  patchLine(
+                    line.id,
+                    costGroupPatch(line, categories, costGroup),
+                  )
+                }
               />
             </CellTd>
             <CellTd>
@@ -79,9 +76,7 @@ export function NonStaffTableBody({
               <CellText
                 className="min-w-52"
                 value={line.description}
-                onChange={(e) =>
-                  patchLine(line.id, { description: e.target.value })
-                }
+                onChange={(description) => patchLine(line.id, { description })}
               />
             </CellTd>
             {years.map((year) => (
@@ -101,43 +96,29 @@ export function NonStaffTableBody({
                 />
               </CellTd>
             ))}
-            <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
-              {dash(rowTotal)}
-            </Calc>
             <Td align="center">
               <Checkbox
                 className="mx-auto"
                 checked={line.add_ten_percent}
-                disabled={!tenPercentAllowed(line.cost_group)}
+                disabled={!tenPercentAllowed(categories, line.cost_group)}
                 onCheckedChange={(checked) =>
                   patchLine(line.id, { add_ten_percent: checked === true })
                 }
               />
             </Td>
-            <Td align="center">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                aria-label={`Remove ${line.description || 'row'}`}
-                className="text-muted-foreground hover:bg-bad-bg hover:text-bad"
-                onClick={() => removeLine(line.id)}
-              >
-                <X />
-              </Button>
-            </Td>
+            <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
+              {dash(rowTotal)}
+            </Calc>
+            <RemoveRowButton
+              label={`Remove ${line.description || 'row'}`}
+              onRemove={() => removeLine(line.id)}
+            />
           </tr>
         )
       })}
 
       {lines.length === 0 && (
-        <tr>
-          <Td
-            colSpan={6 + years.length}
-            className="py-6 text-center text-muted-foreground"
-          >
-            No non-staff costs yet.
-          </Td>
-        </tr>
+        <EmptyRow colSpan={6 + years.length}>No non-staff costs yet.</EmptyRow>
       )}
     </tbody>
   )

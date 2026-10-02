@@ -1,0 +1,258 @@
+import type { QueryClient } from '@tanstack/react-query'
+import {
+  createRootRouteWithContext,
+  createRoute,
+  createRouter,
+  Outlet,
+  redirect,
+} from '@tanstack/react-router'
+
+import { homeFor, meQuery } from '@/api/auth'
+import { SUPERADMIN } from '@/api/auth'
+import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
+import { AppSkeleton } from '@/components/shell'
+import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
+import { EditorRoute } from '@/routes/editor'
+import { ProjectsRoute } from '@/routes/projects'
+import { SCREEN_HEADINGS } from '@/screens'
+import { AdminShell } from '@/screens/admin/AdminShell'
+import { Audit } from '@/screens/admin/Audit'
+import { LookupEditor } from '@/screens/admin/LookupEditor'
+import { Overview } from '@/screens/admin/Overview'
+import { Projects as ProjectRegister } from '@/screens/admin/Projects'
+import { Users } from '@/screens/admin/Users'
+import { VersionHistory } from '@/screens/admin/VersionHistory'
+import { AdminLogin } from '@/screens/auth/AdminLogin'
+import { Login } from '@/screens/auth/Login'
+import { Signup } from '@/screens/auth/Signup'
+import type { AppScreen } from '@/screens/editor/AppContent'
+
+/**
+ * Seven entries, written out rather than generated.
+ *
+ * The file-based generator wants a build step and a checked-in routeTree.gen.ts,
+ * which is a lot of machinery for a tree that fits on a screen.
+ */
+
+/** Derived from the headings, so a restored screen needs no edit here. */
+const isScreen = (value: string): value is AppScreen =>
+  value === LOOKUP_SCREEN || value in SCREEN_HEADINGS
+
+interface RouterContext {
+  queryClient: QueryClient
+}
+
+const rootRoute = createRootRouteWithContext<RouterContext>()({
+  component: Outlet,
+})
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  // Not a screen: the question "where does this account belong?".
+  beforeLoad: async ({ context }) => {
+    const me = await context.queryClient.ensureQueryData(meQuery)
+    throw redirect({ to: me ? homeFor(me) : '/login' })
+  },
+})
+
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
+    typeof search.redirect === 'string' ? { redirect: search.redirect } : {},
+  component: Login,
+})
+
+const signupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/signup',
+  component: Signup,
+})
+
+const adminLoginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/login',
+  component: AdminLogin,
+})
+
+/**
+ * The gate every private route sits behind. Guarded once, on this pathless
+ * parent, so a route added beneath it cannot arrive unguarded.
+ *
+ * In `beforeLoad` rather than in a component: the route does not begin to load
+ * until the answer is in, so a signed-out visitor never gets a frame of the
+ * screen they are not allowed to see, and there is no second render to loop
+ * on. `ensureQueryData` shares one fetch with the `useMe` every screen calls.
+ */
+const privateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'private',
+  beforeLoad: async ({ context, location }) => {
+    const me = await context.queryClient.ensureQueryData(meQuery)
+    // Carried so signing in finishes the trip they started.
+    if (!me) throw redirect({ to: '/login', search: { redirect: location.href } })
+  },
+})
+
+const projectsRoute = createRoute({
+  getParentRoute: () => privateRoute,
+  path: '/projects',
+  component: ProjectsRoute,
+})
+
+/**
+ * The admin console (#62). Guarded once, on the parent, so a screen added
+ * beneath it cannot arrive unguarded. Signed out goes to the admin door; signed
+ * in without the superadmin group goes home, since there is nothing here for
+ * them and the server would refuse every call anyway.
+ */
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  beforeLoad: async ({ context, location }) => {
+    const me = await context.queryClient.ensureQueryData(meQuery)
+    if (!me) throw redirect({ to: '/admin/login', search: { redirect: location.href } })
+    if (!me.groups.includes(SUPERADMIN)) throw redirect({ to: homeFor(me) })
+  },
+  component: AdminShell,
+})
+
+// The shell's own boundary shows the skeleton, inside the frame; the router's
+// default would put a whole app skeleton there.
+const inAdminShell = { getParentRoute: () => adminRoute, wrapInSuspense: false }
+
+// The front door (#94), where a superadmin signing in lands.
+const adminIndexRoute = createRoute({
+  ...inAdminShell,
+  path: '/',
+  component: Overview,
+})
+
+const adminLookupsRoute = createRoute({
+  ...inAdminShell,
+  path: 'lookups',
+  component: LookupEditor,
+})
+
+const adminVersionsRoute = createRoute({
+  ...inAdminShell,
+  path: 'versions',
+  validateSearch: (search: Record<string, unknown>): { version?: number } =>
+    typeof search.version === 'number' ? { version: search.version } : {},
+  component: VersionHistory,
+})
+
+const adminUsersRoute = createRoute({
+  ...inAdminShell,
+  path: 'users',
+  component: Users,
+})
+
+const adminProjectsRoute = createRoute({
+  ...inAdminShell,
+  path: 'projects',
+  component: ProjectRegister,
+})
+
+const adminAuditRoute = createRoute({
+  ...inAdminShell,
+  path: 'audit',
+  component: Audit,
+})
+
+const approvalsRoute = createRoute({
+  getParentRoute: () => privateRoute,
+  path: '/approvals',
+  component: ApprovalsRoute,
+})
+
+const approvalRegisterRoute = createRoute({
+  getParentRoute: () => privateRoute,
+  path: '/approvals/register',
+  component: ApprovalRegisterRoute,
+})
+
+export const editorRoute = createRoute({
+  getParentRoute: () => privateRoute,
+  path: '/projects/$projectId/$screen',
+  params: {
+    parse: ({ projectId, screen }) => ({
+      projectId: Number(projectId),
+      screen: screen as AppScreen,
+    }),
+    stringify: ({ projectId, screen }) => ({
+      projectId: String(projectId),
+      screen,
+    }),
+  },
+  // A pasted or stale URL is the normal way an unknown screen arrives, so it
+  // lands on the first screen rather than rendering blank. A project id that is
+  // not a number never had a row behind it.
+  beforeLoad: ({ params }) => {
+    if (!Number.isInteger(params.projectId)) {
+      throw redirect({ to: '/projects' })
+    }
+    if (!isScreen(params.screen)) {
+      throw redirect({
+        to: '/projects/$projectId/$screen',
+        params: { projectId: params.projectId, screen: 'details' },
+      })
+    }
+  },
+  component: EditorRoute,
+})
+
+const catchAllRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '$',
+  beforeLoad: () => {
+    throw redirect({ to: '/' })
+  },
+})
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  signupRoute,
+  adminLoginRoute,
+  privateRoute.addChildren([
+    projectsRoute,
+    approvalsRoute,
+    approvalRegisterRoute,
+    editorRoute,
+  ]),
+  adminRoute.addChildren([
+    adminIndexRoute,
+    adminLookupsRoute,
+    adminVersionsRoute,
+    adminUsersRoute,
+    adminProjectsRoute,
+    adminAuditRoute,
+  ]),
+  catchAllRoute,
+])
+
+export function makeRouter(queryClient: QueryClient) {
+  return createRouter({
+    routeTree,
+    context: { queryClient },
+    // The guards await `me` before a private route loads, and on a cold load
+    // that is a round trip with nothing on screen behind it, so it gets a
+    // skeleton rather than a blank frame.
+    //
+    // The threshold is what stops that skeleton appearing on a warm move
+    // between tabs, which resolves from cache in about 150ms. Showing it at
+    // 0ms floored every switch at half a second, because once the pending
+    // component is up `defaultPendingMinMs` (500) holds it there to avoid a
+    // flash -- so the guard against flicker became the delay.
+    defaultPendingComponent: () => <AppSkeleton screen="details" />,
+    defaultPendingMs: 400,
+  })
+}
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: ReturnType<typeof makeRouter>
+  }
+}

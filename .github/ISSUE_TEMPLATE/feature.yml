@@ -1,0 +1,74 @@
+name: Feature
+description: A capability the tool does not have. Needs breaking down into tasks.
+title: "[feat] "
+labels: ["feature", "status: needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        A feature is a parent. Once it is triaged, its pieces get filed as
+        **task** issues and added here as sub-issues. If you can already write
+        the checklist without inventing scope, file a task instead.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >
+        Who is stuck, and on what. Describe the situation, not the solution —
+        the shape of the fix is the next box.
+      placeholder: >
+        Costings can only be read in the app, so anyone circulating one for
+        approval rebuilds it in a spreadsheet by hand.
+    validations:
+      required: true
+
+  - type: textarea
+    id: shape
+    attributes:
+      label: Proposed shape
+      description: Roughly how it should work. Rough is fine.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      multiple: true
+      options:
+        - frontend (React SPA)
+        - backend (Django API)
+        - infra (CI, Render, Neon, Docker, Makefile)
+    validations:
+      required: true
+
+  - type: textarea
+    id: pieces
+    attributes:
+      label: The pieces
+      description: >
+        The tasks this splits into, if you already know some. They get filed as
+        their own issues and linked here as sub-issues — this box is a starting
+        point, not the record.
+    validations:
+      required: false
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: What has to be true before this is finished. A checklist.
+      value: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What else you considered
+      description: Including doing nothing, if that was on the table.
+    validations:
+      required: false

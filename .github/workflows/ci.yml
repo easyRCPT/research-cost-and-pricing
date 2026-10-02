@@ -5,15 +5,16 @@ on:
   # as well ran the same commit twice at once, and the two runs raced on the
   # shared uv cache — one would type-check against a half-resolved environment.
   push:
-    branches: [main]
+    branches: [dev, main]
   pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  # Superseded runs on a pull request are worth cancelling; main is the branch
-  # people read results from, so let its runs finish.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Superseded runs on a pull request are worth cancelling; dev and main are the
+  # branches people read results from, so let their runs finish.
+  cancel-in-progress: >-
+    ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/main' }}
 
 jobs:
   backend:
@@ -190,3 +191,103 @@ jobs:
       - name: Type-check and build
         working-directory: frontend
         run: pnpm build
+
+  e2e:
+    name: Frontend (end to end)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # The app cannot do anything without the API, so this job runs the whole
+    # stack: the same Postgres major as the backend job, migrated and seeded,
+    # with Django and the built frontend started by Playwright itself.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: rcpt
+          POSTGRES_PASSWORD: rcpt
+          POSTGRES_DB: rcpt
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rcpt -d rcpt"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: postgresql://rcpt:rcpt@localhost:5432/rcpt
+      DJANGO_SECRET_KEY: ci-only-not-a-real-secret
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_SSL: "False"
+      # Empty on purpose: the app then calls /api on its own origin and the
+      # preview server proxies it to Django. An absolute URL makes the API a
+      # different site from the page, and the session cookie is SameSite=Lax,
+      # so the browser keeps it to itself and every signed-in spec fails on a
+      # 401 that looks like bad credentials rather than a bad origin.
+      VITE_API_URL: ""
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync --locked
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      # Keyed on the lockfile: the browser is 114 MB and changes only when
+      # @playwright/test does.
+      - name: Cache the browser
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        working-directory: frontend
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Prepare the database
+        working-directory: backend
+        run: |
+          uv run python manage.py migrate
+          uv run python manage.py seed
+          # Every screen is behind a sign-in since #44, so the suite needs
+          # accounts to sign in with. The command is deliberately manual rather
+          # than a seed, because it writes a known password -- which is exactly
+          # what a throwaway CI database wants and a real one must never have.
+          uv run python manage.py create_demo_users
+
+      # Playwright starts Django and the built frontend itself, and waits for
+      # both to answer before the first test runs.
+      - name: Run the tests
+        working-directory: frontend
+        run: pnpm test:e2e
+
+      - name: Keep the report when something failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

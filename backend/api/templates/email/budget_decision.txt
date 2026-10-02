@@ -1,0 +1,25 @@
+Your budget approval has been updated.
+
+Project:
+{{ budget.project.title }}
+
+Department:
+{{ budget.project.department.name }}
+
+Decision:
+{{ decision }}
+
+Reviewed by:
+{{ approver.email }}
+
+{% if requires_dean_review %}
+The Head of Department has approved this budget. It requires further Dean review before a final decision is made.
+
+{% elif decision == "reject" %}
+Reason:
+{{ comment }}
+
+{% endif %}
+
+Please review the budget in RCPT:
+{{ url }}

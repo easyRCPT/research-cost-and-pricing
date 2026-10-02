@@ -17,11 +17,28 @@ export const allExpenseTypes = (categories: readonly NonStaffCategory[]) => [
   ...new Set(categories.map((c) => c.cost_subcategory)),
 ]
 
-// TODO: Convert into a flag in lookup table
-const NO_TEN_PERCENT = new Set(['Student Support', 'Shared Grant Payments'])
+export const tenPercentAllowed = (
+  categories: readonly NonStaffCategory[],
+  costGroup: string,
+) =>
+  costGroup !== '' &&
+  !categories.some(
+    (c) =>
+      c.cost_category === costGroup &&
+      c.excludes_additional_rate,
+  )
 
-export const tenPercentAllowed = (costGroup: string) =>
-  costGroup !== '' && !NO_TEN_PERCENT.has(costGroup)
+/** The patch for a new cost group, clearing what no longer applies to it. */
+export const costGroupPatch = (
+  line: NonStaffLine,
+  categories: readonly NonStaffCategory[],
+  costGroup: string,
+): Partial<NonStaffLine> => ({
+  cost_group: costGroup,
+  expense_type: '',
+  add_ten_percent:
+    line.add_ten_percent && tenPercentAllowed(categories, costGroup),
+})
 
 /** Returns the cost amount for a given year in a NonStaffLine  */
 export const amountFor = (line: NonStaffLine, year: number) =>
@@ -38,18 +55,18 @@ export const withAmount = (
     amount: y === year ? amount : amountFor(line, y),
   }))
 
-export const lineTotal = (line: NonStaffLine, years: number[]) =>
-  years.reduce((sum, year) => sum + amountFor(line, year), 0)
-
 export const emptyNonStaffLine = (
-  id: number,
+  id: string,
   years: number[],
 ): NonStaffLine => ({
   id,
+  // The server appends it on create.
+  position: 0,
   cost_group: '',
   expense_type: '',
   description: '',
   in_kind: false,
+  in_kind_reason: '',
   add_ten_percent: false,
   indirect_rate_multiplier: null,
   by_year: years.map((year) => ({ year, amount: 0 })),

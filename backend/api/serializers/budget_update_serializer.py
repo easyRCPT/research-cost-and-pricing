@@ -24,7 +24,6 @@ FIELDS_BY_SECTION = {
         "justification_notes",
         "dean_exemption_reason",
         "mode",
-        "status",
         "cost_multiplier",
         "in_kind_multiplier",
         "margin",
@@ -38,15 +37,19 @@ FIELDS_BY_SECTION = {
         "category",
         "time_basis",
         "in_kind",
+        "in_kind_reason",
         "year_value",
+        "position",
     },
     "non_staff": {
         "description",
         "in_kind",
+        "in_kind_reason",
         "add_ten_percent",
         "indirect_rate_multiplier",
         "category",
         "year_value",
+        "position",
     },
     "deliverable": {
         "description",
@@ -75,7 +78,7 @@ class SectionSerializer(serializers.Serializer):
 # Shared base serialiser inherited by all 5 sections
 #   _Update:        `value`, `field`
 #   _RowUpdate:     `row_id`, `value`, `field`
-#   _YearRowUpdate: `year`, `row_id`, `value`, `field`
+#   _YearRowUpdate: `year`, `row_id` (a cost line's UUID), `value`, `field`
 class _Update(serializers.Serializer):
     value = serializers.JSONField()
 
@@ -84,7 +87,8 @@ class _RowUpdate(_Update):
     row_id = serializers.IntegerField()
 
 
-class _YearRowUpdate(_RowUpdate):
+class _YearRowUpdate(_Update):
+    row_id = serializers.UUIDField()
     year = serializers.IntegerField(required=False)
 
     # TODO: annotate attrs/return as dict[str, Any] for strict pyright

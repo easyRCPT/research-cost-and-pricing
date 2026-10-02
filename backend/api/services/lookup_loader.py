@@ -5,23 +5,17 @@ from django.db import models
 from django.db.models import QuerySet
 
 from ..models import (
-    Activity,
+    Budget,
     CalculationConstant,
-    DeliverableType,
-    Department,
     EbaIncrease,
-    IncrementCap,
-    MinimumCostRecoveryMultiplier,
-    NonStaffCostCategory,
+    LookupConfiguration,
     OnCostRate,
-    Region,
-    RevenueCategory,
     SalaryRate,
     SalaryRateMultiplier,
 )
+from .lookup_definitions import LOOKUP_DEFINITIONS
 
-CACHE_KEY = "lookup_models"
-CONSTANTS_CACHE_KEY = "lookup_constants"
+MODELS_CACHE_KEY = "lookup_models"
 CACHE_TIMEOUT = 3600
 
 REQUIRED_CONSTANTS = {
@@ -29,86 +23,97 @@ REQUIRED_CONSTANTS = {
     "max_payroll_tax",
     "override_uom_oncosts",
     "gst_rate",
+    "default_margin",
+    "minimum_margin",
+    "salary_rate_year",
+    "full_cost_recovery_multiplier",
 }
 
 
-class LookupTable(models.TextChoices):
-    DEPARTMENTS = "departments"
-    SALARY_RATES = "salary_rates"
-    SALARY_RATE_MULTIPLIERS = "salary_rate_multipliers"
-    INCREMENT_CAPS = "increment_caps"
-    EBA_INCREASES = "eba_increases"
-    ON_COST_RATES = "on_cost_rates"
-    NON_STAFF_COST_CATEGORIES = "non_staff_cost_categories"
-    MINIMUM_COST_RECOVERY_MULTIPLIERS = "minimum_cost_recovery_multipliers"
-    CALCULATION_CONSTANTS = "calculation_constants"
-    ACTIVITIES = "activities"
-    REGIONS = "regions"
-    DELIVERABLE_TYPES = "deliverable_types"
-    REVENUE_CATEGORIES = "revenue_categories"
+def _get_lookup_models(version_id: int) -> dict[str, list[models.Model]]:
+    lookup_models = {}
 
+    for table, definition in LOOKUP_DEFINITIONS.items():
+        queryset = definition.model.objects.all()
 
-# Every table's rows, in a stable order. The keys are the response's keys.
-LOOKUP_TABLES: dict[LookupTable, QuerySet] = {
-    LookupTable.DEPARTMENTS: Department.objects.order_by("code"),
-    LookupTable.SALARY_RATES: SalaryRate.objects.order_by(
-        "payroll_type", "category", "classification"
-    ),
-    LookupTable.SALARY_RATE_MULTIPLIERS: SalaryRateMultiplier.objects.order_by(
-        "time_basis"
-    ),
-    LookupTable.INCREMENT_CAPS: IncrementCap.objects.order_by("level"),
-    LookupTable.EBA_INCREASES: EbaIncrease.objects.order_by("year"),
-    LookupTable.ON_COST_RATES: OnCostRate.objects.order_by(
-        "on_cost_type", "employment_type", "year"
-    ),
-    LookupTable.NON_STAFF_COST_CATEGORIES: NonStaffCostCategory.objects.order_by(
-        "cost_category", "cost_subcategory"
-    ),
-    LookupTable.MINIMUM_COST_RECOVERY_MULTIPLIERS: (
-        MinimumCostRecoveryMultiplier.objects.order_by("year")
-    ),
-    LookupTable.CALCULATION_CONSTANTS: CalculationConstant.objects.order_by("name"),
-    LookupTable.ACTIVITIES: Activity.objects.order_by("code"),
-    LookupTable.REGIONS: Region.objects.order_by("code"),
-    LookupTable.DELIVERABLE_TYPES: DeliverableType.objects.order_by("code"),
-    LookupTable.REVENUE_CATEGORIES: RevenueCategory.objects.order_by(
-        "budget_ledger_id"
-    ),
-}
+        if definition.versioned:
+            queryset = queryset.filter(version_id=version_id)
+
+        queryset = queryset.order_by(*definition.order_by)
+        lookup_models[table] = list(queryset)
+
+    return lookup_models
 
 
 def get_lookup_tables() -> dict[str, list[models.Model]]:
     """
     Return all lookup table rows keyed by table name.
     Results are cached for CACHE_TIMEOUT seconds.
+
+    Only get current version of lookup tables.
     """
-    tables = cache.get(CACHE_KEY)
-    if tables is None:
-        # .all() clones the module-level queryset; evaluating it directly would pin
-        # the first result set to the module for the life of the process.
-        tables = {
-            table.value: list(queryset.all())
-            for table, queryset in LOOKUP_TABLES.items()
-        }
-        cache.set(CACHE_KEY, tables, CACHE_TIMEOUT)
-    return tables
+    lookup_models = cache.get(MODELS_CACHE_KEY)
+    if lookup_models is None:
+        version_id = LookupConfiguration.objects.get().current_version_id
+        lookup_models = _get_lookup_models(version_id)
+        cache.set(MODELS_CACHE_KEY, lookup_models, CACHE_TIMEOUT)
+    return lookup_models
 
 
-def get_constants() -> dict:
+def _constants_cache_key(version_id: int) -> str:
+    return f"lookup_version_{version_id}"
+
+
+def validate_constants(constants: dict) -> None:
+    missing = REQUIRED_CONSTANTS - constants.keys()
+    if missing:
+        raise KeyError(
+            f"Missing required calculation constants: {','.join(sorted(missing))}"
+        )
+
+
+def _get_versioned_lookup_querysets(version_id: int) -> dict[str, QuerySet]:
+    return {
+        table: definition.model.objects.filter(
+            version_id=version_id,
+        ).order_by(*definition.order_by)
+        for table, definition in LOOKUP_DEFINITIONS.items()
+        if definition.versioned
+    }
+
+
+def get_constants(version_id: int) -> dict:
     """
     Get lookup tables from cache and convert them into calculation dictionaries.
     The converted result is cached for CACHE_TIMEOUT seconds.
     """
-    constants = cache.get(CONSTANTS_CACHE_KEY)
+    cache_key = _constants_cache_key(version_id)
+    constants = cache.get(cache_key)
 
     if constants is not None:
         return constants
 
-    tables = get_lookup_tables()
+    result = build_constants(version_id)
+    cache.set(cache_key, result, CACHE_TIMEOUT)
+    return result
 
-    # get_lookup_tables() returns generic Model types,
-    # but the type of each table is fixed by LOOKUP_TABLES.
+
+def build_constants(version_id: int) -> dict:
+    """
+    One version's rates as the engine reads them, straight from the database.
+
+    Raises if the version could not price a costing: a constant missing, or an
+    on-cost with no default rate. A set of changes is checked with this before
+    it is saved (#138), so it can never leave the rates in that state.
+    """
+    querysets = _get_versioned_lookup_querysets(version_id)
+    tables = {
+        # Pyright infers TextChoices.value as a callable; it is a string at runtime.
+        table: list(queryset)
+        for table, queryset in querysets.items()
+    }
+
+    # Cast each table to its concrete model type for Pyright.
     salary_rates = cast(
         list[SalaryRate],
         tables["salary_rates"],
@@ -134,7 +139,7 @@ def get_constants() -> dict:
         list[EbaIncrease],
         tables["eba_increases"],
     )
-    eba_multiplier = {row.year: row.multiplier for row in eba_increases}
+    eba_rate = {row.year: row.rate for row in eba_increases}
 
     on_cost_rates = cast(
         list[OnCostRate],
@@ -142,7 +147,7 @@ def get_constants() -> dict:
     )
     on_cost_components = {}
 
-    # Structure: employment_type -> year -> on_cost_type -> rate
+    # Structure: on_cost_type -> employment_type -> year -> rate
     for row in on_cost_rates:
         on_cost_components.setdefault(row.on_cost_type, {}).setdefault(
             row.employment_type, {}
@@ -167,27 +172,36 @@ def get_constants() -> dict:
     result = {
         "salary_rate": salary_rate,
         "salary_rate_multiplier": salary_rate_multiplier,
-        "eba": eba_multiplier,
+        "eba": eba_rate,
         "on_cost_components": on_cost_components,
         "constants": constants,
     }
 
-    cache.set(CONSTANTS_CACHE_KEY, result, CACHE_TIMEOUT)
-
     return result
 
 
-def validate_constants(constants: dict) -> None:
-    missing = REQUIRED_CONSTANTS - constants.keys()
-    if missing:
-        raise KeyError(
-            f"Missing required calculation constants: {','.join(sorted(missing))}"
-        )
+def current_version_id() -> int:
+    return LookupConfiguration.objects.get().current_version_id
+
+
+def constants_for(budget: Budget) -> dict:
+    """
+    The lookup state one budget prices against.
+
+    A draft has no version of its own and reads the live rates, so a lookup
+    edit reaches it: an unauthorised budget is meant to pick up a rate change
+    made after it was created. Submitting stamps the version in use, and from
+    then on the budget is frozen against that one however the rates move.
+    """
+    version_id = budget.lookup_version_id
+    if version_id is None:
+        version_id = current_version_id()
+    return get_constants(version_id)
 
 
 def invalidate_lookup_cache() -> None:
     """
     Refresh the cache after an administrator modifies Lookup table data.
     """
-    cache.delete(CACHE_KEY)
-    cache.delete(CONSTANTS_CACHE_KEY)
+    cache.delete(MODELS_CACHE_KEY)
+    cache.delete(_constants_cache_key(current_version_id()))

@@ -9,16 +9,20 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "gen:api": "openapi-typescript schema.yml -o src/types/api.d.ts"
+    "gen:api": "openapi-typescript schema.yml -o src/types/api.d.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/source-sans-3": "^5.3.0",
     "@tanstack/react-query": "5.102.8",
     "@tanstack/react-query-devtools": "5.102.8",
+    "@tanstack/react-router": "^1.170.38",
     "@tanstack/react-table": "9.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cn": "^0.4.0",
     "lucide-react": "^1.34.0",
     "next-themes": "^0.4.6",
     "openapi-fetch": "^0.17.0",
@@ -33,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
@@ -41,6 +46,7 @@
     "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.7.0",
     "openapi-typescript": "^7.13.0",
     "prettier": "3.9.6",

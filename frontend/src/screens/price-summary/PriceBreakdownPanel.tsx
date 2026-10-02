@@ -1,5 +1,6 @@
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import type { PriceSummary } from '@/types'
+
 import { DASH, percent } from './format'
 
 interface PriceBreakdownPanelProps {

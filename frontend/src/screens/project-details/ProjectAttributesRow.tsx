@@ -1,12 +1,6 @@
 import { FieldRow } from '@/components/shell'
 import { Attribute } from '@/components/ui/attribute'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { OptionSelect } from '@/components/ui/option-select'
 import type { Activity, ProjectInfo, Region } from '@/types'
 
 interface ProjectAttributesRowProps {
@@ -30,41 +24,27 @@ export function ProjectAttributesRow({
         {/* Activity Picker */}
         <label className="block">
           <span className="block text-xs text-muted-foreground">Activity</span>
-          <Select
+          <OptionSelect
             value={project.activity ?? ''}
             onValueChange={(activity) => onChange({ activity })}
-          >
-            <SelectTrigger size="sm" className="mt-0.5 w-full bg-white">
-              <SelectValue placeholder="Select…" />
-            </SelectTrigger>
-            <SelectContent>
-              {activities.map((o) => (
-                <SelectItem key={o.code} value={o.code}>
-                  {o.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={activities.map((o) => ({ value: o.code, label: o.name }))}
+            placeholder="Select…"
+            size="sm"
+            className="mt-0.5 w-full bg-white"
+          />
         </label>
 
         {/* Region Picker */}
         <label className="block">
           <span className="block text-xs text-muted-foreground">Region</span>
-          <Select
+          <OptionSelect
             value={project.region ?? ''}
             onValueChange={(region) => onChange({ region })}
-          >
-            <SelectTrigger size="sm" className="mt-0.5 w-full bg-white">
-              <SelectValue placeholder="Select…" />
-            </SelectTrigger>
-            <SelectContent>
-              {regions.map((o) => (
-                <SelectItem key={o.code} value={o.code}>
-                  {o.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={regions.map((o) => ({ value: o.code, label: o.name }))}
+            placeholder="Select…"
+            size="sm"
+            className="mt-0.5 w-full bg-white"
+          />
         </label>
       </div>
 

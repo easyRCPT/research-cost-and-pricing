@@ -1,9 +1,49 @@
 import createClient from 'openapi-fetch'
+
 import type { paths } from '@/types/api'
 
 export const api = createClient<paths>({
   baseUrl: import.meta.env.VITE_API_URL,
+  // Only matters if VITE_API_URL points at another origin; /api is same-origin.
+  credentials: 'include',
 })
+
+const SAFE = ['GET', 'HEAD', 'OPTIONS', 'TRACE']
+
+/**
+ * Django refuses an unsafe method that cannot show the cookie back to it.
+ *
+ * The token is readable by script on purpose: proving the request came from a
+ * page on this origin is the whole mechanism, and an attacker's page cannot
+ * read the cookie to copy it. `/api/auth/csrf/` is what puts it there for a
+ * browser nobody has signed in on yet.
+ */
+api.use({
+  onRequest({ request }) {
+    if (!SAFE.includes(request.method)) {
+      const token = readCookie('csrftoken')
+      if (token) request.headers.set('X-CSRFToken', token)
+    }
+    return request
+  },
+  async onResponse({ request, response }) {
+    // The session expired mid-visit: sign in again and come back here.
+    const path = new URL(request.url, location.origin).pathname
+    if (response.status === 401 && !path.startsWith('/api/auth/')) {
+      const here = location.pathname + location.search
+      location.assign(`/login?redirect=${encodeURIComponent(here)}`)
+    }
+    // An empty error body comes back as `error: ""`, which callers read as success.
+    if (!response.ok && !(await response.clone().text())) {
+      throw new ApiError(response.status, null)
+    }
+  },
+})
+
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
+}
 
 export class ApiError extends Error {
   status: number
@@ -16,6 +56,28 @@ export class ApiError extends Error {
     this.status = status
     this.fields = fields
   }
+}
+
+/** The server's message for an ApiError; `fallback` for anything else. */
+export function messageOf(error: unknown, fallback = 'Try again.'): string {
+  return error instanceof ApiError ? error.message : fallback
+}
+
+/** The server's message per field for an ApiError; none for anything else. */
+export function fieldErrors(error: unknown): Record<string, string> {
+  return error instanceof ApiError ? error.fields : {}
+}
+
+/** Unwraps the data of a successful request or an ApiError if failed */
+export function unwrap<T>(result: {
+  data?: T
+  error?: unknown
+  response: Response
+}): T {
+  if (!result.response.ok) {
+    throw new ApiError(result.response.status, result.error)
+  }
+  return result.data as T
 }
 
 /** The envelope drf-standardized-errors wraps every 4xx and 5xx in. */

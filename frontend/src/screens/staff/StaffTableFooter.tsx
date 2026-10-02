@@ -25,6 +25,9 @@ export function StaffTableFooter({
             <Money value={costFor(year)} />
           </FootTd>,
         ])}
+        <FootTd>
+          <Money value={columnTotal.total} />
+        </FootTd>
         <FootTd />
       </tr>
     </tfoot>

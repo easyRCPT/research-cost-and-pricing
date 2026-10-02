@@ -1,16 +1,11 @@
-from decimal import Decimal
-
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from api.models import Budget, CalculationConstant, Department, Project
+from api.models import Budget, Department, Project, User
+from api.services.project import budget_defaults
 
 TITLE = "Demo Project"
-
-
-def constant(name: str, fallback: Decimal) -> Decimal:
-    row = CalculationConstant.objects.filter(name=name).first()
-    return row.value if row else fallback
+OWNER = "researcher@unimelb.edu.au"
 
 
 class Command(BaseCommand):
@@ -26,6 +21,10 @@ class Command(BaseCommand):
         if department is None:
             raise CommandError("No departments. Run `make seed` first.")
 
+        owner = User.objects.filter(email=OWNER).first()
+        if owner is None:
+            raise CommandError(f"No {OWNER}. Run `make demo-users` first.")
+
         project, _ = Project.objects.get_or_create(
             title=TITLE,
             defaults={
@@ -36,18 +35,13 @@ class Command(BaseCommand):
                 "start_month": 1,
                 "end_year": options["end_year"],
                 "end_month": 12,
+                "created_by": owner,
             },
         )
 
         budget = project.budgets.order_by("id").first()
         if budget is None:
-            budget = Budget.objects.create(
-                project=project,
-                cost_multiplier=constant(
-                    "full_cost_recovery_multiplier", Decimal("1.70")
-                ),
-                in_kind_multiplier=constant("in_kind_multiplier", Decimal("1.70")),
-            )
+            budget = Budget.objects.create(project=project, **budget_defaults())
 
         self.stdout.write(
             self.style.SUCCESS(f"Budget {budget.id} on project {project.id} ready.")

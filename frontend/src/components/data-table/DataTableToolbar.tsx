@@ -1,14 +1,31 @@
 import type { RowData } from '@tanstack/react-table'
 import { XIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { shortDate } from '@/lib/format/dates'
+
+import { DataTableDateRangeMenu } from './DataTableDateRangeMenu'
 import { DataTableFilterMenu } from './DataTableFilterMenu'
 import type { DataTableFilter } from './features'
-import { filterOptions, type FilterState } from './filtering'
+import {
+  type FilterOption,
+  filterOptions,
+  type FilterState,
+} from './filtering'
 
 /** Values named in a badge before the rest collapse to a count. */
 const VALUES_SHOWN = 3
+
+const day = (value: string) => shortDate(`${value}T00:00`)
+
+/** A date range as a person reads it: "1 Oct 2026 to 2 Oct 2026", or "from" or "to" alone. */
+function rangeText([from = '', to = '']: string[]) {
+  if (from && to) return `${day(from)} to ${day(to)}`
+  return from ? `from ${day(from)}` : `to ${day(to)}`
+}
 
 interface DataTableToolbarProps<T extends RowData> {
   rows: T[]
@@ -18,6 +35,9 @@ interface DataTableToolbarProps<T extends RowData> {
   onSearch: (value: string) => void
   state: FilterState
   onState: (state: FilterState) => void
+  /** Each filter's values from the server, in place of counting `rows`. */
+  options?: Record<string, FilterOption[]>
+  actions?: ReactNode
 }
 
 export function DataTableToolbar<T extends RowData>({
@@ -28,6 +48,8 @@ export function DataTableToolbar<T extends RowData>({
   onSearch,
   state,
   onState,
+  options,
+  actions,
 }: DataTableToolbarProps<T>) {
   const toggle = (id: string, value: string, checked: boolean) => {
     const current = state[id] ?? []
@@ -37,32 +59,53 @@ export function DataTableToolbar<T extends RowData>({
     })
   }
 
+  const labelOf = (id: string, value: string) =>
+    options?.[id]?.find((option) => option.value === value)?.label ?? value
+
   const active = filters
     .map((filter) => ({ filter, values: state[filter.id] ?? [] }))
     .filter(({ values }) => values.length > 0)
 
   return (
     <div className="flex flex-col gap-2 px-6 pb-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {filters.map((filter) => (
-          <DataTableFilterMenu
-            key={filter.id}
-            label={filter.label}
-            options={filterOptions(rows, filters, filter, state, search)}
-            selected={state[filter.id] ?? []}
-            onToggle={(value, checked) => toggle(filter.id, value, checked)}
-            onSet={(values) => onState({ ...state, [filter.id]: values })}
-          />
-        ))}
-        {searchable && (
-          <Input
-            type="search"
-            placeholder="Search"
-            value={search}
-            onChange={(event) => onSearch(event.target.value)}
-            className="ml-auto h-7 w-56 bg-card text-[13px]"
-          />
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-nowrap items-center gap-1 overflow-x-auto">
+          {filters.map((filter) =>
+            filter.range ? (
+              <DataTableDateRangeMenu
+                key={filter.id}
+                label={filter.label}
+                range={state[filter.id] ?? []}
+                onRange={(range) => onState({ ...state, [filter.id]: range })}
+              />
+            ) : (
+              <DataTableFilterMenu
+                key={filter.id}
+                label={filter.label}
+                options={
+                  options?.[filter.id] ??
+                  filterOptions(rows, filters, filter, state, search)
+                }
+                selected={state[filter.id] ?? []}
+                onToggle={(value, checked) => toggle(filter.id, value, checked)}
+                onSet={(values) => onState({ ...state, [filter.id]: values })}
+              />
+            ),
+          )}
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          {searchable && (
+            <Input
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              value={search}
+              onChange={(event) => onSearch(event.target.value)}
+              className="h-7 w-56 bg-card text-[13px]"
+            />
+          )}
+          {actions}
+        </div>
       </div>
       {active.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
@@ -74,9 +117,14 @@ export function DataTableToolbar<T extends RowData>({
             >
               <span className="truncate">
                 <span className="text-muted-foreground">{filter.label}: </span>
-                {values.slice(0, VALUES_SHOWN).join(', ')}
+                {filter.range
+                  ? rangeText(values)
+                  : values
+                      .slice(0, VALUES_SHOWN)
+                      .map((value) => labelOf(filter.id, value))
+                      .join(', ')}
               </span>
-              {values.length > VALUES_SHOWN && (
+              {!filter.range && values.length > VALUES_SHOWN && (
                 <span className="shrink-0 text-muted-foreground">
                   +{values.length - VALUES_SHOWN} more
                 </span>

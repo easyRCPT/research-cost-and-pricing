@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How we label and write issues
+    url: https://github.com/easyRCPT/research-cost-and-pricing/blob/dev/.agents/skills/write-issue/SKILL.md
+    about: The label families, the body sections, and what makes an issue assignable.
+  - name: Running the project
+    url: https://github.com/easyRCPT/research-cost-and-pricing/blob/dev/README.md
+    about: Setup, commands and environment variables. Read this before filing a setup problem.

@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from . import non_staff, staff
 
-DEFAULT_MARGIN = Decimal("0.30")
-
 
 def pricing(
     constants: dict,
@@ -107,27 +105,39 @@ def calculate_budget_summary(
         "staff_budget": staff_budget,
         "non_staff_budget": non_staff_budget,
         "in_kind_costs": in_kind_costs,
-        "dean_required": calculate_dean_required(budget_info, general),
+        **calculate_dean_required_with_dict(budget_info, general, price_summary),
     }
 
 
-def calculate_dean_required(
+def calculate_dean_required_with_dict(
     budget_info: dict,
     general: dict,
-) -> bool:
-    """
-    A budget priced below the default cost recovery multiplier needs a Dean's
-    authorisation as well as the Head of Department's.
-    """
-    default_multiplier = general.get("full_cost_recovery_multiplier")
-    if default_multiplier is not None and (
-        budget_info["cost_multiplier"] < default_multiplier
-    ):
-        return True
+    price_summary: dict,
+) -> dict:
+    return calculate_dean_required(
+        budget_info["margin"],
+        general["minimum_margin"],
+        price_summary["in_kind_project_cost"] > 0,
+    )
 
-    default_margin = general.get("default_margin", DEFAULT_MARGIN)
 
-    return budget_info["margin"] < default_margin
+def calculate_dean_required(
+    margin: Decimal,
+    minimum_margin: Decimal,
+    has_in_kind: bool,
+) -> dict:
+    """
+    Dean review on top of the Head of Department's, when the price is below
+    the margin floor or the University is contributing in kind.
+    """
+    triggers = []
+    # TODO(#87): the floor is seeded at 0.30, the default margin, so any cut to
+    # the margin needs a Dean until Frank sets the margin policy.
+    if margin < minimum_margin:
+        triggers.append("margin_below_minimum")
+    if has_in_kind:
+        triggers.append("in_kind_present")
+    return {"dean_required": bool(triggers), "dean_triggers": triggers}
 
 
 def calculate_price_summary(
@@ -158,6 +168,7 @@ def calculate_price_summary(
 
     total_project_cost = project_cost + in_kind_project_cost
 
+    # Markup on cost, not margin on price -- see Budget.margin.
     margin_amount = project_cost * margin
     total_price_exc_gst = project_cost + margin_amount
     if gst_applicable:

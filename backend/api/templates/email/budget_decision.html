@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget Approval Update</title>
+</head>
+<body>
+
+<p>
+  Your budget approval has been updated.
+</p>
+
+<p>
+  <strong>Project:</strong>
+  {{ budget.project.title }}
+</p>
+
+<p>
+  <strong>Department:</strong>
+  {{ budget.project.department.name }}
+</p>
+
+<p>
+  <strong>Decision:</strong>
+  {{ decision }}
+</p>
+
+<p>
+  <strong>Reviewed by:</strong>
+  {{ approver.email }}
+</p>
+
+{% if requires_dean_review %}
+<p>
+  The Head of Department has approved this budget.
+  It requires further <strong>Dean review</strong> before a final decision is made.
+</p>
+
+{% elif decision == "reject" %}
+<p>
+  <strong>Reason:</strong>
+</p>
+
+<p>
+  {{ comment }}
+</p>
+
+{% endif %}
+
+<p>
+  <a href="{{ url }}">Open budget</a>
+</p>
+
+</body>
+</html>

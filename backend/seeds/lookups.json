@@ -1,13 +1,218 @@
 [
 {
+  "model": "api.lookupversion",
+  "pk": 1,
+  "fields": {
+    "created_at": "2026-09-30T22:58:06.633Z",
+    "updated_at": "2026-09-30T22:58:06.633Z",
+    "updated_by": null
+  }
+},
+{
+  "model": "api.lookupconfiguration",
+  "pk": 1,
+  "fields": {
+    "current_version": 1,
+    "referenced": false
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_01",
+  "fields": {
+    "name": "Faculty of Arts"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_02",
+  "fields": {
+    "name": "Faculty of Medicine, Dentistry and Health Sciences"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_03",
+  "fields": {
+    "name": "Chief Operating Officer"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_04",
+  "fields": {
+    "name": "Faculty of Architecture, Building and Planning"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_05",
+  "fields": {
+    "name": "Faculty of Business and Economics"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_06",
+  "fields": {
+    "name": "Faculty of Engineering and Information Technology"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_07",
+  "fields": {
+    "name": "Faculty of Fine Arts and Music"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_08",
+  "fields": {
+    "name": "Faculty of Science"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_09",
+  "fields": {
+    "name": "Faculty of Education"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_10",
+  "fields": {
+    "name": "Melbourne Law School"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_11",
+  "fields": {
+    "name": "Advancement, Communications & Marketing"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_12",
+  "fields": {
+    "name": "Global, Culture and Engagement"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_13",
+  "fields": {
+    "name": "Office of the Provost"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_14",
+  "fields": {
+    "name": "Office of the Vice-Chancellor"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_15",
+  "fields": {
+    "name": "Research & Enterprise"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_16",
+  "fields": {
+    "name": "University Central Reporting Group"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_17",
+  "fields": {
+    "name": "Nossal Institute Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_18",
+  "fields": {
+    "name": "UM Commercialisation Pty Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_19",
+  "fields": {
+    "name": "UM Commercialisation Trust"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_20",
+  "fields": {
+    "name": "UMELB (Singapore)"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_21",
+  "fields": {
+    "name": "UOM Commercial Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_22",
+  "fields": {
+    "name": "Melbourne Business School Limited Group"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_23",
+  "fields": {
+    "name": "UoM International Holdings Limited Group"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_24",
+  "fields": {
+    "name": "Ao Mo Da (Beijing) Consulting Co. Ltd"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_25",
+  "fields": {
+    "name": "Unimelb Germany GmbH"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_26",
+  "fields": {
+    "name": "Deputy Vice-Chancellor Indigenous"
+  }
+},
+{
+  "model": "api.faculty",
+  "pk": "CCH_H1_3_27",
+  "fields": {
+    "name": "Deputy Vice-Chancellor Education"
+  }
+},
+{
   "model": "api.department",
   "pk": "CCH_H1_5_01",
   "fields": {
     "name": "Faculty of Arts - Admin",
     "school": "Faculty of Arts, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_01",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_01"
   }
 },
@@ -18,8 +223,7 @@
     "name": "Faculty of Arts - Centres and Institutes",
     "school": "Faculty of Arts, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_01",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_02"
   }
 },
@@ -30,8 +234,7 @@
     "name": "Asia Institute (D)",
     "school": "Asia Institute",
     "school_code": "CCH_H1_4_02",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_03"
   }
 },
@@ -42,8 +245,7 @@
     "name": "Graduate School of Humanities and Social Sciences (D)",
     "school": "Graduate School of Humanities and Social Sciences",
     "school_code": "CCH_H1_4_03",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_04"
   }
 },
@@ -54,8 +256,7 @@
     "name": "School of Culture and Communication (D)",
     "school": "School of Culture and Communication",
     "school_code": "CCH_H1_4_04",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_05"
   }
 },
@@ -66,8 +267,7 @@
     "name": "School of Historical and Philosophical Studies (D)",
     "school": "School of Historical and Philosophical Studies",
     "school_code": "CCH_H1_4_05",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_06"
   }
 },
@@ -78,8 +278,7 @@
     "name": "School of Languages and Linguistics (D)",
     "school": "School of Languages and Linguistics",
     "school_code": "CCH_H1_4_06",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_07"
   }
 },
@@ -90,8 +289,7 @@
     "name": "School of Social and Political Sciences (D)",
     "school": "School of Social and Political Sciences",
     "school_code": "CCH_H1_4_07",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_08"
   }
 },
@@ -102,8 +300,7 @@
     "name": "The Peter Doherty Institute for Infection and Immunity",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_09"
   }
 },
@@ -114,8 +311,7 @@
     "name": "Office of the CIO",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_10"
   }
 },
@@ -126,8 +322,7 @@
     "name": "School of BioSciences - Centres and Institutes",
     "school": "School of BioSciences",
     "school_code": "CCH_H1_4_32",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_100"
   }
 },
@@ -138,8 +333,7 @@
     "name": "School of Chemistry (D)",
     "school": "School of Chemistry",
     "school_code": "CCH_H1_4_33",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_101"
   }
 },
@@ -150,8 +344,7 @@
     "name": "School of Chemistry - Centres and Institutes",
     "school": "School of Chemistry",
     "school_code": "CCH_H1_4_33",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_102"
   }
 },
@@ -162,8 +355,7 @@
     "name": "School of Geography, Earth and Atmospheric Sciences (D)",
     "school": "School of Geography, Earth and Atmospheric Sciences",
     "school_code": "CCH_H1_4_34",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_103"
   }
 },
@@ -174,8 +366,7 @@
     "name": "School of Geography, Earth and Atmospheric Sciences - Centres and Institutes",
     "school": "School of Geography, Earth and Atmospheric Sciences",
     "school_code": "CCH_H1_4_34",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_104"
   }
 },
@@ -186,8 +377,7 @@
     "name": "School of Mathematics and Statistics (D)",
     "school": "School of Mathematics and Statistics",
     "school_code": "CCH_H1_4_35",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_105"
   }
 },
@@ -198,8 +388,7 @@
     "name": "School of Mathematics and Statistics - Centres and Institutes",
     "school": "School of Mathematics and Statistics",
     "school_code": "CCH_H1_4_35",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_106"
   }
 },
@@ -210,8 +399,7 @@
     "name": "School of Physics (D)",
     "school": "School of Physics",
     "school_code": "CCH_H1_4_36",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_107"
   }
 },
@@ -222,8 +410,7 @@
     "name": "School of Physics - Centres and Institutes",
     "school": "School of Physics",
     "school_code": "CCH_H1_4_36",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_108"
   }
 },
@@ -234,8 +421,7 @@
     "name": "Melbourne Veterinary School (D)",
     "school": "Melbourne Veterinary School",
     "school_code": "CCH_H1_4_37",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_109"
   }
 },
@@ -246,8 +432,7 @@
     "name": "Client Services",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_11"
   }
 },
@@ -258,8 +443,7 @@
     "name": "Melbourne Veterinary School - Centres and Institutes",
     "school": "Melbourne Veterinary School",
     "school_code": "CCH_H1_4_37",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_110"
   }
 },
@@ -270,8 +454,7 @@
     "name": "Faculty of Education - Admin",
     "school": "Faculty of Education, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_38",
-    "faculty": "Faculty of Education",
-    "faculty_code": "CCH_H1_3_09",
+    "faculty": "CCH_H1_3_09",
     "budget_unit": "CCH_H1_5_111"
   }
 },
@@ -282,8 +465,7 @@
     "name": "Faculty of Education - Centres and Institutes",
     "school": "Faculty of Education, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_38",
-    "faculty": "Faculty of Education",
-    "faculty_code": "CCH_H1_3_09",
+    "faculty": "CCH_H1_3_09",
     "budget_unit": "CCH_H1_5_112"
   }
 },
@@ -294,8 +476,7 @@
     "name": "Faculty of Education (D)",
     "school": "Faculty of Education (S)",
     "school_code": "CCH_H1_4_39",
-    "faculty": "Faculty of Education",
-    "faculty_code": "CCH_H1_3_09",
+    "faculty": "CCH_H1_3_09",
     "budget_unit": "CCH_H1_5_113"
   }
 },
@@ -306,8 +487,7 @@
     "name": "Melbourne Law School - Admin",
     "school": "Melbourne Law School (S)",
     "school_code": "CCH_H1_4_40",
-    "faculty": "Melbourne Law School",
-    "faculty_code": "CCH_H1_3_10",
+    "faculty": "CCH_H1_3_10",
     "budget_unit": "CCH_H1_5_114"
   }
 },
@@ -318,8 +498,7 @@
     "name": "Melbourne Law School - Centres and Institutes",
     "school": "Melbourne Law School (S)",
     "school_code": "CCH_H1_4_40",
-    "faculty": "Melbourne Law School",
-    "faculty_code": "CCH_H1_3_10",
+    "faculty": "CCH_H1_3_10",
     "budget_unit": "CCH_H1_5_115"
   }
 },
@@ -330,8 +509,7 @@
     "name": "Melbourne Law School (D)",
     "school": "Melbourne Law School (S)",
     "school_code": "CCH_H1_4_40",
-    "faculty": "Melbourne Law School",
-    "faculty_code": "CCH_H1_3_10",
+    "faculty": "CCH_H1_3_10",
     "budget_unit": "CCH_H1_5_116"
   }
 },
@@ -342,8 +520,7 @@
     "name": "Office of the VP Advancement",
     "school": "Advancement, Communications & Marketing",
     "school_code": "CCH_H1_4_42",
-    "faculty": "Advancement, Communications & Marketing",
-    "faculty_code": "CCH_H1_3_11",
+    "faculty": "CCH_H1_3_11",
     "budget_unit": "CCH_H1_5_118"
   }
 },
@@ -354,8 +531,7 @@
     "name": "Advancement",
     "school": "Advancement, Communications & Marketing",
     "school_code": "CCH_H1_4_42",
-    "faculty": "Advancement, Communications & Marketing",
-    "faculty_code": "CCH_H1_3_11",
+    "faculty": "CCH_H1_3_11",
     "budget_unit": "CCH_H1_5_119"
   }
 },
@@ -366,8 +542,7 @@
     "name": "Academic Technology",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_12"
   }
 },
@@ -378,8 +553,7 @@
     "name": "Communications and Marketing",
     "school": "Advancement, Communications & Marketing",
     "school_code": "CCH_H1_4_42",
-    "faculty": "Advancement, Communications & Marketing",
-    "faculty_code": "CCH_H1_3_11",
+    "faculty": "CCH_H1_3_11",
     "budget_unit": "CCH_H1_5_120"
   }
 },
@@ -390,8 +564,7 @@
     "name": "Office of the Chief Operating Officer (D)",
     "school": "Office of the Chief Operating Officer",
     "school_code": "CCH_H1_4_43",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_121"
   }
 },
@@ -402,8 +575,7 @@
     "name": "Governance",
     "school": "Office of the Chief Operating Officer",
     "school_code": "CCH_H1_4_43",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_122"
   }
 },
@@ -414,8 +586,7 @@
     "name": "Strategy, Planning and Performance",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_123"
   }
 },
@@ -426,8 +597,7 @@
     "name": "Office of the CFO",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_124"
   }
 },
@@ -438,8 +608,7 @@
     "name": "Corporate Finance, Property and Sustainability",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_125"
   }
 },
@@ -450,8 +619,7 @@
     "name": "Financial Planning, Partnering and Advisory",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_126"
   }
 },
@@ -462,8 +630,7 @@
     "name": "Procurement",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_127"
   }
 },
@@ -474,8 +641,7 @@
     "name": "Strategic Financial Initiatives",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_128"
   }
 },
@@ -486,8 +652,7 @@
     "name": "Office of General Counsel",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_129"
   }
 },
@@ -498,8 +663,7 @@
     "name": "Health & Safety",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_13"
   }
 },
@@ -510,8 +674,7 @@
     "name": "Information Governance Services",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_130"
   }
 },
@@ -522,8 +685,7 @@
     "name": "Legal Services",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_131"
   }
 },
@@ -534,8 +696,7 @@
     "name": "Risk and Assurance",
     "school": "Legal and Risk",
     "school_code": "CCH_H1_4_45",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_132"
   }
 },
@@ -546,8 +707,7 @@
     "name": "Enterprise Service Group Directorate",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_133"
   }
 },
@@ -558,8 +718,7 @@
     "name": "Change Practice (EPG)",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_135"
   }
 },
@@ -570,8 +729,7 @@
     "name": "University Decision Support",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_136"
   }
 },
@@ -582,8 +740,7 @@
     "name": "Projects and Portfolio Management",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_138"
   }
 },
@@ -594,8 +751,7 @@
     "name": "Finance Services",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_14"
   }
 },
@@ -606,8 +762,7 @@
     "name": "Service Experience & Design",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_140"
   }
 },
@@ -618,8 +773,7 @@
     "name": "RIC Directorate",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_141"
   }
 },
@@ -630,8 +784,7 @@
     "name": "Commercialisation Ventures",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_142"
   }
 },
@@ -642,8 +795,7 @@
     "name": "Innovation & Enterprise",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_143"
   }
 },
@@ -654,8 +806,7 @@
     "name": "Melbourne Entrepreneurial Centre (MEC)",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_144"
   }
 },
@@ -666,8 +817,7 @@
     "name": "Office of Research Management",
     "school": "Research, Innovation and Commercialisation",
     "school_code": "CCH_H1_4_47",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_145"
   }
 },
@@ -678,8 +828,7 @@
     "name": "Student and Scholarly Services Directorate",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_146"
   }
 },
@@ -690,8 +839,7 @@
     "name": "Future Students",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_147"
   }
 },
@@ -702,8 +850,7 @@
     "name": "Enterprise Technology",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_15"
   }
 },
@@ -714,8 +861,7 @@
     "name": "University Colleges and Residential Life",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_150"
   }
 },
@@ -726,8 +872,7 @@
     "name": "Scholarly Services",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_151"
   }
 },
@@ -738,8 +883,7 @@
     "name": "Student Administration",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_152"
   }
 },
@@ -750,8 +894,7 @@
     "name": "Student Success",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_154"
   }
 },
@@ -762,8 +905,7 @@
     "name": "Office of the DVC Global, Culture and Engagement",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_155"
   }
 },
@@ -774,8 +916,7 @@
     "name": "HR Services",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_16"
   }
 },
@@ -786,8 +927,7 @@
     "name": "Engagement (GCE)",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_162"
   }
 },
@@ -798,8 +938,7 @@
     "name": "Melbourne Theatre Company",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_164"
   }
 },
@@ -810,8 +949,7 @@
     "name": "Research Computing Services",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_17"
   }
 },
@@ -822,8 +960,7 @@
     "name": "Office of the DVC Indigenous",
     "school": "Deputy Vice-Chancellor Indigenous (S)",
     "school_code": "CCH_H1_4_66",
-    "faculty": "Deputy Vice-Chancellor Indigenous",
-    "faculty_code": "CCH_H1_3_26",
+    "faculty": "CCH_H1_3_26",
     "budget_unit": "CCH_H1_5_171"
   }
 },
@@ -834,8 +971,7 @@
     "name": "People and Community",
     "school": "Office of the Provost (S)",
     "school_code": "CCH_H1_4_50",
-    "faculty": "Office of the Provost",
-    "faculty_code": "CCH_H1_3_13",
+    "faculty": "CCH_H1_3_13",
     "budget_unit": "CCH_H1_5_173"
   }
 },
@@ -846,8 +982,7 @@
     "name": "Office of the Vice-Chancellor (D)",
     "school": "Office of the Vice-Chancellor (S)",
     "school_code": "CCH_H1_4_51",
-    "faculty": "Office of the Vice-Chancellor",
-    "faculty_code": "CCH_H1_3_14",
+    "faculty": "CCH_H1_3_14",
     "budget_unit": "CCH_H1_5_174"
   }
 },
@@ -858,8 +993,7 @@
     "name": "Office of the DVC Research",
     "school": "Research & Enterprise (S)",
     "school_code": "CCH_H1_4_52",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_175"
   }
 },
@@ -870,8 +1004,7 @@
     "name": "Atlantic Fellows for Social Equity",
     "school": "Atlantic Fellows for Social Equity",
     "school_code": "CCH_H1_4_69",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_176"
   }
 },
@@ -882,8 +1015,7 @@
     "name": "Melbourne Connect",
     "school": "Melbourne Connect",
     "school_code": "CCH_H1_4_70",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_178"
   }
 },
@@ -894,8 +1026,7 @@
     "name": "Campus Management",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_18"
   }
 },
@@ -906,8 +1037,7 @@
     "name": "Corporate",
     "school": "University Corporate",
     "school_code": "CCH_H1_4_53",
-    "faculty": "University Central Reporting Group",
-    "faculty_code": "CCH_H1_3_16",
+    "faculty": "CCH_H1_3_16",
     "budget_unit": "CCH_H1_5_184"
   }
 },
@@ -918,8 +1048,7 @@
     "name": "Service Recipients",
     "school": "University Corporate",
     "school_code": "CCH_H1_4_53",
-    "faculty": "University Central Reporting Group",
-    "faculty_code": "CCH_H1_3_16",
+    "faculty": "CCH_H1_3_16",
     "budget_unit": "CCH_H1_5_185"
   }
 },
@@ -930,8 +1059,7 @@
     "name": "Nossal Institute Ltd (D)",
     "school": "Nossal Institute Ltd (S)",
     "school_code": "CCH_H1_4_55",
-    "faculty": "Nossal Institute Ltd",
-    "faculty_code": "CCH_H1_3_17",
+    "faculty": "CCH_H1_3_17",
     "budget_unit": "CCH_H1_5_187"
   }
 },
@@ -942,8 +1070,7 @@
     "name": "Office of the Provost (D)",
     "school": "Office of the Provost (S)",
     "school_code": "CCH_H1_4_50",
-    "faculty": "Office of the Provost",
-    "faculty_code": "CCH_H1_3_13",
+    "faculty": "CCH_H1_3_13",
     "budget_unit": "CCH_H1_5_188"
   }
 },
@@ -954,8 +1081,7 @@
     "name": "UM Commercialisation Pty Ltd (D)",
     "school": "UM Commercialisation Pty Ltd (S)",
     "school_code": "CCH_H1_4_56",
-    "faculty": "UM Commercialisation Pty Ltd",
-    "faculty_code": "CCH_H1_3_18",
+    "faculty": "CCH_H1_3_18",
     "budget_unit": "CCH_H1_5_189"
   }
 },
@@ -966,8 +1092,7 @@
     "name": "Planning & Assurance",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_19"
   }
 },
@@ -978,8 +1103,7 @@
     "name": "UM Commercialisation Trust (D)",
     "school": "UM Commercialisation Trust (S)",
     "school_code": "CCH_H1_4_57",
-    "faculty": "UM Commercialisation Trust",
-    "faculty_code": "CCH_H1_3_19",
+    "faculty": "CCH_H1_3_19",
     "budget_unit": "CCH_H1_5_190"
   }
 },
@@ -990,8 +1114,7 @@
     "name": "UMELB (Singapore) (D)",
     "school": "UMELB (Singapore) (S)",
     "school_code": "CCH_H1_4_58",
-    "faculty": "UMELB (Singapore)",
-    "faculty_code": "CCH_H1_3_20",
+    "faculty": "CCH_H1_3_20",
     "budget_unit": "CCH_H1_5_191"
   }
 },
@@ -1002,8 +1125,7 @@
     "name": "UOM Commercial Ltd (D)",
     "school": "UOM Commercial Ltd (S)",
     "school_code": "CCH_H1_4_59",
-    "faculty": "UOM Commercial Ltd",
-    "faculty_code": "CCH_H1_3_21",
+    "faculty": "CCH_H1_3_21",
     "budget_unit": "CCH_H1_5_192"
   }
 },
@@ -1014,8 +1136,7 @@
     "name": "Melbourne Business School Limited Group (D)",
     "school": "Melbourne Business School Limited Group (S)",
     "school_code": "CCH_H1_4_60",
-    "faculty": "Melbourne Business School Limited Group",
-    "faculty_code": "CCH_H1_3_22",
+    "faculty": "CCH_H1_3_22",
     "budget_unit": "CCH_H1_5_193"
   }
 },
@@ -1026,8 +1147,7 @@
     "name": "UoM International Holdings Limited Group (D)",
     "school": "UoM International Holdings Limited Group (S)",
     "school_code": "CCH_H1_4_61",
-    "faculty": "UoM International Holdings Limited Group",
-    "faculty_code": "CCH_H1_3_23",
+    "faculty": "CCH_H1_3_23",
     "budget_unit": "CCH_H1_5_194"
   }
 },
@@ -1038,8 +1158,7 @@
     "name": "Ao Mo Da (Beijing) Consulting Co. Ltd (D)",
     "school": "Ao Mo Da (Beijing) Consulting Co. Ltd (S)",
     "school_code": "CCH_H1_4_62",
-    "faculty": "Ao Mo Da (Beijing) Consulting Co. Ltd",
-    "faculty_code": "CCH_H1_3_24",
+    "faculty": "CCH_H1_3_24",
     "budget_unit": "CCH_H1_5_195"
   }
 },
@@ -1050,8 +1169,7 @@
     "name": "Unimelb Germany GmbH (D)",
     "school": "Unimelb Germany GmbH (S)",
     "school_code": "CCH_H1_4_63",
-    "faculty": "Unimelb Germany GmbH",
-    "faculty_code": "CCH_H1_3_25",
+    "faculty": "CCH_H1_3_25",
     "budget_unit": "CCH_H1_5_196"
   }
 },
@@ -1062,8 +1180,7 @@
     "name": "School of Chemical and Biomedical Engineering (D)",
     "school": "School of Chemical and Biomedical Engineering",
     "school_code": "CCH_H1_4_18",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_197"
   }
 },
@@ -1074,8 +1191,7 @@
     "name": "Melbourne Online",
     "school": "Melbourne Online",
     "school_code": "CCH_H1_4_68",
-    "faculty": "Office of the Provost",
-    "faculty_code": "CCH_H1_3_13",
+    "faculty": "CCH_H1_3_13",
     "budget_unit": "CCH_H1_5_198"
   }
 },
@@ -1086,8 +1202,7 @@
     "name": "Asia Institute - Centres and Institutes",
     "school": "Asia Institute",
     "school_code": "CCH_H1_4_02",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_199"
   }
 },
@@ -1098,8 +1213,7 @@
     "name": "Cybersecurity",
     "school": "Chief Information Officer Group",
     "school_code": "CCH_H1_4_09",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_20"
   }
 },
@@ -1110,8 +1224,7 @@
     "name": "School of Languages and Linguistics - Centres and Institutes",
     "school": "School of Languages and Linguistics",
     "school_code": "CCH_H1_4_06",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_200"
   }
 },
@@ -1122,8 +1235,7 @@
     "name": "School of Social and Political Sciences - Centres and Institutes",
     "school": "School of Social and Political Sciences",
     "school_code": "CCH_H1_4_07",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_201"
   }
 },
@@ -1134,8 +1246,7 @@
     "name": "Global (GCE)",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_202"
   }
 },
@@ -1146,8 +1257,7 @@
     "name": "Culture (GCE)",
     "school": "Global, Culture and Engagement (S)",
     "school_code": "CCH_H1_4_49",
-    "faculty": "Global, Culture and Engagement",
-    "faculty_code": "CCH_H1_3_12",
+    "faculty": "CCH_H1_3_12",
     "budget_unit": "CCH_H1_5_203"
   }
 },
@@ -1158,8 +1268,7 @@
     "name": "Melbourne Academy of Surgical Anatomy (MDHS)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_204"
   }
 },
@@ -1170,8 +1279,7 @@
     "name": "Melbourne Teaching Health Clinics",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_205"
   }
 },
@@ -1182,8 +1290,7 @@
     "name": "Clinical Research Support (MISCH)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_206"
   }
 },
@@ -1194,8 +1301,7 @@
     "name": "Melbourne Academic Centre for Health (MACH)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_207"
   }
 },
@@ -1206,8 +1312,7 @@
     "name": "Robert Cripps Institute for Cultural Conservation",
     "school": "Faculty of Arts, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_01",
-    "faculty": "Faculty of Arts",
-    "faculty_code": "CCH_H1_3_01",
+    "faculty": "CCH_H1_3_01",
     "budget_unit": "CCH_H1_5_208"
   }
 },
@@ -1218,8 +1323,7 @@
     "name": "Melbourne National Security and Defence",
     "school": "Research & Enterprise (S)",
     "school_code": "CCH_H1_4_52",
-    "faculty": "Research & Enterprise",
-    "faculty_code": "CCH_H1_3_15",
+    "faculty": "CCH_H1_3_15",
     "budget_unit": "CCH_H1_5_209"
   }
 },
@@ -1230,8 +1334,7 @@
     "name": "Melbourne Bio-Resources",
     "school": "Enterprise Service Group",
     "school_code": "CCH_H1_4_46",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_21"
   }
 },
@@ -1242,8 +1345,7 @@
     "name": "Chief People Officer",
     "school": "Chief People Officer",
     "school_code": "CCH_H1_4_64",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_210"
   }
 },
@@ -1254,8 +1356,7 @@
     "name": "Corporate Development Directorate",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_211"
   }
 },
@@ -1266,8 +1367,7 @@
     "name": "Infrastructure",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_212"
   }
 },
@@ -1278,8 +1378,7 @@
     "name": "Sustainability",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_213"
   }
 },
@@ -1290,8 +1389,7 @@
     "name": "Office of the DVC Education",
     "school": "Deputy Vice-Chancellor Education (S)",
     "school_code": "CCH_H1_4_67",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_214"
   }
 },
@@ -1302,8 +1400,7 @@
     "name": "Melbourne Institute of Applied Economic and Social Research",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_215"
   }
 },
@@ -1314,8 +1411,7 @@
     "name": "Wellbeing Services",
     "school": "Student and Scholarly Services",
     "school_code": "CCH_H1_4_48",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_216"
   }
 },
@@ -1326,8 +1422,7 @@
     "name": "Commercial Management",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_217"
   }
 },
@@ -1338,8 +1433,7 @@
     "name": "Stakeholder Relations and Engagement",
     "school": "Corporate Development",
     "school_code": "CCH_H1_4_65",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_218"
   }
 },
@@ -1350,8 +1444,7 @@
     "name": "Funding Policy Planning",
     "school": "Chief Financial Officer Group",
     "school_code": "CCH_H1_4_44",
-    "faculty": "Chief Operating Officer",
-    "faculty_code": "CCH_H1_3_03",
+    "faculty": "CCH_H1_3_03",
     "budget_unit": "CCH_H1_5_219"
   }
 },
@@ -1362,8 +1455,7 @@
     "name": "Faculty of Architecture, Building and Planning - Admin",
     "school": "Faculty of Architecture, Building and Planning, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_10",
-    "faculty": "Faculty of Architecture, Building and Planning",
-    "faculty_code": "CCH_H1_3_04",
+    "faculty": "CCH_H1_3_04",
     "budget_unit": "CCH_H1_5_22"
   }
 },
@@ -1374,8 +1466,7 @@
     "name": "Faculty of Architecture, Building and Planning - Centres and Institutes",
     "school": "Faculty of Architecture, Building and Planning, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_10",
-    "faculty": "Faculty of Architecture, Building and Planning",
-    "faculty_code": "CCH_H1_3_04",
+    "faculty": "CCH_H1_3_04",
     "budget_unit": "CCH_H1_5_23"
   }
 },
@@ -1386,8 +1477,7 @@
     "name": "Faculty of Architecture, Building and Planning (D)",
     "school": "Faculty of Architecture, Building and Planning (S)",
     "school_code": "CCH_H1_4_11",
-    "faculty": "Faculty of Architecture, Building and Planning",
-    "faculty_code": "CCH_H1_3_04",
+    "faculty": "CCH_H1_3_04",
     "budget_unit": "CCH_H1_5_24"
   }
 },
@@ -1398,8 +1488,7 @@
     "name": "Faculty of Business and Economics - Admin",
     "school": "Faculty of Business and Economics, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_13",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_26"
   }
 },
@@ -1410,8 +1499,7 @@
     "name": "Faculty of Business and Economics - Centres and Institutes",
     "school": "Faculty of Business and Economics, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_13",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_27"
   }
 },
@@ -1422,8 +1510,7 @@
     "name": "Department of Accounting",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_28"
   }
 },
@@ -1434,8 +1521,7 @@
     "name": "Department of Business Administration",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_29"
   }
 },
@@ -1446,8 +1532,7 @@
     "name": "Department of Economics",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_30"
   }
 },
@@ -1458,8 +1543,7 @@
     "name": "Department of Finance",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_31"
   }
 },
@@ -1470,8 +1554,7 @@
     "name": "Department of Management and Marketing",
     "school": "Faculty of Business and Economics (S)",
     "school_code": "CCH_H1_4_14",
-    "faculty": "Faculty of Business and Economics",
-    "faculty_code": "CCH_H1_3_05",
+    "faculty": "CCH_H1_3_05",
     "budget_unit": "CCH_H1_5_32"
   }
 },
@@ -1482,8 +1565,7 @@
     "name": "Melbourne Professional Education (MPE)",
     "school": "Deputy Vice-Chancellor Education (S)",
     "school_code": "CCH_H1_4_67",
-    "faculty": "Deputy Vice-Chancellor Education",
-    "faculty_code": "CCH_H1_3_27",
+    "faculty": "CCH_H1_3_27",
     "budget_unit": "CCH_H1_5_34"
   }
 },
@@ -1494,8 +1576,7 @@
     "name": "Faculty of Engineering and Information Technology – Admin",
     "school": "Faculty of Engineering and Information Technology, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_17",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_35"
   }
 },
@@ -1506,8 +1587,7 @@
     "name": "Faculty of Engineering and Information Technology - Centres and Institutes",
     "school": "Faculty of Engineering and Information Technology, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_17",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_36"
   }
 },
@@ -1518,8 +1598,7 @@
     "name": "Department of Biomedical Engineering",
     "school": "School of Chemical and Biomedical Engineering",
     "school_code": "CCH_H1_4_18",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_37"
   }
 },
@@ -1530,8 +1609,7 @@
     "name": "Department of Chemical Engineering",
     "school": "School of Chemical and Biomedical Engineering",
     "school_code": "CCH_H1_4_18",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_38"
   }
 },
@@ -1542,8 +1620,7 @@
     "name": "School of Computing and Information Systems (D)",
     "school": "School of Computing and Information Systems",
     "school_code": "CCH_H1_4_19",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_39"
   }
 },
@@ -1554,8 +1631,7 @@
     "name": "School of Electrical, Mechanical and Infrastructure Eng (D)",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_40"
   }
 },
@@ -1566,8 +1642,7 @@
     "name": "Department of Electrical and Electronic Engineering",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_41"
   }
 },
@@ -1578,8 +1653,7 @@
     "name": "Department of Infrastructure Engineering",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_42"
   }
 },
@@ -1590,8 +1664,7 @@
     "name": "Department of Mechanical Engineering",
     "school": "School of Electrical, Mechanical and Infrastructure Engineering",
     "school_code": "CCH_H1_4_20",
-    "faculty": "Faculty of Engineering and Information Technology",
-    "faculty_code": "CCH_H1_3_06",
+    "faculty": "CCH_H1_3_06",
     "budget_unit": "CCH_H1_5_43"
   }
 },
@@ -1602,8 +1675,7 @@
     "name": "Faculty of Fine Arts and Music - Admin",
     "school": "Faculty of Fine Arts and Music, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_21",
-    "faculty": "Faculty of Fine Arts and Music",
-    "faculty_code": "CCH_H1_3_07",
+    "faculty": "CCH_H1_3_07",
     "budget_unit": "CCH_H1_5_44"
   }
 },
@@ -1614,8 +1686,7 @@
     "name": "Melbourne Conservatorium of Music",
     "school": "Faculty of Fine Arts and Music (S)",
     "school_code": "CCH_H1_4_22",
-    "faculty": "Faculty of Fine Arts and Music",
-    "faculty_code": "CCH_H1_3_07",
+    "faculty": "CCH_H1_3_07",
     "budget_unit": "CCH_H1_5_46"
   }
 },
@@ -1626,8 +1697,7 @@
     "name": "Victorian College of the Arts",
     "school": "Faculty of Fine Arts and Music (S)",
     "school_code": "CCH_H1_4_22",
-    "faculty": "Faculty of Fine Arts and Music",
-    "faculty_code": "CCH_H1_3_07",
+    "faculty": "CCH_H1_3_07",
     "budget_unit": "CCH_H1_5_47"
   }
 },
@@ -1638,8 +1708,7 @@
     "name": "Faculty of Medicine, Dentistry and Health Sciences - Admin (D)",
     "school": "Faculty of Medicine, Dentistry and Health Sciences - Admin",
     "school_code": "CCH_H1_4_23",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_48"
   }
 },
@@ -1650,8 +1719,7 @@
     "name": "Centre for Cancer Research",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_49"
   }
 },
@@ -1662,8 +1730,7 @@
     "name": "Centre for Collaborative Practice",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_50"
   }
 },
@@ -1674,8 +1741,7 @@
     "name": "Centre for Digital Transformation of Health",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_51"
   }
 },
@@ -1686,8 +1752,7 @@
     "name": "Centre for Youth Mental Health (Orygen)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_52"
   }
 },
@@ -1698,8 +1763,7 @@
     "name": "Comprehensive Dementia Centre",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_53"
   }
 },
@@ -1710,8 +1774,7 @@
     "name": "Department of Medical Biology (WEHI)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_54"
   }
 },
@@ -1722,8 +1785,7 @@
     "name": "Florey Department of Neuroscience and Mental Health",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_55"
   }
 },
@@ -1734,8 +1796,7 @@
     "name": "Medical Bionics Department",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_56"
   }
 },
@@ -1746,8 +1807,7 @@
     "name": "Melbourne Bioinformatics (VLSCI)",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_57"
   }
 },
@@ -1758,8 +1818,7 @@
     "name": "Melbourne Poche Centre for Indigenous Health",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_60"
   }
 },
@@ -1770,8 +1829,7 @@
     "name": "National Ageing Research Institute",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_61"
   }
 },
@@ -1782,8 +1840,7 @@
     "name": "Australian Biocommons",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_62"
   }
 },
@@ -1794,8 +1851,7 @@
     "name": "The Sir Peter MacCallum Department of Oncology",
     "school": "MDHS Centres and Institutes",
     "school_code": "CCH_H1_4_08",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_63"
   }
 },
@@ -1806,8 +1862,7 @@
     "name": "Melbourne Dental School (D)",
     "school": "Melbourne Dental School",
     "school_code": "CCH_H1_4_24",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_65"
   }
 },
@@ -1818,8 +1873,7 @@
     "name": "Melbourne Medical School - Admin",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_66"
   }
 },
@@ -1830,8 +1884,7 @@
     "name": "Baker Department of Cardiometabolic Health",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_69"
   }
 },
@@ -1842,8 +1895,7 @@
     "name": "Department of Clinical Pathology",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_70"
   }
 },
@@ -1854,8 +1906,7 @@
     "name": "Department of Critical Care",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_71"
   }
 },
@@ -1866,8 +1917,7 @@
     "name": "Department of General Practice and Primary Care",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_72"
   }
 },
@@ -1878,8 +1928,7 @@
     "name": "Department of Infectious Diseases",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_73"
   }
 },
@@ -1890,8 +1939,7 @@
     "name": "Department of Medical Education",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_74"
   }
 },
@@ -1902,8 +1950,7 @@
     "name": "Department of Medicine",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_75"
   }
 },
@@ -1914,8 +1961,7 @@
     "name": "Department of Obstetrics, Gynaecology and Newborn Health",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_76"
   }
 },
@@ -1926,8 +1972,7 @@
     "name": "Department of Paediatrics",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_77"
   }
 },
@@ -1938,8 +1983,7 @@
     "name": "Department of Psychiatry",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_78"
   }
 },
@@ -1950,8 +1994,7 @@
     "name": "Department of Radiology",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_79"
   }
 },
@@ -1962,8 +2005,7 @@
     "name": "Department of Rural Health",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_80"
   }
 },
@@ -1974,8 +2016,7 @@
     "name": "Department of Surgery",
     "school": "Melbourne Medical School",
     "school_code": "CCH_H1_4_25",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_81"
   }
 },
@@ -1986,8 +2027,7 @@
     "name": "Melbourne School of Health Sciences - Admin",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_82"
   }
 },
@@ -1998,8 +2038,7 @@
     "name": "Department of Audiology and Speech Pathology",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_83"
   }
 },
@@ -2010,8 +2049,7 @@
     "name": "Department of Nursing",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_84"
   }
 },
@@ -2022,8 +2060,7 @@
     "name": "Department of Optometry and Vision Sciences",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_85"
   }
 },
@@ -2034,8 +2071,7 @@
     "name": "Department of Physiotherapy",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_86"
   }
 },
@@ -2046,8 +2082,7 @@
     "name": "Department of Social Work",
     "school": "Melbourne School of Health Sciences",
     "school_code": "CCH_H1_4_26",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_87"
   }
 },
@@ -2058,8 +2093,7 @@
     "name": "Melbourne School of Population and Global Health (D)",
     "school": "Melbourne School of Population and Global Health",
     "school_code": "CCH_H1_4_27",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_88"
   }
 },
@@ -2070,8 +2104,7 @@
     "name": "Melbourne School of Population and Global Health - Centres and Institutes",
     "school": "Melbourne School of Population and Global Health",
     "school_code": "CCH_H1_4_27",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_89"
   }
 },
@@ -2082,8 +2115,7 @@
     "name": "Melbourne School of Psychological Sciences (D)",
     "school": "Melbourne School of Psychological Sciences",
     "school_code": "CCH_H1_4_28",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_90"
   }
 },
@@ -2094,8 +2126,7 @@
     "name": "Melbourne School of Psychological Sciences - Centres and Institutes",
     "school": "Melbourne School of Psychological Sciences",
     "school_code": "CCH_H1_4_28",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_91"
   }
 },
@@ -2106,8 +2137,7 @@
     "name": "School of Biomedical Sciences - Admin",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_92"
   }
 },
@@ -2118,8 +2148,7 @@
     "name": "Department of Anatomy and Physiology",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_93"
   }
 },
@@ -2130,8 +2159,7 @@
     "name": "Department of Biochemistry and Pharmacology",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_94"
   }
 },
@@ -2142,8 +2170,7 @@
     "name": "Department of Microbiology and Immunology",
     "school": "School of Biomedical Sciences",
     "school_code": "CCH_H1_4_29",
-    "faculty": "Faculty of Medicine, Dentistry and Health Sciences",
-    "faculty_code": "CCH_H1_3_02",
+    "faculty": "CCH_H1_3_02",
     "budget_unit": "CCH_H1_5_95"
   }
 },
@@ -2154,8 +2181,7 @@
     "name": "Faculty of Science - Admin",
     "school": "Faculty of Science, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_30",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_96"
   }
 },
@@ -2166,8 +2192,7 @@
     "name": "Faculty of Science - Centres and Institutes",
     "school": "Faculty of Science, Admin, Centres and Institute",
     "school_code": "CCH_H1_4_30",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_97"
   }
 },
@@ -2178,8 +2203,7 @@
     "name": "School of Agriculture, Food and Ecosystem Sciences (D)",
     "school": "School of Agriculture, Food and Ecosystem Sciences",
     "school_code": "CCH_H1_4_31",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_98"
   }
 },
@@ -2190,8 +2214,7 @@
     "name": "School of BioSciences (D)",
     "school": "School of BioSciences",
     "school_code": "CCH_H1_4_32",
-    "faculty": "Faculty of Science",
-    "faculty_code": "CCH_H1_3_08",
+    "faculty": "CCH_H1_3_08",
     "budget_unit": "CCH_H1_5_99"
   }
 },
@@ -2202,7 +2225,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "RA Grade 1.1",
-    "rate": "79677.3000"
+    "rate": "79677.3000",
+    "version": 1
   }
 },
 {
@@ -2212,7 +2236,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "RA Grade 1.2",
-    "rate": "82274.2200"
+    "rate": "82274.2200",
+    "version": 1
   }
 },
 {
@@ -2222,7 +2247,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "RA Grade 1.3",
-    "rate": "87266.1000"
+    "rate": "87266.1000",
+    "version": 1
   }
 },
 {
@@ -2232,7 +2258,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.1",
-    "rate": "87266.1000"
+    "rate": "87266.1000",
+    "version": 1
   }
 },
 {
@@ -2242,7 +2269,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.2",
-    "rate": "92242.6800"
+    "rate": "92242.6800",
+    "version": 1
   }
 },
 {
@@ -2252,7 +2280,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.3",
-    "rate": "97233.5400"
+    "rate": "97233.5400",
+    "version": 1
   }
 },
 {
@@ -2262,7 +2291,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.4",
-    "rate": "102218.2800"
+    "rate": "102218.2800",
+    "version": 1
   }
 },
 {
@@ -2272,7 +2302,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.5",
-    "rate": "106272.7800"
+    "rate": "106272.7800",
+    "version": 1
   }
 },
 {
@@ -2282,7 +2313,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.6",
-    "rate": "110319.1200"
+    "rate": "110319.1200",
+    "version": 1
   }
 },
 {
@@ -2292,7 +2324,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.7",
-    "rate": "114366.4800"
+    "rate": "114366.4800",
+    "version": 1
   }
 },
 {
@@ -2302,7 +2335,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level A.8",
-    "rate": "118415.8800"
+    "rate": "118415.8800",
+    "version": 1
   }
 },
 {
@@ -2312,7 +2346,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.1",
-    "rate": "124656.2400"
+    "rate": "124656.2400",
+    "version": 1
   }
 },
 {
@@ -2322,7 +2357,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.2",
-    "rate": "129326.8200"
+    "rate": "129326.8200",
+    "version": 1
   }
 },
 {
@@ -2332,7 +2368,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.3",
-    "rate": "134000.4600"
+    "rate": "134000.4600",
+    "version": 1
   }
 },
 {
@@ -2342,7 +2379,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.4",
-    "rate": "138673.0800"
+    "rate": "138673.0800",
+    "version": 1
   }
 },
 {
@@ -2352,7 +2390,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.5",
-    "rate": "143351.8200"
+    "rate": "143351.8200",
+    "version": 1
   }
 },
 {
@@ -2362,7 +2401,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level B.6",
-    "rate": "148023.4200"
+    "rate": "148023.4200",
+    "version": 1
   }
 },
 {
@@ -2372,7 +2412,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.1",
-    "rate": "152695.0200"
+    "rate": "152695.0200",
+    "version": 1
   }
 },
 {
@@ -2382,7 +2423,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.2",
-    "rate": "157378.8600"
+    "rate": "157378.8600",
+    "version": 1
   }
 },
 {
@@ -2392,7 +2434,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.3",
-    "rate": "162045.3600"
+    "rate": "162045.3600",
+    "version": 1
   }
 },
 {
@@ -2402,7 +2445,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.4",
-    "rate": "166712.8800"
+    "rate": "166712.8800",
+    "version": 1
   }
 },
 {
@@ -2412,7 +2456,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.5",
-    "rate": "171385.5000"
+    "rate": "171385.5000",
+    "version": 1
   }
 },
 {
@@ -2422,7 +2467,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level C.6",
-    "rate": "176065.2600"
+    "rate": "176065.2600",
+    "version": 1
   }
 },
 {
@@ -2432,7 +2478,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.1",
-    "rate": "183859.0800"
+    "rate": "183859.0800",
+    "version": 1
   }
 },
 {
@@ -2442,7 +2489,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.2",
-    "rate": "190088.2200"
+    "rate": "190088.2200",
+    "version": 1
   }
 },
 {
@@ -2452,7 +2500,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.3",
-    "rate": "196315.3200"
+    "rate": "196315.3200",
+    "version": 1
   }
 },
 {
@@ -2462,7 +2511,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level D.4",
-    "rate": "202555.6800"
+    "rate": "202555.6800",
+    "version": 1
   }
 },
 {
@@ -2472,7 +2522,8 @@
     "payroll_type": "Fortnight",
     "category": "Academic",
     "classification": "Level E.1",
-    "rate": "236823.6000"
+    "rate": "236823.6000",
+    "version": 1
   }
 },
 {
@@ -2482,7 +2533,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 1.1",
-    "rate": "61274.4600"
+    "rate": "61274.4600",
+    "version": 1
   }
 },
 {
@@ -2492,7 +2544,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 1.2",
-    "rate": "62509.6800"
+    "rate": "62509.6800",
+    "version": 1
   }
 },
 {
@@ -2502,7 +2555,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 1.3",
-    "rate": "63751.0200"
+    "rate": "63751.0200",
+    "version": 1
   }
 },
 {
@@ -2512,7 +2566,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 2.1",
-    "rate": "66492.7800"
+    "rate": "66492.7800",
+    "version": 1
   }
 },
 {
@@ -2522,7 +2577,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 2.2",
-    "rate": "67823.8800"
+    "rate": "67823.8800",
+    "version": 1
   }
 },
 {
@@ -2532,7 +2588,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 2.3",
-    "rate": "69181.5000"
+    "rate": "69181.5000",
+    "version": 1
   }
 },
 {
@@ -2542,7 +2599,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.1",
-    "rate": "69553.8000"
+    "rate": "69553.8000",
+    "version": 1
   }
 },
 {
@@ -2552,7 +2610,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.2",
-    "rate": "70948.1400"
+    "rate": "70948.1400",
+    "version": 1
   }
 },
 {
@@ -2562,7 +2621,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.3",
-    "rate": "72361.8600"
+    "rate": "72361.8600",
+    "version": 1
   }
 },
 {
@@ -2572,7 +2632,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.4",
-    "rate": "73810.2600"
+    "rate": "73810.2600",
+    "version": 1
   }
 },
 {
@@ -2582,7 +2643,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.5",
-    "rate": "75290.2800"
+    "rate": "75290.2800",
+    "version": 1
   }
 },
 {
@@ -2592,7 +2654,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 3.6",
-    "rate": "76794.7800"
+    "rate": "76794.7800",
+    "version": 1
   }
 },
 {
@@ -2602,7 +2665,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.1",
-    "rate": "80400.4800"
+    "rate": "80400.4800",
+    "version": 1
   }
 },
 {
@@ -2612,7 +2676,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.2",
-    "rate": "82011.0600"
+    "rate": "82011.0600",
+    "version": 1
   }
 },
 {
@@ -2622,7 +2687,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.3",
-    "rate": "83652.2400"
+    "rate": "83652.2400",
+    "version": 1
   }
 },
 {
@@ -2632,7 +2698,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 4.4",
-    "rate": "85328.1000"
+    "rate": "85328.1000",
+    "version": 1
   }
 },
 {
@@ -2642,7 +2709,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.1",
-    "rate": "86942.7600"
+    "rate": "86942.7600",
+    "version": 1
   }
 },
 {
@@ -2652,7 +2720,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.2",
-    "rate": "88677.7800"
+    "rate": "88677.7800",
+    "version": 1
   }
 },
 {
@@ -2662,7 +2731,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.3",
-    "rate": "90448.5000"
+    "rate": "90448.5000",
+    "version": 1
   }
 },
 {
@@ -2672,7 +2742,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.4",
-    "rate": "92259.0000"
+    "rate": "92259.0000",
+    "version": 1
   }
 },
 {
@@ -2682,7 +2753,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.5",
-    "rate": "94102.1400"
+    "rate": "94102.1400",
+    "version": 1
   }
 },
 {
@@ -2692,7 +2764,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.6",
-    "rate": "95992.2000"
+    "rate": "95992.2000",
+    "version": 1
   }
 },
 {
@@ -2702,7 +2775,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.7",
-    "rate": "97904.7000"
+    "rate": "97904.7000",
+    "version": 1
   }
 },
 {
@@ -2712,7 +2786,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 5.8",
-    "rate": "99864.1200"
+    "rate": "99864.1200",
+    "version": 1
   }
 },
 {
@@ -2722,7 +2797,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.1",
-    "rate": "100847.4000"
+    "rate": "100847.4000",
+    "version": 1
   }
 },
 {
@@ -2732,7 +2808,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.2",
-    "rate": "102869.0400"
+    "rate": "102869.0400",
+    "version": 1
   }
 },
 {
@@ -2742,7 +2819,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.3",
-    "rate": "104917.2000"
+    "rate": "104917.2000",
+    "version": 1
   }
 },
 {
@@ -2752,7 +2830,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.4",
-    "rate": "107019.4200"
+    "rate": "107019.4200",
+    "version": 1
   }
 },
 {
@@ -2762,7 +2841,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 6.5",
-    "rate": "109163.4600"
+    "rate": "109163.4600",
+    "version": 1
   }
 },
 {
@@ -2772,7 +2852,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.1",
-    "rate": "111274.8600"
+    "rate": "111274.8600",
+    "version": 1
   }
 },
 {
@@ -2782,7 +2863,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.2",
-    "rate": "113505.6000"
+    "rate": "113505.6000",
+    "version": 1
   }
 },
 {
@@ -2792,7 +2874,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.3",
-    "rate": "115772.0400"
+    "rate": "115772.0400",
+    "version": 1
   }
 },
 {
@@ -2802,7 +2885,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.4",
-    "rate": "118086.4200"
+    "rate": "118086.4200",
+    "version": 1
   }
 },
 {
@@ -2812,7 +2896,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 7.5",
-    "rate": "120452.8200"
+    "rate": "120452.8200",
+    "version": 1
   }
 },
 {
@@ -2822,7 +2907,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.1",
-    "rate": "125190.7200"
+    "rate": "125190.7200",
+    "version": 1
   }
 },
 {
@@ -2832,7 +2918,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.2",
-    "rate": "127690.7400"
+    "rate": "127690.7400",
+    "version": 1
   }
 },
 {
@@ -2842,7 +2929,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.3",
-    "rate": "130241.7600"
+    "rate": "130241.7600",
+    "version": 1
   }
 },
 {
@@ -2852,7 +2940,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.4",
-    "rate": "132848.8800"
+    "rate": "132848.8800",
+    "version": 1
   }
 },
 {
@@ -2862,7 +2951,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 8.5",
-    "rate": "135503.9400"
+    "rate": "135503.9400",
+    "version": 1
   }
 },
 {
@@ -2872,7 +2962,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 9.1",
-    "rate": "146048.7000"
+    "rate": "146048.7000",
+    "version": 1
   }
 },
 {
@@ -2882,7 +2973,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 9.2",
-    "rate": "148963.8600"
+    "rate": "148963.8600",
+    "version": 1
   }
 },
 {
@@ -2892,7 +2984,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 9.3",
-    "rate": "151951.4400"
+    "rate": "151951.4400",
+    "version": 1
   }
 },
 {
@@ -2902,7 +2995,8 @@
     "payroll_type": "Fortnight",
     "category": "Professional",
     "classification": "UOM 10",
-    "rate": "156480.2400"
+    "rate": "156480.2400",
+    "version": 1
   }
 },
 {
@@ -2912,7 +3006,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 1.1",
-    "rate": "39.8208"
+    "rate": "39.8208",
+    "version": 1
   }
 },
 {
@@ -2922,7 +3017,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 1.2",
-    "rate": "40.6266"
+    "rate": "40.6266",
+    "version": 1
   }
 },
 {
@@ -2932,7 +3028,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 1.3",
-    "rate": "41.4324"
+    "rate": "41.4324",
+    "version": 1
   }
 },
 {
@@ -2942,7 +3039,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 2.1",
-    "rate": "43.2174"
+    "rate": "43.2174",
+    "version": 1
   }
 },
 {
@@ -2952,7 +3050,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 2.2",
-    "rate": "44.0844"
+    "rate": "44.0844",
+    "version": 1
   }
 },
 {
@@ -2962,7 +3061,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 2.3",
-    "rate": "44.9616"
+    "rate": "44.9616",
+    "version": 1
   }
 },
 {
@@ -2972,7 +3072,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.1",
-    "rate": "45.2064"
+    "rate": "45.2064",
+    "version": 1
   }
 },
 {
@@ -2982,7 +3083,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.2",
-    "rate": "46.1040"
+    "rate": "46.1040",
+    "version": 1
   }
 },
 {
@@ -2992,7 +3094,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.3",
-    "rate": "47.0220"
+    "rate": "47.0220",
+    "version": 1
   }
 },
 {
@@ -3002,7 +3105,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.4",
-    "rate": "47.9706"
+    "rate": "47.9706",
+    "version": 1
   }
 },
 {
@@ -3012,7 +3116,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.5",
-    "rate": "48.9294"
+    "rate": "48.9294",
+    "version": 1
   }
 },
 {
@@ -3022,7 +3127,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 3.6",
-    "rate": "49.9086"
+    "rate": "49.9086",
+    "version": 1
   }
 },
 {
@@ -3032,7 +3138,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.1",
-    "rate": "52.2444"
+    "rate": "52.2444",
+    "version": 1
   }
 },
 {
@@ -3042,7 +3149,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.2",
-    "rate": "53.2848"
+    "rate": "53.2848",
+    "version": 1
   }
 },
 {
@@ -3052,7 +3160,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.3",
-    "rate": "54.3558"
+    "rate": "54.3558",
+    "version": 1
   }
 },
 {
@@ -3062,7 +3171,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 4.4",
-    "rate": "55.4370"
+    "rate": "55.4370",
+    "version": 1
   }
 },
 {
@@ -3072,7 +3182,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.1",
-    "rate": "56.4978"
+    "rate": "56.4978",
+    "version": 1
   }
 },
 {
@@ -3082,7 +3193,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.2",
-    "rate": "57.6198"
+    "rate": "57.6198",
+    "version": 1
   }
 },
 {
@@ -3092,7 +3204,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.3",
-    "rate": "58.7724"
+    "rate": "58.7724",
+    "version": 1
   }
 },
 {
@@ -3102,7 +3215,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.4",
-    "rate": "59.9556"
+    "rate": "59.9556",
+    "version": 1
   }
 },
 {
@@ -3112,7 +3226,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.5",
-    "rate": "61.1490"
+    "rate": "61.1490",
+    "version": 1
   }
 },
 {
@@ -3122,7 +3237,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.6",
-    "rate": "62.3730"
+    "rate": "62.3730",
+    "version": 1
   }
 },
 {
@@ -3132,7 +3248,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.7",
-    "rate": "63.6174"
+    "rate": "63.6174",
+    "version": 1
   }
 },
 {
@@ -3142,7 +3259,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 5.8",
-    "rate": "64.8924"
+    "rate": "64.8924",
+    "version": 1
   }
 },
 {
@@ -3152,7 +3270,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.1",
-    "rate": "65.5248"
+    "rate": "65.5248",
+    "version": 1
   }
 },
 {
@@ -3162,7 +3281,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.2",
-    "rate": "66.8406"
+    "rate": "66.8406",
+    "version": 1
   }
 },
 {
@@ -3172,7 +3292,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.3",
-    "rate": "68.1768"
+    "rate": "68.1768",
+    "version": 1
   }
 },
 {
@@ -3182,7 +3303,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.4",
-    "rate": "69.5436"
+    "rate": "69.5436",
+    "version": 1
   }
 },
 {
@@ -3192,7 +3314,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 6.5",
-    "rate": "70.9308"
+    "rate": "70.9308",
+    "version": 1
   }
 },
 {
@@ -3202,7 +3325,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.1",
-    "rate": "72.3078"
+    "rate": "72.3078",
+    "version": 1
   }
 },
 {
@@ -3212,7 +3336,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.2",
-    "rate": "73.7460"
+    "rate": "73.7460",
+    "version": 1
   }
 },
 {
@@ -3222,7 +3347,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.3",
-    "rate": "75.2250"
+    "rate": "75.2250",
+    "version": 1
   }
 },
 {
@@ -3232,7 +3358,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.4",
-    "rate": "76.7346"
+    "rate": "76.7346",
+    "version": 1
   }
 },
 {
@@ -3242,7 +3369,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 7.5",
-    "rate": "78.2646"
+    "rate": "78.2646",
+    "version": 1
   }
 },
 {
@@ -3252,7 +3380,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.1",
-    "rate": "81.3450"
+    "rate": "81.3450",
+    "version": 1
   }
 },
 {
@@ -3262,7 +3391,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.2",
-    "rate": "82.9668"
+    "rate": "82.9668",
+    "version": 1
   }
 },
 {
@@ -3272,7 +3402,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.3",
-    "rate": "84.6294"
+    "rate": "84.6294",
+    "version": 1
   }
 },
 {
@@ -3282,7 +3413,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.4",
-    "rate": "86.3226"
+    "rate": "86.3226",
+    "version": 1
   }
 },
 {
@@ -3292,7 +3424,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 8.5",
-    "rate": "88.0464"
+    "rate": "88.0464",
+    "version": 1
   }
 },
 {
@@ -3302,7 +3435,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 9.1",
-    "rate": "94.9008"
+    "rate": "94.9008",
+    "version": 1
   }
 },
 {
@@ -3312,7 +3446,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 9.2",
-    "rate": "96.7878"
+    "rate": "96.7878",
+    "version": 1
   }
 },
 {
@@ -3322,7 +3457,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 9.3",
-    "rate": "98.7258"
+    "rate": "98.7258",
+    "version": 1
   }
 },
 {
@@ -3332,7 +3468,8 @@
     "payroll_type": "Casual",
     "category": "Professional",
     "classification": "UOM 10",
-    "rate": "101.6736"
+    "rate": "101.6736",
+    "version": 1
   }
 },
 {
@@ -3342,7 +3479,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "RA Grade 1.1",
-    "rate": "51.7854"
+    "rate": "51.7854",
+    "version": 1
   }
 },
 {
@@ -3352,7 +3490,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "RA Grade 1.2",
-    "rate": "53.4684"
+    "rate": "53.4684",
+    "version": 1
   }
 },
 {
@@ -3362,7 +3501,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "RA Grade 1.3",
-    "rate": "56.7018"
+    "rate": "56.7018",
+    "version": 1
   }
 },
 {
@@ -3372,7 +3512,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.1",
-    "rate": "56.7018"
+    "rate": "56.7018",
+    "version": 1
   }
 },
 {
@@ -3382,7 +3523,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.2",
-    "rate": "59.9454"
+    "rate": "59.9454",
+    "version": 1
   }
 },
 {
@@ -3392,7 +3534,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.3",
-    "rate": "63.1788"
+    "rate": "63.1788",
+    "version": 1
   }
 },
 {
@@ -3402,7 +3545,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.4",
-    "rate": "66.4224"
+    "rate": "66.4224",
+    "version": 1
   }
 },
 {
@@ -3412,7 +3556,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.5",
-    "rate": "69.0540"
+    "rate": "69.0540",
+    "version": 1
   }
 },
 {
@@ -3422,7 +3567,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.6",
-    "rate": "71.6856"
+    "rate": "71.6856",
+    "version": 1
   }
 },
 {
@@ -3432,7 +3578,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.7",
-    "rate": "74.3070"
+    "rate": "74.3070",
+    "version": 1
   }
 },
 {
@@ -3442,7 +3589,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level A.8",
-    "rate": "76.9386"
+    "rate": "76.9386",
+    "version": 1
   }
 },
 {
@@ -3452,7 +3600,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.1",
-    "rate": "80.9880"
+    "rate": "80.9880",
+    "version": 1
   }
 },
 {
@@ -3462,7 +3611,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.2",
-    "rate": "84.0276"
+    "rate": "84.0276",
+    "version": 1
   }
 },
 {
@@ -3472,7 +3622,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.3",
-    "rate": "87.0774"
+    "rate": "87.0774",
+    "version": 1
   }
 },
 {
@@ -3482,7 +3633,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.4",
-    "rate": "90.1068"
+    "rate": "90.1068",
+    "version": 1
   }
 },
 {
@@ -3492,7 +3644,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.5",
-    "rate": "93.1464"
+    "rate": "93.1464",
+    "version": 1
   }
 },
 {
@@ -3502,7 +3655,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level B.6",
-    "rate": "96.1758"
+    "rate": "96.1758",
+    "version": 1
   }
 },
 {
@@ -3512,7 +3666,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.1",
-    "rate": "99.2154"
+    "rate": "99.2154",
+    "version": 1
   }
 },
 {
@@ -3522,7 +3677,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.2",
-    "rate": "102.2550"
+    "rate": "102.2550",
+    "version": 1
   }
 },
 {
@@ -3532,7 +3688,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.3",
-    "rate": "105.2946"
+    "rate": "105.2946",
+    "version": 1
   }
 },
 {
@@ -3542,7 +3699,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.4",
-    "rate": "108.3240"
+    "rate": "108.3240",
+    "version": 1
   }
 },
 {
@@ -3552,7 +3710,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.5",
-    "rate": "111.3636"
+    "rate": "111.3636",
+    "version": 1
   }
 },
 {
@@ -3562,7 +3721,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level C.6",
-    "rate": "114.3930"
+    "rate": "114.3930",
+    "version": 1
   }
 },
 {
@@ -3572,7 +3732,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.1",
-    "rate": "119.4624"
+    "rate": "119.4624",
+    "version": 1
   }
 },
 {
@@ -3582,7 +3743,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.2",
-    "rate": "123.5118"
+    "rate": "123.5118",
+    "version": 1
   }
 },
 {
@@ -3592,7 +3754,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.3",
-    "rate": "127.5510"
+    "rate": "127.5510",
+    "version": 1
   }
 },
 {
@@ -3602,7 +3765,8 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level D.4",
-    "rate": "131.6106"
+    "rate": "131.6106",
+    "version": 1
   }
 },
 {
@@ -3612,491 +3776,35 @@
     "payroll_type": "Casual",
     "category": "Academic",
     "classification": "Level E.1",
-    "rate": "153.8670"
+    "rate": "153.8670",
+    "version": 1
   }
 },
 {
   "model": "api.salaryratemultiplier",
-  "pk": "Daily",
-  "fields": {
-    "multiplier": "0.004545454545454545"
-  }
-},
-{
-  "model": "api.salaryratemultiplier",
-  "pk": "FTE",
-  "fields": {
-    "multiplier": "1.000000000000000000"
-  }
-},
-{
-  "model": "api.salaryratemultiplier",
-  "pk": "Hourly",
-  "fields": {
-    "multiplier": "1.000000000000000000"
-  }
-},
-{
-  "model": "api.oncostrate",
   "pk": 1,
   "fields": {
-    "on_cost_type": "leave_loading",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0134"
+    "time_basis": "FTE",
+    "multiplier": "1.000000000000000000",
+    "version": 1
   }
 },
 {
-  "model": "api.oncostrate",
+  "model": "api.salaryratemultiplier",
   "pk": 2,
   "fields": {
-    "on_cost_type": "leave_loading",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0134"
+    "time_basis": "Daily",
+    "multiplier": "0.004545454545454545",
+    "version": 1
   }
 },
 {
-  "model": "api.oncostrate",
+  "model": "api.salaryratemultiplier",
   "pk": 3,
   "fields": {
-    "on_cost_type": "leave_loading",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 4,
-  "fields": {
-    "on_cost_type": "workcover",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 5,
-  "fields": {
-    "on_cost_type": "workcover",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 6,
-  "fields": {
-    "on_cost_type": "workcover",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 7,
-  "fields": {
-    "on_cost_type": "long_service_leave",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 8,
-  "fields": {
-    "on_cost_type": "long_service_leave",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 9,
-  "fields": {
-    "on_cost_type": "long_service_leave",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 10,
-  "fields": {
-    "on_cost_type": "parental_leave",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.0100"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 11,
-  "fields": {
-    "on_cost_type": "parental_leave",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.0100"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 12,
-  "fields": {
-    "on_cost_type": "parental_leave",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 13,
-  "fields": {
-    "on_cost_type": "annual_leave_provision",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.1200"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 14,
-  "fields": {
-    "on_cost_type": "annual_leave_provision",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.1200"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 15,
-  "fields": {
-    "on_cost_type": "annual_leave_provision",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.0000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 16,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2021,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 17,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2021,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 18,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2021,
-    "rate": "0.0950"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 19,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2022,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 20,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2022,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 21,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2022,
-    "rate": "0.1000"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 22,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2023,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 23,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2023,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 24,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2023,
-    "rate": "0.1050"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 25,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2024,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 26,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2024,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 27,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2024,
-    "rate": "0.1100"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 28,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": 2025,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 29,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": 2025,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 30,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": 2025,
-    "rate": "0.1150"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 31,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Continuing",
-    "year": null,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 32,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Fixed-Term",
-    "year": null,
-    "rate": "0.1700"
-  }
-},
-{
-  "model": "api.oncostrate",
-  "pk": 33,
-  "fields": {
-    "on_cost_type": "superannuation",
-    "employment_type": "Casual",
-    "year": null,
-    "rate": "0.1200"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2025,
-  "fields": {
-    "multiplier": "1.000000"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2026,
-  "fields": {
-    "multiplier": "1.030000"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2027,
-  "fields": {
-    "multiplier": "1.060900"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2028,
-  "fields": {
-    "multiplier": "1.092727"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2029,
-  "fields": {
-    "multiplier": "1.125509"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2030,
-  "fields": {
-    "multiplier": "1.159274"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2031,
-  "fields": {
-    "multiplier": "1.194052"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2032,
-  "fields": {
-    "multiplier": "1.229874"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2033,
-  "fields": {
-    "multiplier": "1.266770"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2034,
-  "fields": {
-    "multiplier": "1.304773"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2035,
-  "fields": {
-    "multiplier": "1.343916"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2036,
-  "fields": {
-    "multiplier": "1.384234"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2037,
-  "fields": {
-    "multiplier": "1.425761"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2038,
-  "fields": {
-    "multiplier": "1.468534"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2039,
-  "fields": {
-    "multiplier": "1.512590"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2040,
-  "fields": {
-    "multiplier": "1.557967"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2041,
-  "fields": {
-    "multiplier": "1.604706"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2042,
-  "fields": {
-    "multiplier": "1.652848"
-  }
-},
-{
-  "model": "api.ebaincrease",
-  "pk": 2043,
-  "fields": {
-    "multiplier": "1.702433"
+    "time_basis": "Hourly",
+    "multiplier": "1.000000000000000000",
+    "version": 1
   }
 },
 {
@@ -4212,147 +3920,664 @@
   }
 },
 {
-  "model": "api.nonstaffcostcategory",
-  "pk": 1640,
+  "model": "api.ebaincrease",
+  "pk": 1,
   "fields": {
-    "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Property Plant and Equipment - Cost"
+    "year": 2026,
+    "rate": "0.030000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 1,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0134",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 2,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0134",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 3,
+  "fields": {
+    "on_cost_type": "leave_loading",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 4,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 5,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 6,
+  "fields": {
+    "on_cost_type": "workcover",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 7,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 8,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 9,
+  "fields": {
+    "on_cost_type": "long_service_leave",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 10,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.0100",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 11,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.0100",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 12,
+  "fields": {
+    "on_cost_type": "parental_leave",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 13,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.1200",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 14,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.1200",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 15,
+  "fields": {
+    "on_cost_type": "annual_leave_provision",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.0000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 16,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2021,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 17,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2021,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 18,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2021,
+    "rate": "0.0950",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 19,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2022,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 20,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2022,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 21,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2022,
+    "rate": "0.1000",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 22,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2023,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 23,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2023,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 24,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2023,
+    "rate": "0.1050",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 25,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2024,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 26,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2024,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 27,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2024,
+    "rate": "0.1100",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 28,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": 2025,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 29,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": 2025,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 30,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": 2025,
+    "rate": "0.1150",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 31,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Continuing",
+    "year": null,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 32,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Fixed-Term",
+    "year": null,
+    "rate": "0.1700",
+    "version": 1
+  }
+},
+{
+  "model": "api.oncostrate",
+  "pk": 33,
+  "fields": {
+    "on_cost_type": "superannuation",
+    "employment_type": "Casual",
+    "year": null,
+    "rate": "0.1200",
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5040,
+  "pk": 1,
   "fields": {
-    "cost_category": "Expert Services and Consultants and Contractors",
-    "cost_subcategory": "Consultants"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5041,
-  "fields": {
-    "cost_category": "Expert Services and Consultants and Contractors",
-    "cost_subcategory": "Contracted Services (ex. ICA)"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5042,
-  "fields": {
-    "cost_category": "Expert Services and Consultants and Contractors",
-    "cost_subcategory": "Other Expert Services"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5060,
-  "fields": {
+    "ledger_id": 5060,
     "cost_category": "Advertising and marketing",
-    "cost_subcategory": "Advertising, Marketing and Promotional Expenses"
+    "cost_subcategory": "Advertising, Marketing and Promotional Expenses",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5061,
+  "pk": 2,
   "fields": {
+    "ledger_id": 5061,
     "cost_category": "Consumable Goods and Supplies",
-    "cost_subcategory": "Library"
+    "cost_subcategory": "Library",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5062,
+  "pk": 3,
   "fields": {
+    "ledger_id": 5062,
     "cost_category": "Consumable Goods and Supplies",
-    "cost_subcategory": "Consumable Service"
+    "cost_subcategory": "Consumable Service",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5063,
+  "pk": 4,
   "fields": {
+    "ledger_id": 5063,
     "cost_category": "Consumable Goods and Supplies",
-    "cost_subcategory": "Consumable Goods"
+    "cost_subcategory": "Consumable Goods",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5100,
+  "pk": 5,
   "fields": {
-    "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Minor Assets and Equipment (Asset < $10,000) Non-Capitalised Equipment"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5101,
-  "fields": {
+    "ledger_id": 5101,
     "cost_category": "Data Management",
-    "cost_subcategory": "Computer Software and Services"
+    "cost_subcategory": "Computer Software and Services",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5181,
+  "pk": 6,
   "fields": {
-    "cost_category": "Shared Grant Payments",
-    "cost_subcategory": "Contributions to HEPS"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5182,
-  "fields": {
-    "cost_category": "Shared Grant Payments",
-    "cost_subcategory": "Other Grants"
-  }
-},
-{
-  "model": "api.nonstaffcostcategory",
-  "pk": 5201,
-  "fields": {
+    "ledger_id": 1640,
     "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Rental and Hire"
+    "cost_subcategory": "Property Plant and Equipment - Cost",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5220,
+  "pk": 7,
   "fields": {
+    "ledger_id": 5100,
     "cost_category": "Equipment and maintenance and utilities",
-    "cost_subcategory": "Repairs and Maintenance"
+    "cost_subcategory": "Minor Assets and Equipment (Asset < $10,000) Non-Capitalised Equipment",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5240,
+  "pk": 8,
   "fields": {
+    "ledger_id": 5201,
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Rental and Hire",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 9,
+  "fields": {
+    "ledger_id": 5220,
+    "cost_category": "Equipment and maintenance and utilities",
+    "cost_subcategory": "Repairs and Maintenance",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 10,
+  "fields": {
+    "ledger_id": 5040,
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Consultants",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 11,
+  "fields": {
+    "ledger_id": 5041,
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Contracted Services (ex. ICA)",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 12,
+  "fields": {
+    "ledger_id": 5042,
+    "cost_category": "Expert Services and Consultants and Contractors",
+    "cost_subcategory": "Other Expert Services",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 13,
+  "fields": {
+    "ledger_id": 5181,
+    "cost_category": "Shared Grant Payments",
+    "cost_subcategory": "Contributions to HEPS",
+    "excludes_additional_rate": true,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 14,
+  "fields": {
+    "ledger_id": 5182,
+    "cost_category": "Shared Grant Payments",
+    "cost_subcategory": "Other Grants",
+    "excludes_additional_rate": true,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 15,
+  "fields": {
+    "ledger_id": 5240,
     "cost_category": "Student Support",
-    "cost_subcategory": "Scholarships"
+    "cost_subcategory": "Scholarships",
+    "excludes_additional_rate": true,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5241,
+  "pk": 16,
   "fields": {
+    "ledger_id": 5241,
     "cost_category": "Student Support",
-    "cost_subcategory": "Other Student Support"
+    "cost_subcategory": "Other Student Support",
+    "excludes_additional_rate": true,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5260,
+  "pk": 17,
   "fields": {
+    "ledger_id": 5260,
     "cost_category": "Travel and entertainment",
-    "cost_subcategory": "Travel, Staff Development, and Conference Expense"
+    "cost_subcategory": "Travel, Staff Development, and Conference Expense",
+    "excludes_additional_rate": false,
+    "version": 1
   }
 },
 {
   "model": "api.nonstaffcostcategory",
-  "pk": 5261,
+  "pk": 18,
   "fields": {
+    "ledger_id": 5261,
     "cost_category": "Travel and entertainment",
-    "cost_subcategory": "Entertainment"
+    "cost_subcategory": "Entertainment",
+    "excludes_additional_rate": false,
+    "version": 1
+  }
+},
+{
+  "model": "api.nonstaffcostcategory",
+  "pk": 19,
+  "fields": {
+    "ledger_id": 0,
+    "cost_category": "Contingency",
+    "cost_subcategory": "Contingency",
+    "excludes_additional_rate": true,
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 1,
+  "fields": {
+    "name": "max_leave_loading",
+    "description": "Leave loading is capped at this many dollars per year",
+    "value": "1611.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 2,
+  "fields": {
+    "name": "full_cost_recovery_multiplier",
+    "description": "The full cost recovery multiplier, for staff and in-kind staff.",
+    "value": "1.700000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 3,
+  "fields": {
+    "name": "max_payroll_tax",
+    "description": "Maximum payroll tax rate",
+    "value": "0.058500",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 4,
+  "fields": {
+    "name": "override_uom_oncosts",
+    "description": "Override multiplier for UoM on-costs",
+    "value": "0.000000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 6,
+  "fields": {
+    "name": "gst_rate",
+    "description": "Goods and Services Tax Amount",
+    "value": "0.100000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 7,
+  "fields": {
+    "name": "default_margin",
+    "description": "The margin a new budget starts at. Editable per budget.",
+    "value": "0.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 8,
+  "fields": {
+    "name": "minimum_margin",
+    "description": "A budget priced below this margin needs the Dean as well as the HoD.",
+    "value": "0.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 9,
+  "fields": {
+    "name": "salary_rate_year",
+    "description": "The year of recorded salary rate that eba increase starts from.",
+    "value": "2025.000000",
+    "version": 1
   }
 },
 {
@@ -4703,62 +4928,6 @@
   "fields": {
     "external_party": "Other",
     "description": "Consultancies and Contracts"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "full_cost_recovery_multiplier",
-  "fields": {
-    "description": "Default cost recovery multiplier",
-    "value": "1.700000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "gst_rate",
-  "fields": {
-    "description": "Goods and Services Tax Amount",
-    "value": "0.100000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "in_kind_multiplier",
-  "fields": {
-    "description": "Matches full cost recovery.",
-    "value": "1.700000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "max_leave_loading",
-  "fields": {
-    "description": "Leave loading is capped at this many dollars per year",
-    "value": "1611.300000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "max_payroll_tax",
-  "fields": {
-    "description": "Maximum payroll tax rate",
-    "value": "0.058500"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "override_uom_oncosts",
-  "fields": {
-    "description": "Override multiplier for UoM on-costs",
-    "value": "0.000000"
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": "working_days_per_year",
-  "fields": {
-    "description": "Weekdays in a year. Used only for the annual leave deduction.",
-    "value": "260.892000"
   }
 }
 ]

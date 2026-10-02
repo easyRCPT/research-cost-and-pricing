@@ -1,6 +1,14 @@
+from decimal import ROUND_HALF_UP, Decimal
+
 from ..calculation import pricing
-from ..models import Budget
-from . import data_loader, lookup_loader
+from ..models import Budget, LookupVersion
+from . import approval_record, data_loader, lookup_loader
+
+
+def get_lookup_version_for_budget(budget: Budget) -> LookupVersion:
+    return budget.lookup_version or LookupVersion.objects.get(
+        id=lookup_loader.current_version_id()
+    )
 
 
 def get_budget_details(budget: Budget) -> dict:
@@ -8,24 +16,87 @@ def get_budget_details(budget: Budget) -> dict:
     Get project details from database.
     Calculate cost and price result.
     """
-    return build_budget_details(
-        lookup_loader.get_constants(),
+    details = build_budget_details(
+        lookup_loader.constants_for(budget),
         data_loader.load_budget_data(budget),
     )
+    store_price(budget, details)
+    store_multipliers(budget, details)
+    details["approval"] = approval_record.approval_record(budget)
+    return details
+
+
+def store_price(budget: Budget, details: dict) -> None:
+    """
+    Keep Budget.total_price_inc_gst in step with what the engine just returned,
+    so the projects list can read a price without pricing every project.
+
+    Every route that changes a priced field comes through here, and so does a
+    plain GET, which makes a row that somehow fell behind heal on next read.
+    The write is skipped when the number has not moved, so reads stay
+    read-only in the ordinary case. updated_at is left out of update_fields
+    deliberately: syncing a price is not an edit to the budget.
+    """
+    price = details["budget_summary"]["price_summary"]["total_price_inc_gst"]
+    price = Decimal(price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    if budget.total_price_inc_gst == price:
+        return
+
+    budget.total_price_inc_gst = price
+    budget.save(update_fields=["total_price_inc_gst"])
+
+
+def store_multipliers(budget: Budget, details: dict) -> None:
+    """
+    Keep the budget's copy of its multipliers at the rate it was last priced
+    at, as store_price does for the price. Nothing reads the copy to price:
+    the rate comes from the lookup version (build_budget_details).
+    """
+    info = details["budget_info"]
+    changed = [
+        field
+        for field in ("cost_multiplier", "in_kind_multiplier")
+        if getattr(budget, field) != info[field]
+    ]
+    if not changed:
+        return
+
+    for field in changed:
+        setattr(budget, field, info[field])
+    budget.save(update_fields=changed)
+
+
+def priced_budget_info(constants: dict, budget_info: dict) -> dict:
+    """
+    The budget's inputs with the multiplier it is priced at.
+
+    The full cost recovery multiplier is a rate like any other (#149): it comes
+    from the lookup version the budget prices against, so a draft follows an
+    administrator's change and a submitted costing keeps the rate of the
+    version it was stamped with. In-kind staff are costed at the same rate.
+    """
+    multiplier = constants["constants"]["full_cost_recovery_multiplier"]
+    return {
+        **budget_info,
+        "cost_multiplier": multiplier,
+        "in_kind_multiplier": multiplier,
+    }
 
 
 def build_budget_details(constants: dict, budget_data: dict) -> dict:
     """
     Run the engine over one budget's inputs and shape the response.
-    Split out so services/calculate.py can feed it without a database row.
     """
+    budget_info = priced_budget_info(constants, budget_data["budget_info"])
+
     # Calculation
     calculation_result = pricing.pricing(
         constants,
         budget_data["project_duration"],
         budget_data["staff_table"],
         budget_data["non_staff_table"],
-        budget_data["budget_info"],
+        budget_info,
     )
 
     # Merge staff table and result
@@ -47,7 +118,7 @@ def build_budget_details(constants: dict, budget_data: dict) -> dict:
 
     return {
         "project_info": budget_data["project_info"],
-        "budget_info": budget_data["budget_info"],
+        "budget_info": budget_info,
         "staff_table": staff_table,
         "non_staff_table": calculation_result["non_staff_result"],
         "budget_summary": calculation_result["budget_summary"],
@@ -73,7 +144,7 @@ def merge_staff_table_with_result(
 
         result_table[row_id] = {
             "info": staff_info,
-            "rate_2025": staff_result["rate_2025"],
+            "rate": staff_result["rate"],
             "numeric": {
                 year: {
                     "input": staff_numeric.get(year, 0),

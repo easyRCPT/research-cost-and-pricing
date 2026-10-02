@@ -25,3 +25,9 @@ dist-ssr
 
 # Backend schema for CI
 schema.yml
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

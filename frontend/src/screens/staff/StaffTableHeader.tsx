@@ -15,7 +15,11 @@ export function StaffTableHeader({ years }: StaffTableHeaderProps) {
         <Th rowSpan={2}>Category</Th>
         <Th rowSpan={2}>Classification</Th>
         <Th rowSpan={2}>Basis</Th>
-        <Th rowSpan={2} align="right">
+        <Th
+          rowSpan={2}
+          align="right"
+          title="The 2025 rate, adjusted for the row's time basis. Each year is costed at its own rate."
+        >
           Rate (AUD)
         </Th>
         {years.map((year, i) => (
@@ -23,6 +27,9 @@ export function StaffTableHeader({ years }: StaffTableHeaderProps) {
             Year {i + 1} ({year})
           </Th>
         ))}
+        <Th rowSpan={2} align="right" className="w-28">
+          Total (AUD)
+        </Th>
         <Th rowSpan={2} className="w-8" />
       </tr>
       <tr>
