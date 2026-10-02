@@ -29,6 +29,8 @@ FIELDS_BY_SECTION = {
         "margin",
         "cash_co_contribution",
         "gst_applicable",
+        "currency",
+        "exchange_rate_override",
     },
     "staff": {
         "name_role",
@@ -80,7 +82,10 @@ class SectionSerializer(serializers.Serializer):
 #   _RowUpdate:     `row_id`, `value`, `field`
 #   _YearRowUpdate: `year`, `row_id` (a cost line's UUID), `value`, `field`
 class _Update(serializers.Serializer):
-    value = serializers.JSONField()
+    # Null clears a field that can be empty: a project's region, or a
+    # costing's own exchange rate (#152). A field that can't be empty refuses
+    # it in the model's own validation.
+    value = serializers.JSONField(allow_null=True)
 
 
 class _RowUpdate(_Update):

@@ -545,6 +545,8 @@ class TestPricing(SimpleTestCase):
             12,
             Decimal("1.2"),
             Decimal(1),
+            # The exchange rate: AUD, since this budget names no currency.
+            Decimal(1),
         )
 
         mock_non_staff.assert_called_once_with(

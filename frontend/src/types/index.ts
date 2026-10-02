@@ -19,6 +19,7 @@ export type ProjectInfo = S['ProjectInfo']
 export type BudgetInfo = S['BudgetInfo']
 export type Activity = S['Activity']
 export type Region = S['Region']
+export type Currency = S['Currency']
 
 // Response types
 export type BudgetDetail = S['BudgetDetail']

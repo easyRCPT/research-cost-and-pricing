@@ -1,15 +1,20 @@
-import { Ledger, LedgerRow, Money, PartBar } from '@/components/shell'
+import { InAud, Ledger, LedgerRow, Money, PartBar } from '@/components/shell'
+import { useCurrency } from '@/lib/format/currency'
 import type { PriceSummary } from '@/types'
 
 interface PriceSummarySectionProps {
   summary: PriceSummary
   gstApplicable: boolean
+  /** The same figures in AUD, beside the price when it is in another currency (#152). */
+  inAud: PriceSummary
 }
 
 export function PriceSummarySection({
   summary,
   gstApplicable,
+  inAud,
 }: PriceSummarySectionProps) {
+  const foreign = useCurrency() !== 'AUD'
   const gst = summary.total_price_inc_gst - summary.total_price_exc_gst
 
   return (
@@ -22,6 +27,13 @@ export function PriceSummarySection({
               label="Price Excluding GST"
               value={<Money value={summary.total_price_exc_gst} />}
             />
+            {foreign && (
+              <LedgerRow
+                tone="sub"
+                label="In AUD"
+                value={<InAud value={inAud.total_price_exc_gst} />}
+              />
+            )}
             <LedgerRow
               label={
                 <>
@@ -38,6 +50,13 @@ export function PriceSummarySection({
               label="Total Price"
               value={<Money value={summary.total_price_inc_gst} />}
             />
+            {foreign && (
+              <LedgerRow
+                tone="sub"
+                label="In AUD"
+                value={<InAud value={inAud.total_price_inc_gst} />}
+              />
+            )}
           </tbody>
         </Ledger>
         <Ledger>

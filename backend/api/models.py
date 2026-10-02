@@ -333,6 +333,43 @@ class IncrementCap(models.Model):
     max_steps = models.PositiveSmallIntegerField()
 
 
+class Currency(models.Model):
+    """
+    A currency a costing can be priced in, and what 1 AUD buys of it: the
+    workbook's dCurrencyRates table (Lookup Tables U35:Y56), "1 AUD =".
+
+    Versioned with the rates, because the rate prices a costing: a draft
+    follows an administrator's change and a submitted costing keeps the rate
+    of the version it was stamped with (#152). AUD is the base, held at 1.
+    """
+
+    code = models.CharField(max_length=3)
+    name = models.CharField(max_length=60)
+    rate = models.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        validators=[MinValueValidator(Decimal("0.000001"))],
+        help_text="How much of this currency 1 AUD buys.",
+    )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        verbose_name_plural = "currencies"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["code", "version"],
+                name="unique_currency",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
 # Salary increases by EBA rate
 class EbaIncrease(models.Model):
     year = models.PositiveSmallIntegerField()
@@ -758,6 +795,20 @@ class Budget(models.Model):
     )
 
     gst_applicable = models.BooleanField(default=True)
+
+    # The currency the costing is priced in, by code (#152). Staff costs are
+    # converted from AUD at the exchange rate; non-staff amounts, the cash
+    # co-contribution and deliverable invoices are entered in it.
+    currency = models.CharField(max_length=3, default="AUD")
+    # The researcher's own rate, as the workbook's "override" tick allows.
+    # Null means the rate in the lookup version the costing prices against.
+    exchange_rate_override = models.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0.000001"))],
+    )
 
     cash_co_contribution = models.DecimalField(
         max_digits=12,

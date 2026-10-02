@@ -26,6 +26,7 @@ class LookupSerializersTestCase(SimpleTestCase):
             "on_cost_rates",
             "non_staff_cost_categories",
             "calculation_constants",
+            "currencies",
             "activities",
             "regions",
             "deliverable_types",

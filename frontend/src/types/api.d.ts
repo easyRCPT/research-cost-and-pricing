@@ -1897,7 +1897,9 @@ export interface components {
          * @description * `cash_co_contribution` - cash_co_contribution
          *     * `comments` - comments
          *     * `cost_multiplier` - cost_multiplier
+         *     * `currency` - currency
          *     * `dean_exemption_reason` - dean_exemption_reason
+         *     * `exchange_rate_override` - exchange_rate_override
          *     * `gst_applicable` - gst_applicable
          *     * `in_kind_multiplier` - in_kind_multiplier
          *     * `justification` - justification
@@ -1906,7 +1908,7 @@ export interface components {
          *     * `mode` - mode
          * @enum {string}
          */
-        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "dean_exemption_reason" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode";
+        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "currency" | "dean_exemption_reason" | "exchange_rate_override" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode";
         BudgetFieldUpdate: {
             value: unknown;
             field: components["schemas"]["BudgetFieldEnum"];
@@ -1927,6 +1929,13 @@ export interface components {
             gst_applicable: boolean;
             /** Format: double */
             cash_co_contribution: number;
+            currency: string;
+            /** Format: double */
+            exchange_rate: number;
+            /** Format: double */
+            table_exchange_rate: number;
+            /** Format: double */
+            exchange_rate_override: number | null;
             comments: string;
             justification: string;
             justification_notes: string;
@@ -1937,6 +1946,7 @@ export interface components {
         };
         BudgetSummary: {
             price_summary: components["schemas"]["PriceSummary"];
+            in_aud: components["schemas"]["InAud"];
             staff_budget: components["schemas"]["StaffBudget"];
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
@@ -2368,11 +2378,10 @@ export interface components {
             attr: "value";
             /**
              * @description * `invalid` - invalid
-             *     * `null` - null
              *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "null" | "required";
+            code: "invalid" | "required";
             detail: string;
         };
         BudgetsPartialUpdateYearErrorComponent: {
@@ -2641,6 +2650,17 @@ export interface components {
          * @enum {string}
          */
         ClientErrorEnum: "client_error";
+        Currency: {
+            code: string;
+            name: string;
+            /**
+             * Format: double
+             * @description How much of this currency 1 AUD buys.
+             */
+            rate: number;
+            /** Format: double */
+            readonly inverse: number;
+        };
         /**
          * @description * `approve` - approve
          *     * `reject` - reject
@@ -2843,6 +2863,12 @@ export interface components {
             group: string;
             count: number;
         };
+        /** @description The costing's totals in AUD, beside its own currency's (#152). */
+        InAud: {
+            price_summary: components["schemas"]["PriceSummary"];
+            staff_cost_by_year: components["schemas"]["YearAmountInAud"][];
+            non_staff_cost_by_year: components["schemas"]["YearAmountInAud"][];
+        };
         InKindCosts: {
             in_kind_staff_budget: components["schemas"]["StaffBudget"];
             in_kind_non_staff_budget: components["schemas"]["NonStaffBudget"];
@@ -2889,6 +2915,7 @@ export interface components {
             on_cost_rates: components["schemas"]["OnCostRate"][];
             non_staff_cost_categories: components["schemas"]["NonStaffCostCategory"][];
             calculation_constants: components["schemas"]["CalculationConstant"][];
+            currencies: components["schemas"]["Currency"][];
             activities: components["schemas"]["Activity"][];
             regions: components["schemas"]["Region"][];
             deliverable_types: components["schemas"]["DeliverableType"][];
@@ -3659,9 +3686,10 @@ export interface components {
          *     * `on_cost_rates` - on_cost_rates
          *     * `non_staff_cost_categories` - non_staff_cost_categories
          *     * `calculation_constants` - calculation_constants
+         *     * `currencies` - currencies
          * @enum {string}
          */
-        TableEnum: "salary_rates" | "salary_rate_multipliers" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants";
+        TableEnum: "salary_rates" | "salary_rate_multipliers" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants" | "currencies";
         /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily
@@ -3749,6 +3777,11 @@ export interface components {
             time: number;
         };
         YearAmount: {
+            year: number;
+            /** Format: double */
+            amount: number;
+        };
+        YearAmountInAud: {
             year: number;
             /** Format: double */
             amount: number;

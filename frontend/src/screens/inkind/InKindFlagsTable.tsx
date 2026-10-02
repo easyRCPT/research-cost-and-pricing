@@ -1,6 +1,6 @@
 import { CellText, Grid, Money, Td, Th } from '@/components/shell'
 import { Checkbox } from '@/components/ui/checkbox'
-import { money } from '@/lib/format/utils'
+import { useCurrency, useMoney } from '@/lib/format/currency'
 
 export interface CostRow {
   key: string
@@ -17,6 +17,8 @@ export interface CostRow {
 }
 
 export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
+  const currency = useCurrency()
+  const money = useMoney()
   return (
     <Grid>
       <thead>
@@ -24,7 +26,7 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
           <Th>Cost line</Th>
           <Th>Detail</Th>
           <Th align="right" className="w-36">
-            Cost (AUD)
+            Cost ({currency})
           </Th>
           <Th align="center" className="w-24">
             In kind?
@@ -80,7 +82,9 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
  */
 function ReasonCell({ row }: { row: CostRow }) {
   if (!row.inKind) {
-    return <span className="text-muted-foreground">Tick the box to say why</span>
+    return (
+      <span className="text-muted-foreground">Tick the box to say why</span>
+    )
   }
 
   return (

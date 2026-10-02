@@ -14,17 +14,28 @@ export type AdminTable =
   | { kind: 'view'; id: string }
 
 const rate = (id: RateTable): AdminTable => ({ kind: 'rate', id })
-const reference = (id: ReferenceTable): AdminTable => ({ kind: 'reference', id })
+const reference = (id: ReferenceTable): AdminTable => ({
+  kind: 'reference',
+  id,
+})
 
 export const ADMIN_TABLES: Record<LookupTabValue, AdminTable[]> = {
   constants: [rate('calculation_constants')],
-  rates: [rate('salary_rates'), { kind: 'view', id: 'caps' }, rate('salary_rate_multipliers')],
+  rates: [
+    rate('salary_rates'),
+    { kind: 'view', id: 'caps' },
+    rate('salary_rate_multipliers'),
+  ],
   eba: [rate('eba_increases')],
   oncosts: [rate('on_cost_rates')],
+  currencies: [rate('currencies')],
   orgunits: [reference('faculties'), reference('departments')],
   expenses: [rate('non_staff_cost_categories')],
   attributes: [reference('activities'), reference('regions')],
-  deliverables: [reference('deliverable_types'), reference('revenue_categories')],
+  deliverables: [
+    reference('deliverable_types'),
+    reference('revenue_categories'),
+  ],
 }
 
 /** The tab a rate table is on, to show it when the server refuses a change to it. */

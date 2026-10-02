@@ -26,7 +26,9 @@ from rest_framework.fields import get_error_detail
 
 from ..calculation.staff import PAYROLL_TYPE
 from ..models import (
+    Budget,
     CalculationConstant,
+    Currency,
     LookupChangeSet,
     LookupConfiguration,
     OnCostRate,
@@ -254,6 +256,7 @@ def _update(definition: LookupDefinition, version_id: int, change: dict) -> dict
 
     values = _typed_values(definition, change.get("values"), instance)
     _check_constant(instance, values)
+    _check_aud(instance, values)
 
     before = model_to_dict(instance, fields=list(values))
     for field, value in values.items():
@@ -289,6 +292,37 @@ def _reject_removing_a_rate_in_use(instance: models.Model) -> None:
         )
 
 
+def _check_aud(instance: models.Model, values: dict) -> None:
+    """AUD is what every rate is quoted against, so 1 AUD is always 1 AUD."""
+    if (
+        isinstance(instance, Currency)
+        and instance.code == "AUD"
+        and "rate" in values
+        and values["rate"] != 1
+    ):
+        raise ValidationError("AUD is the base currency: its rate is always 1.")
+
+
+def _reject_removing_a_currency_in_use(instance: models.Model) -> None:
+    """
+    AUD is the base, and a currency a draft costing is priced in is still in
+    use: without its rate that costing could not be priced. Only drafts, as
+    for salary rates: a submitted costing keeps its stamped version.
+    """
+    if not isinstance(instance, Currency):
+        return
+    if instance.code == "AUD":
+        raise ValidationError("AUD is the base currency and can't be removed.")
+    drafts = Budget.objects.filter(
+        lookup_version__isnull=True, currency=instance.code
+    ).count()
+    if drafts:
+        raise ValidationError(
+            f"{drafts} draft {'costing is' if drafts == 1 else 'costings are'} "
+            f"priced in {instance.code}, so it can't be removed."
+        )
+
+
 def _reject_removing_a_default_on_cost(instance: models.Model) -> None:
     """The rate for every year without one of its own; every costing needs it."""
     if isinstance(instance, OnCostRate) and instance.year is None:
@@ -307,6 +341,7 @@ def _delete(definition: LookupDefinition, version_id: int, change: dict) -> dict
     instance = _find(definition, version_id, key)
     _reject_removing_a_rate_in_use(instance)
     _reject_removing_a_default_on_cost(instance)
+    _reject_removing_a_currency_in_use(instance)
     before = model_to_dict(instance, exclude=["id", "version"])
 
     # Only from this version. Costings priced on older versions keep the row,

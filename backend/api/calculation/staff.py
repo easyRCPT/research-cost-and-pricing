@@ -10,9 +10,11 @@ def calculate_staff_table(
     end_month: int,
     cost_multiplier: Decimal,
     in_kind_multiplier: Decimal,
+    exchange_rate: Decimal = Decimal(1),
 ) -> dict:
     """
-    Calculate the staff cost (in kind or not)
+    Calculate the staff cost (in kind or not), in the costing's currency:
+    exchange_rate is what 1 AUD buys of it, 1 for AUD (#152).
     Input format: {
         'info_table': {'<row_id>': {}},
         'numeric_table': {'<row_id>': {}}
@@ -49,7 +51,7 @@ def calculate_staff_table(
             multiplier = cost_multiplier
 
         costs[row_id] = calculate_staff_row(
-            info, numeric, constants, project_duration, multiplier
+            info, numeric, constants, project_duration, multiplier, exchange_rate
         )
 
     # Calculate column total
@@ -170,10 +172,14 @@ def calculate_staff_row(
     constants: dict,
     project_duration: dict,
     cost_recovery_multiplier: Decimal,
+    exchange_rate: Decimal = Decimal(1),
 ) -> dict:
     """
     Calculate the cost of a staff in each year of the project
     Return a dictionary for cost in each year {'year': cost}
+
+    The rate stays the AUD figure from the salary table, as the workbook's
+    PART B shows it; the costs are in the costing's currency.
     """
     # salary rate in recorded salary rate year
     rate = find_salary_rate(
@@ -201,8 +207,11 @@ def calculate_staff_row(
         # Calculate cost
         salary_rate_year = _get_salary_rate_year(constants)
         eba_multiplier = _find_eba_multiplier(constants["eba"], salary_rate_year, year)
-        salary_rate = find_salary_rate(
-            info_data, constants, eba_multiplier, year_employed
+        # Converted where the workbook converts it: each year's salary is
+        # multiplied by the exchange rate (On cost calculator J7, L7, ...).
+        salary_rate = (
+            find_salary_rate(info_data, constants, eba_multiplier, year_employed)
+            * exchange_rate
         )
         employment_type = info_data["employment_type"]
         on_costs = get_on_cost_rates(
@@ -216,6 +225,7 @@ def calculate_staff_row(
             time,
             year_fraction,
             cost_recovery_multiplier,
+            exchange_rate,
         )
 
         # Increment by one year when employed
@@ -303,10 +313,14 @@ def calculate_staff_cost(
     time: Decimal,
     year_fraction: Decimal,
     cost_recovery_multiplier: Decimal,
+    exchange_rate: Decimal = Decimal(1),
 ) -> Decimal:
     """
     Calculate the total cost of a staff in a year, with base salary rate calculated in previous
     year_fraction is calculated by the caller and is 1 for non-FTE time basis
+
+    salary_rate is already in the costing's currency. The leave loading cap is
+    an AUD figure, so it is converted too, as the workbook does (K9).
     """
 
     # Requested salary
@@ -314,7 +328,7 @@ def calculate_staff_cost(
     # Leave loading
     # MAX_LEAVE_LOADING = 1611.3
     leave_loading = on_costs["leave_loading"] * requested_salary
-    max_leave_loading = general["max_leave_loading"]
+    max_leave_loading = general["max_leave_loading"] * exchange_rate
     leave_loading = min(leave_loading, max_leave_loading)
     # Superannuation
     superannuation = on_costs["superannuation"] * requested_salary

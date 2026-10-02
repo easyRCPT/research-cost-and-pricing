@@ -4501,6 +4501,216 @@
   }
 },
 {
+  "model": "api.currency",
+  "pk": 1,
+  "fields": {
+    "code": "AUD",
+    "name": "Australian Dollar",
+    "rate": "1.000000",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 2,
+  "fields": {
+    "code": "BHD",
+    "name": "Bahraini Dinar",
+    "rate": "0.264271",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 3,
+  "fields": {
+    "code": "CAD",
+    "name": "Canadian Dollar",
+    "rate": "0.985703",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 4,
+  "fields": {
+    "code": "CHF",
+    "name": "Swiss Franc",
+    "rate": "0.571129",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 5,
+  "fields": {
+    "code": "CNY",
+    "name": "Chinese Yuan",
+    "rate": "4.742069",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 6,
+  "fields": {
+    "code": "DKK",
+    "name": "Danish Krone",
+    "rate": "4.559951",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 7,
+  "fields": {
+    "code": "EUR",
+    "name": "Euro",
+    "rate": "0.609959",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 8,
+  "fields": {
+    "code": "GBP",
+    "name": "Pound Sterling",
+    "rate": "0.522417",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 9,
+  "fields": {
+    "code": "HKD",
+    "name": "Hong Kong Dollar",
+    "rate": "5.513622",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 10,
+  "fields": {
+    "code": "IDR",
+    "name": "Indonesian Rupiah",
+    "rate": "12581.675106",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 11,
+  "fields": {
+    "code": "INR",
+    "name": "Indian Rupee",
+    "rate": "66.954629",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 12,
+  "fields": {
+    "code": "JPY",
+    "name": "Japanese Yen",
+    "rate": "111.283991",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 13,
+  "fields": {
+    "code": "KRW",
+    "name": "South Korean Won",
+    "rate": "998.148333",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 14,
+  "fields": {
+    "code": "MYR",
+    "name": "Malaysian Ringgit",
+    "rate": "2.874039",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 15,
+  "fields": {
+    "code": "NOK",
+    "name": "Norwegian Krona",
+    "rate": "6.704966",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 16,
+  "fields": {
+    "code": "NZD",
+    "name": "New Zealand Dollar",
+    "rate": "1.198579",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 17,
+  "fields": {
+    "code": "SEK",
+    "name": "Swedish Krona",
+    "rate": "6.685676",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 18,
+  "fields": {
+    "code": "SGD",
+    "name": "Singapore Dollar",
+    "rate": "0.901138",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 19,
+  "fields": {
+    "code": "THB",
+    "name": "Thai Baht",
+    "rate": "23.268913",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 20,
+  "fields": {
+    "code": "TWD",
+    "name": "New Taiwan Dollar",
+    "rate": "22.657292",
+    "version": 1
+  }
+},
+{
+  "model": "api.currency",
+  "pk": 21,
+  "fields": {
+    "code": "USD",
+    "name": "United States Dollar",
+    "rate": "0.702850",
+    "version": 1
+  }
+},
+{
   "model": "api.calculationconstant",
   "pk": 1,
   "fields": {

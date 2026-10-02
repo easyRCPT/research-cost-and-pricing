@@ -53,6 +53,23 @@ async function removeOurCategory(page: Page) {
   })
 }
 
+// The ISO code kept for testing: no costing is ever priced in it.
+const TEST_CURRENCY = 'XTS'
+
+/** Takes out the test currency a failed run left behind. */
+async function removeOurCurrency(page: Page) {
+  const lookups = await (await page.request.get('/api/lookups/')).json()
+  const left = (lookups.currencies as { code: string }[]).some((row) => row.code === TEST_CURRENCY)
+  if (!left) return
+  await apiWrite(page, 'post', '/api/admin/lookups/changes/', {
+    status: 201,
+    data: {
+      note: 'e2e clean-up',
+      changes: [{ table: 'currencies', op: 'delete', lookup: { code: TEST_CURRENCY } }],
+    },
+  })
+}
+
 async function ebaYears(page: Page): Promise<number[]> {
   const lookups = await (await page.request.get('/api/lookups/')).json()
   return (lookups.eba_increases as { year: number }[]).map((row) => row.year)
@@ -93,6 +110,7 @@ test.beforeEach(async ({ page }) => {
   await signIn(page, 'admin')
   await removeOurYears(page)
   await removeOurCategory(page)
+  await removeOurCurrency(page)
 })
 
 test.afterAll(async ({ browser }) => {
@@ -100,6 +118,7 @@ test.afterAll(async ({ browser }) => {
   await signIn(page, 'admin')
   await removeOurYears(page)
   await removeOurCategory(page)
+  await removeOurCurrency(page)
   await page.close()
 })
 
@@ -271,6 +290,43 @@ test('a non-staff category is a rate: added, changed and removed through sets (#
   await row.getByRole('button', { name: `Remove ${LEDGER}` }).click()
   await reviewAndSave(page, 'e2e: the category again')
   await expect.poll(flag).toBeUndefined()
+})
+
+test('a currency is a rate: added, changed and removed through sets, and AUD stays at 1 (#152)', async ({ page }) => {
+  await openEditor(page)
+  await openTab(page, 'Currencies')
+  await addRow(page, async (form) => {
+    await form.getByLabel('Code', { exact: true }).fill(TEST_CURRENCY)
+    await form.getByLabel('Name', { exact: true }).fill('Testing Currency')
+    await form.getByLabel('1 AUD =', { exact: true }).fill('2.5')
+  })
+  await reviewAndSave(page, 'e2e: a currency')
+  await expect(page.getByRole('status').filter({ hasText: '1 change saved' })).toBeVisible()
+
+  const rate = async () =>
+    ((await (await page.request.get('/api/lookups/')).json()).currencies as { code: string; rate: number }[]).find(
+      (currency) => currency.code === TEST_CURRENCY,
+    )?.rate
+  await expect.poll(rate).toBe(2.5)
+
+  await page.getByRole('searchbox', { name: 'Search' }).fill(TEST_CURRENCY)
+  const row = page.getByRole('row').filter({ hasText: TEST_CURRENCY })
+  await row.getByRole('spinbutton', { name: `1 AUD = for ${TEST_CURRENCY}` }).fill('2.75')
+  await reviewAndSave(page, 'e2e: the currency moved')
+  await expect.poll(rate).toBe(2.75)
+
+  await row.getByRole('button', { name: `Remove ${TEST_CURRENCY}` }).click()
+  await reviewAndSave(page, 'e2e: the currency again')
+  await expect.poll(rate).toBeUndefined()
+
+  // AUD is the base: the server refuses to move it, against its row.
+  await page.getByRole('searchbox', { name: 'Search' }).fill('AUD')
+  const audRate = page.getByRole('spinbutton', { name: '1 AUD = for AUD' })
+  const aud = page.getByRole('row').filter({ has: audRate })
+  await audRate.fill('1.1')
+  await reviewAndSave(page, 'e2e: refused')
+  await expect(aud).toContainText('AUD is the base currency: its rate is always 1.')
+  await page.getByRole('button', { name: 'Discard all' }).click()
 })
 
 test('constants read as what they are, take 30% or 0.30, and refuse a bare 25 (#151)', async ({ page }) => {

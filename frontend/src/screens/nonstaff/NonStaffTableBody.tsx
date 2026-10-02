@@ -9,7 +9,7 @@ import {
   Td,
 } from '@/components/shell'
 import { Checkbox } from '@/components/ui/checkbox'
-import { dash } from '@/lib/format/utils'
+import { useDash } from '@/lib/format/currency'
 import {
   allExpenseTypes,
   amountFor,
@@ -37,6 +37,7 @@ export function NonStaffTableBody({
   patchLine,
   removeLine,
 }: NonStaffTableBodyProps) {
+  const dash = useDash()
   const groups = costGroups(categories)
   const expenseTypes = allExpenseTypes(categories)
 

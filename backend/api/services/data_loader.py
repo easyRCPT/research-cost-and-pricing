@@ -124,6 +124,8 @@ def build_budget_info(budget: Budget) -> dict:
         "margin": budget.margin,
         "gst_applicable": budget.gst_applicable,
         "cash_co_contribution": budget.cash_co_contribution,
+        "currency": budget.currency,
+        "exchange_rate_override": budget.exchange_rate_override,
         "comments": budget.comments,
         "justification": budget.justification,
         "justification_notes": budget.justification_notes,

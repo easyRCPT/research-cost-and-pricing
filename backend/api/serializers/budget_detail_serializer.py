@@ -102,6 +102,16 @@ class BudgetInfoSerializer(serializers.Serializer):
         decimal_places=2,
     )
 
+    # The currency it is priced in, and what 1 AUD buys of it (#152): the
+    # rate the costing is priced at, the table's rate in its lookup version,
+    # and the researcher's own rate when they set one.
+    currency = serializers.CharField()
+    exchange_rate = serializers.DecimalField(max_digits=18, decimal_places=6)
+    table_exchange_rate = serializers.DecimalField(max_digits=18, decimal_places=6)
+    exchange_rate_override = serializers.DecimalField(
+        max_digits=18, decimal_places=6, allow_null=True
+    )
+
     comments = serializers.CharField(allow_blank=True)
     justification = serializers.CharField(allow_blank=True)
     justification_notes = serializers.CharField(allow_blank=True)
@@ -393,8 +403,22 @@ class InKindCostsSerializer(serializers.Serializer):
     )
 
 
+class YearAmountInAudSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    amount = CostDecimalField(max_digits=14, decimal_places=2)
+
+
+class InAudSerializer(serializers.Serializer):
+    """The costing's totals in AUD, beside its own currency's (#152)."""
+
+    price_summary = PriceSummarySerializer()
+    staff_cost_by_year = YearAmountInAudSerializer(many=True)
+    non_staff_cost_by_year = YearAmountInAudSerializer(many=True)
+
+
 class BudgetSummarySerializer(serializers.Serializer):
     price_summary = PriceSummarySerializer()
+    in_aud = InAudSerializer()
     staff_budget = StaffBudgetSerializer()
     non_staff_budget = NonStaffBudgetSerializer()
     in_kind_costs = InKindCostsSerializer()
