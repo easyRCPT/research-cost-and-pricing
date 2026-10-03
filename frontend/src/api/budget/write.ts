@@ -5,10 +5,11 @@ import {
 } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { api, ApiError } from '@/lib/api'
+import { api, ApiError, unwrap } from '@/lib/api'
 import type { BudgetDetail, BudgetUpdate } from '@/types'
-import { budgetKey } from './detail'
+
 import { useBudgetId } from './context'
+import { budgetKeys } from './detail'
 
 export const writeKey = ['budget-write'] as const
 
@@ -67,7 +68,7 @@ export type Command = BudgetUpdate
  * the cache; and even when it answers 200, the reply was composed before any
  * later keystroke. Applying the echo on top of whatever comes back covers both.
  */
-export type Echo = (budget: BudgetDetail) => BudgetDetail
+type Echo = (budget: BudgetDetail) => BudgetDetail
 
 const identity: Echo = (budget) => budget
 
@@ -75,13 +76,13 @@ async function patch(
   budgetId: number,
   command: Command,
 ): Promise<BudgetDetail | null> {
-  const { data, error, response } = await api.PATCH(
-    '/api/budgets/{budget_id}/',
-    { params: { path: { budget_id: budgetId } }, body: command },
-  )
-  if (error) throw new ApiError(response.status, error)
+  const result = await api.PATCH('/api/budgets/{budget_id}/', {
+    params: { path: { budget_id: budgetId } },
+    body: command,
+  })
+  const data = unwrap(result)
   // 204: saved, nothing recalculated.
-  return response.status === 204 ? null : (data as BudgetDetail)
+  return result.response.status === 204 ? null : (data as BudgetDetail)
 }
 
 /**
@@ -114,7 +115,7 @@ const describe = (error: unknown) => {
  * Read from the budget the screen is showing, because the server answers with
  * a row id and the reader has never seen one.
  */
-export function rowLabel(
+function rowLabel(
   budget: BudgetDetail | undefined,
   command: Command | undefined,
 ): string | undefined {
@@ -191,7 +192,7 @@ export function reportWriteError(error: unknown, where?: string) {
 export function useEdit() {
   const budgetId = useBudgetId()
   const queryClient = useQueryClient()
-  const key = budgetKey(budgetId)
+  const key = budgetKeys.detail(budgetId)
 
   const write = useMutation({
     mutationKey: writeKey,

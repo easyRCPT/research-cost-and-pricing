@@ -1,29 +1,31 @@
 import type { QueryClient } from '@tanstack/react-query'
 import {
-  Outlet,
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  Outlet,
   redirect,
 } from '@tanstack/react-router'
+
 import { homeFor, meQuery } from '@/api/auth'
-import { LOOKUP_SCREEN } from '@/components/lookups-tabs/LookupButton'
-import type { AppScreen } from '@/components/shell/AppContent'
+import { SUPERADMIN } from '@/api/auth'
+import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppSkeleton } from '@/components/shell'
+import { ApprovalRegisterRoute, ApprovalsRoute } from '@/routes/approvals'
+import { EditorRoute } from '@/routes/editor'
+import { ProjectsRoute } from '@/routes/projects'
 import { SCREEN_HEADINGS } from '@/screens'
+import { AdminShell } from '@/screens/admin/AdminShell'
+import { Audit } from '@/screens/admin/Audit'
+import { LookupEditor } from '@/screens/admin/LookupEditor'
+import { Overview } from '@/screens/admin/Overview'
+import { Projects as ProjectRegister } from '@/screens/admin/Projects'
+import { Users } from '@/screens/admin/Users'
+import { VersionHistory } from '@/screens/admin/VersionHistory'
 import { AdminLogin } from '@/screens/auth/AdminLogin'
 import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
-import { EditorRoute } from '@/routes/editor'
-import { ProjectsRoute } from '@/routes/projects'
-import { ApprovalsRoute } from '@/routes/approvals'
-import { AdminShell } from '@/screens/admin/AdminShell'
-import { LookupEditor } from '@/screens/admin/LookupEditor'
-import { Users } from '@/screens/admin/Users'
-import { Overview } from '@/screens/admin/Overview'
-import { Projects as ProjectRegister } from '@/screens/admin/Projects'
-import { Audit } from '@/screens/admin/Audit'
-import { SUPERADMIN } from '@/api/auth'
+import type { AppScreen } from '@/screens/editor/AppContent'
 
 /**
  * Seven entries, written out rather than generated.
@@ -43,26 +45,6 @@ interface RouterContext {
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: Outlet,
 })
-
-/**
- * The gate every private route sits behind.
- *
- * In `beforeLoad` rather than in a component: the route does not begin to load
- * until the answer is in, so a signed-out visitor never gets a frame of the
- * screen they are not allowed to see, and there is no second render to loop
- * on. `ensureQueryData` shares one fetch with the `useMe` every screen calls.
- */
-async function requireAuth(
-  { queryClient }: RouterContext,
-  href: string,
-) {
-  const me = await queryClient.ensureQueryData(meQuery)
-  if (!me) {
-    // Carried so signing in finishes the trip they started.
-    throw redirect({ to: '/login', search: { redirect: href } })
-  }
-  return me
-}
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -94,10 +76,28 @@ const adminLoginRoute = createRoute({
   component: AdminLogin,
 })
 
-const projectsRoute = createRoute({
+/**
+ * The gate every private route sits behind. Guarded once, on this pathless
+ * parent, so a route added beneath it cannot arrive unguarded.
+ *
+ * In `beforeLoad` rather than in a component: the route does not begin to load
+ * until the answer is in, so a signed-out visitor never gets a frame of the
+ * screen they are not allowed to see, and there is no second render to loop
+ * on. `ensureQueryData` shares one fetch with the `useMe` every screen calls.
+ */
+const privateRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: 'private',
+  beforeLoad: async ({ context, location }) => {
+    const me = await context.queryClient.ensureQueryData(meQuery)
+    // Carried so signing in finishes the trip they started.
+    if (!me) throw redirect({ to: '/login', search: { redirect: location.href } })
+  },
+})
+
+const projectsRoute = createRoute({
+  getParentRoute: () => privateRoute,
   path: '/projects',
-  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
   component: ProjectsRoute,
 })
 
@@ -118,46 +118,63 @@ const adminRoute = createRoute({
   component: AdminShell,
 })
 
+// The shell's own boundary shows the skeleton, inside the frame; the router's
+// default would put a whole app skeleton there.
+const inAdminShell = { getParentRoute: () => adminRoute, wrapInSuspense: false }
+
 // The front door (#94), where a superadmin signing in lands.
 const adminIndexRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: '/',
   component: Overview,
 })
 
 const adminLookupsRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'lookups',
   component: LookupEditor,
 })
 
+const adminVersionsRoute = createRoute({
+  ...inAdminShell,
+  path: 'versions',
+  validateSearch: (search: Record<string, unknown>): { version?: number } =>
+    typeof search.version === 'number' ? { version: search.version } : {},
+  component: VersionHistory,
+})
+
 const adminUsersRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'users',
   component: Users,
 })
 
 const adminProjectsRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'projects',
   component: ProjectRegister,
 })
 
 const adminAuditRoute = createRoute({
-  getParentRoute: () => adminRoute,
+  ...inAdminShell,
   path: 'audit',
   component: Audit,
 })
 
 const approvalsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => privateRoute,
   path: '/approvals',
-  beforeLoad: ({ context, location }) => requireAuth(context, location.href),
   component: ApprovalsRoute,
 })
 
+const approvalRegisterRoute = createRoute({
+  getParentRoute: () => privateRoute,
+  path: '/approvals/register',
+  component: ApprovalRegisterRoute,
+})
+
 export const editorRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => privateRoute,
   path: '/projects/$projectId/$screen',
   params: {
     parse: ({ projectId, screen }) => ({
@@ -172,8 +189,7 @@ export const editorRoute = createRoute({
   // A pasted or stale URL is the normal way an unknown screen arrives, so it
   // lands on the first screen rather than rendering blank. A project id that is
   // not a number never had a row behind it.
-  beforeLoad: async ({ context, location, params }) => {
-    await requireAuth(context, location.href)
+  beforeLoad: ({ params }) => {
     if (!Number.isInteger(params.projectId)) {
       throw redirect({ to: '/projects' })
     }
@@ -200,16 +216,20 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   signupRoute,
   adminLoginRoute,
-  projectsRoute,
-  approvalsRoute,
+  privateRoute.addChildren([
+    projectsRoute,
+    approvalsRoute,
+    approvalRegisterRoute,
+    editorRoute,
+  ]),
   adminRoute.addChildren([
     adminIndexRoute,
     adminLookupsRoute,
+    adminVersionsRoute,
     adminUsersRoute,
     adminProjectsRoute,
     adminAuditRoute,
   ]),
-  editorRoute,
   catchAllRoute,
 ])
 

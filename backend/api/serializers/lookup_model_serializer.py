@@ -1,8 +1,12 @@
+from decimal import Decimal
+
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from api.models import (
     Activity,
     CalculationConstant,
+    Currency,
     DeliverableType,
     Department,
     EbaIncrease,
@@ -125,3 +129,18 @@ class RevenueCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = RevenueCategory
         fields = ["budget_ledger_id", "external_party", "description"]
+
+
+class CurrencySerializer(serializers.ModelSerializer):
+    # What 1 unit of the currency buys of AUD: the workbook's "Inv 1 AUD"
+    # column, shown beside the rate. Worked out here, not stored, so it can
+    # never disagree with the rate the costing is priced at.
+    inverse = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Currency
+        fields = ["code", "name", "rate", "inverse"]
+
+    @extend_schema_field(serializers.DecimalField(max_digits=18, decimal_places=6))
+    def get_inverse(self, row: Currency) -> Decimal:
+        return (Decimal(1) / row.rate).quantize(Decimal("0.000001"))

@@ -1,10 +1,14 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
-import type { components } from '@/types/api'
+
+import { pageOptions } from '@/api/cursor'
+import { adminQuery } from '@/api/query'
+import { api } from '@/lib/api'
+import type { components, operations } from '@/types/api'
 
 export type AuditEntry = components['schemas']['AuditEntry']
 export type AdminProject = components['schemas']['AdminProject']
 export type Overview = components['schemas']['Overview']
+export type ApproverGaps = components['schemas']['ApproverGaps']
 
 /**
  * These read what the rest of the console just did, so each is asked again
@@ -12,62 +16,67 @@ export type Overview = components['schemas']['Overview']
  */
 const FRESH = { staleTime: 0 } as const
 
-/** The most the audit API returns at once (#67). */
-export const AUDIT_LIMITS = [50, 100, 250, 500] as const
+/** Plain queries, not suspense: each block on these screens draws its own skeleton. */
+export function useOverview() {
+  return useQuery(adminQuery(['overview'], () => api.GET('/api/admin/overview/'), FRESH))
+}
+
+/** Costings waiting on a role nobody holds, and the units missing one (#121). */
+export function useApproverGaps() {
+  return useQuery(adminQuery(['approver-gaps'], () => api.GET('/api/admin/approver-gaps/'), FRESH))
+}
+
+export type AdminProjectQuery = NonNullable<
+  operations['admin_projects_list']['parameters']['query']
+>
+
+/** One cursor page of every project, whoever owns it. */
+export function useAdminProjects(query: AdminProjectQuery) {
+  return useQuery(
+    adminQuery(
+      ['projects', query],
+      () => api.GET('/api/admin/projects/', { params: { query } }),
+      pageOptions(query.cursor),
+    ),
+  )
+}
+
+/** Counted against the search and the other filters. */
+export function useAdminProjectFilters(query: AdminProjectQuery) {
+  return useQuery(
+    adminQuery(
+      ['project-filters', query],
+      () => api.GET('/api/admin/projects/filters/', { params: { query } }),
+      { ...FRESH, placeholderData: keepPreviousData },
+    ),
+  )
+}
+
+export type AuditQuery = NonNullable<
+  operations['admin_audit_list']['parameters']['query']
+>
+
+/** One cursor page of the log. */
+export function useAudit(query: AuditQuery) {
+  return useQuery(
+    adminQuery(
+      ['audit', query],
+      () => api.GET('/api/admin/audit/', { params: { query } }),
+      pageOptions(query.cursor),
+    ),
+  )
+}
 
 /**
- * Plain queries, not suspense: each block on these screens draws its own
- * skeleton, and a changed filter keeps the last answer on screen while the
- * next one loads rather than blanking the table.
+ * Read off the log itself, so a filter never hides a value that exists, and
+ * counted against the other filters.
  */
-export function useOverview() {
-  return useQuery({
-    queryKey: ['admin', 'overview'] as const,
-    queryFn: async (): Promise<Overview> => {
-      const { data, error, response } = await api.GET('/api/admin/overview/')
-      if (error) throw new ApiError(response.status, error)
-      return data
-    },
-    ...FRESH,
-  })
-}
-
-export function useAdminProjects() {
-  return useQuery({
-    queryKey: ['admin', 'projects'] as const,
-    queryFn: async (): Promise<AdminProject[]> => {
-      const { data, error, response } = await api.GET('/api/admin/projects/')
-      if (error) throw new ApiError(response.status, error)
-      return data
-    },
-    ...FRESH,
-  })
-}
-
-export function useAudit(action: string, limit: number) {
-  return useQuery({
-    queryKey: ['admin', 'audit', action, limit] as const,
-    queryFn: async (): Promise<AuditEntry[]> => {
-      const { data, error, response } = await api.GET('/api/admin/audit/', {
-        params: { query: { limit, ...(action ? { action } : {}) } },
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
-    },
-    placeholderData: keepPreviousData,
-    ...FRESH,
-  })
-}
-
-/** Read off the log itself, so the filter never hides an action that exists. */
-export function useAuditActions() {
-  return useQuery({
-    queryKey: ['admin', 'audit-actions'] as const,
-    queryFn: async (): Promise<string[]> => {
-      const { data, error, response } = await api.GET('/api/admin/audit/actions/')
-      if (error) throw new ApiError(response.status, error)
-      return data
-    },
-    ...FRESH,
-  })
+export function useAuditFilters(query: AuditQuery) {
+  return useQuery(
+    adminQuery(
+      ['audit-filters', query],
+      () => api.GET('/api/admin/audit/filters/', { params: { query } }),
+      { ...FRESH, placeholderData: keepPreviousData },
+    ),
+  )
 }

@@ -1,8 +1,10 @@
-import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+
+import { type AccountType, homeFor, useSignup } from '@/api/auth'
 import { Button } from '@/components/ui/button'
-import { homeFor, useSignup, type AccountType } from '@/api/auth'
-import { ApiError } from '@/lib/api'
+import { fieldErrors } from '@/lib/api'
+
 import { AccountTabs } from './AccountTabs'
 import { AuthError, AuthShell, Field } from './AuthShell'
 
@@ -18,7 +20,7 @@ export function Signup() {
 
   // The 422 names the field it is about, so it renders against that field
   // rather than as one message at the top.
-  const fields = signup.error instanceof ApiError ? signup.error.fields : {}
+  const fields = fieldErrors(signup.error)
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -36,15 +38,13 @@ export function Signup() {
 
   return (
     <AuthShell
-      title="Create an account"
-      intro="Use your University email address."
       footer={
-        <p className="text-muted-foreground">
-          Already have one?{' '}
-          <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+        <>
+          Already have an account?{' '}
+          <Link to="/login" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
-        </p>
+        </>
       }
     >
       <AccountTabs value={accountType} onChange={setAccountType} />
@@ -72,7 +72,7 @@ export function Signup() {
         </div>
         <Field
           id="email"
-          label="Email"
+          label="Email address"
           type="email"
           value={email}
           onChange={setEmail}
@@ -88,8 +88,13 @@ export function Signup() {
           error={fields.password}
           autoComplete="new-password"
         />
-        <Button type="submit" disabled={signup.isPending}>
-          {signup.isPending ? 'Creating…' : 'Create account'}
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-1 w-full"
+          disabled={signup.isPending}
+        >
+          {signup.isPending ? 'Creating account…' : 'Create account'}
         </Button>
       </form>
     </AuthShell>

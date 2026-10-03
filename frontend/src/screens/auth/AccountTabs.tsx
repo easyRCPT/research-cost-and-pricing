@@ -1,5 +1,5 @@
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { AccountType } from '@/api/auth'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 /**
  * Which door, sent to the server as `account_type`.
@@ -16,12 +16,12 @@ const DOORS: { value: AccountType; label: string; who: string }[] = [
   {
     value: 'researcher',
     label: 'Researcher',
-    who: 'Chief and co-investigators costing their own projects.',
+    who: 'For chief and co-investigators costing their own projects.',
   },
   {
     value: 'staff',
     label: 'Staff',
-    who: 'University staff, including heads of department and deans.',
+    who: 'For University staff, including heads of department and deans.',
   },
 ]
 
@@ -37,15 +37,19 @@ export function AccountTabs({
   return (
     <div className="mb-5">
       <Tabs value={value} onValueChange={(next) => onChange(next as AccountType)}>
-        <TabsList className="w-full">
+        <TabsList className="h-9 w-full">
           {DOORS.map((door) => (
-            <TabsTrigger key={door.value} value={door.value} className="flex-1">
+            <TabsTrigger
+              key={door.value}
+              value={door.value}
+              className="flex-1 data-active:bg-card"
+            >
               {door.label}
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
-      <p className="mt-2 text-xs text-muted-foreground">{current?.who}</p>
+      <p className="mt-2.5 text-[12.5px] text-muted-foreground">{current?.who}</p>
     </div>
   )
 }

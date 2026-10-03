@@ -4,22 +4,23 @@ import {
   CellNumber,
   CellTd,
   CellText,
+  EmptyRow,
+  RemoveRowButton,
   Td,
 } from '@/components/shell'
-import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { dash } from '@/lib/format/utils'
-import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
+import { useDash } from '@/lib/format/currency'
 import {
   allExpenseTypes,
   amountFor,
+  costGroupPatch,
   costGroups,
   expenseTypesFor,
   tenPercentAllowed,
   withAmount,
 } from '@/lib/non-staff'
+import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 import type { NonStaffCategory, NonStaffLine } from '@/types'
-import { X } from 'lucide-react'
 
 interface NonStaffTableBodyProps {
   lines: NonStaffLine[]
@@ -36,16 +37,9 @@ export function NonStaffTableBody({
   patchLine,
   removeLine,
 }: NonStaffTableBodyProps) {
+  const dash = useDash()
   const groups = costGroups(categories)
   const expenseTypes = allExpenseTypes(categories)
-
-  function setCostGroup(line: NonStaffLine, cost_group: string) {
-    patchLine(line.id, {
-      cost_group,
-      expense_type: '',
-      add_ten_percent: line.add_ten_percent && tenPercentAllowed(categories, cost_group),
-    })
-  }
 
   return (
     <tbody>
@@ -59,7 +53,12 @@ export function NonStaffTableBody({
                 value={line.cost_group}
                 options={groups}
                 placeholder="Select…"
-                onChange={(v) => setCostGroup(line, v)}
+                onChange={(costGroup) =>
+                  patchLine(
+                    line.id,
+                    costGroupPatch(line, categories, costGroup),
+                  )
+                }
               />
             </CellTd>
             <CellTd>
@@ -111,30 +110,16 @@ export function NonStaffTableBody({
             <Calc className={rowTotal ? undefined : 'text-muted-foreground'}>
               {dash(rowTotal)}
             </Calc>
-            <Td align="center">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                aria-label={`Remove ${line.description || 'row'}`}
-                className="text-muted-foreground hover:bg-bad-bg hover:text-bad"
-                onClick={() => removeLine(line.id)}
-              >
-                <X />
-              </Button>
-            </Td>
+            <RemoveRowButton
+              label={`Remove ${line.description || 'row'}`}
+              onRemove={() => removeLine(line.id)}
+            />
           </tr>
         )
       })}
 
       {lines.length === 0 && (
-        <tr>
-          <Td
-            colSpan={6 + years.length}
-            className="py-6 text-center text-muted-foreground"
-          >
-            No non-staff costs yet.
-          </Td>
-        </tr>
+        <EmptyRow colSpan={6 + years.length}>No non-staff costs yet.</EmptyRow>
       )}
     </tbody>
   )

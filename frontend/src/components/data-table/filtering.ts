@@ -1,12 +1,15 @@
 import type { RowData } from '@tanstack/react-table'
+
 import type { DataTableFilter } from './features'
 
 export type FilterState = Record<string, string[]>
 
 export interface FilterOption {
   value: string
+  /** Shown in place of the value, such as a name for an email. */
+  label?: string
   /** Rows this value would leave, with the search and every other filter applied. */
-  count: number
+  count?: number
 }
 
 const collator = new Intl.Collator('en', { numeric: true })
@@ -19,6 +22,10 @@ function haystack<T extends RowData>(row: T, filters: DataTableFilter<T>[]) {
     .join(' ')
     .toLowerCase()
 }
+
+/** Whether a day, as YYYY-MM-DD, falls inside a range with either end open. */
+const inRange = (day: string, [from = '', to = '']: string[]) =>
+  (!from || day >= from) && (!to || day <= to)
 
 /** Rows passing the search and every active filter, except `skip`. */
 function narrow<T extends RowData>(
@@ -35,7 +42,11 @@ function narrow<T extends RowData>(
   return rows.filter(
     (row) =>
       (!q || haystack(row, filters).includes(q)) &&
-      active.every((f) => state[f.id].includes(f.value(row))),
+      active.every((f) =>
+        f.range
+          ? inRange(f.value(row), state[f.id])
+          : state[f.id].includes(f.value(row)),
+      ),
   )
 }
 

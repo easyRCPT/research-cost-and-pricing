@@ -2,7 +2,6 @@ from typing import cast
 
 from django.test import SimpleTestCase, TestCase
 
-from api.models import Department, Faculty
 from api.serializers.lookup_model_serializer import DepartmentSerializer
 from api.serializers.lookup_serializer import (
     LookupCreateSerializer,
@@ -10,6 +9,7 @@ from api.serializers.lookup_serializer import (
     LookupUpdateSerializer,
 )
 from api.services.lookup_definitions import LOOKUP_DEFINITIONS
+from api.tests.factories import make_department, make_faculty
 
 from .serializer_utils import get_data, get_errors, get_validated_data
 
@@ -26,6 +26,7 @@ class LookupSerializersTestCase(SimpleTestCase):
             "on_cost_rates",
             "non_staff_cost_categories",
             "calculation_constants",
+            "currencies",
             "activities",
             "regions",
             "deliverable_types",
@@ -146,17 +147,13 @@ class LookupUpdateSerializerTestCase(SimpleTestCase):
 class DepartmentSerializerTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science",
-        )
-
-        cls.department = Department.objects.create(
-            code="D001",
+        cls.faculty = make_faculty("SCI", "Science")
+        cls.department = make_department(
+            "D001",
+            cls.faculty,
             name="Computer Science",
             school="School of Computing",
             school_code="COMP",
-            faculty=cls.faculty,
             budget_unit="BU001",
         )
 

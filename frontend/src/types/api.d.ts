@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/admin/approver-gaps/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Costings waiting on a role nobody holds, and the units missing one (#121). */
+        get: operations["admin_approver_gaps_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/audit/": {
         parameters: {
             query?: never;
@@ -11,7 +28,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The audit log, newest first (#67). Read-only: nothing edits an entry. */
+        /** @description The audit log, newest first, a cursor page at a time (#67). Read-only. */
         get: operations["admin_audit_list"];
         put?: never;
         post?: never;
@@ -21,15 +38,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/audit/actions/": {
+    "/api/admin/audit/filters/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** @description Every action the log holds, for the filter. */
-        get: operations["admin_audit_actions_retrieve"];
+        /** @description Every value the log's filters can take. */
+        get: operations["admin_audit_filters_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -65,7 +82,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Create or update a lookup table.
+         * @description Create or update a row of a table that does not price costings: the
+         *     faculties, departments and reference lists, changed in place (#70, #144). The rate tables are changed only as a set, through
+         *     LookupChangesView.
          *
          *     Moved into the admin namespace from api/lookups/..
          */
@@ -74,11 +93,55 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * @description Create or update a lookup table.
+         * @description Create or update a row of a table that does not price costings: the
+         *     faculties, departments and reference lists, changed in place (#70, #144). The rate tables are changed only as a set, through
+         *     LookupChangesView.
          *
          *     Moved into the admin namespace from api/lookups/..
          */
         patch: operations["admin_lookups_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/lookups/{table}/{key}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Remove a reference row nothing uses (#144), named by its key: a code, or
+         *     a revenue category's ledger ID. Refused, saying what uses it, otherwise.
+         */
+        delete: operations["admin_lookups_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/changes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Save a reviewed set of rate changes, all at once or not at all (#138).
+         *
+         *     The only way the rate tables change. A refused change refuses the whole
+         *     set, and the error names the change by its index (`changes.<index>`).
+         */
+        post: operations["admin_lookups_changes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/admin/lookups/versions/": {
@@ -88,8 +151,59 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Every set of rates the tool has had, newest first (#137). */
+        /** @description Every set of rates the tool has had, a cursor page at a time (#137). */
         get: operations["admin_lookups_versions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One version, by id or the current one, for a dialog its page may not hold. */
+        get: operations["admin_lookups_versions_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/budgets/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every costing priced on one version, newest submission first (#142). */
+        get: operations["admin_lookups_versions_budgets_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/{version_id}/changes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The sets saved into one version, with what each change did (#138). */
+        get: operations["admin_lookups_versions_changes_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -109,6 +223,40 @@ export interface paths {
         put?: never;
         /** @description Make an older set of rates current again, as a new version (#137). */
         post: operations["admin_lookups_versions_restore_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/current/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One version, by id or the current one, for a dialog its page may not hold. */
+        get: operations["admin_lookups_versions_current_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/lookups/versions/filters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every value the history's filters can take. */
+        get: operations["admin_lookups_versions_filters_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -139,8 +287,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Every project, whoever owns it. Read-only (#66). */
+        /** @description Every project, whoever owns it, a cursor page at a time. Read-only (#66). */
         get: operations["admin_projects_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/projects/filters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every value the register's filters can take. */
+        get: operations["admin_projects_filters_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -502,6 +667,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/budgets/{budget_id}/withdraw/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The owner pulls a costing back out of review (#95). */
+        post: operations["budgets_withdraw_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/departments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Departments whose name or code contains `q`, a page at a time by name. */
+        get: operations["departments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/faculties/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["faculties_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/lookups/": {
         parameters: {
             query?: never;
@@ -526,7 +741,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description The list of projects, and the way to start one.
+         * @description The list of projects, a cursor page at a time, and the way to start one.
          *
          *     Who may see which project is decided one level down, in
          *     services/project.visible_projects.
@@ -534,12 +749,46 @@ export interface paths {
         get: operations["projects_list"];
         put?: never;
         /**
-         * @description The list of projects, and the way to start one.
+         * @description The list of projects, a cursor page at a time, and the way to start one.
          *
          *     Who may see which project is decided one level down, in
          *     services/project.visible_projects.
          */
         post: operations["projects_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{project_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One project as its list row, so a link to it needs no page of the list. */
+        get: operations["projects_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/filters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every value the list's filters can take, across the projects you can see. */
+        get: operations["projects_filters_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -566,6 +815,7 @@ export interface components {
             code: string;
             name: string;
         };
+        AdminApproverGapsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminAssignment: {
             id: number;
             role: components["schemas"]["RoleEnum"];
@@ -574,13 +824,171 @@ export interface components {
             faculty: string | null;
             faculty_name?: string | null;
         };
-        AdminAuditActionsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminAuditFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminAuditListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminGroupsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLogin: {
             /** Format: email */
             email: string;
             password: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXLookupErrorComponent: {
+            /**
+             * @description * `changes.INDEX.lookup` - changes.INDEX.lookup (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.lookup";
+            /**
+             * @description * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_dict" | "null";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXLookupKEYErrorComponent: {
+            /**
+             * @description * `changes.INDEX.lookup.KEY` - changes.INDEX.lookup.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.lookup.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `changes.INDEX.non_field_errors` - changes.INDEX.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXOpErrorComponent: {
+            /**
+             * @description * `changes.INDEX.op` - changes.INDEX.op (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.op";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXTableErrorComponent: {
+            /**
+             * @description * `changes.INDEX.table` - changes.INDEX.table (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.table";
+            /**
+             * @description * `invalid_choice` - invalid_choice
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid_choice" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXValuesErrorComponent: {
+            /**
+             * @description * `changes.INDEX.values` - changes.INDEX.values (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.values";
+            /**
+             * @description * `not_a_dict` - not_a_dict
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "not_a_dict" | "null";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesINDEXValuesKEYErrorComponent: {
+            /**
+             * @description * `changes.INDEX.values.KEY` - changes.INDEX.values.KEY (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.INDEX.values.KEY";
+            /**
+             * @description * `invalid` - invalid
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "invalid" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateChangesNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `changes.non_field_errors` - changes.non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "changes.non_field_errors";
+            /**
+             * @description * `empty` - empty
+             *     * `not_a_list` - not_a_list
+             *     * `null` - null
+             *     * `required` - required
+             * @enum {string}
+             */
+            code: "empty" | "not_a_list" | "null" | "required";
+            detail: string;
+        };
+        AdminLookupsChangesCreateError: components["schemas"]["AdminLookupsChangesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateNoteErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXTableErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXOpErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXLookupErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXLookupKEYErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXValuesErrorComponent"] | components["schemas"]["AdminLookupsChangesCreateChangesINDEXValuesKEYErrorComponent"];
+        AdminLookupsChangesCreateErrorResponse400: components["schemas"]["AdminLookupsChangesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AdminLookupsChangesCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AdminLookupsChangesCreateNoteErrorComponent: {
+            /**
+             * @description * `note` - note (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "note";
+            /**
+             * @description * `invalid` - invalid
+             *     * `max_length` - max_length
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AdminLookupsChangesCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AdminLookupsChangesCreateError"][];
         };
         AdminLookupsCreateError: components["schemas"]["AdminLookupsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsCreateValuesErrorComponent"] | components["schemas"]["AdminLookupsCreateValuesKEYErrorComponent"];
         AdminLookupsCreateErrorResponse400: components["schemas"]["AdminLookupsCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
@@ -636,6 +1044,7 @@ export interface components {
             code: "invalid" | "null" | "required";
             detail: string;
         };
+        AdminLookupsDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsPartialUpdateError: components["schemas"]["AdminLookupsPartialUpdateNonFieldErrorsErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateLookupErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateLookupKEYErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateValuesErrorComponent"] | components["schemas"]["AdminLookupsPartialUpdateValuesKEYErrorComponent"];
         AdminLookupsPartialUpdateErrorResponse400: components["schemas"]["AdminLookupsPartialUpdateValidationError"] | components["schemas"]["ParseErrorResponse"];
         AdminLookupsPartialUpdateLookupErrorComponent: {
@@ -722,8 +1131,13 @@ export interface components {
             code: "invalid" | "null" | "required";
             detail: string;
         };
+        AdminLookupsVersionsBudgetsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsChangesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsCurrentRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminLookupsVersionsRestoreCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AdminLookupsVersionsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminOverviewRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminProject: {
             id: number;
@@ -731,6 +1145,7 @@ export interface components {
             title: string;
             owner: components["schemas"]["ProjectOwner"];
             department: string;
+            department_code: string;
             faculty: string;
             budget_id: number | null;
             status: (components["schemas"]["StatusEnum"] | components["schemas"]["NullEnum"]) | null;
@@ -740,6 +1155,7 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        AdminProjectsFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminProjectsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AdminUser: {
             id: number;
@@ -1102,7 +1518,7 @@ export interface components {
         };
         ApprovalStepRecord: {
             id: number;
-            level: components["schemas"]["LevelEnum"];
+            level: components["schemas"]["ApprovalStepRecordLevelEnum"];
             status: components["schemas"]["ApprovalStepStatusEnum"];
             decided_by: string | null;
             /** Format: date-time */
@@ -1110,6 +1526,12 @@ export interface components {
             comment: string;
             waiting_on: string[];
         };
+        /**
+         * @description * `department` - Head of Department
+         *     * `faculty` - Dean
+         * @enum {string}
+         */
+        ApprovalStepRecordLevelEnum: "department" | "faculty";
         /**
          * @description * `pending` - Pending
          *     * `approved` - Approved
@@ -1174,6 +1596,11 @@ export interface components {
             errors: components["schemas"]["ApprovalsDecideCreateError"][];
         };
         ApprovalsQueueListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        ApproverGaps: {
+            stranded: components["schemas"]["Stranded"][];
+            departments_without_head: string[];
+            faculties_without_dean: string[];
+        };
         Assignment: {
             id: number;
             role: string;
@@ -1191,10 +1618,16 @@ export interface components {
             created_at: string;
             /** Format: email */
             actor_email?: string | null;
+            actor_name?: string | null;
             action: string;
             object_type: string;
             object_id: string;
             detail: unknown;
+        };
+        AuditFilters: {
+            actor: components["schemas"]["FilterOption"][];
+            action: components["schemas"]["FilterOption"][];
+            object_type: components["schemas"]["FilterOption"][];
         };
         AuthAdminLoginCreateEmailErrorComponent: {
             /**
@@ -1464,7 +1897,9 @@ export interface components {
          * @description * `cash_co_contribution` - cash_co_contribution
          *     * `comments` - comments
          *     * `cost_multiplier` - cost_multiplier
+         *     * `currency` - currency
          *     * `dean_exemption_reason` - dean_exemption_reason
+         *     * `exchange_rate_override` - exchange_rate_override
          *     * `gst_applicable` - gst_applicable
          *     * `in_kind_multiplier` - in_kind_multiplier
          *     * `justification` - justification
@@ -1473,7 +1908,7 @@ export interface components {
          *     * `mode` - mode
          * @enum {string}
          */
-        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "dean_exemption_reason" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode";
+        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "currency" | "dean_exemption_reason" | "exchange_rate_override" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode";
         BudgetFieldUpdate: {
             value: unknown;
             field: components["schemas"]["BudgetFieldEnum"];
@@ -1494,6 +1929,13 @@ export interface components {
             gst_applicable: boolean;
             /** Format: double */
             cash_co_contribution: number;
+            currency: string;
+            /** Format: double */
+            exchange_rate: number;
+            /** Format: double */
+            table_exchange_rate: number;
+            /** Format: double */
+            exchange_rate_override: number | null;
             comments: string;
             justification: string;
             justification_notes: string;
@@ -1504,6 +1946,7 @@ export interface components {
         };
         BudgetSummary: {
             price_summary: components["schemas"]["PriceSummary"];
+            in_aud: components["schemas"]["InAud"];
             staff_budget: components["schemas"]["StaffBudget"];
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
@@ -1935,11 +2378,10 @@ export interface components {
             attr: "value";
             /**
              * @description * `invalid` - invalid
-             *     * `null` - null
              *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "null" | "required";
+            code: "invalid" | "required";
             detail: string;
         };
         BudgetsPartialUpdateYearErrorComponent: {
@@ -2175,6 +2617,7 @@ export interface components {
         };
         BudgetsStaffLinesDestroyErrorResponse400: components["schemas"]["ParseErrorResponse"];
         BudgetsSubmitCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        BudgetsWithdrawCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         CalculationConstant: {
             name: string;
             description?: string;
@@ -2187,11 +2630,37 @@ export interface components {
          * @enum {string}
          */
         CategoryEnum: "Academic" | "Professional";
+        ChangeSet: {
+            id: number;
+            note: string;
+            saved_by: string | null;
+            saved_by_name: string | null;
+            /** Format: date-time */
+            saved_at: string;
+            change_count: number;
+        };
+        ChangesApplied: {
+            change_set_id: number;
+            version_id: number;
+            new_version: boolean;
+            replaced: components["schemas"]["PricedOn"] | null;
+        };
         /**
          * @description * `client_error` - Client Error
          * @enum {string}
          */
         ClientErrorEnum: "client_error";
+        Currency: {
+            code: string;
+            name: string;
+            /**
+             * Format: double
+             * @description How much of this currency 1 AUD buys.
+             */
+            rate: number;
+            /** Format: double */
+            readonly inverse: number;
+        };
         /**
          * @description * `approve` - approve
          *     * `reject` - reject
@@ -2253,6 +2722,7 @@ export interface components {
             faculty_code: string;
             budget_unit?: string;
         };
+        DepartmentsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         EbaIncrease: {
             year: number;
             /** Format: double */
@@ -2378,13 +2848,26 @@ export interface components {
             type: components["schemas"]["ServerErrorEnum"];
             errors: components["schemas"]["Error500"][];
         };
+        FacultiesListErrorResponse400: components["schemas"]["ParseErrorResponse"];
         Faculty: {
             code: string;
             name: string;
         };
+        /** @description One value a filter can take, and how many rows the other filters leave with it. */
+        FilterOption: {
+            value: string;
+            label?: string;
+            count: number;
+        };
         GroupCount: {
             group: string;
             count: number;
+        };
+        /** @description The costing's totals in AUD, beside its own currency's (#152). */
+        InAud: {
+            price_summary: components["schemas"]["PriceSummary"];
+            staff_cost_by_year: components["schemas"]["YearAmountInAud"][];
+            non_staff_cost_by_year: components["schemas"]["YearAmountInAud"][];
         };
         InKindCosts: {
             in_kind_staff_budget: components["schemas"]["StaffBudget"];
@@ -2396,17 +2879,26 @@ export interface components {
             level: string;
             max_steps: number;
         };
-        /**
-         * @description * `department` - Head of Department
-         *     * `faculty` - Dean
-         * @enum {string}
-         */
-        LevelEnum: "department" | "faculty";
         Login: {
             /** Format: email */
             email: string;
             password: string;
             account_type: components["schemas"]["AccountTypeEnum"];
+        };
+        LookupChange: {
+            table: components["schemas"]["TableEnum"];
+            op: components["schemas"]["OpEnum"];
+            lookup?: {
+                [key: string]: unknown;
+            };
+            values?: {
+                [key: string]: unknown;
+            };
+        };
+        LookupChanges: {
+            /** @default  */
+            note: string;
+            changes: components["schemas"]["LookupChange"][];
         };
         LookupCreate: {
             values: {
@@ -2423,6 +2915,7 @@ export interface components {
             on_cost_rates: components["schemas"]["OnCostRate"][];
             non_staff_cost_categories: components["schemas"]["NonStaffCostCategory"][];
             calculation_constants: components["schemas"]["CalculationConstant"][];
+            currencies: components["schemas"]["Currency"][];
             activities: components["schemas"]["Activity"][];
             regions: components["schemas"]["Region"][];
             deliverable_types: components["schemas"]["DeliverableType"][];
@@ -2441,8 +2934,12 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             updated_by: string | null;
+            updated_by_name: string | null;
             budgets_priced: number;
             current: boolean;
+            accepts_changes: boolean;
+            baseline: boolean;
+            change_sets: components["schemas"]["ChangeSet"][];
         };
         LookupsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         /**
@@ -2580,11 +3077,96 @@ export interface components {
          * @enum {string}
          */
         OnCostTypeEnum: "superannuation" | "workcover" | "leave_loading" | "long_service_leave" | "parental_leave" | "annual_leave_provision";
+        /**
+         * @description * `create` - create
+         *     * `update` - update
+         *     * `delete` - delete
+         * @enum {string}
+         */
+        OpEnum: "create" | "update" | "delete";
         Overview: {
             accounts: components["schemas"]["AccountsSummary"];
             projects: components["schemas"]["ProjectsSummary"];
             versions: components["schemas"]["VersionsSummary"];
             recent: components["schemas"]["AuditEntry"][];
+        };
+        PaginatedAdminProjectList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminProject"][];
+        };
+        PaginatedAuditEntryList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["AuditEntry"][];
+        };
+        PaginatedDepartmentList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["Department"][];
+        };
+        PaginatedFacultyList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["Faculty"][];
+        };
+        PaginatedLookupVersionList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["LookupVersion"][];
+        };
+        PaginatedProjectRowList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["ProjectRow"][];
         };
         ParseError: {
             code: components["schemas"]["ParseErrorCodeEnum"];
@@ -2646,27 +3228,26 @@ export interface components {
             /** Format: double */
             university_position: number;
         };
+        /** @description Who was priced on the version the rates just moved away from (#142). */
+        PricedOn: {
+            version_id: number;
+            in_review: number;
+            approved: number;
+        };
         /**
-         * @description What it takes to start a project.
-         *
-         *     Only the fields a project cannot exist without: a title for the list to
-         *     show and a department for the engine to cost against. Everything else --
-         *     external party, duration, scheme, activity, region -- is edited afterwards
-         *     on Project Details, so the create form does not ask for it twice.
+         * @description What it takes to start a project: nothing. New project opens the costing
+         *     straight away, and Project Details asks for the rest.
          */
         ProjectCreate: {
-            title: string;
-            department: string;
-            /** @default  */
-            funder: string;
-            /** @default  */
-            chief_investigator: string;
-            /** @default  */
-            scheme: string;
-            start_year: number;
-            start_month: number;
-            end_year: number;
-            end_month: number;
+            title?: string;
+            department?: string | null;
+            funder?: string;
+            chief_investigator?: string;
+            scheme?: string;
+            start_year?: number;
+            start_month?: number;
+            end_year?: number | null;
+            end_month?: number | null;
         };
         /**
          * @description * `activity` - activity
@@ -2686,6 +3267,12 @@ export interface components {
          * @enum {string}
          */
         ProjectFieldEnum: "activity" | "additional_information" | "chief_investigator" | "department" | "end_month" | "end_year" | "funder" | "other_funder" | "other_funder_category" | "region" | "scheme" | "start_month" | "start_year" | "title";
+        ProjectFilters: {
+            status: components["schemas"]["FilterOption"][];
+            faculty: components["schemas"]["FilterOption"][];
+            department: components["schemas"]["FilterOption"][];
+            owner: components["schemas"]["FilterOption"][];
+        };
         ProjectInfo: {
             owner_id: number;
             title: string;
@@ -2696,8 +3283,8 @@ export interface components {
             scheme: string;
             start_year: number;
             start_month: number;
-            end_year: number;
-            end_month: number;
+            end_year: number | null;
+            end_month: number | null;
             company: string;
             cost_centre: string;
             activity: string | null;
@@ -2723,7 +3310,7 @@ export interface components {
             department: string;
             faculty: string;
             start_year: number;
-            end_year: number;
+            end_year: number | null;
             budget_id: number | null;
             status: (components["schemas"]["StatusEnum"] | components["schemas"]["NullEnum"]) | null;
             budget_count: number;
@@ -2731,6 +3318,7 @@ export interface components {
             total_price_inc_gst: number;
             /** Format: date-time */
             updated_at: string;
+            owner: components["schemas"]["ProjectOwner"];
         };
         ProjectUpdate: {
             value: unknown;
@@ -2767,11 +3355,9 @@ export interface components {
             /**
              * @description * `does_not_exist` - does_not_exist
              *     * `incorrect_type` - incorrect_type
-             *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "does_not_exist" | "incorrect_type" | "null" | "required";
+            code: "does_not_exist" | "incorrect_type";
             detail: string;
         };
         ProjectsCreateEndMonthErrorComponent: {
@@ -2785,11 +3371,9 @@ export interface components {
              *     * `max_string_length` - max_string_length
              *     * `max_value` - max_value
              *     * `min_value` - min_value
-             *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value";
             detail: string;
         };
         ProjectsCreateEndYearErrorComponent: {
@@ -2803,11 +3387,9 @@ export interface components {
              *     * `max_string_length` - max_string_length
              *     * `max_value` - max_value
              *     * `min_value` - min_value
-             *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value";
             detail: string;
         };
         ProjectsCreateError: components["schemas"]["ProjectsCreateNonFieldErrorsErrorComponent"] | components["schemas"]["ProjectsCreateTitleErrorComponent"] | components["schemas"]["ProjectsCreateDepartmentErrorComponent"] | components["schemas"]["ProjectsCreateFunderErrorComponent"] | components["schemas"]["ProjectsCreateChiefInvestigatorErrorComponent"] | components["schemas"]["ProjectsCreateSchemeErrorComponent"] | components["schemas"]["ProjectsCreateStartYearErrorComponent"] | components["schemas"]["ProjectsCreateStartMonthErrorComponent"] | components["schemas"]["ProjectsCreateEndYearErrorComponent"] | components["schemas"]["ProjectsCreateEndMonthErrorComponent"];
@@ -2872,10 +3454,9 @@ export interface components {
              *     * `max_value` - max_value
              *     * `min_value` - min_value
              *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null";
             detail: string;
         };
         ProjectsCreateStartYearErrorComponent: {
@@ -2890,10 +3471,9 @@ export interface components {
              *     * `max_value` - max_value
              *     * `min_value` - min_value
              *     * `null` - null
-             *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null" | "required";
+            code: "invalid" | "max_string_length" | "max_value" | "min_value" | "null";
             detail: string;
         };
         ProjectsCreateTitleErrorComponent: {
@@ -2903,16 +3483,14 @@ export interface components {
              */
             attr: "title";
             /**
-             * @description * `blank` - blank
-             *     * `invalid` - invalid
+             * @description * `invalid` - invalid
              *     * `max_length` - max_length
              *     * `null` - null
              *     * `null_characters_not_allowed` - null_characters_not_allowed
-             *     * `required` - required
              *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
              * @enum {string}
              */
-            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
             detail: string;
         };
         ProjectsCreateValidationError: {
@@ -2923,7 +3501,9 @@ export interface components {
             type: "validation_error";
             errors: components["schemas"]["ProjectsCreateError"][];
         };
+        ProjectsFiltersRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         ProjectsListErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        ProjectsRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         ProjectsSummary: {
             total: number;
             by_status: components["schemas"]["StatusCount"][];
@@ -2935,6 +3515,7 @@ export interface components {
         };
         Restored: {
             version_id: number;
+            replaced: components["schemas"]["PricedOn"];
         };
         RevenueCategory: {
             budget_ledger_id: number;
@@ -3079,6 +3660,36 @@ export interface components {
          * @enum {string}
          */
         StatusEnum: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn";
+        Stranded: {
+            budget_id: number;
+            project_id: number;
+            reference: string | null;
+            title: string;
+            /** Format: email */
+            owner: string;
+            status: components["schemas"]["StatusEnum"];
+            level: components["schemas"]["StrandedLevelEnum"];
+            unit: string;
+            /** Format: date-time */
+            submitted_at: string | null;
+        };
+        /**
+         * @description * `department` - department
+         *     * `faculty` - faculty
+         * @enum {string}
+         */
+        StrandedLevelEnum: "department" | "faculty";
+        /**
+         * @description * `salary_rates` - salary_rates
+         *     * `salary_rate_multipliers` - salary_rate_multipliers
+         *     * `eba_increases` - eba_increases
+         *     * `on_cost_rates` - on_cost_rates
+         *     * `non_staff_cost_categories` - non_staff_cost_categories
+         *     * `calculation_constants` - calculation_constants
+         *     * `currencies` - currencies
+         * @enum {string}
+         */
+        TableEnum: "salary_rates" | "salary_rate_multipliers" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants" | "currencies";
         /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily
@@ -3112,6 +3723,50 @@ export interface components {
          * @enum {string}
          */
         ValidationErrorEnum: "validation_error";
+        VersionBudget: {
+            id: number;
+            project_id: number;
+            reference: string | null;
+            title: string;
+            owner: components["schemas"]["VersionBudgetOwner"];
+            status: components["schemas"]["StatusEnum"];
+            /** Format: double */
+            total_price_inc_gst: number;
+            /** Format: date-time */
+            submitted_at: string | null;
+        };
+        VersionBudgetOwner: {
+            /** Format: email */
+            email: string;
+            name: string;
+        };
+        /** @description One change in a set: the row it named, and the values before and after. */
+        VersionChange: {
+            table: string;
+            op: string;
+            key: {
+                [key: string]: unknown;
+            };
+            before: {
+                [key: string]: unknown;
+            } | null;
+            after: {
+                [key: string]: unknown;
+            } | null;
+        };
+        VersionChangeSet: {
+            id: number;
+            note: string;
+            saved_by: string | null;
+            saved_by_name: string | null;
+            /** Format: date-time */
+            saved_at: string;
+            change_count: number;
+            changes: components["schemas"]["VersionChange"][];
+        };
+        VersionFilters: {
+            by: components["schemas"]["FilterOption"][];
+        };
         VersionsSummary: {
             total: number;
             latest: components["schemas"]["LookupVersion"][];
@@ -3126,6 +3781,11 @@ export interface components {
             /** Format: double */
             amount: number;
         };
+        YearAmountInAud: {
+            year: number;
+            /** Format: double */
+            amount: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -3135,11 +3795,101 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_approver_gaps_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApproverGaps"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminApproverGapsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     admin_audit_list: {
         parameters: {
             query?: {
-                action?: string;
+                action?: string[];
+                actor?: string[];
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
                 limit?: number;
+                object_type?: string[];
+                since?: string;
+                until?: string;
             };
             header?: never;
             path?: never;
@@ -3152,7 +3902,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditEntry"][];
+                    "application/json": components["schemas"]["PaginatedAuditEntryList"];
                 };
             };
             400: {
@@ -3221,9 +3971,15 @@ export interface operations {
             };
         };
     };
-    admin_audit_actions_retrieve: {
+    admin_audit_filters_retrieve: {
         parameters: {
-            query?: never;
+            query?: {
+                action?: string[];
+                actor?: string[];
+                object_type?: string[];
+                since?: string;
+                until?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3235,7 +3991,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string[];
+                    "application/json": components["schemas"]["AuditFilters"];
                 };
             };
             400: {
@@ -3243,7 +3999,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminAuditActionsRetrieveErrorResponse400"];
+                    "application/json": components["schemas"]["AdminAuditFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -3567,9 +4323,193 @@ export interface operations {
             };
         };
     };
-    admin_lookups_versions_list: {
+    admin_lookups_destroy: {
         parameters: {
             query?: never;
+            header?: never;
+            path: {
+                key: string;
+                table: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsDestroyErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_changes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookupChanges"];
+                "application/x-www-form-urlencoded": components["schemas"]["LookupChanges"];
+                "multipart/form-data": components["schemas"]["LookupChanges"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangesApplied"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsChangesCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_list: {
+        parameters: {
+            query?: {
+                by?: string[];
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                ordering?: string;
+                q?: string;
+                since?: string;
+                until?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3581,7 +4521,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LookupVersion"][];
+                    "application/json": components["schemas"]["PaginatedLookupVersionList"];
                 };
             };
             400: {
@@ -3590,6 +4530,261 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsVersionsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupVersion"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_budgets_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionBudget"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsBudgetsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_changes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionChangeSet"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsChangesListErrorResponse400"];
                 };
             };
             401: {
@@ -3675,6 +4870,178 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminLookupsVersionsRestoreCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_current_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupVersion"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsCurrentRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_lookups_versions_filters_retrieve: {
+        parameters: {
+            query?: {
+                by?: string[];
+                ordering?: string;
+                q?: string;
+                since?: string;
+                until?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionFilters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLookupsVersionsFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -3821,17 +5188,18 @@ export interface operations {
     admin_projects_list: {
         parameters: {
             query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                department?: string[];
+                department_code?: string;
+                faculty?: string[];
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
                 q?: string;
-                /**
-                 * @description * `draft` - Draft
-                 *     * `submitted` - Submitted
-                 *     * `hod_review` - Head of Department review
-                 *     * `dean_review` - Dean review
-                 *     * `approved` - Approved
-                 *     * `rejected` - Rejected
-                 *     * `withdrawn` - Withdrawn
-                 */
-                status?: "draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "";
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
             };
             header?: never;
             path?: never;
@@ -3844,7 +5212,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminProject"][];
+                    "application/json": components["schemas"]["PaginatedAdminProjectList"];
                 };
             };
             400: {
@@ -3853,6 +5221,97 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminProjectsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    admin_projects_filters_retrieve: {
+        parameters: {
+            query?: {
+                department?: string[];
+                faculty?: string[];
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
+                q?: string;
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectFilters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminProjectsFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {
@@ -5907,6 +7366,245 @@ export interface operations {
             };
         };
     };
+    budgets_withdraw_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                budget_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetsWithdrawCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    departments_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDepartmentList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepartmentsListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    faculties_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedFacultyList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacultiesListErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
     lookups_retrieve: {
         parameters: {
             query?: never;
@@ -5984,7 +7682,19 @@ export interface operations {
     };
     projects_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                department?: string[];
+                faculty?: string[];
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
+                q?: string;
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -5996,7 +7706,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProjectRow"][];
+                    "application/json": components["schemas"]["PaginatedProjectRowList"];
                 };
             };
             400: {
@@ -6064,7 +7774,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["ProjectCreate"];
                 "application/x-www-form-urlencoded": components["schemas"]["ProjectCreate"];
@@ -6086,6 +7796,166 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectsCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    projects_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRow"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectsRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    projects_filters_retrieve: {
+        parameters: {
+            query?: {
+                department?: string[];
+                faculty?: string[];
+                /** @description A column, with - in front for descending. */
+                ordering?: string;
+                owner?: string[];
+                q?: string;
+                status?: ("draft" | "submitted" | "hod_review" | "dean_review" | "approved" | "rejected" | "withdrawn" | "none")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectFilters"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectsFiltersRetrieveErrorResponse400"];
                 };
             };
             401: {

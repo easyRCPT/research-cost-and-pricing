@@ -38,9 +38,10 @@ class StaffLineSerializer(serializers.Serializer):
         for allocation in allocations:
             year = allocation["year"]
 
-            if not project.start_year <= year <= project.end_year:
+            end_year = project.end_year or project.start_year
+            if not project.start_year <= year <= end_year:
                 raise serializers.ValidationError(
-                    f"Year must be between {project.start_year} and {project.end_year}."
+                    f"Year must be between {project.start_year} and {end_year}."
                 )
 
             if year in years:

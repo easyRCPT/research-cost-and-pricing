@@ -24,6 +24,7 @@ def pricing(
         project_duration["end_month"],
         budget_info["cost_multiplier"],
         budget_info["in_kind_multiplier"],
+        budget_info.get("exchange_rate", Decimal(1)),
     )
 
     # non staff cost table result

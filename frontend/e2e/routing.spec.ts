@@ -63,7 +63,7 @@ test('a screen nobody has lands on the first one', async ({ page }) => {
   ).toBeVisible()
 })
 
-test('the lookups screen is a screen, with nothing selected in the rail', async ({
+test('the lookups screen is a screen, its tab the one selected in the rail', async ({
   page,
 }) => {
   const project = await createProject(page, uniqueTitle('Lookups by URL'))
@@ -73,8 +73,9 @@ test('the lookups screen is a screen, with nothing selected in the rail', async 
   await expect(
     page.getByRole('heading', { name: 'Lookup Tables' }),
   ).toBeVisible()
-  // It is not in SECTIONS, so the rail shows no page as current.
-  await expect(page.locator('[aria-current="page"]')).toHaveCount(0)
+  await expect(page.locator('nav [aria-current="page"]:visible')).toHaveText(
+    'Lookup Tables',
+  )
 })
 
 test('a project nobody has goes back to the list', async ({ page }) => {

@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 class LookupVersion(models.Model):
     if TYPE_CHECKING:
         id: int
+        change_sets: RelatedManager["LookupChangeSet"]
+        updated_by_id: int | None
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -42,6 +44,40 @@ class LookupConfiguration(models.Model):
     # Whether current version is referenced by authorised budget.
     # Determines whether a new version should be created when updating current version.
     referenced = models.BooleanField(default=False)
+
+
+class LookupChangeSet(models.Model):
+    """
+    One saved set of rate changes (#138), applied all at once or not at all.
+
+    Many sets can go into one version: a version is "the rates some costing was
+    priced on", and a set writes into the current version until a costing is
+    submitted on it. So restore undoes a whole version, and this is the record
+    of the sets that made it. What each change said before and after is in the
+    set's audit entry.
+    """
+
+    if TYPE_CHECKING:
+        id: int
+        version_id: int
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        related_name="change_sets",
+        on_delete=models.PROTECT,
+    )
+    note = models.CharField(max_length=200, blank=True, default="")
+    saved_by = models.ForeignKey(
+        "User",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+    saved_at = models.DateTimeField(auto_now_add=True)
+    change_count = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.change_count} changes into version {self.version_id}"
 
 
 class Faculty(models.Model):
@@ -163,6 +199,11 @@ class User(AbstractUser):
             # that actually holds.
             models.UniqueConstraint(Lower("email"), name="user_email_unique_ci"),
         ]
+
+    @property
+    def display_name(self) -> str:
+        """What they are called on screen: their name, or their email without one."""
+        return self.get_full_name() or self.email
 
 
 class UserOrgAssignment(models.Model):
@@ -305,6 +346,43 @@ class IncrementCap(models.Model):
                 name="unique_increment_cap",
             )
         ]
+
+
+class Currency(models.Model):
+    """
+    A currency a costing can be priced in, and what 1 AUD buys of it: the
+    workbook's dCurrencyRates table (Lookup Tables U35:Y56), "1 AUD =".
+
+    Versioned with the rates, because the rate prices a costing: a draft
+    follows an administrator's change and a submitted costing keeps the rate
+    of the version it was stamped with (#152). AUD is the base, held at 1.
+    """
+
+    code = models.CharField(max_length=3)
+    name = models.CharField(max_length=60)
+    rate = models.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        validators=[MinValueValidator(Decimal("0.000001"))],
+        help_text="How much of this currency 1 AUD buys.",
+    )
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        verbose_name_plural = "currencies"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["code", "version"],
+                name="unique_currency",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
 
 
 # Salary increases by EBA rate
@@ -569,7 +647,7 @@ def build_account_string(
     activity: str | None,
     region: str | None,
 ) -> str:
-    if not (activity and region):
+    if not (cost_centre and activity and region):
         return ""
     return f"{company}-{cost_centre}-{activity}-{region}"
 
@@ -577,7 +655,7 @@ def build_account_string(
 class Project(models.Model):
     if TYPE_CHECKING:
         id: int
-        department_id: str
+        department_id: str | None
         created_by_id: int
         activity_id: str | None
         region_id: str | None
@@ -589,10 +667,11 @@ class Project(models.Model):
     # Blank while a draft is being written: clearing the title to retype it
     # must not be an error. Completeness belongs at submission, not on the row.
     title = models.CharField(max_length=200, blank=True)
-    department = models.ForeignKey("Department", on_delete=models.PROTECT)
+    # Null until Project Details names one: a project is created empty.
+    department = models.ForeignKey(
+        "Department", null=True, blank=True, on_delete=models.PROTECT
+    )
     chief_investigator = models.CharField(max_length=100, blank=True)
-    # Blank until Project Details names one: a project is created with only a
-    # title and a department, so that costing can start straight away.
     funder = models.CharField(max_length=100, blank=True)
     other_funder = models.CharField(max_length=200, blank=True, default="")
     other_funder_category = models.CharField(max_length=100, blank=True, default="")
@@ -601,8 +680,11 @@ class Project(models.Model):
     # Dictates potential year allocations for staff
     start_year = models.PositiveSmallIntegerField()
     start_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
-    end_year = models.PositiveSmallIntegerField()
-    end_month = models.PositiveSmallIntegerField(validators=[MaxValueValidator(12)])
+    # Null until Project Details sets it; costing waits on it.
+    end_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    end_month = models.PositiveSmallIntegerField(
+        null=True, blank=True, validators=[MaxValueValidator(12)]
+    )
 
     activity = models.ForeignKey(
         "Activity", null=True, blank=True, on_delete=models.PROTECT
@@ -639,7 +721,7 @@ class Project(models.Model):
     def account_string(self):
         return build_account_string(
             self.COMPANY_CODE,
-            self.department_id,
+            self.department_id or "",
             self.activity_id,
             self.region_id,
         )
@@ -703,8 +785,9 @@ class Budget(models.Model):
     )
     mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.FULL)
 
-    # Seeded from CalculationConstant when the budget is created, not by a
-    # field default, because the current values live in the database.
+    # A record of the rate the budget was last priced at, kept in step by
+    # services/budget_details.py. The engine reads the rate from the budget's
+    # lookup version, not from here (#149); in-kind staff use the same rate.
     cost_multiplier = models.DecimalField(
         max_digits=4,
         decimal_places=2,
@@ -727,6 +810,20 @@ class Budget(models.Model):
     )
 
     gst_applicable = models.BooleanField(default=True)
+
+    # The currency the costing is priced in, by code (#152). Staff costs are
+    # converted from AUD at the exchange rate; non-staff amounts, the cash
+    # co-contribution and deliverable invoices are entered in it.
+    currency = models.CharField(max_length=3, default="AUD")
+    # The researcher's own rate, as the workbook's "override" tick allows.
+    # Null means the rate in the lookup version the costing prices against.
+    exchange_rate_override = models.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0.000001"))],
+    )
 
     cash_co_contribution = models.DecimalField(
         max_digits=12,

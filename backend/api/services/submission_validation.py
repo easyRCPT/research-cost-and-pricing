@@ -31,11 +31,12 @@ def validate_submission(budget: Budget) -> list[str]:
     ):
         reasons.append("Specify other funder and category.")
 
-    # Defensive check: required by the model, but verify before submission.
     if project.department_id is None:
         reasons.append("Department is required.")
 
-    if project.end_year < project.start_year or (
+    if project.end_year is None or project.end_month is None:
+        reasons.append("Project end date is required.")
+    elif project.end_year < project.start_year or (
         project.end_year == project.start_year
         and project.end_month < project.start_month
     ):

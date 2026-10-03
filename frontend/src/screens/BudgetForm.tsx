@@ -1,20 +1,18 @@
 import { useBudget } from '@/api/budget'
+import { useLookups } from '@/api/lookups'
 import { Panel } from '@/components/shell'
-import type { LookupTables } from '@/types'
-import { ProjectDetailsSection } from './budget-form/ProjectDetailsSection'
-import { PriceSummarySection } from './budget-form/PriceSummarySection'
-import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
-import { NonStaffBudgetSection } from './budget-form/NonStaffBudgetSection'
+
+import { BudgetPrintDocument } from './budget-form/BudgetPrintDocument'
 import { DeliverablesSection } from './budget-form/DeliverablesSection'
 import { InKindSection } from './budget-form/InKindSection'
-import { BudgetPrintDocument } from './budget-form/BudgetPrintDocument'
+import { NonStaffBudgetSection } from './budget-form/NonStaffBudgetSection'
+import { PriceSummarySection } from './budget-form/PriceSummarySection'
+import { ProjectDetailsSection } from './budget-form/ProjectDetailsSection'
+import { StaffBudgetSection } from './budget-form/StaffBudgetSection'
 
-export interface BudgetFormProps {
-  lookups: LookupTables
-}
-
-export function BudgetForm({ lookups }: BudgetFormProps) {
+export function BudgetForm() {
   const { data: budget } = useBudget()
+  const { data: lookups } = useLookups()
 
   const info = budget.budget_info
   const summary = budget.budget_summary.price_summary
@@ -26,10 +24,12 @@ export function BudgetForm({ lookups }: BudgetFormProps) {
           project={budget.project_info}
           years={budget.years}
           summary={summary}
+          info={info}
         />
         <PriceSummarySection
           summary={summary}
           gstApplicable={info.gst_applicable}
+          inAud={budget.budget_summary.in_aud.price_summary}
         />
         <StaffBudgetSection staffBudget={budget.budget_summary.staff_budget} />
         <NonStaffBudgetSection

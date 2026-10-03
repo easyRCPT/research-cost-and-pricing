@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.utils import timezone
@@ -8,50 +6,21 @@ from api.models import (
     ApprovalStep,
     Budget,
     Department,
-    Faculty,
-    Project,
     User,
 )
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 class ApprovalStepTestMixin:
-    @staticmethod
-    def create_department() -> Department:
-        # get_or_create: some tests need two budgets, and they share a
-        # department rather than inventing a second one.
-        faculty, _ = Faculty.objects.get_or_create(
-            code="SCI", defaults={"name": "Science Faculty"}
-        )
-        department, _ = Department.objects.get_or_create(
-            code="SCI",
-            defaults={
-                "name": "Science",
-                "school": "Science School",
-                "school_code": "SCI",
-                "faculty": faculty,
-            },
-        )
-        return department
-
     def create_budget(self) -> Budget:
-        project = Project.objects.create(
-            title="Test Project",
-            department=self.create_department(),
+        project = make_project(
+            User.objects.filter(email="owner@unimelb.edu.au").first() or make_user(),
+            Department.objects.filter(code="SCI").first() or make_department(),
             funder="Test Funder",
             start_year=2025,
-            start_month=1,
             end_year=2026,
-            end_month=12,
-            created_by=User.objects.get_or_create(email="owner@unimelb.edu.au")[0],
         )
-        return Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.0"),
-            in_kind_multiplier=Decimal("1.0"),
-            margin=Decimal("0.30"),
-            gst_applicable=True,
-            cash_co_contribution=Decimal(0),
-        )
+        return make_budget(project)
 
     @staticmethod
     def step(budget: Budget, **overrides) -> ApprovalStep:
@@ -96,7 +65,7 @@ class TestOneStepPerLevel(ApprovalStepTestMixin, TestCase):
 class TestADecidedStepNamesItsDecider(ApprovalStepTestMixin, TestCase):
     def setUp(self):
         self.budget = self.create_budget()
-        self.approver = User.objects.create_user(email="hod@unimelb.edu.au")
+        self.approver = make_user(email="hod@unimelb.edu.au")
 
     def test_a_decision_with_a_decider_and_a_time_is_stored(self):
         step = self.step(
@@ -136,7 +105,7 @@ class TestADecidedStepNamesItsDecider(ApprovalStepTestMixin, TestCase):
 class TestAnUndecidedStepNamesNobody(ApprovalStepTestMixin, TestCase):
     def setUp(self):
         self.budget = self.create_budget()
-        self.approver = User.objects.create_user(email="hod@unimelb.edu.au")
+        self.approver = make_user(email="hod@unimelb.edu.au")
 
     def test_a_pending_step_stores_neither(self):
         step = self.step(self.budget)
@@ -171,7 +140,7 @@ class TestWhatOutlivesWhat(ApprovalStepTestMixin, TestCase):
 
     def test_a_decider_cannot_be_deleted_out_from_under_a_decision(self):
         budget = self.create_budget()
-        approver = User.objects.create_user(email="hod@unimelb.edu.au")
+        approver = make_user(email="hod@unimelb.edu.au")
         self.step(
             budget,
             status=ApprovalStep.Status.APPROVED,
@@ -188,7 +157,7 @@ class TestWhatOutlivesWhat(ApprovalStepTestMixin, TestCase):
 
     def test_deactivating_a_decider_leaves_the_decision_intact(self):
         budget = self.create_budget()
-        approver = User.objects.create_user(email="hod@unimelb.edu.au")
+        approver = make_user(email="hod@unimelb.edu.au")
         step = self.step(
             budget,
             status=ApprovalStep.Status.APPROVED,

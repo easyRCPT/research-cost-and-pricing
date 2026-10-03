@@ -1,11 +1,13 @@
 import time
+from unittest.mock import patch
 
-from django.contrib.auth.models import Group
+from django.conf import settings
 from django.core.cache import cache
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from api.models import Department, Faculty, User, UserOrgAssignment
+from api.models import User, UserOrgAssignment
+from api.tests import factories
 
 PASSWORD = "a-perfectly-ordinary-password"
 
@@ -20,11 +22,9 @@ class AuthTestMixin:
 
     @staticmethod
     def make_user(email: str, *, groups: list[str], active: bool = True) -> User:
-        user = User.objects.create_user(email=email, password=PASSWORD)
-        user.is_active = active
-        user.save(update_fields=["is_active"])
-        user.groups.set(Group.objects.filter(name__in=groups))
-        return user
+        return factories.make_user(
+            email, groups=groups, password=PASSWORD, is_active=active
+        )
 
     def signup(self, **overrides):
         body = {
@@ -90,6 +90,41 @@ class TestSignup(AuthTestMixin, TestCase):
         response = self.signup(email="new@student.unimelb.edu.au")
 
         self.assertEqual(response.status_code, 400)
+
+    @override_settings(ALLOWED_EMAIL_DOMAINS=["unimelb.edu.au", "example.org"])
+    def test_the_allowed_domains_come_from_settings(self):
+        self.assertEqual(self.signup(email="new@example.org").status_code, 201)
+        self.assertEqual(self.signup(email="new@gmail.com").status_code, 400)
+
+    def test_the_setting_defaults_to_the_university(self):
+        self.assertEqual(settings.ALLOWED_EMAIL_DOMAINS, ["unimelb.edu.au"])
+
+
+class TestStartSession(AuthTestMixin, TestCase):
+    """Every door makes its session through `start_session`, and only it."""
+
+    def test_signup_login_and_admin_login_each_call_it(self):
+        self.make_user("ruth@unimelb.edu.au", groups=["researcher"])
+        self.make_user("sam@unimelb.edu.au", groups=["staff", "superadmin"])
+
+        with patch("api.views.auth.auth.start_session") as start_session:
+            self.signup()
+            self.login("ruth@unimelb.edu.au")
+            self.client.post(
+                reverse("admin-login"),
+                {"email": "sam@unimelb.edu.au", "password": PASSWORD},
+                "application/json",
+            )
+
+        self.assertEqual(start_session.call_count, 3)
+
+    def test_an_existing_account_outside_the_domain_still_signs_in(self):
+        self.make_user("old@gmail.com", groups=["researcher"])
+
+        response = self.login("old@gmail.com")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("sessionid", response.cookies)
 
 
 class TestLogin(AuthTestMixin, TestCase):
@@ -214,10 +249,7 @@ class TestMeAndLogout(AuthTestMixin, TestCase):
         self.assertEqual(self.client.get(reverse("me")).status_code, 401)
 
     def test_me_carries_the_groups_and_the_assignments(self):
-        faculty = Faculty.objects.create(code="ENG", name="Engineering")
-        department = Department.objects.create(
-            code="SOFT", name="CIS", school="Eng", school_code="ENG", faculty=faculty
-        )
+        department = factories.make_department("SOFT")
         hod = self.make_user("hana@unimelb.edu.au", groups=["staff"])
         UserOrgAssignment.objects.create(
             user=hod, role=UserOrgAssignment.Role.HOD, department=department

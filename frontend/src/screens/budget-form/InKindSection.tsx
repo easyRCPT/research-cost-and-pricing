@@ -1,5 +1,5 @@
 import { Ledger, LedgerRow, PartBar } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { useMoney } from '@/lib/format/currency'
 import type { BudgetDetail } from '@/types'
 
 interface InKindSectionProps {
@@ -18,6 +18,7 @@ interface InKindSectionProps {
  * the row would hide the contribution along with it.
  */
 export function InKindSection({ budget }: InKindSectionProps) {
+  const money = useMoney()
   const rows = [
     ...budget.staff_in_kind_cost.lines.map((line) => ({
       key: `staff-${line.id}`,

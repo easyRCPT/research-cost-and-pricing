@@ -23,6 +23,10 @@ const subscribe = (listener: () => void) => {
   }
 }
 
+/**
+ * The CI cost toggle. Held next to the budget rather than in it, because the
+ * engine does not take the flag yet and so there is no column for it.
+ */
 export function useCiFlag() {
   const budgetId = useBudgetId()
 

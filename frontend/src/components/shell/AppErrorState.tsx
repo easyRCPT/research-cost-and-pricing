@@ -1,8 +1,10 @@
 import { type FallbackProps } from 'react-error-boundary'
-import { AppShell } from './AppShell'
-import { SidebarSkeleton } from './skeleton/SidebarSkeleton'
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+
+import { AppShell } from './AppShell'
+import { SidebarSkeleton } from './skeleton/SidebarSkeleton'
 
 export function AppErrorState({ error, resetErrorBoundary }: FallbackProps) {
   const message =

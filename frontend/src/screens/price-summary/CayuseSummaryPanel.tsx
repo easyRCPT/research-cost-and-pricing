@@ -1,6 +1,7 @@
 import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
 import type { PriceSummary } from '@/types'
+
 import { DASH } from './format'
 
 interface CayuseSummaryPanelProps {

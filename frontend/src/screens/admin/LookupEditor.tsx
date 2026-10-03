@@ -1,197 +1,206 @@
+import { useBlocker, useNavigate } from '@tanstack/react-router'
+import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'
-import { LockIcon } from 'lucide-react'
-import { toast } from 'sonner'
+
+import { useApproverGaps } from '@/api/admin-console'
+import type { RateTable } from '@/api/admin-lookups'
 import { useLookups } from '@/api/lookups'
-import { useAddRate, useUpdateRate } from '@/api/admin-lookups'
-import { Grid, PageHead, Panel, Td, Th } from '@/components/shell'
+import {
+  LOOKUP_TABS,
+  LookupTabsView,
+  type LookupTabValue,
+  type LookupTabView,
+} from '@/components/lookups-tabs'
+import { PageHead } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { NumberInput } from '@/components/ui/number-input'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ApiError } from '@/lib/api'
-import { RATE_TABLES, type RateTableSpec } from './rateTables'
-import { VersionsPanel } from './VersionsPanel'
+import {
+  ADMIN_TABLES,
+  type AdminTable,
+  tabOf,
+} from '@/screens/admin/lookups/adminTables'
+import { gapFlags } from '@/screens/admin/lookups/gapFlags'
+import { LeaveGuard } from '@/screens/admin/lookups/LeaveGuard'
+import { RateDataTable } from '@/screens/admin/lookups/RateDataTable'
+import { ReferenceDataTable } from '@/screens/admin/lookups/ReferenceDataTable'
+import { useStagedChanges } from '@/screens/admin/lookups/useStagedChanges'
+import { ChangeBar } from '@/screens/admin/rates/ChangeBar'
+import { RatesMovedNotice } from '@/screens/admin/rates/RatesMovedNotice'
+import { Review } from '@/screens/admin/rates/Review'
+import { tableSpec } from '@/screens/admin/rateTables'
+import { referenceSpec } from '@/screens/admin/referenceTables'
+import type { Row } from '@/screens/admin/stagedChanges'
 
-type Row = Record<string, unknown>
-
-const keyOf = (spec: RateTableSpec, row: Row) =>
-  Object.fromEntries(spec.key.map((k) => [k.field, row[k.field] ?? null]))
-
-const keyText = (spec: RateTableSpec, row: Row) =>
-  spec.key.map((k) => String(row[k.field] ?? '')).join('|')
-
-const failed = (error: unknown) =>
-  toast.error('Not saved', {
-    description: error instanceof ApiError ? error.message : 'Try again.',
-  })
+const FIRST_TABLES = Object.fromEntries(
+  LOOKUP_TABS.map((tab) => [tab.value, ADMIN_TABLES[tab.value][0].id]),
+)
 
 /**
- * The rates that price a costing, editable (#68).
+ * Everything an administrator maintains in the workbook's lookup sheets, on
+ * the costing screen's own tabs (#138, #70, #144).
  *
- * Built on the versioned tables as they are: an edit changes a row of the
- * current version, and once any costing has been submitted on that version the
- * server copies the whole set into a new one first. So a costing already
- * submitted keeps the rates it was submitted with, and any older set can be
- * put back from the versions panel (#137).
+ * The rates price a costing, so they are edited as one reviewed set: edits
+ * are held on screen, across every rate tab, until they are reviewed and
+ * saved in one request, which the server applies all at once or not at all.
+ * The reference tables (faculties, departments, the lists a project picks
+ * from) don't price anything, so each row is saved on its own.
  */
 export function LookupEditor() {
   const { data: lookups } = useLookups()
-  const [tableId, setTableId] = useState(RATE_TABLES[0].id)
-  const spec = RATE_TABLES.find((table) => table.id === tableId) ?? RATE_TABLES[0]
-  const rows = (lookups[spec.id] ?? []) as unknown as Row[]
+  // Which units have nobody to sign for them, flagged on their rows (#121).
+  const gaps = useApproverGaps()
+  const navigate = useNavigate()
+  const [tab, setTab] = useState<string>(LOOKUP_TABS[0].value)
+  const [tables, setTables] = useState<Record<string, string>>(FIRST_TABLES)
+
+  const showTable = (id: RateTable) => {
+    const on = tabOf(id)
+    setTab(on)
+    setTables((current) => ({ ...current, [on]: id }))
+  }
+
+  const {
+    staged,
+    refused,
+    reviewing,
+    setReviewing,
+    moved,
+    setMoved,
+    warnings,
+    stage,
+    onSaved,
+    onRefused,
+  } = useStagedChanges(lookups, showTable)
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => true,
+    disabled: staged.length === 0,
+    enableBeforeUnload: () => staged.length > 0,
+    withResolver: true,
+  })
+
+  const ratesOn = ADMIN_TABLES[tab as LookupTabValue].some(
+    (table) => table.kind === 'rate',
+  )
+
+  const rowsOf = (id: string) =>
+    (lookups[id as keyof typeof lookups] ?? []) as unknown as Row[]
+
+  const resolve = (
+    tabValue: LookupTabValue,
+    table: AdminTable,
+  ): LookupTabView['tables'][number] => {
+    switch (table.kind) {
+      case 'rate':
+        return {
+          value: table.id,
+          title: tableSpec(table.id).label,
+          count: staged.filter((change) => change.table === table.id).length,
+          table: (
+            <RateDataTable
+              spec={tableSpec(table.id)}
+              rows={rowsOf(table.id)}
+              staged={staged}
+              refused={refused}
+              onStage={stage}
+            />
+          ),
+        }
+      case 'reference':
+        return {
+          value: table.id,
+          title: referenceSpec(table.id).label,
+          table: (
+            <ReferenceDataTable
+              spec={referenceSpec(table.id)}
+              rows={rowsOf(table.id)}
+              faculties={lookups.faculties}
+              unassigned={gapFlags(table.id, gaps.data)}
+            />
+          ),
+        }
+      case 'view': {
+        const view = LOOKUP_TABS.find((t) => t.value === tabValue)!.tables.find(
+          (t) => t.value === table.id,
+        )!
+        return {
+          value: view.value,
+          title: view.title,
+          table: view.render(lookups),
+        }
+      }
+    }
+  }
+
+  const tabs: LookupTabView[] = LOOKUP_TABS.map((t) => ({
+    value: t.value,
+    title: t.title,
+    notice: 'notice' in t ? t.notice(lookups) : undefined,
+    tables: ADMIN_TABLES[t.value].map((table) => resolve(t.value, table)),
+  }))
 
   return (
     <>
-      <PageHead title="Lookup tables" subtitle="The rates every costing is priced with" />
+      <PageHead
+        title="Lookup tables"
+        subtitle="The rates every costing is priced with, and the lists it is built from"
+      />
 
-      <Alert className="mb-4">
-        <AlertDescription>
-          A change here reprices every draft and every new costing straight
-          away. Costings already submitted keep the rates they were submitted
-          with, and any earlier set of rates can be put back below.
-        </AlertDescription>
-      </Alert>
+      {moved ? (
+        <RatesMovedNotice
+          moved={moved}
+          onSee={(version) =>
+            navigate({ to: '/admin/versions', search: { version } })
+          }
+          onDismiss={() => setMoved(null)}
+        />
+      ) : (
+        <Alert className="mb-4">
+          <InfoIcon />
+          <AlertDescription>
+            {ratesOn
+              ? "Edits aren't saved until you review and save them. Saving updates all draft costings; submitted costings keep their old rates."
+              : 'Each edit is saved when you confirm it in its dialog, and applies straight away.'}
+          </AlertDescription>
+        </Alert>
+      )}
 
-      <Tabs value={spec.id} onValueChange={(next) => setTableId(next as typeof tableId)}>
-        <TabsList className="mb-4 flex-wrap">
-          {RATE_TABLES.map((table) => (
-            <TabsTrigger key={table.id} value={table.id}>
-              {table.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
-      <Panel title={spec.label}>
-        <Grid>
-          <thead>
-            <tr>
-              {spec.key.map((k) => (
-                <Th key={k.field}>{k.label}</Th>
-              ))}
-              <Th className="text-right">{spec.value.label}</Th>
-              <Th />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <RateRow key={keyText(spec, row)} spec={spec} row={row} />
-            ))}
-          </tbody>
-        </Grid>
-        <AddRow spec={spec} />
-      </Panel>
-
-      <VersionsPanel />
-    </>
-  )
-}
-
-function RateRow({ spec, row }: { spec: RateTableSpec; row: Row }) {
-  const update = useUpdateRate()
-  const saved = Number(row[spec.value.field])
-  const [draft, setDraft] = useState<number | null>(null)
-  const locked = spec.locked?.(row) ?? false
-  const changed = draft !== null && draft !== saved
-
-  const save = () =>
-    update.mutate(
-      { table: spec.id, key: keyOf(spec, row), values: { [spec.value.field]: draft } },
-      {
-        onSuccess: () => {
-          setDraft(null)
-          toast.success('Saved', { description: `${spec.label}: ${keyText(spec, row).replaceAll('|', ' · ')}` })
-        },
-        onError: failed,
-      },
-    )
-
-  return (
-    <tr>
-      {spec.key.map((k) => (
-        <Td key={k.field}>{row[k.field] === null || row[k.field] === '' ? '—' : String(row[k.field])}</Td>
-      ))}
-      <Td className="text-right">
-        {locked ? (
-          <span className="tabular inline-flex items-center gap-1.5 text-muted-foreground" title="Fixed by the University">
-            <LockIcon className="size-3.5" /> {saved}
-          </span>
-        ) : (
-          <NumberInput
-            className="tabular ml-auto h-8 w-36 text-right"
-            step={spec.value.step}
-            min={0}
-            value={draft ?? saved}
-            onChange={setDraft}
-            aria-label={`${spec.value.label} for ${keyText(spec, row).replaceAll('|', ' ')}`}
-          />
-        )}
-      </Td>
-      <Td className="w-40">
-        {locked ? (
-          <span className="text-[12px] text-muted-foreground">Fixed by the University</span>
-        ) : (
-          changed && (
-            <div className="flex gap-2">
-              <Button size="sm" disabled={update.isPending} onClick={save}>
-                {update.isPending ? 'Saving…' : 'Save'}
-              </Button>
-              <Button size="sm" variant="ghost" disabled={update.isPending} onClick={() => setDraft(null)}>
-                Undo
-              </Button>
-            </div>
-          )
-        )}
-      </Td>
-    </tr>
-  )
-}
-
-function AddRow({ spec }: { spec: RateTableSpec }) {
-  const add = useAddRate()
-  const blank = () => Object.fromEntries([...spec.key.map((k) => [k.field, '']), [spec.value.field, '']])
-  const [values, setValues] = useState<Record<string, string>>(blank)
-  const ready = spec.key.every((k) => k.kind === 'number' || values[k.field]?.trim()) && values[spec.value.field] !== ''
-
-  const submit = () => {
-    const body: Record<string, unknown> = {}
-    for (const k of spec.key) {
-      const raw = values[k.field]?.trim() ?? ''
-      body[k.field] = k.kind === 'number' ? (raw === '' ? null : Number(raw)) : raw
-    }
-    body[spec.value.field] = Number(values[spec.value.field])
-    add.mutate(
-      { table: spec.id, values: body },
-      {
-        onSuccess: () => {
-          setValues(blank())
-          toast.success('Row added', { description: spec.label })
-        },
-        onError: failed,
-      },
-    )
-  }
-
-  return (
-    <div key={spec.id} className="mt-5 border-t pt-4">
-      <div className="mb-2 text-[13px] font-medium">Add a row</div>
-      <div className="flex flex-wrap items-end gap-3">
-        {[...spec.key, { field: spec.value.field, label: spec.value.label, kind: 'number' as const }].map((k) => (
-          <label key={k.field} className="grid gap-1 text-[12px] text-muted-foreground">
-            {k.label}
-            <Input
-              className="h-8 w-40"
-              type={k.kind === 'number' ? 'number' : 'text'}
-              value={values[k.field] ?? ''}
-              onChange={(event) => setValues({ ...values, [k.field]: event.target.value })}
-            />
-          </label>
-        ))}
-        <Button size="sm" disabled={!ready || add.isPending} onClick={submit}>
-          {add.isPending ? 'Adding…' : 'Add'}
-        </Button>
+      {/* Room under the last row for the floating change bar. */}
+      <div className={staged.length > 0 ? 'pb-20' : undefined}>
+        <LookupTabsView
+          tabs={tabs}
+          value={tab}
+          onValueChange={setTab}
+          tables={tables}
+          onTableChange={(on, table) =>
+            setTables((current) => ({ ...current, [on]: table }))
+          }
+        />
       </div>
-    </div>
+
+      {staged.length > 0 &&
+        (reviewing ? (
+          <Review
+            staged={staged}
+            warnings={warnings}
+            onBack={() => setReviewing(false)}
+            onSaved={onSaved}
+            onRefused={onRefused}
+          />
+        ) : (
+          <ChangeBar
+            staged={staged}
+            onDiscard={() => stage([])}
+            onReview={() => setReviewing(true)}
+          />
+        ))}
+
+      {blocker.status === 'blocked' && (
+        <LeaveGuard
+          staged={staged}
+          onLeave={blocker.proceed}
+          onStay={blocker.reset}
+        />
+      )}
+    </>
   )
 }

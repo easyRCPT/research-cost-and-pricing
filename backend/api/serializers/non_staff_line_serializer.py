@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from api.models import NonStaffCostCategory
 from api.services.budget_details import get_lookup_version_for_budget
+from api.services.budget_update import refuse_ten_percent
 
 from .line_id import validate_new_line_id
 
@@ -58,6 +59,8 @@ class NonStaffLineSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid cost group or expense type.")
 
         attrs["category"] = category
+        if attrs.get("add_ten_percent"):
+            refuse_ten_percent(category)
         return attrs
 
     def validate_amounts(self, amounts):
@@ -69,9 +72,10 @@ class NonStaffLineSerializer(serializers.Serializer):
         for amount in amounts:
             year = amount["year"]
 
-            if not project.start_year <= year <= project.end_year:
+            end_year = project.end_year or project.start_year
+            if not project.start_year <= year <= end_year:
                 raise serializers.ValidationError(
-                    f"Year must be between {project.start_year} and {project.end_year}."
+                    f"Year must be between {project.start_year} and {end_year}."
                 )
 
             if year in years:

@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
 import { ChevronRightIcon, InfoIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
+
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,7 +23,6 @@ interface PanelProps {
   /** Shown in a tooltip beside the title, where a description would be too heavy. */
   hint?: string
   collapsible?: boolean
-  defaultOpen?: boolean
   className?: string
   children: ReactNode
 }
@@ -32,7 +32,6 @@ export function Panel({
   description,
   hint,
   collapsible,
-  defaultOpen = false,
   className,
   children,
 }: PanelProps) {
@@ -43,7 +42,7 @@ export function Panel({
 
   if (collapsible) {
     return (
-      <Collapsible asChild defaultOpen={defaultOpen}>
+      <Collapsible asChild>
         <section className={cn(shell, 'group/panel')}>
           <h3 className={TITLE}>
             <CollapsibleTrigger className="flex cursor-pointer items-center gap-2 text-left">

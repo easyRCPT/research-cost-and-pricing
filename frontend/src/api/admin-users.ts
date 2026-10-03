@@ -1,13 +1,13 @@
 import {
   keepPreviousData,
-  queryOptions,
   useMutation,
   useQuery,
-  useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+
 import { meQuery } from '@/api/auth'
+import { adminQuery, useInvalidate } from '@/api/query'
+import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
 export type AdminUser = components['schemas']['AdminUser']
@@ -17,26 +17,19 @@ const usersKey = ['admin', 'users'] as const
 
 /** Filtered on the server, and the last list held while the next one loads. */
 export function useAdminUsers(q: string) {
-  return useQuery({
-    queryKey: [...usersKey, q],
-    queryFn: async (): Promise<AdminUser[]> => {
-      const { data, error, response } = await api.GET('/api/admin/users/', {
-        params: { query: q ? { q } : {} },
-      })
-      if (error) throw new ApiError(response.status, error)
-      return data
-    },
-    placeholderData: keepPreviousData,
-  })
+  return useQuery(
+    adminQuery(
+      ['users', q],
+      () =>
+        api.GET('/api/admin/users/', {
+          params: { query: q ? { q } : {} },
+        }),
+      { placeholderData: keepPreviousData },
+    ),
+  )
 }
 
-const groupsQuery = queryOptions({
-  queryKey: ['admin', 'groups'] as const,
-  queryFn: async (): Promise<string[]> => {
-    const { data, error, response } = await api.GET('/api/admin/groups/')
-    if (error) throw new ApiError(response.status, error)
-    return data
-  },
+const groupsQuery = adminQuery(['groups'], () => api.GET('/api/admin/groups/'), {
   staleTime: Infinity,
 })
 
@@ -46,13 +39,9 @@ export function useGroups() {
 }
 
 function useRefresh() {
-  const queryClient = useQueryClient()
-  return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: usersKey }),
-      // An administrator editing their own account changes who `me` is.
-      queryClient.invalidateQueries({ queryKey: meQuery.queryKey }),
-    ])
+  const invalidate = useInvalidate()
+  // An administrator editing their own account changes who `me` is.
+  return () => invalidate(usersKey, meQuery.queryKey)
 }
 
 export function useUpdateUser() {
@@ -65,11 +54,12 @@ export function useUpdateUser() {
       id: number
       changes: { first_name?: string; last_name?: string; is_active?: boolean; groups?: string[] }
     }) => {
-      const { error, response } = await api.PATCH('/api/admin/users/{user_id}/', {
-        params: { path: { user_id: id } },
-        body: changes,
-      })
-      if (error) throw new ApiError(response.status, error)
+      unwrap(
+        await api.PATCH('/api/admin/users/{user_id}/', {
+          params: { path: { user_id: id } },
+          body: changes,
+        }),
+      )
     },
     onSettled: refresh,
   })
@@ -79,8 +69,7 @@ export function useCreateUser() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: async (body: components['schemas']['UserCreate']) => {
-      const { error, response } = await api.POST('/api/admin/users/', { body })
-      if (error) throw new ApiError(response.status, error)
+      unwrap(await api.POST('/api/admin/users/', { body }))
     },
     onSettled: refresh,
   })
@@ -100,11 +89,12 @@ export function useAddAssignment() {
       department: string | null
       faculty: string | null
     }) => {
-      const { error, response } = await api.POST('/api/admin/users/{user_id}/assignments/', {
-        params: { path: { user_id: id } },
-        body: { role, department, faculty },
-      })
-      if (error) throw new ApiError(response.status, error)
+      unwrap(
+        await api.POST('/api/admin/users/{user_id}/assignments/', {
+          params: { path: { user_id: id } },
+          body: { role, department, faculty },
+        }),
+      )
     },
     onSettled: refresh,
   })
@@ -114,11 +104,12 @@ export function useRemoveAssignment() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: async ({ id, assignmentId }: { id: number; assignmentId: number }) => {
-      const { error, response } = await api.DELETE(
-        '/api/admin/users/{user_id}/assignments/{assignment_id}/',
-        { params: { path: { user_id: id, assignment_id: assignmentId } } },
+      unwrap(
+        await api.DELETE(
+          '/api/admin/users/{user_id}/assignments/{assignment_id}/',
+          { params: { path: { user_id: id, assignment_id: assignmentId } } },
+        ),
       )
-      if (error) throw new ApiError(response.status, error)
     },
     onSettled: refresh,
   })

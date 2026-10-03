@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import cast
 
 from django.db import transaction
@@ -11,16 +12,18 @@ from api.models import (
     YearAllocation,
     YearAmount,
 )
+from api.services import lookup_loader
 from api.services.audit import write_audit
+from api.services.lookup_update import current_categories
 
-from .budget_state import require_rejected
+from .budget_state import require_clonable
 
 
 @transaction.atomic
 def clone_budget(user: User, budget: Budget) -> Budget:
-    """Clone a rejected budget into a new draft budget."""
-    # Raise 409 if budget is not at the status rejected
-    require_rejected(budget)
+    """Clone a rejected or withdrawn budget into a new draft budget."""
+    # Raise 409 unless the attempt ended without approval
+    require_clonable(budget)
 
     new_budget = Budget.objects.create(
         project=budget.project,
@@ -32,6 +35,8 @@ def clone_budget(user: User, budget: Budget) -> Budget:
         margin=budget.margin,
         gst_applicable=budget.gst_applicable,
         cash_co_contribution=budget.cash_co_contribution,
+        currency=budget.currency,
+        exchange_rate_override=_rate_to_carry(budget),
         comments=budget.comments,
         justification=budget.justification,
         justification_notes=budget.justification_notes,
@@ -92,16 +97,23 @@ def _clone_staff_lines(source_budget: Budget, target_budget: Budget) -> None:
 
 def _clone_non_staff_lines(source_budget: Budget, target_budget: Budget) -> None:
     """Clone non-staff cost lines and their year amounts to a new budget."""
-    non_staff_lines = NonStaffCostLine.objects.filter(
-        budget=source_budget,
-    ).prefetch_related("amounts")
+    non_staff_lines = (
+        NonStaffCostLine.objects.filter(budget=source_budget)
+        .select_related("category")
+        .prefetch_related("amounts")
+    )
 
     new_amounts: list[YearAmount] = []
+    # A new draft prices on the current rates, so its lines point at the
+    # current version's categories, as repoint_drafts keeps every draft's do.
+    current = current_categories()
 
     for non_staff_line in non_staff_lines:
         new_non_staff_line = NonStaffCostLine.objects.create(
             budget=target_budget,
-            category=non_staff_line.category,
+            category_id=current.get(
+                non_staff_line.category.ledger_id, non_staff_line.category_id
+            ),
             description=non_staff_line.description,
             in_kind=non_staff_line.in_kind,
             in_kind_reason=non_staff_line.in_kind_reason,
@@ -144,3 +156,17 @@ def _clone_deliverables(source_budget: Budget, target_budget: Budget) -> None:
     ]
 
     Deliverable.objects.bulk_create(new_deliverables)
+
+
+def _rate_to_carry(budget: Budget) -> Decimal | None:
+    """
+    The researcher's own rate goes with the new draft (#152). If the currency
+    has since left the rates table, the draft keeps the rate the old attempt
+    was priced at as its own, rather than having nothing to price at.
+    """
+    if budget.exchange_rate_override is not None or budget.currency == "AUD":
+        return budget.exchange_rate_override
+    current = lookup_loader.get_constants(lookup_loader.current_version_id())
+    if budget.currency in current["currencies"]:
+        return None
+    return lookup_loader.constants_for(budget)["currencies"][budget.currency]

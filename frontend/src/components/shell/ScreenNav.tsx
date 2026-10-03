@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+
 import { SECTIONS } from './sections'
 import type { EditorScreen, SidebarSection } from './Sidebar'
 
@@ -9,9 +10,15 @@ const ORDER = (SECTIONS as readonly SidebarSection[]).flatMap(
 interface ScreenNavProps {
   screen: EditorScreen
   onSelect: (screen: EditorScreen) => void
+  /** Project Details is incomplete, so there is nowhere to continue to. */
+  locked?: boolean
 }
 
-export function ScreenNav({ screen, onSelect }: ScreenNavProps) {
+export function ScreenNav({
+  screen,
+  onSelect,
+  locked = false,
+}: ScreenNavProps) {
   const index = ORDER.findIndex((item) => item.id === screen)
 
   if (index < 0) return null
@@ -35,6 +42,7 @@ export function ScreenNav({ screen, onSelect }: ScreenNavProps) {
         <Button
           size="lg"
           className="w-full px-5 md:w-auto"
+          disabled={locked}
           onClick={() => onSelect(next.id)}
         >
           Continue to {next.label}

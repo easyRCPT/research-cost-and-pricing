@@ -1,10 +1,12 @@
 import { Th } from '@/components/shell'
+import { useCurrency } from '@/lib/format/currency'
 
-export interface NonStaffTableHeaderProps {
+interface NonStaffTableHeaderProps {
   years: number[]
 }
 
 export function NonStaffTableHeader({ years }: NonStaffTableHeaderProps) {
+  const currency = useCurrency()
   return (
     <thead>
       <tr>
@@ -20,7 +22,7 @@ export function NonStaffTableHeader({ years }: NonStaffTableHeaderProps) {
           Additional 10%
         </Th>
         <Th align="right" className="w-28">
-          Total (AUD)
+          Total ({currency})
         </Th>
         <Th className="w-8" />
       </tr>

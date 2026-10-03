@@ -30,6 +30,10 @@ make frontend   # http://localhost:5173, in a second terminal
 editing by hand. Postgres is on **5433, not 5432**, so it cannot collide with a native
 install.
 
+Django admin is for developers only. The console never grants it, so a superadmin made
+there is refused at `/admin/`. Get access with `make superuser` (`manage.py createsuperuser`),
+or set `is_staff` and `is_superuser` on your account in the shell.
+
 ## Commands
 
 ```

@@ -1,7 +1,9 @@
 import { Link, useParams } from '@tanstack/react-router'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+
 import { useBudget, useBudgetId, useEditable } from '@/api/budget'
 import { useDecidableStep } from '@/api/decidable'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { isDraftStatus } from '@/lib/status'
 
 const STATE: Record<string, string> = {
   submitted: 'has been submitted for review',
@@ -55,7 +57,7 @@ export function ReadOnlyNotice() {
 
   const status = budget.budget_info.status
   const why =
-    status === 'draft'
+    isDraftStatus(status)
       ? 'This costing belongs to someone else, so you are reading it.'
       : `This costing ${STATE[status] ?? 'is not a draft'}, so it is read-only.`
 

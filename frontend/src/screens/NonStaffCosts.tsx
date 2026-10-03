@@ -1,33 +1,32 @@
-import type { LookupTables } from '@/types'
-import { Panel } from '@/components/shell'
-import { NonStaffTable } from './nonstaff/NonStaffTable'
-import { type NonStaffLines, useBudget } from '@/api/budget'
+import { useBudget, useLines } from '@/api/budget'
+import { useLookups } from '@/api/lookups'
+import { EditableGrid, Panel } from '@/components/shell'
 
-export interface NonStaffCostsProps extends NonStaffLines {
-  lookups: LookupTables
-}
+import { NonStaffTableBody } from './nonstaff/NonStaffTableBody'
+import { NonStaffTableFooter } from './nonstaff/NonStaffTableFooter'
+import { NonStaffTableHeader } from './nonstaff/NonStaffTableHeader'
 
-export function NonStaffCosts({
-  lines,
-  years,
-  patchLine,
-  addLine,
-  removeLine,
-  lookups,
-}: NonStaffCostsProps) {
+export function NonStaffCosts() {
   const { data: budget } = useBudget()
+  const { data: lookups } = useLookups()
+  const { lines, years, patchLine, addLine, removeLine } = useLines(
+    'non_staff',
+    budget.years,
+  )
 
   return (
     <Panel>
-      <NonStaffTable
-        years={years}
-        lines={lines}
-        categories={lookups.non_staff_cost_categories}
-        columnTotal={budget.non_staff_cost.column_total}
-        patchLine={patchLine}
-        removeLine={removeLine}
-        addLine={addLine}
-      />
+      <EditableGrid onAdd={addLine}>
+        <NonStaffTableHeader years={years} />
+        <NonStaffTableBody
+          lines={lines}
+          years={years}
+          categories={lookups.non_staff_cost_categories}
+          patchLine={patchLine}
+          removeLine={removeLine}
+        />
+        <NonStaffTableFooter columnTotal={budget.non_staff_cost.column_total} />
+      </EditableGrid>
 
       <p className="mt-4 max-w-[100ch] text-xs text-muted-foreground">
         * Additional costs can be difficult to determine. If no better method is

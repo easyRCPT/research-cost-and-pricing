@@ -1,0 +1,154 @@
+import { useState } from 'react'
+
+import { type AdminUser, useGroups, useUpdateUser } from '@/api/admin-users'
+import { STAFF, SUPERADMIN, useMe } from '@/api/auth'
+import { Panel } from '@/components/shell'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { InlineConfirm } from '@/components/ui/inline-confirm'
+import { shortDate } from '@/lib/format/dates'
+
+import { Assignments } from './Assignments'
+import { nameOf, refused } from './labels'
+import { Names } from './Names'
+
+type Changes = Parameters<
+  ReturnType<typeof useUpdateUser>['mutate']
+>[0]['changes']
+
+interface Pending {
+  title: string
+  body: string
+  confirm: string
+  changes: Changes
+}
+
+const LOCKOUT = {
+  title: 'This is the account you are signed in as',
+  body: 'Saving it shuts you out of the console straight away, and only another superadmin can let you back in.',
+}
+
+export function UserEditor({ user }: { user: AdminUser }) {
+  const { data: allGroups } = useGroups()
+  const { data: me } = useMe()
+  const update = useUpdateUser()
+  const yourself = me?.user.id === user.id
+  // A change that takes access away, held until it is confirmed (#69).
+  const [pending, setPending] = useState<Pending | null>(null)
+
+  const save = (changes: Changes) => {
+    setPending(null)
+    update.mutate({ id: user.id, changes }, { onError: refused })
+  }
+
+  const toggleGroup = (group: string, on: boolean) => {
+    const groups = on
+      ? [...user.groups, group]
+      : user.groups.filter((g) => g !== group)
+    if (yourself && !on && group === SUPERADMIN) {
+      return setPending({
+        ...LOCKOUT,
+        confirm: 'Yes, remove my superadmin group',
+        changes: { groups },
+      })
+    }
+    const approvals = user.assignments.length
+    if (!on && group === STAFF && approvals > 0) {
+      return setPending({
+        title: `Remove ${nameOf(user)} from staff?`,
+        body: `Only staff approve, so ${approvals === 1 ? 'their approval goes' : `all ${approvals} of their approvals go`} too. Costings waiting on them stay pending until someone else is assigned.`,
+        confirm: 'Remove from staff',
+        changes: { groups },
+      })
+    }
+    save({ groups })
+  }
+
+  const toggleActive = () => {
+    if (!user.is_active) return save({ is_active: true })
+    setPending(
+      yourself
+        ? {
+            ...LOCKOUT,
+            confirm: 'Yes, deactivate my account',
+            changes: { is_active: false },
+          }
+        : {
+            title: `Deactivate ${nameOf(user)}?`,
+            body: 'They will not be able to sign in, and they drop out of every approval queue. Their costings stay theirs, and the account can be reactivated later.',
+            confirm: 'Deactivate',
+            changes: { is_active: false },
+          },
+    )
+  }
+
+  return (
+    <div className="grid gap-4">
+      <Panel
+        title={nameOf(user)}
+        description={`${user.email} · joined ${shortDate(user.date_joined)} · ${
+          user.last_login
+            ? `last signed in ${shortDate(user.last_login)}`
+            : 'never signed in'
+        }`}
+      >
+        <Names user={user} />
+
+        {pending && (
+          <div
+            className="mb-5 rounded-md border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-[13px]"
+            role="alert"
+          >
+            <p className="font-semibold text-destructive">{pending.title}</p>
+            <p className="mt-1">{pending.body}</p>
+            <InlineConfirm
+              className="mt-3"
+              confirm={pending.confirm}
+              variant="destructive"
+              pending={update.isPending}
+              onConfirm={() => save(pending.changes)}
+              onCancel={() => setPending(null)}
+            />
+          </div>
+        )}
+
+        <h3 className="mb-2 text-[13px] font-semibold">Groups</h3>
+        <div className="flex flex-wrap gap-x-6 gap-y-1">
+          {allGroups.map((group) => (
+            <label
+              key={group}
+              className="flex items-center gap-2 py-1 text-[13.5px]"
+            >
+              <Checkbox
+                checked={user.groups.includes(group)}
+                disabled={update.isPending || !!pending}
+                onCheckedChange={(on) => toggleGroup(group, on === true)}
+              />
+              {group}
+            </label>
+          ))}
+        </div>
+
+        <h3 className="mt-5 mb-2 text-[13px] font-semibold">Access</h3>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={update.isPending || !!pending}
+          className={
+            user.is_active ? 'border-destructive/40 text-destructive' : ''
+          }
+          onClick={toggleActive}
+        >
+          {user.is_active ? 'Deactivate' : 'Reactivate'}
+        </Button>
+        <p className="mt-1 text-[12px] text-muted-foreground">
+          {user.is_active
+            ? `Stops ${yourself ? 'you' : 'them'} signing in and takes ${yourself ? 'you' : 'them'} out of every approval queue. Their costings stay theirs. Accounts are never deleted.`
+            : 'This account cannot sign in.'}
+        </p>
+      </Panel>
+
+      <Assignments user={user} />
+    </div>
+  )
+}

@@ -1,9 +1,15 @@
 import { Link } from '@tanstack/react-router'
-import { useApprovalQueue, type QueueRow } from '@/api/approvals'
+import { useEffect, useState } from 'react'
+
+import { type QueueRow, useApprovalQueue } from '@/api/approvals'
+import { Pager } from '@/components/data-table'
 import { PageHead, Panel } from '@/components/shell'
 import { Badge } from '@/components/ui/badge'
-import { shortDate } from '@/lib/format/dates'
+import { dateTime } from '@/lib/format/dates'
 import { money } from '@/lib/format/utils'
+
+import { ApprovalsNav } from './ApprovalsNav'
+import { rememberApprovalsPage } from './returnTo'
 
 /**
  * Grouped by the authorisation being asked for, rather than a level column to
@@ -14,24 +20,21 @@ import { money } from '@/lib/format/utils'
  * calculator's own screens, read-only, and decides on its Approvals screen.
  */
 const GROUPS = [
-  {
-    level: 'department',
-    title: 'Authorising as Head of Department',
-    note: 'The first authorisation. Every costing needs one.',
-  },
-  {
-    level: 'faculty',
-    title: 'Authorising as Dean or delegate',
-    note: 'The second authorisation, asked for only when a costing needs it.',
-  },
+  { level: 'department', title: 'Authorising as Head of Department' },
+  { level: 'faculty', title: 'Authorising as Dean or delegate' },
 ]
 
 export function ApprovalQueue() {
   const { data: rows } = useApprovalQueue()
+  useEffect(() => rememberApprovalsPage('/approvals'), [])
 
   return (
     <>
-      <PageHead title="Approvals" subtitle="Costings waiting on your authorisation" />
+      <PageHead
+        title="Approvals"
+        subtitle="Costings waiting on your authorisation"
+        right={<ApprovalsNav current="queue" />}
+      />
 
       {rows.length === 0 && (
         <Panel title="Nothing is waiting on you">
@@ -46,17 +49,39 @@ export function ApprovalQueue() {
       {GROUPS.map((group) => {
         const mine = rows.filter((row) => row.level === group.level)
         if (mine.length === 0) return null
-        return (
-          <Panel key={group.level} title={group.title} description={group.note} className="mb-4">
-            <div className="divide-y rounded-md border">
-              {mine.map((row) => (
-                <Row key={row.step_id} row={row} />
-              ))}
-            </div>
-          </Panel>
-        )
+        return <Group key={group.level} title={group.title} rows={mine} />
       })}
     </>
+  )
+}
+
+function Group({ title, rows }: { title: string; rows: QueueRow[] }) {
+  const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
+  // Deciding the last row on the last page would otherwise leave it empty.
+  const page = Math.min(pageIndex, Math.max(0, Math.ceil(rows.length / pageSize) - 1))
+  const shown = rows.slice(page * pageSize, (page + 1) * pageSize)
+
+  return (
+    <Panel title={title} className="mb-4">
+      <div className="divide-y rounded-md border">
+        {shown.map((row) => (
+          <Row key={row.step_id} row={row} />
+        ))}
+      </div>
+      <Pager
+        pageIndex={page}
+        pageSize={pageSize}
+        total={rows.length}
+        onPageIndex={setPageIndex}
+        onPageSize={(size) => {
+          setPageSize(size)
+          setPageIndex(0)
+        }}
+        noun={['costing', 'costings']}
+        className="px-0 pb-0"
+      />
+    </Panel>
   )
 }
 
@@ -75,7 +100,7 @@ function Row({ row }: { row: QueueRow }) {
         )}
         <span className="block text-[12.5px] text-muted-foreground">
           {budget.reference ? `${budget.reference} · ` : ''}
-          {budget.submitted_by} · {budget.department} · submitted {shortDate(budget.submitted_at)}
+          {budget.submitted_by} · {budget.department} · submitted {dateTime(budget.submitted_at)}
         </span>
       </span>
       <span className="text-right">

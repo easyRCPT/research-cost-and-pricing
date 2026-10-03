@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.test import TestCase
@@ -9,15 +7,12 @@ from api.models import (
     ApprovalStep,
     AuditLog,
     Budget,
-    Department,
-    Faculty,
     LookupConfiguration,
     LookupVersion,
-    Project,
-    User,
     UserOrgAssignment,
 )
 from api.services.approval_decide import decide
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 from .test_submission import ForceRollbackError
 
@@ -25,48 +20,15 @@ from .test_submission import ForceRollbackError
 class ApprovalDecideTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.owner = User.objects.create_user(
-            email="owner@example.com",
-            password="password",
-        )
+        cls.owner = make_user("owner@example.com")
+        cls.hod = make_user("hod@example.com")
+        cls.dean = make_user("dean@example.com")
+        cls.other_user = make_user("other@example.com")
 
-        cls.hod = User.objects.create_user(
-            email="hod@example.com",
-            password="password",
-        )
+        cls.department = make_department(name="Science Department")
+        cls.faculty = cls.department.faculty
 
-        cls.dean = User.objects.create_user(
-            email="dean@example.com",
-            password="password",
-        )
-
-        cls.other_user = User.objects.create_user(
-            email="other@example.com",
-            password="password",
-        )
-
-        cls.faculty = Faculty.objects.create(
-            code="SCI",
-            name="Science Faculty",
-        )
-
-        cls.department = Department.objects.create(
-            code="SCI-01",
-            name="Science Department",
-            school="Science School",
-            school_code="SCI",
-            faculty=cls.faculty,
-        )
-
-        cls.project = Project.objects.create(
-            title="Test Project",
-            department=cls.department,
-            start_year=2026,
-            start_month=1,
-            end_year=2027,
-            end_month=12,
-            created_by=cls.owner,
-        )
+        cls.project = make_project(cls.owner, cls.department, end_year=2027)
 
         cls.lookup_version = LookupVersion.objects.create()
 
@@ -105,12 +67,9 @@ class ApprovalDecideTest(TestCase):
     ) -> Budget:
         # As submit leaves it: in review, and stamped with the rates it was
         # priced on (#57). Decide must not move that stamp.
-        budget = Budget.objects.create(
-            project=self.project,
+        budget = make_budget(
+            self.project,
             status=Budget.Status.HOD_REVIEW,
-            cost_multiplier=Decimal("1.00"),
-            in_kind_multiplier=Decimal("1.00"),
-            margin=Decimal("0.3000"),
             lookup_version=self.lookup_version,
         )
 

@@ -6,7 +6,7 @@ from django.db.models import Count
 from ..models import Budget, Faculty, User
 from . import audit
 from .admin_projects import with_current_status
-from .lookup_update import list_versions
+from .lookup_update import version_rows, versions
 
 
 def overview() -> dict:
@@ -20,7 +20,6 @@ def overview() -> dict:
         .annotate(n=Count("id"))
         .values_list("current_status", "n")
     )
-    versions = list_versions()
 
     return {
         "accounts": {
@@ -43,6 +42,9 @@ def overview() -> dict:
         },
         # Option 3 on #94: nothing is scheduled under #52, so the panel that
         # showed scheduled rates shows the versions instead.
-        "versions": {"total": len(versions), "latest": versions[:5]},
-        "recent": list(audit.entries(limit=8)),
+        "versions": {
+            "total": versions().count(),
+            "latest": version_rows(versions().order_by("-id")[:5]),
+        },
+        "recent": list(audit.entries()[:8]),
     }

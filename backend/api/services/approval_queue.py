@@ -62,6 +62,8 @@ def get_approval_steps(user: User) -> list[ApprovalStep]:
             # query per row.
             "budget__project__created_by",
         )
+        # Longest waiting first.
+        .order_by("budget__submitted_at", "id")
     )
 
     return list(steps)

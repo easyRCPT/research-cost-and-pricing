@@ -1,24 +1,24 @@
 from decimal import Decimal
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from api.models import Budget, Department, Faculty, Project, User
+from api.models import Budget, Project
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_project,
+    make_user,
+    seed_lookups,
+)
 
 
 class ProjectRoutesTestCase(TestCase):
     def setUp(self):
-        self.client.force_login(User.objects.create_user("owner@unimelb.edu.au"))
+        self.client.force_login(make_user())
         self.url = reverse("projects")
-        self.department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
+        self.department = make_department(name="Science")
 
     def valid_body(self, **overrides) -> dict:
         return {
@@ -36,7 +36,7 @@ class ProjectRoutesTestCase(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()["results"], [])
 
     def test_create_returns_the_row_the_list_screen_needs(self):
         response = self.client.post(
@@ -56,6 +56,26 @@ class ProjectRoutesTestCase(TestCase):
         self.assertEqual(body["budget_id"], budget.id)
         self.assertEqual(body["reference"], f"RCP-2026-{body['id']:04d}")
 
+    def test_an_empty_project_opens_and_prices_at_nothing(self):
+        # Opening it prices it, which reads the rates: the seeded ones, rather
+        # than whatever an earlier test left in the cache.
+        seed_lookups()
+        cache.clear()
+        self.addCleanup(cache.clear)
+        response = self.client.post(self.url, {}, content_type="application/json")
+
+        self.assertEqual(response.status_code, 201, response.content)
+
+        body = response.json()
+        self.assertEqual(body["title"], "")
+        self.assertEqual(body["department"], "")
+        self.assertIsNone(body["end_year"])
+
+        detail = self.client.get(reverse("budget-detail", args=[body["budget_id"]]))
+
+        self.assertEqual(detail.status_code, 200, detail.content)
+        self.assertEqual(detail.json()["project_info"]["cost_centre"], "")
+
     def test_a_created_project_turns_up_in_the_list(self):
         self.client.post(
             self.url,
@@ -63,7 +83,7 @@ class ProjectRoutesTestCase(TestCase):
             content_type="application/json",
         )
 
-        body = self.client.get(self.url).json()
+        body = self.client.get(self.url).json()["results"]
 
         self.assertEqual(len(body), 1)
         self.assertEqual(body[0]["title"], "Test Project")
@@ -78,7 +98,7 @@ class ProjectRoutesTestCase(TestCase):
             total_price_inc_gst=Decimal("98765.43")
         )
 
-        body = self.client.get(self.url).json()
+        body = self.client.get(self.url).json()["results"]
 
         self.assertEqual(body[0]["total_price_inc_gst"], 98765.43)
 
@@ -97,33 +117,10 @@ class ModelValidationTestCase(TestCase):
     """full_clean() failures are bad requests, not server errors."""
 
     def setUp(self):
-        owner = User.objects.create_user("owner@unimelb.edu.au")
+        owner = make_user()
         self.client.force_login(owner)
-        department = Department.objects.create(
-            code="SCI",
-            name="Science",
-            school="Science School",
-            school_code="SCI",
-            faculty=Faculty.objects.get_or_create(
-                code="SCI", defaults={"name": "Science Faculty"}
-            )[0],
-        )
-        project = Project.objects.create(
-            title="Test Project",
-            department=department,
-            funder="Test Funder",
-            start_year=2026,
-            start_month=1,
-            end_year=2028,
-            end_month=12,
-            created_by=owner,
-        )
-        self.budget = Budget.objects.create(
-            project=project,
-            cost_multiplier=Decimal("1.70"),
-            in_kind_multiplier=Decimal("1.70"),
-            margin=Decimal("0.30"),
-        )
+        project = make_project(owner, funder="Test Funder")
+        self.budget = make_budget(project)
         self.url = reverse("budget-detail", args=[self.budget.id])
 
     def patch(self, body):

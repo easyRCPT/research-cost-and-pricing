@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import cast
 from uuid import UUID
 
@@ -21,8 +21,8 @@ from api.models import (
     YearAmount,
 )
 
-from . import classification
-from .budget_details import get_budget_details
+from . import classification,  lookup_loader
+from .budget_details import exchange_rate_for, get_budget_details
 from .staff_time_validation import check_time
 
 
@@ -151,7 +151,6 @@ def update_budget(
 
     fields_requiring_calculation = {
         "mode",
-        "in_kind_multiplier",
         "margin",
         "cash_co_contribution",
         "gst_applicable",
@@ -165,18 +164,87 @@ def update_budget(
         _set_field(budget, field, value)
         return True
 
+    if field in {"currency", "exchange_rate_override"}:
+        _set_currency(budget, field, value)
+        return True
+
     # Said in its own words rather than as the generic refusal below, because
-    # this one is a rule rather than a typo: the multiplier is copied onto the
-    # budget from full_cost_recovery_multiplier at creation. The cost is the
-    # cost (#97): a budget changes its price through the margin, which is also
-    # what routes it to a Dean.
-    if field == "cost_multiplier":
+    # this one is a rule rather than a typo. Both multipliers are the
+    # University's full cost recovery rate, set by an administrator as a
+    # lookup rate (#149). The cost is the cost (#97): a budget changes its
+    # price through the margin, which is also what routes it to a Dean.
+    if field in {"cost_multiplier", "in_kind_multiplier"}:
         raise ValidationError(
-            "The cost multiplier is fixed at the University's full cost "
-            "recovery rate and is not editable per budget."
+            "The cost multiplier is the University's full cost recovery rate "
+            "and is not editable per budget."
         )
 
     raise ValidationError(f"Field '{field}' cannot be updated.")
+
+
+def _set_currency(budget: Budget, field: str, value: object) -> None:
+    """
+    Price the costing in another currency, or at the researcher's own rate
+    (#152).
+
+    Non-staff amounts, the cash co-contribution and deliverable invoices are
+    entered in the costing's currency, so when the currency or its rate
+    changes they move with it and keep their AUD value: back to AUD at the
+    old rate, on at the new one. That is what the workbook's macro sets out
+    to do on a currency change (update_to_aud_nonstaff_costs, then
+    update_to_foreign_nonstaff_costs). Staff costs need nothing: the engine
+    converts them from AUD on every pricing.
+    """
+    constants = lookup_loader.constants_for(budget)
+    before = exchange_rate_for(
+        budget.currency, budget.exchange_rate_override, constants
+    )
+
+    if field == "currency":
+        if not isinstance(value, str) or value not in constants["currencies"]:
+            raise ValidationError({"currency": [f"There is no currency '{value}'."]})
+        budget.currency = value
+        # A new currency starts at the table's rate, as the workbook's does:
+        # a rate typed for the old currency means nothing for the new one.
+        budget.exchange_rate_override = None
+    else:
+        if budget.currency == "AUD" and value is not None:
+            raise ValidationError(
+                {
+                    "exchange_rate_override": [
+                        "An AUD costing has no exchange rate to set."
+                    ]
+                }
+            )
+        budget.exchange_rate_override = _as_decimal(
+            budget, "exchange_rate_override", value
+        )
+
+    budget.full_clean()
+    after = exchange_rate_for(budget.currency, budget.exchange_rate_override, constants)
+    _save(budget, ["currency", "exchange_rate_override"])
+    if after != before:
+        _convert_entered_amounts(budget, after / before)
+
+
+def _convert_entered_amounts(budget: Budget, factor: Decimal) -> None:
+    """Every amount entered in the costing's currency, at a new rate."""
+
+    def moved(amount: Decimal) -> Decimal:
+        return (amount * factor).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    amounts = list(YearAmount.objects.filter(non_staff_line__budget=budget))
+    for year_amount in amounts:
+        year_amount.amount = moved(year_amount.amount)
+    YearAmount.objects.bulk_update(amounts, ["amount"])
+
+    deliverables = list(budget.deliverables.exclude(invoice_amount=None))
+    for deliverable in deliverables:
+        deliverable.invoice_amount = moved(deliverable.invoice_amount)
+    Deliverable.objects.bulk_update(deliverables, ["invoice_amount"])
+
+    budget.cash_co_contribution = moved(budget.cash_co_contribution)
+    budget.save(update_fields=["cash_co_contribution"])
 
 
 def _set_in_kind(line, field: str, value: object) -> None:
@@ -258,6 +326,23 @@ def update_staff(
     raise ValidationError(f"Field '{field}' cannot be updated.")
 
 
+def refuse_ten_percent(category: NonStaffCostCategory) -> None:
+    """
+    Contingency, Student Support and Shared Grant Payments never take the
+    additional 10% (#148): contingency is a flat row in the workbook, and its
+    macro forces the 10% off for the other two. The engine ignores it on them
+    anyway, so a tick there would only claim an uplift that isn't charged.
+    """
+    if category.excludes_additional_rate:
+        raise ValidationError(
+            {
+                "add_ten_percent": [
+                    f"{category.cost_category} doesn't take the additional 10%."
+                ]
+            }
+        )
+
+
 def update_non_staff(
     budget: Budget,
     row_id: UUID,
@@ -292,6 +377,8 @@ def update_non_staff(
         if field in {"in_kind", "in_kind_reason"}:
             _set_in_kind(non_staff_line, field, value)
         else:
+            if field == "add_ten_percent" and value is True:
+                refuse_ten_percent(non_staff_line.category)
             _set_field(non_staff_line, field, value)
         return True
 
@@ -305,7 +392,13 @@ def update_non_staff(
             raise ValidationError("Invalid category.")
 
         non_staff_line.category = category
-        _save(non_staff_line, ["category"])
+        changed = ["category"]
+        # Moved onto a category that never takes the 10%: the tick goes with
+        # it, rather than sitting on the line doing nothing (#148).
+        if category.excludes_additional_rate and non_staff_line.add_ten_percent:
+            non_staff_line.add_ten_percent = False
+            changed.append("add_ten_percent")
+        _save(non_staff_line, changed)
         return True
 
     if field == "year_value":
@@ -399,9 +492,10 @@ def _validate_year_and_convert_value(
     # Check in project duration
     project = line.budget.project
 
-    if year < project.start_year or year > project.end_year:
+    end_year = project.end_year or project.start_year
+    if year < project.start_year or year > end_year:
         raise ValidationError(
-            f"Year must be between {project.start_year} and {project.end_year}."
+            f"Year must be between {project.start_year} and {end_year}."
         )
 
     # Return None to delete the year value

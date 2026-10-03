@@ -1,5 +1,3 @@
-import type { ProjectInfo } from '@/types'
-
 export const STARTING_ROWS = 6
 
 export const EXTERNAL_PARTIES = ['NHMRC', 'ARC', 'Other'] as const
@@ -26,30 +24,3 @@ export const MONTHS = [
   'November',
   'December',
 ]
-
-const now = new Date()
-const year = now.getFullYear()
-const month = now.getMonth() + 1
-
-export const EMPTY_PROJECT: ProjectInfo = {
-  // No account has id 0, so an empty project is nobody's to edit.
-  owner_id: 0,
-  title: '',
-  chief_investigator: '',
-  funder: '',
-  other_funder: '',
-  other_funder_category: '',
-  department: '',
-  faculty: '',
-  scheme: '',
-  start_year: year,
-  start_month: month,
-  end_year: year,
-  end_month: month,
-  company: 'C001',
-  cost_centre: '',
-  activity: null,
-  region: null,
-  account_string: '',
-  additional_information: '',
-}

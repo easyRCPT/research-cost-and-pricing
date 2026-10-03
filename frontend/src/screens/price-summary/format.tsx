@@ -1,7 +1,6 @@
 import { Derived } from '@/components/shell'
+import { percent1 } from '@/lib/format/utils'
 
 export const DASH = <span className="text-muted-foreground">—</span>
 
-const ratio = (value: number) => `${(value * 100).toFixed(1)}%`
-
-export const percent = (value: number) => <Derived>{ratio(value)} </Derived>
+export const percent = (value: number) => <Derived>{percent1(value)} </Derived>

@@ -308,6 +308,8 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.budget.margin = Decimal("0.30")
         self.budget.gst_applicable = True
         self.budget.cash_co_contribution = Decimal(500)
+        self.budget.currency = "USD"
+        self.budget.exchange_rate_override = Decimal("0.7")
         self.budget.comments = "Comments"
         self.budget.justification = "Justification"
         self.budget.justification_notes = "Notes"
@@ -328,6 +330,8 @@ class TestBuildBudgetInfo(SimpleTestCase):
                 "margin": Decimal("0.30"),
                 "gst_applicable": True,
                 "cash_co_contribution": Decimal(500),
+                "currency": "USD",
+                "exchange_rate_override": Decimal("0.7"),
                 "comments": "Comments",
                 "justification": "Justification",
                 "justification_notes": "Notes",

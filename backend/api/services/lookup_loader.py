@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import cast
 
 from django.core.cache import cache
@@ -7,6 +8,7 @@ from django.db.models import QuerySet
 from ..models import (
     Budget,
     CalculationConstant,
+    Currency,
     EbaIncrease,
     IncrementCap,
     LookupConfiguration,
@@ -27,6 +29,7 @@ REQUIRED_CONSTANTS = {
     "default_margin",
     "minimum_margin",
     "salary_rate_year",
+    "full_cost_recovery_multiplier",
 }
 
 
@@ -93,6 +96,19 @@ def get_constants(version_id: int) -> dict:
     if constants is not None:
         return constants
 
+    result = build_constants(version_id)
+    cache.set(cache_key, result, CACHE_TIMEOUT)
+    return result
+
+
+def build_constants(version_id: int) -> dict:
+    """
+    One version's rates as the engine reads them, straight from the database.
+
+    Raises if the version could not price a costing: a constant missing, or an
+    on-cost with no default rate. A set of changes is checked with this before
+    it is saved (#138), so it can never leave the rates in that state.
+    """
     querysets = _get_versioned_lookup_querysets(version_id)
     tables = {
         # Pyright infers TextChoices.value as a callable; it is a string at runtime.
@@ -162,7 +178,16 @@ def get_constants(version_id: int) -> dict:
 
     validate_constants(constants)
 
+    # What 1 AUD buys of each currency (#152). AUD is the base, at 1 whether
+    # or not a version holds a row for it, so a costing priced before
+    # currencies existed still prices.
+    currencies = {"AUD": Decimal(1)}
+    currencies.update(
+        {row.code: row.rate for row in cast(list[Currency], tables["currencies"])}
+    )
+
     result = {
+        "currencies": currencies,
         "salary_rate": salary_rate,
         "increment_cap": increment_cap,
         "salary_rate_multiplier": salary_rate_multiplier,
@@ -170,8 +195,6 @@ def get_constants(version_id: int) -> dict:
         "on_cost_components": on_cost_components,
         "constants": constants,
     }
-
-    cache.set(cache_key, result, CACHE_TIMEOUT)
 
     return result
 

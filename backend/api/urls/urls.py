@@ -1,12 +1,16 @@
 from django.urls import path
 
+from api.views.org_search import DepartmentSearchView, FacultySearchView
 from api.views.views import (
     BudgetCloneView,
     BudgetDetailView,
     BudgetSubmitView,
+    BudgetWithdrawView,
     DeliverableView,
     LookupView,
     NonStaffLineView,
+    ProjectDetailView,
+    ProjectFiltersView,
     ProjectView,
     StaffLineView,
 )
@@ -18,11 +22,32 @@ urlpatterns = [
         LookupView.as_view(http_method_names=["get"]),
         name="lookups",
     ),
+    # Pickers over the org tables, searched rather than scrolled
+    path(
+        "departments/",
+        DepartmentSearchView.as_view(http_method_names=["get"]),
+        name="department-search",
+    ),
+    path(
+        "faculties/",
+        FacultySearchView.as_view(http_method_names=["get"]),
+        name="faculty-search",
+    ),
     # Projects
     path(
         "projects/",
         ProjectView.as_view(http_method_names=["get", "post"]),
         name="projects",
+    ),
+    path(
+        "projects/filters/",
+        ProjectFiltersView.as_view(http_method_names=["get"]),
+        name="project-filters",
+    ),
+    path(
+        "projects/<int:project_id>/",
+        ProjectDetailView.as_view(http_method_names=["get"]),
+        name="project-detail",
     ),
     # Budget
     path(
@@ -34,6 +59,11 @@ urlpatterns = [
         "budgets/<int:budget_id>/submit/",
         BudgetSubmitView.as_view(http_method_names=["post"]),
         name="submission",
+    ),
+    path(
+        "budgets/<int:budget_id>/withdraw/",
+        BudgetWithdrawView.as_view(http_method_names=["post"]),
+        name="withdrawal",
     ),
     path(
         "budgets/<int:budget_id>/clone/",

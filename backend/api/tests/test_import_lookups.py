@@ -5,10 +5,8 @@ the HTTP write path: never edit a version a budget is pinned to.
 
 from decimal import Decimal
 from io import StringIO
-from pathlib import Path
 from unittest.mock import MagicMock
 
-from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -18,12 +16,14 @@ from api.management.commands.import_lookups import (
 )
 from api.models import (
     CalculationConstant,
+    Currency,
     EbaIncrease,
     IncrementCap,
     LookupConfiguration,
     LookupVersion,
     SalaryRate,
 )
+from api.tests.factories import seed_lookups
 
 SENTINEL = Decimal("1.00")
 
@@ -35,11 +35,7 @@ def import_lookups():
 class TestImportLookups(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command(
-            "loaddata",
-            str(Path(settings.BASE_DIR) / "seeds" / "lookups.json"),
-            verbosity=0,
-        )
+        seed_lookups()
 
     def setUp(self):
         self.config = LookupConfiguration.objects.get()
@@ -85,6 +81,21 @@ class TestImportLookups(TestCase):
             classification=self.rate.classification,
         )
         self.assertNotEqual(imported.rate, SENTINEL)
+
+    def test_imports_the_workbooks_currencies(self):
+        # dCurrencyRates: 21 currencies, each at "1 AUD =" (#152).
+        Currency.objects.all().delete()
+        self.set_referenced(False)
+
+        import_lookups()
+
+        currencies = Currency.objects.filter(version_id=self.pinned_id)
+        self.assertEqual(currencies.count(), 21)
+        usd = currencies.get(code="USD")
+        self.assertEqual(
+            (usd.name, usd.rate), ("United States Dollar", Decimal("0.70285"))
+        )
+        self.assertEqual(currencies.get(code="AUD").rate, Decimal(1))
 
     def test_importing_twice_mints_one_version(self):
         self.set_referenced(True)

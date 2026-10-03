@@ -1,11 +1,12 @@
 import {
+  type QueryClient,
   queryOptions,
   useMutation,
   useQuery,
   useQueryClient,
-  type QueryClient,
 } from '@tanstack/react-query'
-import { api, ApiError } from '@/lib/api'
+
+import { api, unwrap } from '@/lib/api'
 import type { components } from '@/types/api'
 
 export type Me = components['schemas']['Me']
@@ -14,7 +15,7 @@ type Signup = components['schemas']['Signup']
 type Login = components['schemas']['Login']
 type AdminLogin = components['schemas']['AdminLogin']
 
-export const meKey = ['me'] as const
+const meKey = ['me'] as const
 
 /**
  * Who is signed in, or nobody.
@@ -29,10 +30,9 @@ export const meKey = ['me'] as const
 export const meQuery = queryOptions({
   queryKey: meKey,
   queryFn: async (): Promise<Me | null> => {
-    const { data, error, response } = await api.GET('/api/auth/me/')
-    if (response.status === 401) return null
-    if (error) throw new ApiError(response.status, error)
-    return data
+    const result = await api.GET('/api/auth/me/')
+    if (result.response.status === 401) return null
+    return unwrap(result)
   },
   retry: false,
   staleTime: Infinity,
@@ -74,33 +74,21 @@ function useSignIn<TBody>(
 export function useLogin() {
   const queryClient = useQueryClient()
   return useSignIn<Login>(async (body) => {
-    const { data, error, response } = await api.POST('/api/auth/login/', {
-      body,
-    })
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.POST('/api/auth/login/', { body }))
   }, queryClient)
 }
 
 export function useSignup() {
   const queryClient = useQueryClient()
   return useSignIn<Signup>(async (body) => {
-    const { data, error, response } = await api.POST('/api/auth/signup/', {
-      body,
-    })
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.POST('/api/auth/signup/', { body }))
   }, queryClient)
 }
 
 export function useAdminLogin() {
   const queryClient = useQueryClient()
   return useSignIn<AdminLogin>(async (body) => {
-    const { data, error, response } = await api.POST('/api/auth/admin-login/', {
-      body,
-    })
-    if (error) throw new ApiError(response.status, error)
-    return data
+    return unwrap(await api.POST('/api/auth/admin-login/', { body }))
   }, queryClient)
 }
 
@@ -108,13 +96,14 @@ export function useAdminLogin() {
 export function useLogout() {
   return useMutation({
     mutationFn: async () => {
-      const { error, response } = await api.POST('/api/auth/logout/', {})
-      if (error) throw new ApiError(response.status, error)
+      unwrap(await api.POST('/api/auth/logout/', {}))
     },
   })
 }
 
 export const SUPERADMIN = 'superadmin'
+export const RESEARCHER = 'researcher'
+export const STAFF = 'staff'
 
 /** Approving is an org assignment, never a group (#41). */
 export const isApprover = (me: Me) =>

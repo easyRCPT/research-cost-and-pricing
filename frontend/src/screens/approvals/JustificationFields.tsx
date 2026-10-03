@@ -1,4 +1,4 @@
-import { TextInput, TextareaInput } from '@/components/ui/text-input'
+import { TextareaInput, TextInput } from '@/components/ui/text-input'
 
 type TextField = { value: string; onChange: (value: string) => void }
 

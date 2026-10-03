@@ -3,41 +3,22 @@ from decimal import Decimal
 from django.test import TestCase
 
 from api.models import (
-    Budget,
-    Department,
-    Faculty,
     LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
-    Project,
     StaffCostLine,
-    User,
     YearAllocation,
     YearAmount,
 )
 from api.services.submission_validation import validate_submission
+from api.tests.factories import make_budget, make_department, make_project, make_user
 
 
 class ValidateSubmissionTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(
-            email="test@example.com",
-            password="password",
-        )
-
-        cls.faculty = Faculty.objects.create(
-            code="TEST",
-            name="Test Faculty",
-        )
-
-        cls.department = Department.objects.create(
-            code="TEST",
-            name="Test Department",
-            school="Test School",
-            school_code="TEST",
-            faculty=cls.faculty,
-        )
+        cls.user = make_user("test@example.com")
+        cls.department = make_department("TEST")
 
         cls.non_staff_category = NonStaffCostCategory.objects.create(
             ledger_id=1000,
@@ -47,36 +28,22 @@ class ValidateSubmissionTests(TestCase):
         )
 
     def create_project(self, **overrides):
-        data = {
-            "title": "Test Project",
-            "department": self.department,
-            "chief_investigator": "Test Investigator",
-            "funder": "ARC",
-            "other_funder": "",
-            "other_funder_category": "",
-            "scheme": "Discovery Projects",
-            "start_year": 2026,
-            "start_month": 1,
-            "end_year": 2027,
-            "end_month": 12,
-            "created_by": self.user,
-        }
-        data.update(overrides)
-        return Project.objects.create(**data)
+        return make_project(
+            self.user,
+            self.department,
+            **{
+                "chief_investigator": "Test Investigator",
+                "funder": "ARC",
+                "scheme": "Discovery Projects",
+                "end_year": 2027,
+                **overrides,
+            },
+        )
 
     def create_budget(self, project=None, **overrides):
-        if project is None:
-            project = self.create_project()
-
-        data = {
-            "project": project,
-            "cost_multiplier": Decimal("1.70"),
-            "in_kind_multiplier": Decimal("1.70"),
-            "margin": Decimal("0.3000"),
-            "gst_applicable": True,
-        }
-        data.update(overrides)
-        return Budget.objects.create(**data)
+        return make_budget(
+            project or self.create_project(), **{"gst_applicable": True, **overrides}
+        )
 
     def create_staff_line(self, budget, **overrides):
         data = {
@@ -227,6 +194,25 @@ class ValidateSubmissionTests(TestCase):
             "The project end date must not be before the project start date.",
             reasons,
         )
+
+    def test_missing_end_date(self):
+        budget = self.create_budget(
+            project=self.create_project(end_year=None, end_month=None),
+        )
+
+        reasons = validate_submission(budget)
+
+        self.assertIn("Project end date is required.", reasons)
+
+    def test_missing_department(self):
+        project = self.create_project()
+        project.department = None
+        project.save()
+        budget = self.create_budget(project=project)
+
+        reasons = validate_submission(budget)
+
+        self.assertIn("Department is required.", reasons)
 
     def test_same_year_and_month_is_valid(self):
         budget = self.create_budget(

@@ -1,30 +1,50 @@
-import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
-import type { PriceSummary } from '@/types'
+import { InAud, Ledger, LedgerRow, Money, Panel } from '@/components/shell'
+import { useCurrency } from '@/lib/format/currency'
+import type { BudgetInfo, PriceSummary } from '@/types'
+
 import { DASH, percent } from './format'
 
 interface PriceBreakdownPanelProps {
   summary: PriceSummary
   multiplier: number
   basis: number | undefined
+  /** The same figures in AUD, beside the price when it is in another currency (#152). */
+  inAud: PriceSummary
+  info: Pick<
+    BudgetInfo,
+    'currency' | 'exchange_rate' | 'exchange_rate_override'
+  >
 }
 
 export function PriceBreakdownPanel({
   summary,
   multiplier,
   basis,
+  inAud,
+  info,
 }: PriceBreakdownPanelProps) {
+  const foreign = info.currency !== 'AUD'
+  const currency = useCurrency()
   return (
-    <Panel title="Price Summary" className="mt-4">
+    <Panel
+      title="Price Summary"
+      className="mt-4"
+      description={
+        foreign
+          ? `Priced in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. The price in AUD is shown beneath it.`
+          : undefined
+      }
+    >
       <div className="overflow-x-auto">
         <Ledger>
           <thead>
             <tr className="border-b text-[12px] text-muted-foreground">
               <th className="py-1.5 text-left font-semibold" />
               <th className="w-[190px] py-1.5 text-right font-semibold">
-                Full Project Cost (AUD)
+                Full Project Cost ({currency})
               </th>
               <th className="w-[190px] py-1.5 text-right font-semibold">
-                Price to be charged to Funder (AUD)
+                Price to be charged to Funder ({currency})
               </th>
             </tr>
           </thead>
@@ -87,11 +107,27 @@ export function PriceBreakdownPanel({
               secondValue=""
               value={<Money value={summary.total_price_exc_gst} />}
             />
+            {foreign && (
+              <LedgerRow
+                tone="sub"
+                label="In AUD"
+                secondValue=""
+                value={<InAud value={inAud.total_price_exc_gst} />}
+              />
+            )}
             <LedgerRow
               label="Total Price to be charged to Funder (Including GST)"
               secondValue=""
               value={<Money value={summary.total_price_inc_gst} />}
             />
+            {foreign && (
+              <LedgerRow
+                tone="sub"
+                label="In AUD"
+                secondValue=""
+                value={<InAud value={inAud.total_price_inc_gst} />}
+              />
+            )}
           </tbody>
         </Ledger>
       </div>

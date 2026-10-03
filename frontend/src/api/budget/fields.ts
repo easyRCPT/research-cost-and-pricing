@@ -2,12 +2,12 @@ import { useState } from 'react'
 
 import { useDebounced } from '@/lib/use-debounced'
 import type { BudgetDetail, BudgetInfoInput, ProjectInfoInput } from '@/types'
+
 import { useBudget } from './detail'
-import { useCiFlag } from './ci-flag'
-import { useEdit, type Command } from './write'
+import { type Command, useEdit } from './write'
 
 /** What the saved budget says, which is what every input binds to. */
-export const useBudgetInfo = () => useBudget().data.budget_info
+const useBudgetInfo = () => useBudget().data.budget_info
 
 /**
  * What is typed, held locally until it settles, so a keystroke never
@@ -60,7 +60,7 @@ export function useField<K extends keyof BudgetInfoInput>(
 }
 
 /** budget_info fields with no input behind them, such as the submit button. */
-export function useSetBudgetField() {
+function useSetBudgetField() {
   const edit = useEdit()
 
   return <K extends keyof BudgetInfoInput>(
@@ -71,22 +71,6 @@ export function useSetBudgetField() {
       [{ section: 'budget', field, value } as Command],
       echoBudget(field, value),
     )
-}
-
-/** One project_info field, bound to an input. */
-export function useProjectField<K extends keyof ProjectInfoInput>(
-  field: K,
-  delay = 400,
-) {
-  const stored = useBudget().data.project_info[field] as ProjectInfoInput[K]
-  const update = useUpdateProject()
-
-  return useDraft(
-    stored,
-    (value: ProjectInfoInput[K]) =>
-      update({ [field]: value } as Partial<ProjectInfoInput>),
-    delay,
-  )
 }
 
 /**
@@ -133,12 +117,4 @@ export function useUpdateProject() {
 
     edit(commands, echoProject(patch))
   }
-}
-
-/**
- * The CI cost toggle. Held next to the budget rather than in it, because the
- * engine does not take the flag yet and so there is no column for it.
- */
-export function useCiCostsIncluded() {
-  return useCiFlag()
 }

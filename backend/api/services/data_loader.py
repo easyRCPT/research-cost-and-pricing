@@ -7,11 +7,13 @@ def load_budget_data(budget: Budget) -> dict:
     """
     project_info = build_project_info(budget.project)
 
+    # Until the end date is set the engine costs the start month alone, and
+    # every screen but Project Details is locked.
     project_duration = {
         "start_year": project_info["start_year"],
         "start_month": project_info["start_month"],
-        "end_year": project_info["end_year"],
-        "end_month": project_info["end_month"],
+        "end_year": project_info["end_year"] or project_info["start_year"],
+        "end_month": project_info["end_month"] or project_info["start_month"],
     }
 
     staff_lines = list(budget.staff_lines.all())
@@ -38,19 +40,20 @@ def load_budget_data(budget: Budget) -> dict:
 
 
 def build_project_info(project: Project) -> dict:
+    department = project.department
     return {
         "title": project.title,
         "chief_investigator": project.chief_investigator,
         "funder": project.funder,
-        "department": project.department.name,
-        "faculty": project.department.faculty.name,
+        "department": department.name if department else "",
+        "faculty": department.faculty.name if department else "",
         "scheme": project.scheme,
         "start_year": project.start_year,
         "start_month": project.start_month,
         "end_year": project.end_year,
         "end_month": project.end_month,
         "company": project.COMPANY_CODE,
-        "cost_centre": project.department.code,
+        "cost_centre": department.code if department else "",
         "account_string": project.account_string,
         "activity": project.activity.code if project.activity else None,
         "region": project.region.code if project.region else None,
@@ -121,6 +124,8 @@ def build_budget_info(budget: Budget) -> dict:
         "margin": budget.margin,
         "gst_applicable": budget.gst_applicable,
         "cash_co_contribution": budget.cash_co_contribution,
+        "currency": budget.currency,
+        "exchange_rate_override": budget.exchange_rate_override,
         "comments": budget.comments,
         "justification": budget.justification,
         "justification_notes": budget.justification_notes,

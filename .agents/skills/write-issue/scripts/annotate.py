@@ -32,13 +32,14 @@ Colours carry meaning, so use them consistently:
 Marks are numbered 1..n in the order you list them, so list them in the order
 you want someone to read them.
 """
+
 import json, math, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
 PALETTE = {
-    "red":   (220, 38, 38),
+    "red": (220, 38, 38),
     "amber": (194, 101, 0),
-    "blue":  (37, 99, 235),
+    "blue": (37, 99, 235),
     "green": (22, 163, 74),
 }
 INK = (31, 35, 40)
@@ -48,7 +49,7 @@ FONT_DIR = "/System/Library/Fonts/Supplemental"
 
 
 def font(size, bold=False):
-    for name in (("Arial Bold.ttf",) if bold else ("Arial.ttf",)):
+    for name in ("Arial Bold.ttf",) if bold else ("Arial.ttf",):
         try:
             return ImageFont.truetype(os.path.join(FONT_DIR, name), size)
         except OSError:
@@ -57,10 +58,15 @@ def font(size, bold=False):
 
 
 def badge(draw, cx, cy, n, color, r):
-    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color, outline=PAPER,
-                 width=max(2, r // 7))
-    draw.text((cx, cy + 1), str(n), font=font(int(r * 1.25), True),
-              fill=PAPER, anchor="mm")
+    draw.ellipse(
+        [cx - r, cy - r, cx + r, cy + r],
+        fill=color,
+        outline=PAPER,
+        width=max(2, r // 7),
+    )
+    draw.text(
+        (cx, cy + 1), str(n), font=font(int(r * 1.25), True), fill=PAPER, anchor="mm"
+    )
 
 
 def arrow(draw, p1, p2, color, width):
@@ -68,8 +74,11 @@ def arrow(draw, p1, p2, color, width):
     ang = math.atan2(p2[1] - p1[1], p2[0] - p1[0])
     size = width * 4.5
     for s in (2.5, -2.5):
-        draw.line([p2, (p2[0] + size * math.cos(ang + s),
-                        p2[1] + size * math.sin(ang + s))], fill=color, width=width)
+        draw.line(
+            [p2, (p2[0] + size * math.cos(ang + s), p2[1] + size * math.sin(ang + s))],
+            fill=color,
+            width=width,
+        )
 
 
 def wrap(draw, text, f, max_w):
@@ -108,7 +117,9 @@ def legend(im, marks, scale):
     out = Image.new("RGB", (im.width, im.height + height), PAPER)
     out.paste(im, (0, 0))
     d = ImageDraw.Draw(out)
-    d.line([(0, im.height), (out.width, im.height)], fill=RULE, width=max(1, int(scale)))
+    d.line(
+        [(0, im.height), (out.width, im.height)], fill=RULE, width=max(1, int(scale))
+    )
 
     y = im.height + pad
     for i, ((lines, lh), m) in enumerate(zip(blocks, marks), 1):
@@ -146,7 +157,7 @@ def run(spec, base):
             S = lambda v: v * k
 
         draw = ImageDraw.Draw(im)
-        scale = target / 1500          # badge/legend sizing, independent of ref space
+        scale = target / 1500  # badge/legend sizing, independent of ref space
         lw = max(3, int(3.2 * scale))
         r = int(15 * scale)
         marks = img.get("marks", [])
@@ -161,13 +172,17 @@ def run(spec, base):
             elif "point" in m:
                 x, y = [S(v) for v in m["point"]]
                 bx, by = x - ox, y - oy
-                draw.ellipse([bx - r * 1.9, by - r * 1.9, bx + r * 1.9, by + r * 1.9],
-                             outline=color, width=lw)
+                draw.ellipse(
+                    [bx - r * 1.9, by - r * 1.9, bx + r * 1.9, by + r * 1.9],
+                    outline=color,
+                    width=lw,
+                )
             else:
                 x, y, w, h = [S(v) for v in m["box"]]
                 x, y = x - ox, y - oy
-                draw.rounded_rectangle([x, y, x + w, y + h], radius=int(7 * scale),
-                                       outline=color, width=lw)
+                draw.rounded_rectangle(
+                    [x, y, x + w, y + h], radius=int(7 * scale), outline=color, width=lw
+                )
                 bx, by = x, y
             # Keep the badge on the canvas whatever the mark sits against.
             bx = min(max(bx, r + 2), im.width - r - 2)
@@ -177,7 +192,9 @@ def run(spec, base):
         im = legend(im, marks, scale)
         out = os.path.join(out_dir, img["out"])
         im.save(out, optimize=True)
-        print(f"{img['out']}  {im.size[0]}x{im.size[1]}  {os.path.getsize(out)//1024}KB")
+        print(
+            f"{img['out']}  {im.size[0]}x{im.size[1]}  {os.path.getsize(out) // 1024}KB"
+        )
 
 
 if __name__ == "__main__":

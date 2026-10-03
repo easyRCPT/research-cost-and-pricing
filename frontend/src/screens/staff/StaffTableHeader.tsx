@@ -1,10 +1,12 @@
 import { Th } from '@/components/shell'
+import { useCurrency } from '@/lib/format/currency'
 
 interface StaffTableHeaderProps {
   years: number[]
 }
 
 export function StaffTableHeader({ years }: StaffTableHeaderProps) {
+  const currency = useCurrency()
   return (
     <thead>
       <tr>
@@ -28,7 +30,7 @@ export function StaffTableHeader({ years }: StaffTableHeaderProps) {
           </Th>
         ))}
         <Th rowSpan={2} align="right" className="w-28">
-          Total (AUD)
+          Total ({currency})
         </Th>
         <Th rowSpan={2} className="w-8" />
       </tr>
@@ -38,7 +40,7 @@ export function StaffTableHeader({ years }: StaffTableHeaderProps) {
             Time
           </Th>,
           <Th key={`${year}-total`} align="right" className="w-28">
-            Total (AUD)
+            Total ({currency})
           </Th>,
         ])}
       </tr>

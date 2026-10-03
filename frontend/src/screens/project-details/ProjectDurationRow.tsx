@@ -29,8 +29,11 @@ export function ProjectDurationRow({
   function setDuration(patch: Partial<ProjectInfo>) {
     const next = { ...project, ...patch }
     const endsBeforeStart =
-      next.end_year < next.start_year ||
-      (next.end_year === next.start_year && next.end_month < next.start_month)
+      next.end_year !== null &&
+      (next.end_year < next.start_year ||
+        (next.end_year === next.start_year &&
+          next.end_month !== null &&
+          next.end_month < next.start_month))
 
     onChange(
       endsBeforeStart
@@ -56,12 +59,14 @@ export function ProjectDurationRow({
         />
         <NumberSelect
           label="End year"
+          placeholder="Select"
           value={project.end_year}
           options={endYears}
           onChange={(end_year) => setDuration({ end_year })}
         />
         <NumberSelect
           label="End month"
+          placeholder="Select"
           value={project.end_month}
           options={endMonths}
           onChange={(end_month) => setDuration({ end_month })}
