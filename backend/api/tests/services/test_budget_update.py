@@ -435,6 +435,7 @@ class TestUpdateStaff(SimpleTestCase):
 
     @patch("api.services.classification.validate_with_budget")
     def test_updates_calculation_field(self, mock_validate_with_budget):
+        self.staff_line.category = "Academic"
         result = budget_update.update_staff(
             self.budget,
             LINE_ID,
@@ -450,6 +451,7 @@ class TestUpdateStaff(SimpleTestCase):
         )
         mock_validate_with_budget.assert_called_once_with(
             self.budget,
+            "Academic",
             "Level A.2",
         )
 

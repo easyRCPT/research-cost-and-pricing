@@ -1073,7 +1073,7 @@ class StaffCostLine(models.Model):
     employment_type = models.CharField(
         max_length=20, choices=OnCostRate.EmploymentType.choices
     )
-    category = models.CharField(max_length=20, choices=SalaryRate.Category.choices)
+    category = models.CharField(max_length=20)
     classification = models.CharField(max_length=20)
     time_basis = models.CharField(max_length=10, choices=TimeBasis.choices)
 

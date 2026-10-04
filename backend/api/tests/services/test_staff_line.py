@@ -107,7 +107,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
         self.assertEqual(result, {})
 
         mock_get_budget_details.assert_called_once_with(budget)
-        mock_validate_with_budget.assert_called_once_with(budget, "Level A")
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
     @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
@@ -144,7 +144,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_called_once_with(budget)
-        mock_validate_with_budget.assert_called_once_with(budget, "Level A")
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
     @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
@@ -174,7 +174,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         self.assertFalse(line.in_kind)
-        mock_validate_with_budget.assert_called_once_with(budget, "Level A")
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
     @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
@@ -204,7 +204,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_not_called()
-        mock_validate_with_budget.assert_called_once_with(budget, "Level A")
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
     @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
@@ -245,7 +245,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_not_called()
-        mock_validate_with_budget.assert_called_once_with(budget, "Level A")
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
 
 class TestDelete(StaffLineTestMixin, TestCase):
@@ -338,4 +338,4 @@ class TestTouchesTheBudget(StaffLineTestMixin, TestCase):
 
         budget.refresh_from_db()
         self.assertGreater(budget.updated_at, datetime(2020, 1, 1, tzinfo=UTC))
-        mock_validate_with_budget.assert_called_once_with(budget, "Level A")
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
