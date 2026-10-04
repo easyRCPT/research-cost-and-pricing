@@ -23,9 +23,7 @@ export const tenPercentAllowed = (
 ) =>
   costGroup !== '' &&
   !categories.some(
-    (c) =>
-      c.cost_category === costGroup &&
-      c.excludes_additional_rate,
+    (c) => c.cost_category === costGroup && c.excludes_additional_rate,
   )
 
 /** The patch for a new cost group, clearing what no longer applies to it. */
@@ -68,7 +66,6 @@ export const emptyNonStaffLine = (
   in_kind: false,
   in_kind_reason: '',
   add_ten_percent: false,
-  indirect_rate_multiplier: null,
   by_year: years.map((year) => ({ year, amount: 0 })),
   total: 0,
   direct_total: 0,

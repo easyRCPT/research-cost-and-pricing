@@ -137,7 +137,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "in_kind": False,
                             "in_kind_reason": "",
                             "add_ten_percent": False,
-                            "indirect_rate_multiplier": Decimal("1.00"),
                         },
                         "numeric": {
                             2025: Decimal("1000.125"),
@@ -154,14 +153,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                         },
                         "total": Decimal("3000.581"),
                     },
-                    "indirect_total": {
-                        "numeric": {
-                            2025: Decimal("100.125"),
-                            2026: Decimal(0),
-                            2027: Decimal("200.456"),
-                        },
-                        "total": Decimal("300.581"),
-                    },
                     "column_total": {
                         "numeric": {
                             2025: Decimal("1100.250"),
@@ -173,10 +164,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 },
                 "in_kind_cost_results": {
                     "direct_total": {
-                        "numeric": {},
-                        "total": Decimal(0),
-                    },
-                    "indirect_total": {
                         "numeric": {},
                         "total": Decimal(0),
                     },
@@ -220,7 +207,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                         "Travel": Decimal("3000.456"),
                     },
                     "direct_total": Decimal("3000.456"),
-                    "indirect_cost_recovery": Decimal("300.581"),
                     "total_non_staff_costs": Decimal("3301.037"),
                 },
                 "in_kind_costs": {
@@ -234,7 +220,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "in_kind_non_staff_budget": {
                         "category_totals": {},
                         "direct_total": Decimal(0),
-                        "indirect_cost_recovery": Decimal(0),
                         "total_non_staff_costs": Decimal(0),
                     },
                     "total_in_kind_costs": Decimal(0),
@@ -356,7 +341,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "in_kind": False,
                     "in_kind_reason": "",
                     "add_ten_percent": False,
-                    "indirect_rate_multiplier": Decimal("1.00"),
                     "by_year": [
                         {
                             "year": 2025,
@@ -401,26 +385,8 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
             },
         )
 
-        self.assertEqual(
-            data["non_staff_cost"]["indirect_total"],
-            {
-                "by_year": [
-                    {
-                        "year": 2025,
-                        "cost": Decimal("100.13"),
-                    },
-                    {
-                        "year": 2026,
-                        "cost": Decimal("0.00"),
-                    },
-                    {
-                        "year": 2027,
-                        "cost": Decimal("200.46"),
-                    },
-                ],
-                "total": Decimal("300.58"),
-            },
-        )
+        # No indirect rate (#192): only the direct and column totals.
+        self.assertNotIn("indirect_total", data["non_staff_cost"])
 
         self.assertEqual(
             data["non_staff_cost"]["column_total"],

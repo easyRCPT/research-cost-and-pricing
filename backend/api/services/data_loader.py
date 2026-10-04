@@ -103,7 +103,6 @@ def build_non_staff_info_table(non_staff_lines: list[NonStaffCostLine]) -> dict:
             "in_kind": line.in_kind,
             "in_kind_reason": line.in_kind_reason,
             "add_ten_percent": line.add_ten_percent,
-            "indirect_rate_multiplier": line.indirect_rate_multiplier,
         }
         for line in non_staff_lines
     }

@@ -90,7 +90,7 @@ export const RATE_TABLES: RateTableSpec[] = [
   },
   {
     // Versioned with the rates (#144): the flag decides whether a line takes
-    // the 10% and the indirect rate, so it prices a costing.
+    // the 10%, so it prices a costing.
     id: 'non_staff_cost_categories',
     label: 'Non-staff categories',
     key: [{ field: 'ledger_id', label: 'Ledger ID', kind: 'number' }],
@@ -99,7 +99,7 @@ export const RATE_TABLES: RateTableSpec[] = [
       { field: 'cost_subcategory', label: 'Expense type', kind: 'text' },
       {
         field: 'excludes_additional_rate',
-        label: 'No 10% or indirect rate',
+        label: 'No 10%',
         kind: 'boolean',
       },
     ],

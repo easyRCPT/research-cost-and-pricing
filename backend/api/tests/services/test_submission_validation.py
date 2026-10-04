@@ -8,7 +8,6 @@ from api.models import (
     NonStaffCostLine,
     StaffCostLine,
     YearAllocation,
-    YearAmount,
 )
 from api.services.submission_validation import validate_submission
 from api.tests.factories import make_budget, make_department, make_project, make_user
@@ -236,15 +235,13 @@ class ValidateSubmissionTests(TestCase):
 
         self.assertEqual(reasons, [])
 
-    def test_no_cost_lines(self):
+    def test_a_costing_with_no_cost_lines_can_be_submitted(self):
+        # Approval is where an empty costing is caught, not submission (#192).
         budget = self.create_budget()
 
         reasons = validate_submission(budget)
 
-        self.assertIn(
-            "At least one staff or non-staff cost line is required.",
-            reasons,
-        )
+        self.assertEqual(reasons, [])
 
     def test_staff_line_requires_name_role(self):
         budget = self.create_budget()
@@ -337,35 +334,14 @@ class ValidateSubmissionTests(TestCase):
             reasons,
         )
 
-    def test_staff_cost_requires_value(self):
+    def test_a_staff_line_with_no_time_entered_is_not_refused(self):
         budget = self.create_budget()
 
         self.create_staff_line(budget)
 
         reasons = validate_submission(budget)
 
-        self.assertIn(
-            "Staff cost must have at least one value.",
-            reasons,
-        )
-
-    def test_staff_cost_with_value_is_valid(self):
-        budget = self.create_budget()
-
-        staff_line = self.create_staff_line(budget)
-
-        YearAllocation.objects.create(
-            staff_line=staff_line,
-            year=2026,
-            time=Decimal(1),
-        )
-
-        reasons = validate_submission(budget)
-
-        self.assertNotIn(
-            "Staff cost must have at least one value.",
-            reasons,
-        )
+        self.assertEqual(reasons, [])
 
     def test_in_kind_non_staff_line_requires_reason(self):
         budget = self.create_budget()
@@ -383,35 +359,14 @@ class ValidateSubmissionTests(TestCase):
             reasons,
         )
 
-    def test_non_staff_cost_requires_value(self):
+    def test_a_non_staff_line_with_no_amount_entered_is_not_refused(self):
         budget = self.create_budget()
 
         self.create_non_staff_line(budget)
 
         reasons = validate_submission(budget)
 
-        self.assertIn(
-            "Non-staff cost must have at least one value.",
-            reasons,
-        )
-
-    def test_non_staff_cost_with_value_is_valid(self):
-        budget = self.create_budget()
-
-        non_staff_line = self.create_non_staff_line(budget)
-
-        YearAmount.objects.create(
-            non_staff_line=non_staff_line,
-            year=2026,
-            amount=Decimal(1000),
-        )
-
-        reasons = validate_submission(budget)
-
-        self.assertNotIn(
-            "Non-staff cost must have at least one value.",
-            reasons,
-        )
+        self.assertEqual(reasons, [])
 
     def test_multiple_submission_errors_are_returned(self):
         budget = self.create_budget(
@@ -442,9 +397,5 @@ class ValidateSubmissionTests(TestCase):
         )
         self.assertIn(
             "The project end date must not be before the project start date.",
-            reasons,
-        )
-        self.assertIn(
-            "At least one staff or non-staff cost line is required.",
             reasons,
         )

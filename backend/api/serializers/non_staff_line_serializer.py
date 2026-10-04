@@ -32,12 +32,6 @@ class NonStaffLineSerializer(serializers.Serializer):
         max_length=200, required=False, allow_blank=True, default=""
     )
     add_ten_percent = serializers.BooleanField(default=False)
-    indirect_rate_multiplier = serializers.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        required=False,
-        allow_null=True,
-    )
 
     amounts = YearAmountSerializer(
         many=True,

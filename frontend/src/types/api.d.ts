@@ -2210,7 +2210,7 @@ export interface components {
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
             detail: string;
         };
-        BudgetsNonStaffLinesCreateError: components["schemas"]["BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIndirectRateMultiplierErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
+        BudgetsNonStaffLinesCreateError: components["schemas"]["BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
         BudgetsNonStaffLinesCreateErrorResponse400: components["schemas"]["BudgetsNonStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         BudgetsNonStaffLinesCreateExpenseTypeErrorComponent: {
             /**
@@ -2273,23 +2273,6 @@ export interface components {
              * @enum {string}
              */
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
-            detail: string;
-        };
-        BudgetsNonStaffLinesCreateIndirectRateMultiplierErrorComponent: {
-            /**
-             * @description * `indirect_rate_multiplier` - indirect_rate_multiplier (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "indirect_rate_multiplier";
-            /**
-             * @description * `invalid` - invalid
-             *     * `max_decimal_places` - max_decimal_places
-             *     * `max_digits` - max_digits
-             *     * `max_string_length` - max_string_length
-             *     * `max_whole_digits` - max_whole_digits
-             * @enum {string}
-             */
-            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits";
             detail: string;
         };
         BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent: {
@@ -2965,14 +2948,11 @@ export interface components {
             /** Format: double */
             direct_total: number;
             /** Format: double */
-            indirect_cost_recovery: number;
-            /** Format: double */
             total_non_staff_costs: number;
         };
         NonStaffCost: {
             lines: components["schemas"]["NonStaffLine"][];
             direct_total: components["schemas"]["NonStaffTotal"];
-            indirect_total: components["schemas"]["NonStaffTotal"];
             column_total: components["schemas"]["NonStaffTotal"];
         };
         NonStaffCostCategory: {
@@ -2987,12 +2967,11 @@ export interface components {
          *     * `description` - description
          *     * `in_kind` - in_kind
          *     * `in_kind_reason` - in_kind_reason
-         *     * `indirect_rate_multiplier` - indirect_rate_multiplier
          *     * `position` - position
          *     * `year_value` - year_value
          * @enum {string}
          */
-        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "in_kind_reason" | "indirect_rate_multiplier" | "position" | "year_value";
+        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "in_kind_reason" | "position" | "year_value";
         NonStaffLine: {
             /** Format: uuid */
             id: string;
@@ -3003,8 +2982,6 @@ export interface components {
             in_kind: boolean;
             in_kind_reason: string;
             add_ten_percent: boolean;
-            /** Format: double */
-            indirect_rate_multiplier: number | null;
             by_year: components["schemas"]["NonStaffYear"][];
             /** Format: double */
             total: number;
@@ -3023,8 +3000,6 @@ export interface components {
             in_kind_reason: string;
             /** @default false */
             add_ten_percent: boolean;
-            /** Format: double */
-            indirect_rate_multiplier?: number | null;
             amounts?: components["schemas"]["YearAmount"][];
         };
         NonStaffTotal: {

@@ -783,7 +783,10 @@ class TestConstants(RatesMixin, TestCase):
 
 
 class TestRateConstants(RatesMixin, TestCase):
-    """The rate constants are decimals from 0 to 1 (#151)."""
+    """
+    The rate constants are decimals from 0 to 1 (#151), but the margins have
+    no cap but the column's (#192).
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -801,22 +804,37 @@ class TestRateConstants(RatesMixin, TestCase):
 
     def test_a_bare_percentage_is_refused_with_the_decimal_it_meant(self):
         with self.assertRaises(ValidationError) as refused:
-            self.save(set_constant("minimum_margin", "25"))
+            self.save(set_constant("gst_rate", "10"))
 
         message = str(refused.exception)
-        self.assertIn("Minimum margin is a decimal from 0 to 1", message)
-        self.assertIn("Did you mean 25%? Enter 0.25 or 25%.", message)
-        self.assertEqual(self.value("minimum_margin"), Decimal("0.300000"))
+        self.assertIn("Gst rate is a decimal from 0 to 1", message)
+        self.assertIn("Did you mean 10%? Enter 0.1 or 10%.", message)
+        self.assertEqual(self.value("gst_rate"), Decimal("0.100000"))
 
-    def test_every_rate_is_held_between_0_and_1(self):
-        for name in (
-            "default_margin",
-            "minimum_margin",
-            "gst_rate",
-            "max_payroll_tax",
-            "override_uom_oncosts",
+    def test_a_margin_can_be_above_100_percent(self):
+        for name in ("default_margin", "minimum_margin"):
+            with self.subTest(name=name):
+                self.save(set_constant(name, "1.5"))
+
+                self.assertEqual(self.value(name), Decimal("1.5"))
+
+    def test_a_margin_past_the_column_is_refused_with_the_decimal_it_meant(self):
+        with self.assertRaises(ValidationError) as refused:
+            self.save(set_constant("default_margin", "25"))
+
+        message = str(refused.exception)
+        self.assertIn("from 0 to 9.9999 (0% to 999.99%)", message)
+        self.assertIn("Did you mean 25%? Enter 0.25 or 25%.", message)
+
+    def test_every_rate_is_held_between_0_and_its_ceiling(self):
+        for name, above in (
+            ("default_margin", "10"),
+            ("minimum_margin", "10"),
+            ("gst_rate", "1.01"),
+            ("max_payroll_tax", "1.01"),
+            ("override_uom_oncosts", "1.01"),
         ):
-            for value in ("-0.01", "1.01"):
+            for value in ("-0.01", above):
                 with (
                     self.subTest(name=name, value=value),
                     self.assertRaises(ValidationError),

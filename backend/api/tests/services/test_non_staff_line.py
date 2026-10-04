@@ -47,7 +47,6 @@ class NonStaffLineTestMixin:
             "description": "Test non-staff cost",
             "in_kind": False,
             "add_ten_percent": False,
-            "indirect_rate_multiplier": None,
         }
         data.update(kwargs)
 
@@ -70,7 +69,6 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
             "description": "Test equipment",
             "in_kind": False,
             "add_ten_percent": True,
-            "indirect_rate_multiplier": Decimal("1.20"),
             "amounts": [
                 {
                     "year": 2025,
@@ -93,10 +91,6 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
         self.assertEqual(line.category, category)
         self.assertFalse(line.in_kind)
         self.assertTrue(line.add_ten_percent)
-        self.assertEqual(
-            line.indirect_rate_multiplier,
-            Decimal("1.20"),
-        )
 
         amounts = YearAmount.objects.filter(
             non_staff_line=line,
@@ -168,7 +162,6 @@ class TestCreate(NonStaffLineTestMixin, TestCase):
 
         self.assertFalse(line.in_kind)
         self.assertFalse(line.add_ten_percent)
-        self.assertIsNone(line.indirect_rate_multiplier)
 
     @patch("api.services.non_staff_line.budget_details.get_budget_details")
     def test_validates_non_staff_line_before_saving(
