@@ -128,10 +128,11 @@ def calculate_dean_required(
     """
     Dean review on top of the Head of Department's, when the price is below
     the margin floor or the University is contributing in kind.
+
+    Confirmed with Frank as they are (#192, #87): the floor is the minimum
+    margin rate, seeded at 30%.
     """
     triggers = []
-    # TODO(#87): the floor is seeded at 0.30, the default margin, so any cut to
-    # the margin needs a Dean until Frank sets the margin policy.
     if margin < minimum_margin:
         triggers.append("margin_below_minimum")
     if has_in_kind:
