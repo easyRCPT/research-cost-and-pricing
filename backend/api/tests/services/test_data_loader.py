@@ -110,6 +110,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
         line_1.time_basis = "FTE"
         line_1.in_kind = False
         line_1.in_kind_reason = ""
+        line_1.is_ci = True
 
         line_2 = Mock(spec=StaffCostLine)
         line_2.id = 2
@@ -121,6 +122,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
         line_2.time_basis = "Hourly"
         line_2.in_kind = True
         line_2.in_kind_reason = ""
+        line_2.is_ci = False
 
         result = build_staff_info_table([line_1, line_2])
 
@@ -136,6 +138,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "time_basis": "FTE",
                     "in_kind": False,
                     "in_kind_reason": "",
+                    "is_ci": True,
                 },
                 2: {
                     "position": 1,
@@ -146,6 +149,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "time_basis": "Hourly",
                     "in_kind": True,
                     "in_kind_reason": "",
+                    "is_ci": False,
                 },
             },
         )

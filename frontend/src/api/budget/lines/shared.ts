@@ -5,7 +5,7 @@ export interface Lines<T> {
   lines: T[]
   years: number[]
   patchLine: (id: string, patch: Partial<T>) => void
-  addLine: () => void
+  addLine: (initial?: Partial<T>) => void
   removeLine: (id: string) => void
 }
 

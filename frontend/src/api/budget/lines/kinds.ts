@@ -53,6 +53,7 @@ const STAFF_FIELDS = new Set<string>([
   'time_basis',
   'in_kind',
   'in_kind_reason',
+  'is_ci',
 ])
 
 const NON_STAFF_FIELDS = new Set<string>([
@@ -111,6 +112,7 @@ const staff: LineKindSpec<'staff'> = {
           time_basis: line.time_basis,
           in_kind: line.in_kind,
           in_kind_reason: line.in_kind_reason,
+          is_ci: line.is_ci,
           allocations: line.by_year
             .filter((entry) => entry.time > 0)
             .map(({ year, time }) => ({ year, time })),

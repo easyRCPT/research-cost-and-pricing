@@ -16,7 +16,12 @@ export function EditableGrid({
   return (
     <>
       <Grid>{children}</Grid>
-      <Button variant="outline" size="sm" className="mt-3" onClick={onAdd}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="mt-3"
+        onClick={() => onAdd()}
+      >
         <Plus /> Add row
       </Button>
     </>

@@ -14,14 +14,12 @@ import { StaffFigureCell } from './StaffFigureCell'
 interface StaffYearCellsProps {
   line: EditableStaffLine
   years: number[]
-  excluded: boolean
   patchLine: (id: string, patch: Partial<EditableStaffLine>) => void
 }
 
 export function StaffYearCells({
   line,
   years,
-  excluded,
   patchLine,
 }: StaffYearCellsProps) {
   return years.map((year) => [
@@ -44,11 +42,6 @@ export function StaffYearCells({
         }
       />
     </CellTd>,
-    <StaffFigureCell
-      key={`${year}-total`}
-      value={costFor(line, year)}
-      excluded={excluded}
-      struck
-    />,
+    <StaffFigureCell key={`${year}-total`} value={costFor(line, year)} />,
   ])
 }

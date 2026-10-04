@@ -96,6 +96,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "time_basis": "FTE",
                             "in_kind": False,
                             "in_kind_reason": "",
+                            "is_ci": False,
                         },
                         "rate": Decimal("50000.0000"),
                         "numeric": {
@@ -279,6 +280,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "time_basis": "FTE",
                     "in_kind": False,
                     "in_kind_reason": "",
+                    "is_ci": False,
                     "rate": Decimal("50000.0000"),
                     "by_year": [
                         {

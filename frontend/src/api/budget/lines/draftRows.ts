@@ -64,10 +64,11 @@ export function useDraftRows<K extends DraftSection, S extends { id: string }>(
     lines,
     isDraft,
 
-    addLine: () =>
+    /** A blank draft, or one that starts with `initial` filled in. */
+    addLine: (initial?: Partial<DraftRow<K>>) =>
       writeDrafts([
         ...draftsOf(budgetId, section),
-        emptyRow(crypto.randomUUID(), years),
+        { ...emptyRow(crypto.randomUUID(), years), ...initial },
       ]),
 
     /** A draft goes locally; a saved row goes through `removeSaved`. */

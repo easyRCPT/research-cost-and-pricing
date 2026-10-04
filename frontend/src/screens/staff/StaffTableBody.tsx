@@ -14,7 +14,6 @@ interface StaffTableBodyProps {
   salaryRates: SalaryRate[]
   multipliers: SalaryRateMultiplier[]
   ciId: string | null
-  ciIncluded: boolean
   patchLine: (id: string, patch: Partial<EditableStaffLine>) => void
   removeLine: (id: string) => void
 }
@@ -25,7 +24,6 @@ export function StaffTableBody({
   salaryRates,
   multipliers,
   ciId,
-  ciIncluded,
   patchLine,
   removeLine,
 }: StaffTableBodyProps) {
@@ -46,7 +44,6 @@ export function StaffTableBody({
           classifications={classifications}
           bases={bases}
           isCi={line.id === ciId}
-          ciIncluded={ciIncluded}
           patchLine={patchLine}
           removeLine={removeLine}
         />
