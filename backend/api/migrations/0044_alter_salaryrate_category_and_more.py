@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0040_increment_cap'),
+        ('api', '0043_remove_indirect_rate_multiplier'),
     ]
 
     operations = [
