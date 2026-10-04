@@ -415,6 +415,5 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
                 {"name": "default_margin"},
                 {"value": Decimal("0.25")},
             )
-
         constant.refresh_from_db()
         self.assertEqual(constant.value, Decimal("0.300000"))

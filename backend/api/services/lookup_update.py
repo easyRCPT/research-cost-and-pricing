@@ -47,12 +47,14 @@ from ..models import (
     LookupVersion,
     NonStaffCostCategory,
     NonStaffCostLine,
+    SalaryRate,
     User,
 )
+from . import classification
 from .audit import write_audit
 from .facets import emails_to_names, facets
 from .lookup_definitions import LOOKUP_DEFINITIONS, LookupDefinition
-from .lookup_loader import invalidate_lookup_cache
+from .lookup_loader import current_version_id, invalidate_lookup_cache
 
 # A costing stamped with a version and still waiting on an approver. It can be
 # rejected and resubmitted on newer rates; an approved one cannot (#142).
@@ -161,6 +163,14 @@ def repoint_drafts(version_id: int) -> None:
             moved.append(line)
     # Not a save: re-pointing is not an edit to the draft, so updated_at stays.
     NonStaffCostLine.objects.bulk_update(moved, ["category"])
+
+
+def validate_classification(model: type[models.Model], data: dict) -> None:
+    if model is not SalaryRate:
+        return
+
+    if data.get("classification") is not None:
+        classification.validate(current_version_id(), data["classification"])
 
 
 def _validate_model_fields(model: type[models.Model], *sources: dict) -> None:
@@ -278,6 +288,8 @@ def create(
 ) -> None:
     model = _get_unversioned(table).model
 
+    validate_classification(model, data)
+
     instance = insert_row(model, data)
 
     _audit(
@@ -303,6 +315,8 @@ def update(
 
     _reject_a_new_key(definition, data)
     _validate_model_fields(model, lookup, data)
+
+    validate_classification(model, data)
 
     instance = find_row(model, table, lookup)
     before, after = write_row(instance, data)

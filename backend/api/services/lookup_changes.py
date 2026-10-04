@@ -42,6 +42,10 @@ from ..models import (
     User,
 )
 from .audit import write_audit
+from .classification import (
+    update_increment_cap_in_creation,
+    update_increment_cap_in_deletion,
+)
 from .lookup_definitions import LookupDefinition
 from .lookup_loader import build_constants, invalidate_lookup_cache
 from .lookup_update import (
@@ -245,6 +249,13 @@ def _create(definition: LookupDefinition, version_id: int, change: dict) -> dict
             f"There is already a {_label(definition)} for {_describe(key)}."
         )
 
+    # Update increment caps
+    # Creating a salary rate automatically creates new level and increment cap if needed.
+    if model is SalaryRate:
+        update_increment_cap_in_creation(
+            values["category"], values["classification"], version_id
+        )
+
     insert_row(model, {**values, "version_id": version_id})
     return {"key": key, "before": None, "after": values}
 
@@ -349,6 +360,11 @@ def _delete(definition: LookupDefinition, version_id: int, change: dict) -> dict
     # Only from this version. Costings priced on older versions keep the row,
     # because each version holds every row of its own.
     delete_row(instance)
+
+    # Update increment caps
+    # Removing the last salary rate automatically removes its classification level
+    if model is SalaryRate:
+        update_increment_cap_in_deletion(key, version_id)
 
     return {"key": key, "before": before, "after": None}
 

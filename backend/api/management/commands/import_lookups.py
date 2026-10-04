@@ -53,6 +53,11 @@ WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
 EMPLOYMENT_TYPES = {"Continuing", "Fixed-Term", "Casual"}
 
+CATEGORY_MAPPING = {
+    "Academic": {"Level", "RA Grade"},
+    "Professional": {"UOM"},
+}
+
 # Tables here are shaped (employment_type, rate) with no year
 FLAT_ONCOSTS = {
     "tbLeaveLoading": OnCostRate.OnCostType.LEAVE_LOADING,
@@ -218,7 +223,14 @@ def import_salary_rates(workbook, version):
     return count
 
 
-def import_increment_caps(workbook):
+def category_for(level: str):
+    for category, prefixes in CATEGORY_MAPPING.items():
+        if any(level.startswith(prefix) for prefix in prefixes):
+            return category
+    raise ValueError(f"No category mapping for level: {level}")
+
+
+def import_increment_caps(workbook, version):
     """
     The highest step within each level. Continuing and fixed-term staff
     move up one step per project year. Take the scenario where
@@ -231,8 +243,23 @@ def import_increment_caps(workbook):
         if not level or not is_number(max_steps):
             continue
 
+        if not isinstance(level, str):
+            raise TypeError(f"Level {level} is not a string")
+
+        category = category_for(level)
+
+        # "UOM 10" is stepless: the classification is the level name itself,
+        # not "<level>.<step>". The workbook records max_steps = 1 for it,
+        # which is ambiguous (it reads as if "UOM 10.1" exists), so normalise
+        # it to 0, the marker for stepless levels.
+        if level == "UOM 10":
+            max_steps = 0
+
         IncrementCap.objects.update_or_create(
-            level=level, defaults={"max_steps": int(max_steps)}
+            category=category,
+            level=level,
+            version=version,
+            defaults={"max_steps": int(max_steps)},
         )
 
         count += 1
@@ -569,7 +596,6 @@ class Command(BaseCommand):
 
         unversioned_importers = (
             ("departments", import_departments),
-            ("increment caps", import_increment_caps),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
@@ -578,6 +604,7 @@ class Command(BaseCommand):
 
         versioned_importers = (
             ("salary rates", import_salary_rates),
+            ("increment caps", import_increment_caps),
             ("EBA increases", import_eba_increases),
             ("on-cost rates", import_on_costs),
             ("salary rate multipliers", import_salary_rate_multipliers),

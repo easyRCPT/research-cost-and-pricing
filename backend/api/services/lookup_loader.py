@@ -5,11 +5,13 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 
+from ..calculation.staff import PAYROLL_TYPE
 from ..models import (
     Budget,
     CalculationConstant,
     Currency,
     EbaIncrease,
+    IncrementCap,
     LookupConfiguration,
     OnCostRate,
     SalaryRate,
@@ -74,6 +76,24 @@ def validate_constants(constants: dict) -> None:
         )
 
 
+def _validate_increment_cap(rates: dict, caps: dict) -> None:
+    """Check that all rates defined by increment caps exist."""
+    for (category, level), max_steps in caps.items():
+        classifications = (
+            [level]
+            if max_steps == 0
+            else [f"{level}.{i}" for i in range(1, max_steps + 1)]
+        )
+
+        for payroll_type in set(PAYROLL_TYPE.values()):
+            for classification in classifications:
+                key = (payroll_type, category, classification)
+                if key not in rates:
+                    raise KeyError(
+                        f"Salary rate for {payroll_type}, {category}, {classification} is missing."
+                    )
+
+
 def _get_versioned_lookup_querysets(version_id: int) -> dict[str, QuerySet]:
     return {
         table: definition.model.objects.filter(
@@ -129,6 +149,13 @@ def build_constants(version_id: int) -> dict:
         for row in salary_rates
     }
 
+    increment_caps = cast(
+        list[IncrementCap],
+        tables["increment_caps"],
+    )
+    increment_cap = {(row.category, row.level): row.max_steps for row in increment_caps}
+    _validate_increment_cap(salary_rate, increment_cap)
+
     salary_rate_multipliers = cast(
         list[SalaryRateMultiplier],
         tables["salary_rate_multipliers"],
@@ -182,6 +209,7 @@ def build_constants(version_id: int) -> dict:
     result = {
         "currencies": currencies,
         "salary_rate": salary_rate,
+        "increment_cap": increment_cap,
         "salary_rate_multiplier": salary_rate_multiplier,
         "eba": eba_rate,
         "on_cost_components": on_cost_components,

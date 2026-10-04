@@ -44,6 +44,7 @@ make migrate / makemigrations      apply migrations; write them after a model ch
 make seed / seed-list              load reference data; show what would run
 make backend / frontend            dev servers (backend runs preflight first)
 make test / gen-api                Django test suite; regenerate frontend/src/types/api.d.ts
+make fixture                       Rebuild the DB from workbook lookups and regenerate the lookup fixture
 ```
 
 `make` on its own lists every target. Or go direct: `manage.py <command>` and `uv add` in

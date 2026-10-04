@@ -3,8 +3,8 @@
   "model": "api.lookupversion",
   "pk": 1,
   "fields": {
-    "created_at": "2026-09-30T22:58:06.633Z",
-    "updated_at": "2026-09-30T22:58:06.633Z",
+    "created_at": "2026-10-04T05:03:46.833Z",
+    "updated_at": "2026-10-04T05:03:46.833Z",
     "updated_by": null
   }
 },
@@ -3809,114 +3809,162 @@
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level A",
+  "pk": 1,
   "fields": {
-    "max_steps": 8
+    "category": "Academic",
+    "level": "Level A",
+    "max_steps": 8,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level B",
+  "pk": 2,
   "fields": {
-    "max_steps": 6
+    "category": "Academic",
+    "level": "Level B",
+    "max_steps": 6,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level C",
+  "pk": 3,
   "fields": {
-    "max_steps": 6
+    "category": "Academic",
+    "level": "Level C",
+    "max_steps": 6,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level D",
+  "pk": 4,
   "fields": {
-    "max_steps": 4
+    "category": "Academic",
+    "level": "Level D",
+    "max_steps": 4,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "Level E",
+  "pk": 5,
   "fields": {
-    "max_steps": 1
+    "category": "Academic",
+    "level": "Level E",
+    "max_steps": 1,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "RA Grade 1",
+  "pk": 6,
   "fields": {
-    "max_steps": 3
+    "category": "Academic",
+    "level": "RA Grade 1",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 1",
+  "pk": 7,
   "fields": {
-    "max_steps": 3
+    "category": "Professional",
+    "level": "UOM 1",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 10",
+  "pk": 8,
   "fields": {
-    "max_steps": 1
+    "category": "Professional",
+    "level": "UOM 2",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 2",
+  "pk": 9,
   "fields": {
-    "max_steps": 3
+    "category": "Professional",
+    "level": "UOM 3",
+    "max_steps": 6,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 3",
+  "pk": 10,
   "fields": {
-    "max_steps": 6
+    "category": "Professional",
+    "level": "UOM 4",
+    "max_steps": 4,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 4",
+  "pk": 11,
   "fields": {
-    "max_steps": 4
+    "category": "Professional",
+    "level": "UOM 5",
+    "max_steps": 8,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 5",
+  "pk": 12,
   "fields": {
-    "max_steps": 8
+    "category": "Professional",
+    "level": "UOM 6",
+    "max_steps": 5,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 6",
+  "pk": 13,
   "fields": {
-    "max_steps": 5
+    "category": "Professional",
+    "level": "UOM 7",
+    "max_steps": 5,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 7",
+  "pk": 14,
   "fields": {
-    "max_steps": 5
+    "category": "Professional",
+    "level": "UOM 8",
+    "max_steps": 5,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 8",
+  "pk": 15,
   "fields": {
-    "max_steps": 5
+    "category": "Professional",
+    "level": "UOM 9",
+    "max_steps": 3,
+    "version": 1
   }
 },
 {
   "model": "api.incrementcap",
-  "pk": "UOM 9",
+  "pk": 16,
   "fields": {
-    "max_steps": 3
+    "category": "Professional",
+    "level": "UOM 10",
+    "max_steps": 0,
+    "version": 1
   }
 },
 {
@@ -4501,6 +4549,86 @@
   }
 },
 {
+  "model": "api.calculationconstant",
+  "pk": 1,
+  "fields": {
+    "name": "max_leave_loading",
+    "description": "Leave loading is capped at this many dollars per year",
+    "value": "1611.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 2,
+  "fields": {
+    "name": "full_cost_recovery_multiplier",
+    "description": "The full cost recovery multiplier, for staff and in-kind staff.",
+    "value": "1.700000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 3,
+  "fields": {
+    "name": "max_payroll_tax",
+    "description": "Maximum payroll tax rate",
+    "value": "0.058500",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 4,
+  "fields": {
+    "name": "override_uom_oncosts",
+    "description": "Override multiplier for UoM on-costs",
+    "value": "0.000000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 5,
+  "fields": {
+    "name": "gst_rate",
+    "description": "Goods and Services Tax Amount",
+    "value": "0.100000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 6,
+  "fields": {
+    "name": "default_margin",
+    "description": "The margin a new budget starts at. Editable per budget.",
+    "value": "0.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 7,
+  "fields": {
+    "name": "minimum_margin",
+    "description": "A budget priced below this margin needs the Dean as well as the HoD.",
+    "value": "0.300000",
+    "version": 1
+  }
+},
+{
+  "model": "api.calculationconstant",
+  "pk": 8,
+  "fields": {
+    "name": "salary_rate_year",
+    "description": "The year of recorded salary rate that eba increase starts from.",
+    "value": "2025.000000",
+    "version": 1
+  }
+},
+{
   "model": "api.currency",
   "pk": 1,
   "fields": {
@@ -4707,86 +4835,6 @@
     "code": "USD",
     "name": "United States Dollar",
     "rate": "0.702850",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 1,
-  "fields": {
-    "name": "max_leave_loading",
-    "description": "Leave loading is capped at this many dollars per year",
-    "value": "1611.300000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 2,
-  "fields": {
-    "name": "full_cost_recovery_multiplier",
-    "description": "The full cost recovery multiplier, for staff and in-kind staff.",
-    "value": "1.700000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 3,
-  "fields": {
-    "name": "max_payroll_tax",
-    "description": "Maximum payroll tax rate",
-    "value": "0.058500",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 4,
-  "fields": {
-    "name": "override_uom_oncosts",
-    "description": "Override multiplier for UoM on-costs",
-    "value": "0.000000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 6,
-  "fields": {
-    "name": "gst_rate",
-    "description": "Goods and Services Tax Amount",
-    "value": "0.100000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 7,
-  "fields": {
-    "name": "default_margin",
-    "description": "The margin a new budget starts at. Editable per budget.",
-    "value": "0.300000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 8,
-  "fields": {
-    "name": "minimum_margin",
-    "description": "A budget priced below this margin needs the Dean as well as the HoD.",
-    "value": "0.300000",
-    "version": 1
-  }
-},
-{
-  "model": "api.calculationconstant",
-  "pk": 9,
-  "fields": {
-    "name": "salary_rate_year",
-    "description": "The year of recorded salary rate that eba increase starts from.",
-    "value": "2025.000000",
     "version": 1
   }
 },

@@ -23,6 +23,7 @@ STAFF = {
 }
 
 
+@patch("api.services.staff_line.classification.validate_with_budget")
 @patch("api.services.staff_line.budget_details.get_budget_details")
 @patch("api.services.non_staff_line.budget_details.get_budget_details")
 class TestLineOrder(StaffLineTestMixin, TestCase):
