@@ -68,7 +68,6 @@ export type StaffCategory = S['IncrementCap']['category']
 export type TimeBasis = S['TimeBasisEnum']
 
 /** model.py enums  */
-export type Mode = S['ModeEnum']
 export type Status = S['StatusEnum']
 
 /**

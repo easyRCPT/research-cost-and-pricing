@@ -96,7 +96,6 @@ class _YearRowUpdate(_Update):
     row_id = serializers.UUIDField()
     year = serializers.IntegerField(required=False)
 
-    # TODO: annotate attrs/return as dict[str, Any] for strict pyright
     def validate(self, attrs):
         if (attrs["field"] == "year_value") != ("year" in attrs):
             raise serializers.ValidationError(

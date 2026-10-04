@@ -81,7 +81,7 @@ def notify_withdrawn(budget: Budget, *, levels: list[str]) -> None:
     )
 
 
-# TODO: Add urls of approval step or RCPT to emails
+# TODO (#100): Add urls of approval step or RCPT to emails
 def get_url() -> str:
     return ""
 

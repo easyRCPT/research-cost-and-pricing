@@ -31,7 +31,6 @@ class LookupVersion(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # TODO: replace with admin
     # initial version don't have editor
     updated_by = models.ForeignKey(
         "User",
@@ -635,8 +634,6 @@ class RevenueCategory(models.Model):
         return f"{self.description} ({self.budget_ledger_id})"
 
 
-# TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
-
 # ------------------- Schema for Data Derived From Application -------------
 
 
@@ -739,7 +736,6 @@ class Project(models.Model):
         return self.title
 
 
-# TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     """
     One costed attempt at a project. A project can carry several: a first
@@ -756,10 +752,6 @@ class Budget(models.Model):
         cloned_from_id: int
 
         def get_status_display(self) -> str: ...
-
-    class Mode(models.TextChoices):
-        SIMPLE = "simple", "Simple"
-        FULL = "full", "Full"
 
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -792,7 +784,6 @@ class Budget(models.Model):
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE
     )
-    mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.FULL)
 
     # A record of the rate the budget was last priced at, kept in step by
     # services/budget_details.py. The engine reads the rate from the budget's
@@ -853,8 +844,6 @@ class Budget(models.Model):
 
     dean_triggers = models.JSONField(default=list, blank=True)
 
-    # TODO: Verify whether these fields are still required.
-    #  They appear to overlap with comments and dean_triggers.
     justification = models.CharField(max_length=200, blank=True, default="")
     justification_notes = models.TextField(blank=True, default="")
     dean_exemption_reason = models.TextField(blank=True, default="")
