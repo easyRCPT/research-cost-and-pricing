@@ -13,6 +13,15 @@ if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
 
+# The salary table's payroll type for each employment type: the workbook keys
+# its rate lookup on CONCATENATE(payroll_type, category, classification).
+PAYROLL_TYPE_MAPPING = {
+    "Continuing": "Fortnight",
+    "Fixed-Term": "Fortnight",
+    "Casual": "Casual",
+}
+
+
 # ------------------- Schema for Lookup table data -------------
 class LookupVersion(models.Model):
     if TYPE_CHECKING:
@@ -411,6 +420,12 @@ class EbaIncrease(models.Model):
         ]
 
 
+def get_payroll_type_choices():
+    return (
+        (payroll_type, payroll_type) for payroll_type in PAYROLL_TYPE_MAPPING.values()
+    )
+
+
 class SalaryRate(models.Model):
     """
     Base rates from the RCPT workbook's tSalaryRate table.
@@ -419,17 +434,11 @@ class SalaryRate(models.Model):
     if TYPE_CHECKING:
         id: int
 
-    class PayrollType(models.TextChoices):
-        # MEMBER = value, label
-        FORTNIGHT = "Fortnight", "Fortnight"
-        CASUAL = "Casual", "Casual"
-
-    class Category(models.TextChoices):
-        ACADEMIC = "Academic", "Academic"
-        PROFESSIONAL = "Professional", "Professional"
-
-    payroll_type = models.CharField(max_length=20, choices=PayrollType.choices)
-    category = models.CharField(max_length=20, choices=Category.choices)
+    payroll_type = models.CharField(
+        max_length=20,
+        choices=get_payroll_type_choices(),
+    )
+    category = models.CharField(max_length=20)
     classification = models.CharField(max_length=20)
     rate = models.DecimalField(
         max_digits=12,

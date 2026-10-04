@@ -28,8 +28,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.fields import get_error_detail
 
-from ..calculation.staff import PAYROLL_TYPE
 from ..models import (
+    PAYROLL_TYPE_MAPPING,
     Budget,
     CalculationConstant,
     Currency,
@@ -45,6 +45,7 @@ from .audit import write_audit
 from .classification import (
     update_increment_cap_in_creation,
     update_increment_cap_in_deletion,
+    validate_classification,
 )
 from .lookup_definitions import LookupDefinition
 from .lookup_loader import build_constants, invalidate_lookup_cache
@@ -264,6 +265,10 @@ def _update(definition: LookupDefinition, version_id: int, change: dict) -> dict
     key = _typed_key(definition, change.get("lookup"))
     instance = _find(definition, version_id, key)
 
+    # Category and classification are validated through increment caps, not serializer.
+    if definition.model == SalaryRate:
+        validate_classification(key["category"], key["classification"], version_id)
+
     renamed = set(change.get("values") or {}) & set(definition.key)
     if renamed:
         raise ValidationError(
@@ -292,7 +297,7 @@ def _reject_removing_a_rate_in_use(instance: models.Model) -> None:
         budget__lookup_version__isnull=True,
         employment_type__in=[
             employment
-            for employment, payroll in PAYROLL_TYPE.items()
+            for employment, payroll in PAYROLL_TYPE_MAPPING.items()
             if payroll == instance.payroll_type
         ],
         category=instance.category,

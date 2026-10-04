@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 from django.core.cache import cache
 from django.test import SimpleTestCase, TestCase
 
-from api.calculation.staff import PAYROLL_TYPE
 from api.models import (
+    PAYROLL_TYPE_MAPPING,
     Budget,
     CalculationConstant,
     Currency,
@@ -514,7 +514,7 @@ class TestGetConstants(SimpleTestCase):
                 classification="UOM 10",
                 rate=Decimal(60000),
             )
-            for payroll_type in set(PAYROLL_TYPE.values())
+            for payroll_type in set(PAYROLL_TYPE_MAPPING.values())
         ]
 
         tables = self._build_tables()

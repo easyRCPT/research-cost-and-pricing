@@ -2470,12 +2470,16 @@ export interface components {
              */
             attr: "category";
             /**
-             * @description * `invalid_choice` - invalid_choice
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
              *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
              *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
              * @enum {string}
              */
-            code: "invalid_choice" | "null" | "required";
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
             detail: string;
         };
         BudgetsStaffLinesCreateClassificationErrorComponent: {
@@ -2624,12 +2628,6 @@ export interface components {
             /** Format: double */
             value: number;
         };
-        /**
-         * @description * `Academic` - Academic
-         *     * `Professional` - Professional
-         * @enum {string}
-         */
-        CategoryEnum: "Academic" | "Professional";
         ChangeSet: {
             id: number;
             note: string;
@@ -3532,7 +3530,7 @@ export interface components {
         RoleEnum: "member" | "hod" | "dean";
         SalaryRate: {
             payroll_type: components["schemas"]["PayrollTypeEnum"];
-            category: components["schemas"]["CategoryEnum"];
+            category: string;
             classification: string;
             /** Format: double */
             rate: number;
@@ -3591,7 +3589,7 @@ export interface components {
             position: number;
             name_role: string;
             employment_type: components["schemas"]["EmploymentTypeEnum"];
-            category: components["schemas"]["CategoryEnum"];
+            category: string;
             classification: string;
             time_basis: components["schemas"]["TimeBasisEnum"];
             in_kind: boolean;
@@ -3607,7 +3605,7 @@ export interface components {
             id?: string;
             name_role: string;
             employment_type: components["schemas"]["EmploymentTypeEnum"];
-            category: components["schemas"]["CategoryEnum"];
+            category: string;
             classification: string;
             time_basis: components["schemas"]["TimeBasisEnum"];
             /** @default false */

@@ -1,7 +1,7 @@
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
-from ..models import OnCostRate, SalaryRate, StaffCostLine
+from ..models import OnCostRate, StaffCostLine
 from ..services.staff_time_validation import check_time_against_basis
 from .line_id import validate_new_line_id
 
@@ -19,7 +19,7 @@ class StaffLineSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False, validators=[validate_new_line_id])
     name_role = serializers.CharField(max_length=100)
     employment_type = serializers.ChoiceField(choices=OnCostRate.EmploymentType.choices)
-    category = serializers.ChoiceField(choices=SalaryRate.Category.choices)
+    category = serializers.CharField(max_length=20)
     classification = serializers.CharField(max_length=20)
     time_basis = serializers.ChoiceField(choices=StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField(default=False)
