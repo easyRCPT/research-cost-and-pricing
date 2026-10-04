@@ -1,8 +1,12 @@
 from decimal import Decimal
 
-# Classifications that carry no step suffix, i.e. the string is the level
-# itself, not "<level>.<step>"
-NO_STEP_CLASSIFICATIONS = ["UOM 10"]
+# The salary table's payroll type for each employment type: the workbook keys
+# its rate lookup on CONCATENATE(payroll_type, category, classification).
+PAYROLL_TYPE = {
+    "Continuing": "Fortnight",
+    "Fixed-Term": "Fortnight",
+    "Casual": "Casual",
+}
 
 
 def calculate_staff_table(
@@ -125,15 +129,6 @@ def calculate_column_total(
 def _get_salary_rate_year(constants: dict) -> int:
     salary_rate_year = constants["constants"]["salary_rate_year"]
     return int(salary_rate_year)
-
-
-# The salary table's payroll type for each employment type: the workbook keys
-# its rate lookup on CONCATENATE(payroll_type, category, classification).
-PAYROLL_TYPE = {
-    "Continuing": "Fortnight",
-    "Fixed-Term": "Fortnight",
-    "Casual": "Casual",
-}
 
 
 def _get_eba_rate(eba: dict, year: int) -> Decimal:
@@ -272,7 +267,8 @@ def find_salary_rate(
     else:
         level, _, step_str = classification.rpartition(".")
         level = level or classification
-        max_steps = constants["increment_cap"][level]
+        cap_key = (category, level)
+        max_steps = constants["increment_cap"][cap_key]
 
         if max_steps == 0:
             new_classification = classification
@@ -282,10 +278,10 @@ def find_salary_rate(
             new_classification = f"{level}.{target}"
 
     # Find base salary rate in 2025 from lookup table
-    key = (payroll_type, category, new_classification)
+    salary_key = (payroll_type, category, new_classification)
     # A row can carry a category/classification pair with no rate while it is
     # still being filled in. Cost it at zero rather than failing the budget.
-    base_salary_rate = constants["salary_rate"].get(key, Decimal(0))
+    base_salary_rate = constants["salary_rate"].get(salary_key, Decimal(0))
 
     # Calculate salary rate
     salary_rate_multiplier = constants["salary_rate_multiplier"][time_basis]

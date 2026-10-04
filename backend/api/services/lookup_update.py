@@ -165,7 +165,7 @@ def repoint_drafts(version_id: int) -> None:
     NonStaffCostLine.objects.bulk_update(moved, ["category"])
 
 
-def _validate_classification(model: type[models.Model], data: dict) -> None:
+def validate_classification(model: type[models.Model], data: dict) -> None:
     if model is not SalaryRate:
         return
 
@@ -288,7 +288,7 @@ def create(
 ) -> None:
     model = _get_unversioned(table).model
 
-    _validate_classification(model, data)
+    validate_classification(model, data)
 
     instance = insert_row(model, data)
 
@@ -316,7 +316,7 @@ def update(
     _reject_a_new_key(definition, data)
     _validate_model_fields(model, lookup, data)
 
-    _validate_classification(model, data)
+    validate_classification(model, data)
 
     instance = find_row(model, table, lookup)
     before, after = write_row(instance, data)

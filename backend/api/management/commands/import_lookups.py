@@ -53,6 +53,11 @@ WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
 EMPLOYMENT_TYPES = {"Continuing", "Fixed-Term", "Casual"}
 
+CATEGORY_MAPPING = {
+    "Academic": {"Level", "RA Grade"},
+    "Professional": {"UOM"},
+}
+
 # Tables here are shaped (employment_type, rate) with no year
 FLAT_ONCOSTS = {
     "tbLeaveLoading": OnCostRate.OnCostType.LEAVE_LOADING,
@@ -218,6 +223,13 @@ def import_salary_rates(workbook, version):
     return count
 
 
+def category_for(level: str):
+    for category, prefixes in CATEGORY_MAPPING.items():
+        if any(level.startswith(prefix) for prefix in prefixes):
+            return category
+    raise ValueError(f"No category mapping for level: {level}")
+
+
 def import_increment_caps(workbook, version):
     """
     The highest step within each level. Continuing and fixed-term staff
@@ -231,6 +243,11 @@ def import_increment_caps(workbook, version):
         if not level or not is_number(max_steps):
             continue
 
+        if not isinstance(level, str):
+            raise ValueError(f"Level {level} is not a string")
+
+        category = category_for(level)
+
         # "UOM 10" is stepless: the classification is the level name itself,
         # not "<level>.<step>". The workbook records max_steps = 1 for it,
         # which is ambiguous (it reads as if "UOM 10.1" exists), so normalise
@@ -239,7 +256,10 @@ def import_increment_caps(workbook, version):
             max_steps = 0
 
         IncrementCap.objects.update_or_create(
-            level=level, version=version, defaults={"max_steps": int(max_steps)}
+            category=category,
+            level=level,
+            version=version,
+            defaults={"max_steps": int(max_steps)},
         )
 
         count += 1

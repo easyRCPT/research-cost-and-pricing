@@ -4,7 +4,10 @@ from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
 
 from api.models import Budget, IncrementCap, LookupVersion
-from api.services.classification import validate, validate_with_budget
+from api.services.classification import (
+    validate,
+    validate_with_budget,
+)
 
 
 class TestValidate(TestCase):
@@ -14,6 +17,7 @@ class TestValidate(TestCase):
 
     def test_accepts_valid_stepped_classification(self):
         IncrementCap.objects.create(
+            category="Academic",
             level="Level A",
             max_steps=5,
             version_id=self.version.id,
@@ -23,6 +27,7 @@ class TestValidate(TestCase):
 
     def test_accepts_valid_stepless_classification(self):
         IncrementCap.objects.create(
+            category="Professional",
             level="UOM 10",
             max_steps=0,
             version_id=self.version.id,
@@ -39,6 +44,7 @@ class TestValidate(TestCase):
 
     def test_rejects_step_for_stepless_level(self):
         IncrementCap.objects.create(
+            category="Professional",
             level="UOM 10",
             max_steps=0,
             version_id=self.version.id,
@@ -52,6 +58,7 @@ class TestValidate(TestCase):
 
     def test_rejects_stepped_classification_without_step(self):
         IncrementCap.objects.create(
+            category="Academic",
             level="Level A",
             max_steps=5,
             version_id=self.version.id,
@@ -65,6 +72,7 @@ class TestValidate(TestCase):
 
     def test_rejects_non_numeric_step(self):
         IncrementCap.objects.create(
+            category="Academic",
             level="Level A",
             max_steps=5,
             version_id=self.version.id,
@@ -78,6 +86,7 @@ class TestValidate(TestCase):
 
     def test_rejects_step_above_maximum(self):
         IncrementCap.objects.create(
+            category="Academic",
             level="Level A",
             max_steps=5,
             version_id=self.version.id,
@@ -91,6 +100,7 @@ class TestValidate(TestCase):
 
     def test_rejects_zero_step(self):
         IncrementCap.objects.create(
+            category="Academic",
             level="Level A",
             max_steps=5,
             version_id=self.version.id,
@@ -104,6 +114,7 @@ class TestValidate(TestCase):
 
     def test_rejects_increment_cap_from_different_version(self):
         IncrementCap.objects.create(
+            category="Academic",
             level="Level A",
             max_steps=5,
             version=self.other_version,

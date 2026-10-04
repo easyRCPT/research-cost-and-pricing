@@ -52,6 +52,7 @@ from .lookup_update import (
     is_baseline,
     plain,
     priced_on,
+    validate_classification,
     write_row,
 )
 
@@ -240,6 +241,8 @@ def _create(definition: LookupDefinition, version_id: int, change: dict) -> dict
 
     values = _typed_values(definition, change.get("values"))
     key = {name: values.get(name) for name in definition.key}
+    # Validate classification for salary rate creation
+    validate_classification(model, key)
     if model.objects.filter(**key, version_id=version_id).exists():
         raise ValidationError(
             f"There is already a {_label(definition)} for {_describe(key)}."

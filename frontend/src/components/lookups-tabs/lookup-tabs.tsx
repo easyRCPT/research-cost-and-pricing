@@ -66,6 +66,7 @@ const RATE_FILTERS: DataTableFilter<SalaryRate>[] = [
 
 const cap = columnHelper<IncrementCap>()
 const CAP_COLUMNS = cap.columns([
+  cap.accessor('category', { header: 'Category family' }),
   cap.accessor('level', { header: 'Classification family' }),
   cap.accessor('max_steps', {
     header: 'Max. step',

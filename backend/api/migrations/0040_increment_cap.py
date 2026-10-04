@@ -32,18 +32,34 @@ INCREMENT_CAPS = (
     ("UOM 10", 0),
 )
 
+CATEGORY_MAPPING = {
+    "Academic": {"Level", "RA Grade"},
+    "Professional": {"UOM"},
+}
+
+
+def category_for(level):
+    for category, prefixes in CATEGORY_MAPPING.items():
+        if any(level.startswith(prefix) for prefix in prefixes):
+            return category
+    raise ValueError(f"No category mapping for level: {level}")
+
 
 def fill_increment_caps(apps, schema_editor):
     LookupVersion = apps.get_model("api", "LookupVersion")
+    CalculationConstant = apps.get_model("api", "CalculationConstant")
     IncrementCap = apps.get_model("api", "IncrementCap")
 
     for version in LookupVersion.objects.all():
-        if not IncrementCap.objects.filter(version=version).exists():
+        # The initial version created by 0019 is empty and will be
+        # populated by the lookup seed.
+        if not CalculationConstant.objects.filter(version=version).exists():
             continue
 
         IncrementCap.objects.bulk_create(
             [
                 IncrementCap(
+                    category=category_for(level),
                     level=level,
                     max_steps=max_steps,
                     version=version,
@@ -76,6 +92,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "category",
+                    models.CharField(max_length=30),
+                ),
+                (
                     "level",
                     models.CharField(max_length=20),
                 ),
@@ -94,7 +114,7 @@ class Migration(migrations.Migration):
             options={
                 "constraints": [
                     models.UniqueConstraint(
-                        fields=("level", "version"),
+                        fields=("category", "level", "version"),
                         name="unique_increment_cap",
                     ),
                 ],

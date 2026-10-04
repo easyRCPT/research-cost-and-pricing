@@ -2876,6 +2876,7 @@ export interface components {
             total_in_kind_costs: number;
         };
         IncrementCap: {
+            category: string;
             level: string;
             max_steps: number;
         };
@@ -3682,6 +3683,7 @@ export interface components {
         /**
          * @description * `salary_rates` - salary_rates
          *     * `salary_rate_multipliers` - salary_rate_multipliers
+         *     * `increment_caps` - increment_caps
          *     * `eba_increases` - eba_increases
          *     * `on_cost_rates` - on_cost_rates
          *     * `non_staff_cost_categories` - non_staff_cost_categories
@@ -3689,7 +3691,7 @@ export interface components {
          *     * `currencies` - currencies
          * @enum {string}
          */
-        TableEnum: "salary_rates" | "salary_rate_multipliers" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants" | "currencies";
+        TableEnum: "salary_rates" | "salary_rate_multipliers" | "increment_caps" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants" | "currencies";
         /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily
