@@ -5,8 +5,11 @@ import { Slider } from '@/components/ui/slider'
 import { percent1 } from '@/lib/format/utils'
 import { toastOutOfRange } from '@/lib/range'
 
-// TODO(#87): the 0 floor and 100% ceiling hold until Frank sets the margin policy.
-const MAX_MARGIN = 100
+// No negative margin and no cap (#192): a margin can be above 100%, up to
+// the 999.99% the server's column holds. The slider covers the usual range;
+// the box takes the rest.
+const MAX_MARGIN = 999.99
+const SLIDER_MAX = 100
 
 const asPercent = (fraction: number) => fraction * 100
 const asFraction = (percent: number) =>
@@ -29,12 +32,13 @@ export function MarginPanel() {
             <Slider
               className="max-w-[320px] min-w-[220px] flex-1"
               min={0}
-              max={MAX_MARGIN}
+              max={SLIDER_MAX}
               step={1}
-              value={[percent]}
+              value={[Math.min(percent, SLIDER_MAX)]}
               onValueChange={([next]) => setPercent(next)}
             />
             <NumberInput
+              aria-label="Margin percentage"
               min={0}
               max={MAX_MARGIN}
               onOutOfRange={() => toastOutOfRange('Margin', 0, MAX_MARGIN)}

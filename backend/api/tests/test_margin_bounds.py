@@ -3,6 +3,7 @@ A costing's margin bounds (#192).
 
 No negative margin: a discount comes from a cash co-contribution or in-kind
 costs, never a margin below zero, so the floor stays at 0% (#96 not needed).
+No cap either: a margin can be above 100%, up to the 999.99% the column holds.
 """
 
 from decimal import Decimal
@@ -38,6 +39,7 @@ class MarginBoundsTest(TestCase):
         response = self.set_margin(-0.1)
 
         self.assertEqual(response.status_code, 400)
+        self.assertIn("A margin can't be below 0%.", response.content.decode())
         self.assertEqual(self.margin(), Decimal("0.30"))
 
     def test_a_margin_of_zero_is_allowed(self):
@@ -45,3 +47,16 @@ class MarginBoundsTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.margin(), Decimal(0))
+
+    def test_a_margin_above_100_percent_is_saved(self):
+        response = self.set_margin(1.5)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.margin(), Decimal("1.5"))
+
+    def test_a_margin_past_what_the_column_holds_is_refused_plainly(self):
+        response = self.set_margin(10)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("A margin can be at most 999.99%.", response.content.decode())
+        self.assertEqual(self.margin(), Decimal("0.30"))

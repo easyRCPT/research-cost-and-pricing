@@ -803,10 +803,18 @@ class Budget(models.Model):
     # earns over what it costs. Price = project_cost * (1 + margin), so the
     # default 0.30 prices a $100k project at $130k, not at $142,857. Settled
     # with RIC; the workbook's Summary of Price agrees.
+    #
+    # No negative margin and no cap (#192): a discount comes from a cash
+    # co-contribution or in-kind costs, and a margin can be above 100%. The
+    # most the column holds, 999.99%, is the only ceiling.
+    MAX_MARGIN = Decimal("9.9999")
     margin = models.DecimalField(
         max_digits=5,
         decimal_places=4,
-        validators=[MinValueValidator(Decimal(0))],
+        validators=[
+            MinValueValidator(Decimal(0), message="A margin can't be below 0%%."),
+            MaxValueValidator(MAX_MARGIN, message="A margin can be at most 999.99%%."),
+        ],
     )
 
     gst_applicable = models.BooleanField(default=True)
