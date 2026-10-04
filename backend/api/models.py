@@ -328,7 +328,7 @@ class SalaryRateMultiplier(models.Model):
 
 # Defines the Salary Cap
 class IncrementCap(models.Model):
-    category = models.CharField(max_length=30)
+    category = models.CharField(max_length=20)
     level = models.CharField(max_length=20)
     # 0 means the level is stepless (e.g. "UOM 10"): the classification is
     # the level name itself, not "<level>.<step>". Stepped levels are >= 1.

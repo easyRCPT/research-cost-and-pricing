@@ -244,7 +244,7 @@ def import_increment_caps(workbook, version):
             continue
 
         if not isinstance(level, str):
-            raise ValueError(f"Level {level} is not a string")
+            raise TypeError(f"Level {level} is not a string")
 
         category = category_for(level)
 

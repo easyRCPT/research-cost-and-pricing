@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "category",
-                    models.CharField(max_length=30),
+                    models.CharField(max_length=20),
                 ),
                 (
                     "level",

@@ -234,7 +234,7 @@ export const LOOKUP_TABS = [
     value: 'eba',
     title: 'EBA Increases',
     notice: () =>
-      'Only the years when EBA rate changes are displayed. Years with the same rate are not included.',
+      'Only years in which the EBA rate changes are displayed. Years with no change in the rate are omitted. EBA increases before the first recorded year are treated as 0.',
     tables: [
       lookupTable({
         value: 'increases',

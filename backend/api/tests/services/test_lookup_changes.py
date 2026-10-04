@@ -26,6 +26,7 @@ from api.models import (
     Department,
     EbaIncrease,
     Faculty,
+    IncrementCap,
     LookupChangeSet,
     LookupConfiguration,
     LookupVersion,
@@ -477,7 +478,12 @@ class TestAddAndRemove(RatesMixin, TestCase):
             SalaryRate.objects.filter(version=self.version, **LEVEL_A1).exists()
         )
 
-    def test_a_rate_only_submitted_costings_used_can_be_removed(self):
+    @patch("api.services.lookup_changes.build_constants")
+    def test_a_rate_only_submitted_costings_used_can_be_removed(
+        self, mock_build_constants
+    ):
+        # This test is about lookup versioning; build_constants validation is tested separately.
+
         # They keep the version they were stamped with, which still has it.
         self.draft_line_on("Level A.1", submitted=True)
         self.submitted_on_current()
@@ -548,6 +554,114 @@ class TestAddAndRemove(RatesMixin, TestCase):
             )
 
         self.assertTrue(NonStaffCostCategory.objects.filter(pk=category.pk).exists())
+
+
+def salary_rate_changes(
+    classification: str,
+    rate: str = "100000",
+) -> list[dict]:
+    return [
+        {
+            "table": "salary_rates",
+            "op": "create",
+            "values": {
+                "payroll_type": payroll_type,
+                "category": "Academic",
+                "classification": classification,
+                "rate": rate,
+            },
+        }
+        for payroll_type in ("Fortnight", "Casual")
+    ]
+
+
+class TestSalaryRateIncrementCaps(RatesMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.make_rates()
+
+    def test_adding_first_salary_rate_creates_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+
+        cap = IncrementCap.objects.get(
+            version_id=self.current(),
+            category="Academic",
+            level="Level Test",
+        )
+        self.assertEqual(cap.max_steps, 1)
+
+    def test_adding_higher_salary_rate_increases_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+
+        self.save(*salary_rate_changes("Level Test.2", "105000"))
+
+        cap = IncrementCap.objects.get(
+            version_id=self.current(),
+            category="Academic",
+            level="Level Test",
+        )
+        self.assertEqual(cap.max_steps, 2)
+
+    def test_deleting_highest_step_updates_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+        self.save(*salary_rate_changes("Level Test.2"))
+        self.save(*salary_rate_changes("Level Test.3"))
+
+        self.save(
+            *[
+                {
+                    "table": "salary_rates",
+                    "op": "delete",
+                    "lookup": {
+                        "payroll_type": payroll_type,
+                        "category": "Academic",
+                        "classification": "Level Test.3",
+                    },
+                }
+                for payroll_type in ("Fortnight", "Casual")
+            ]
+        )
+
+        cap = IncrementCap.objects.get(
+            version_id=self.current(),
+            category="Academic",
+            level="Level Test",
+        )
+        self.assertEqual(cap.max_steps, 2)
+
+    def test_deleting_last_salary_rate_removes_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+
+        self.assertTrue(
+            IncrementCap.objects.filter(
+                version_id=self.current(),
+                category="Academic",
+                level="Level Test",
+            ).exists()
+        )
+
+        self.save(
+            *[
+                {
+                    "table": "salary_rates",
+                    "op": "delete",
+                    "lookup": {
+                        "payroll_type": payroll_type,
+                        "category": "Academic",
+                        "classification": "Level Test.1",
+                    },
+                }
+                for payroll_type in ("Fortnight", "Casual")
+            ]
+        )
+
+        self.assertFalse(
+            IncrementCap.objects.filter(
+                version_id=self.current(),
+                category="Academic",
+                level="Level Test",
+            ).exists()
+        )
 
 
 class TestOneWritePath(RatesMixin, TestCase):
