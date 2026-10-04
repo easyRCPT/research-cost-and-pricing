@@ -304,7 +304,6 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.deliverable.sponsor = "Test Sponsor"
 
         self.budget = Mock(spec=Budget)
-        self.budget.mode = "full"
         self.budget.cost_multiplier = Decimal("1.0")
         self.budget.in_kind_multiplier = Decimal("1.0")
         self.budget.margin = Decimal("0.30")
@@ -326,7 +325,6 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.assertEqual(
             result,
             {
-                "mode": "full",
                 "cost_multiplier": Decimal("1.0"),
                 "in_kind_multiplier": Decimal("1.0"),
                 "margin": Decimal("0.30"),

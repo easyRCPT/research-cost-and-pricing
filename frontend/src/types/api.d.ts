@@ -1925,7 +1925,6 @@ export interface components {
             section: "budget";
         };
         BudgetInfo: {
-            mode: components["schemas"]["ModeEnum"];
             /** Format: double */
             cost_multiplier: number;
             /** Format: double */
@@ -2955,12 +2954,6 @@ export interface components {
             groups: string[];
             assignments: components["schemas"]["Assignment"][];
         };
-        /**
-         * @description * `simple` - Simple
-         *     * `full` - Full
-         * @enum {string}
-         */
-        ModeEnum: "simple" | "full";
         NonStaffBudget: {
             category_totals: {
                 [key: string]: number;

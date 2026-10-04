@@ -118,7 +118,6 @@ def build_non_staff_numeric_table(non_staff_lines: list[NonStaffCostLine]) -> di
 
 def build_budget_info(budget: Budget) -> dict:
     return {
-        "mode": budget.mode,
         "cost_multiplier": budget.cost_multiplier,
         "in_kind_multiplier": budget.in_kind_multiplier,
         "margin": budget.margin,
