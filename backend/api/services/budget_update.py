@@ -272,6 +272,19 @@ def _set_in_kind(line, field: str, value: object) -> None:
     _set_field(line, field, value)
 
 
+def _set_ci(budget: Budget, line: StaffCostLine, value: object) -> None:
+    """
+    Mark the chief investigator's line (#166). At most one per budget, so
+    marking a line takes the mark from any other.
+    """
+    if not isinstance(value, bool):
+        raise ValidationError("is_ci must be true or false.")
+    if value:
+        budget.staff_lines.exclude(id=line.id).filter(is_ci=True).update(is_ci=False)
+    line.is_ci = value
+    _save(line, ["is_ci"])
+
+
 def update_staff(
     budget: Budget,
     row_id: UUID,
@@ -290,6 +303,10 @@ def update_staff(
         "name_role",
         "position",
     }
+
+    if field == "is_ci":
+        _set_ci(budget, staff_line, value)
+        return False
 
     fields_requiring_calculation = {
         "classification",

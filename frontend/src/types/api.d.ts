@@ -2499,7 +2499,7 @@ export interface components {
             code: "invalid_choice" | "null" | "required";
             detail: string;
         };
-        BudgetsStaffLinesCreateError: components["schemas"]["BudgetsStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateCategoryErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateClassificationErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXTimeErrorComponent"];
+        BudgetsStaffLinesCreateError: components["schemas"]["BudgetsStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateCategoryErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateClassificationErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIsCiErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXTimeErrorComponent"];
         BudgetsStaffLinesCreateErrorResponse400: components["schemas"]["BudgetsStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         BudgetsStaffLinesCreateIdErrorComponent: {
             /**
@@ -2544,6 +2544,20 @@ export interface components {
              * @enum {string}
              */
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        BudgetsStaffLinesCreateIsCiErrorComponent: {
+            /**
+             * @description * `is_ci` - is_ci (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "is_ci";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
             detail: string;
         };
         BudgetsStaffLinesCreateNameRoleErrorComponent: {
@@ -3551,13 +3565,14 @@ export interface components {
          *     * `employment_type` - employment_type
          *     * `in_kind` - in_kind
          *     * `in_kind_reason` - in_kind_reason
+         *     * `is_ci` - is_ci
          *     * `name_role` - name_role
          *     * `position` - position
          *     * `time_basis` - time_basis
          *     * `year_value` - year_value
          * @enum {string}
          */
-        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "in_kind_reason" | "name_role" | "position" | "time_basis" | "year_value";
+        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "in_kind_reason" | "is_ci" | "name_role" | "position" | "time_basis" | "year_value";
         StaffLine: {
             /** Format: uuid */
             id: string;
@@ -3569,6 +3584,7 @@ export interface components {
             time_basis: components["schemas"]["TimeBasisEnum"];
             in_kind: boolean;
             in_kind_reason: string;
+            is_ci: boolean;
             /** Format: double */
             rate: number;
             by_year: components["schemas"]["StaffYear"][];
@@ -3587,6 +3603,8 @@ export interface components {
             in_kind: boolean;
             /** @default  */
             in_kind_reason: string;
+            /** @default false */
+            is_ci: boolean;
             allocations?: components["schemas"]["YearAllocation"][];
         };
         StaffTotal: {

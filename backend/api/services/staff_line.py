@@ -15,6 +15,10 @@ def create(budget: Budget, data: dict) -> dict:
 
     allocations = data.pop("allocations", [])
 
+    if data.get("is_ci"):
+        # One CI line per budget: a new one takes the mark.
+        budget.staff_lines.filter(is_ci=True).update(is_ci=False)
+
     last = budget.staff_lines.aggregate(Max("position"))["position__max"]
     staff_line = StaffCostLine(
         budget=budget,

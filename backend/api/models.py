@@ -1108,6 +1108,11 @@ class StaffCostLine(models.Model):
     # the University would absorb the cost, or on what grounds.
     in_kind_reason = models.CharField(max_length=200, blank=True, default="")
 
+    # The chief investigator's own line (#166), marked by the researcher
+    # rather than read off row position: naming a CI used to take over row one
+    # whatever it held, attributing someone else's costing to the CI.
+    is_ci = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["position", "created_at"]
         constraints = [
@@ -1117,6 +1122,11 @@ class StaffCostLine(models.Model):
             models.CheckConstraint(
                 condition=models.Q(in_kind=True) | models.Q(in_kind_reason=""),
                 name="%(class)s_reason_needs_the_tick",
+            ),
+            models.UniqueConstraint(
+                fields=["budget"],
+                condition=models.Q(is_ci=True),
+                name="one_ci_line_per_budget",
             ),
         ]
 

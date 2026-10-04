@@ -164,6 +164,7 @@ export const emptyStaffLine = (
   time_basis: '',
   in_kind: false,
   in_kind_reason: '',
+  is_ci: false,
   rate: 0,
   by_year: years.map((year) => ({ year, time: 0, cost: 0 })),
   total: 0,
@@ -177,15 +178,22 @@ export const isRated = (line: EditableStaffLine): line is RatedStaffLine =>
   line.time_basis !== ''
 
 /**
- * The CI's own row, which is the first one. Their name is typed on Project
- * Details, so the row carries it rather than letting the two drift apart.
+ * The CI's own row: the one Include Chief Investigator cost added (#166), wherever it sits in
+ * the table. Never read off position, which took over row one whatever it
+ * held. None until the project names a CI and the cost is included.
  */
 export const ciLineId = (
   lines: EditableStaffLine[],
   chiefInvestigator: string,
-) => (chiefInvestigator.trim() === '' ? null : (lines[0]?.id ?? null))
+) =>
+  chiefInvestigator.trim() === ''
+    ? null
+    : (lines.find((line) => line.is_ci)?.id ?? null)
 
-/** Puts the CI's name on their row, wherever it was last edited. */
+/**
+ * Shows the CI's name, typed on Project Details, on their row, so a renamed
+ * CI is never left with the old name.
+ */
 export const withCiName = (
   lines: EditableStaffLine[],
   chiefInvestigator: string,
