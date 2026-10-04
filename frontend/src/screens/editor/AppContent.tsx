@@ -3,7 +3,6 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { type ComponentType, createElement } from 'react'
 
 import { useBudget, useEditable, useMissingDetails } from '@/api/budget'
-import { useLookups } from '@/api/lookups'
 import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppShell } from '@/components/shell/AppShell'
 import { DetailsNeededNotice } from '@/components/shell/DetailsNeededNotice'
@@ -67,7 +66,6 @@ export function AppContent({
   setScreen,
   onLeave,
 }: AppContentProps) {
-  const { data: lookups } = useLookups()
   const currency = useBudget().data.budget_info.currency
   const editable = useEditable()
   const locked = useMissingDetails().length > 0
@@ -134,7 +132,7 @@ export function AppContent({
           right={screen === 'budget' ? <ExportPdfButton /> : undefined}
         />
         {lookupsOpen ? (
-          <LookupsScreen lookups={lookups} />
+          <LookupsScreen />
         ) : (
           <>
             <ReadOnlyNotice />

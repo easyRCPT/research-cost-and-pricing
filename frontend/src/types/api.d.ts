@@ -724,6 +724,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description The lookup tables: the current ones, or with `budget` the ones that
+         *     costing is priced on (#198). A submitted or approved costing is priced on
+         *     the version stamped when it was submitted, so its tables can differ from
+         *     today's; a draft's are today's.
+         */
         get: operations["lookups_retrieve"];
         put?: never;
         post?: never;
@@ -7584,7 +7590,10 @@ export interface operations {
     };
     lookups_retrieve: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A costing whose own tables to return. */
+                budget?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
