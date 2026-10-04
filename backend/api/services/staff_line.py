@@ -7,9 +7,11 @@ from . import budget_details, classification
 
 @transaction.atomic
 def create(budget: Budget, data: dict) -> dict:
-    # Validate classification before update
+    # Validate category and classification before create
     # Other fields are validated by serializer
-    classification.validate_with_budget(budget, data["classification"])
+    classification.validate_with_budget(
+        budget, data["category"], data["classification"]
+    )
 
     allocations = data.pop("allocations", [])
 

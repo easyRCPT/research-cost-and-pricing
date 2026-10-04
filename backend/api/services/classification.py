@@ -12,15 +12,21 @@ def get_level_step(classification: str) -> tuple[str, str, str]:
     return level, sep, step_str
 
 
-def validate(version_id: int, classification: str) -> None:
+def validate_classification(
+    category: str, classification: str, version_id: int
+) -> None:
     """Validate a classification string against the cap table."""
     level, sep, step_str = classification.rpartition(".")
     level = level or classification
 
-    cap = IncrementCap.objects.filter(level=level, version_id=version_id).first()
+    cap = IncrementCap.objects.filter(
+        category=category, level=level, version_id=version_id
+    ).first()
     if not cap:
         # Reject classification not recorded in database.
-        raise ValidationError(f"Unknown level: '{level}'.")
+        raise ValidationError(
+            f"No salary rate record for category: '{category}', level: '{level}'."
+        )
 
     if cap.max_steps == 0:
         # Reject classification like "UOM 10.1" if UOM 10 is stepless.
@@ -41,9 +47,9 @@ def validate(version_id: int, classification: str) -> None:
         )
 
 
-def validate_with_budget(budget: Budget, classification: str) -> None:
+def validate_with_budget(budget: Budget, category: str, classification: str) -> None:
     version_id = get_lookup_version_id_for_budget(budget)
-    validate(version_id, classification)
+    validate_classification(category, classification, version_id)
 
 
 def update_increment_cap_in_creation(

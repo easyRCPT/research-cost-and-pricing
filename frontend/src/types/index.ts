@@ -64,7 +64,7 @@ export type Section = BudgetUpdate['section']
 
 // Choices
 export type EmploymentType = S['EmploymentTypeEnum']
-export type StaffCategory = S['CategoryEnum']
+export type StaffCategory = S['IncrementCap']['category']
 export type TimeBasis = S['TimeBasisEnum']
 
 /** model.py enums  */

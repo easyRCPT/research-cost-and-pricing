@@ -5,7 +5,7 @@ from django.test import SimpleTestCase, TestCase
 
 from api.models import Budget, IncrementCap, LookupVersion
 from api.services.classification import (
-    validate,
+    validate_classification,
     validate_with_budget,
 )
 
@@ -23,7 +23,7 @@ class TestValidate(TestCase):
             version_id=self.version.id,
         )
 
-        validate(self.version.id, "Level A.3")
+        validate_classification("Academic", "Level A.3", self.version.id)
 
     def test_accepts_valid_stepless_classification(self):
         IncrementCap.objects.create(
@@ -33,14 +33,14 @@ class TestValidate(TestCase):
             version_id=self.version.id,
         )
 
-        validate(self.version.id, "UOM 10")
+        validate_classification("Professional", "UOM 10", self.version.id)
 
     def test_rejects_unknown_level(self):
         with self.assertRaisesMessage(
             ValidationError,
-            "Unknown level: 'Level A'.",
+            "No salary rate record for category: 'Academic', level: 'Level A'.",
         ):
-            validate(self.version.id, "Level A.1")
+            validate_classification("Academic", "Level A.1", self.version.id)
 
     def test_rejects_step_for_stepless_level(self):
         IncrementCap.objects.create(
@@ -54,7 +54,7 @@ class TestValidate(TestCase):
             ValidationError,
             "'UOM 10' is stepless and takes no step.",
         ):
-            validate(self.version.id, "UOM 10.1")
+            validate_classification("Professional", "UOM 10.1", self.version.id)
 
     def test_rejects_stepped_classification_without_step(self):
         IncrementCap.objects.create(
@@ -68,7 +68,7 @@ class TestValidate(TestCase):
             ValidationError,
             "Invalid classification 'Level A': expected '<level>.<step>'.",
         ):
-            validate(self.version.id, "Level A")
+            validate_classification("Academic", "Level A", self.version.id)
 
     def test_rejects_non_numeric_step(self):
         IncrementCap.objects.create(
@@ -82,7 +82,7 @@ class TestValidate(TestCase):
             ValidationError,
             "Invalid classification 'Level A.x': expected '<level>.<step>'.",
         ):
-            validate(self.version.id, "Level A.x")
+            validate_classification("Academic", "Level A.x", self.version.id)
 
     def test_rejects_step_above_maximum(self):
         IncrementCap.objects.create(
@@ -96,7 +96,7 @@ class TestValidate(TestCase):
             ValidationError,
             "Step 6 out of range for 'Level A' (max 5).",
         ):
-            validate(self.version.id, "Level A.6")
+            validate_classification("Academic", "Level A.6", self.version.id)
 
     def test_rejects_zero_step(self):
         IncrementCap.objects.create(
@@ -110,7 +110,7 @@ class TestValidate(TestCase):
             ValidationError,
             "Step 0 out of range for 'Level A' (max 5).",
         ):
-            validate(self.version.id, "Level A.0")
+            validate_classification("Academic", "Level A.0", self.version.id)
 
     def test_rejects_increment_cap_from_different_version(self):
         IncrementCap.objects.create(
@@ -122,9 +122,9 @@ class TestValidate(TestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            "Unknown level: 'Level A'.",
+            "No salary rate record for category: 'Academic', level: 'Level A'.",
         ):
-            validate(self.version.id, "Level A.1")
+            validate_classification("Academic", "Level A.1", self.version.id)
 
 
 class TestValidateWithBudget(SimpleTestCase):
@@ -137,10 +137,10 @@ class TestValidateWithBudget(SimpleTestCase):
                 return_value=1,
             ) as mock_get_version,
             patch(
-                "api.services.classification.validate",
+                "api.services.classification.validate_classification",
             ) as mock_validate,
         ):
-            validate_with_budget(budget, "Level A.2")
+            validate_with_budget(budget, "Academic", "Level A.2")
 
         mock_get_version.assert_called_once_with(budget)
-        mock_validate.assert_called_once_with(1, "Level A.2")
+        mock_validate.assert_called_once_with("Academic", "Level A.2", 1)

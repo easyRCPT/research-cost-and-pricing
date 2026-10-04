@@ -2,7 +2,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
-from api.models import ApprovalStep, Budget, OnCostRate, SalaryRate, StaffCostLine
+from api.models import ApprovalStep, Budget, OnCostRate, StaffCostLine
 
 from ..services.approval_record import EMPTY_RECORD
 
@@ -150,7 +150,7 @@ class StaffLineSerializer(serializers.Serializer):
     position = serializers.IntegerField()
     name_role = serializers.CharField()
     employment_type = serializers.ChoiceField(OnCostRate.EmploymentType.choices)
-    category = serializers.ChoiceField(SalaryRate.Category.choices)
+    category = serializers.CharField()
     classification = serializers.CharField()
     time_basis = serializers.ChoiceField(StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField()

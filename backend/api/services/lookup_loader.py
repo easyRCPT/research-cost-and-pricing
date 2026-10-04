@@ -5,8 +5,8 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 
-from ..calculation.staff import PAYROLL_TYPE
 from ..models import (
+    PAYROLL_TYPE_MAPPING,
     Budget,
     CalculationConstant,
     Currency,
@@ -85,7 +85,7 @@ def _validate_increment_cap(rates: dict, caps: dict) -> None:
             else [f"{level}.{i}" for i in range(1, max_steps + 1)]
         )
 
-        for payroll_type in set(PAYROLL_TYPE.values()):
+        for payroll_type in set(PAYROLL_TYPE_MAPPING.values()):
             for classification in classifications:
                 key = (payroll_type, category, classification)
                 if key not in rates:
@@ -214,6 +214,7 @@ def build_constants(version_id: int) -> dict:
         "eba": eba_rate,
         "on_cost_components": on_cost_components,
         "constants": constants,
+        "payroll_type_mapping": PAYROLL_TYPE_MAPPING,
     }
 
     return result

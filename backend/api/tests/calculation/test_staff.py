@@ -153,6 +153,11 @@ class TestFindSalaryRate(SimpleTestCase):
                 "Daily": Decimal("0.2"),
                 "Hourly": Decimal("0.9"),
             },
+            "payroll_type_mapping": {
+                "Continuing": "Fortnight",
+                "Fixed-Term": "Fortnight",
+                "Casual": "Casual",
+            },
         }
 
     def test_continuing_uses_fortnight_payroll_type(self):
@@ -520,6 +525,11 @@ class TestCalculateStaffRow(SimpleTestCase):
                 "override_uom_oncosts": Decimal("0.01"),
                 "salary_rate_year": Decimal(2025),
             },
+            "payroll_type_mapping": {
+                "Continuing": "Fortnight",
+                "Fixed-Term": "Fortnight",
+                "Casual": "Casual",
+            },
         }
 
         self.project_duration = {
@@ -832,6 +842,11 @@ class TestCalculateStaffTable(SimpleTestCase):
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
                 "salary_rate_year": Decimal(2025),
+            },
+            "payroll_type_mapping": {
+                "Continuing": "Fortnight",
+                "Fixed-Term": "Fortnight",
+                "Casual": "Casual",
             },
         }
 

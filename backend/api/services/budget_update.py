@@ -324,12 +324,18 @@ def update_staff(
     if field in fields_requiring_calculation:
         if field in {"in_kind", "in_kind_reason"}:
             _set_in_kind(staff_line, field, value)
-        elif field == "classification":
-            # Validate classification before update
-            # Other fields are validated through model validation
-            classification.validate_with_budget(budget, str(value))
-            _set_field(staff_line, field, value)
         else:
+            # Validate category and classification before update
+            # Other fields are validated through model validation
+            if field == "classification":
+                classification.validate_with_budget(
+                    budget, staff_line.category, str(value)
+                )
+            if field == "category":
+                classification.validate_with_budget(
+                    budget, str(value), staff_line.classification
+                )
+
             _set_field(staff_line, field, value)
         return True
 

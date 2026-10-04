@@ -1,13 +1,5 @@
 from decimal import Decimal
 
-# The salary table's payroll type for each employment type: the workbook keys
-# its rate lookup on CONCATENATE(payroll_type, category, classification).
-PAYROLL_TYPE = {
-    "Continuing": "Fortnight",
-    "Fixed-Term": "Fortnight",
-    "Casual": "Casual",
-}
-
 
 def calculate_staff_table(
     table_data: dict,
@@ -255,7 +247,8 @@ def find_salary_rate(
     classification = info_data["classification"]
     time_basis = info_data["time_basis"]
 
-    payroll_type = PAYROLL_TYPE.get(employment_type, employment_type)
+    payroll_type_mapping = constants["payroll_type_mapping"]
+    payroll_type = payroll_type_mapping.get(employment_type, employment_type)
 
     # Continuing and Fixed-term staff progress one classification step per year
     # employed. Casual staff do not progress.
