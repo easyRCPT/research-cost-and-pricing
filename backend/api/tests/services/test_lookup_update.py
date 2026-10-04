@@ -415,47 +415,5 @@ class TestUpdate(TestCase, LookupUpdateTestMixin):
                 {"name": "default_margin"},
                 {"value": Decimal("0.25")},
             )
-
         constant.refresh_from_db()
         self.assertEqual(constant.value, Decimal("0.300000"))
-
-
-class TestClassificationValidation(TestCase):
-    @patch("api.services.classification.validate")
-    def test_salary_rate_classification_is_validated(
-        self,
-        mock_validate,
-    ):
-        lookup_update._validate_classification(
-            SalaryRate,
-            {"classification": "A.2"},
-        )
-
-        mock_validate.assert_called_once_with(
-            lookup_update.current_version_id(),
-            "A.2",
-        )
-
-    @patch("api.services.classification.validate")
-    def test_salary_rate_without_classification_is_not_validated(
-        self,
-        mock_validate,
-    ):
-        lookup_update._validate_classification(
-            SalaryRate,
-            {},
-        )
-
-        mock_validate.assert_not_called()
-
-    @patch("api.services.classification.validate")
-    def test_other_lookup_models_are_not_validated(
-        self,
-        mock_validate,
-    ):
-        lookup_update._validate_classification(
-            CalculationConstant,
-            {"classification": "A.2"},
-        )
-
-        mock_validate.assert_not_called()

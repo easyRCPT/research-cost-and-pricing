@@ -21,7 +21,7 @@ from api.models import (
     YearAmount,
 )
 
-from . import classification,  lookup_loader
+from . import classification, lookup_loader
 from .budget_details import exchange_rate_for, get_budget_details
 from .staff_time_validation import check_time
 

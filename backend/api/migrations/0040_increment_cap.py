@@ -13,11 +13,50 @@ fixture. Existing rows are not user data and do not need to be preserved.
 import django.db.models.deletion
 from django.db import migrations, models
 
+INCREMENT_CAPS = (
+    ("Level A", 8),
+    ("Level B", 6),
+    ("Level C", 6),
+    ("Level D", 4),
+    ("Level E", 1),
+    ("RA Grade 1", 3),
+    ("UOM 1", 3),
+    ("UOM 2", 3),
+    ("UOM 3", 6),
+    ("UOM 4", 4),
+    ("UOM 5", 8),
+    ("UOM 6", 5),
+    ("UOM 7", 5),
+    ("UOM 8", 5),
+    ("UOM 9", 3),
+    ("UOM 10", 0),
+)
+
+
+def fill_increment_caps(apps, schema_editor):
+    LookupVersion = apps.get_model("api", "LookupVersion")
+    IncrementCap = apps.get_model("api", "IncrementCap")
+
+    for version in LookupVersion.objects.all():
+        if not IncrementCap.objects.filter(version=version).exists():
+            continue
+
+        IncrementCap.objects.bulk_create(
+            [
+                IncrementCap(
+                    level=level,
+                    max_steps=max_steps,
+                    version=version,
+                )
+                for level, max_steps in INCREMENT_CAPS
+            ]
+        )
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0033_remove_ebaincrease_unique_eba_increase_and_more"),
+        ("api", "0039_seed_currencies"),
     ]
 
     operations = [
@@ -60,5 +99,9 @@ class Migration(migrations.Migration):
                     ),
                 ],
             },
+        ),
+        migrations.RunPython(
+            fill_increment_caps,
+            migrations.RunPython.noop,
         ),
     ]
