@@ -543,7 +543,7 @@ class NonStaffCostCategory(models.Model):
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
 
-    # Excluded cost groups should not apply additional direct rate and indirect rate
+    # Excluded cost groups do not take the additional direct rate (the 10%)
     excludes_additional_rate = models.BooleanField(default=False)
 
     version = models.ForeignKey(
@@ -803,10 +803,18 @@ class Budget(models.Model):
     # earns over what it costs. Price = project_cost * (1 + margin), so the
     # default 0.30 prices a $100k project at $130k, not at $142,857. Settled
     # with RIC; the workbook's Summary of Price agrees.
+    #
+    # No negative margin and no cap (#192): a discount comes from a cash
+    # co-contribution or in-kind costs, and a margin can be above 100%. The
+    # most the column holds, 999.99%, is the only ceiling.
+    MAX_MARGIN = Decimal("9.9999")
     margin = models.DecimalField(
         max_digits=5,
         decimal_places=4,
-        validators=[MinValueValidator(Decimal(0))],
+        validators=[
+            MinValueValidator(Decimal(0), message="A margin can't be below 0%%."),
+            MaxValueValidator(MAX_MARGIN, message="A margin can be at most 999.99%%."),
+        ],
     )
 
     gst_applicable = models.BooleanField(default=True)
@@ -857,6 +865,11 @@ class Budget(models.Model):
         decimal_places=2,
         default=Decimal(0),
     )
+
+    # An approved costing's figures as the API showed them when it was
+    # approved (#192). It was approved on those figures, so opening it shows
+    # them rather than pricing it again, even after the engine changes.
+    approved_figures = models.JSONField(null=True, blank=True, editable=False)
 
     # The attempt this one was cloned from, so a reviewer can put the two
     # side by side. Null on a first attempt.
@@ -1165,15 +1178,8 @@ class NonStaffCostLine(models.Model):
     # An estimate for extra cost
     add_ten_percent = models.BooleanField(default=False)
 
-    indirect_rate_multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        # Negative indirect rate is not allowed.
-        # The minimum multiplier is 1
-        validators=[MinValueValidator(Decimal(1))],
-    )
+    # No indirect rate multiplier: the workbook's PART C column T is not
+    # needed (#192, #148 option A). A line takes the 10% and nothing more.
 
     class Meta:
         ordering = ["position", "created_at"]

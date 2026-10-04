@@ -215,7 +215,6 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
         line.in_kind = False
         line.in_kind_reason = ""
         line.add_ten_percent = True
-        line.indirect_rate_multiplier = Decimal("1.2")
 
         result = build_non_staff_info_table([line])
 
@@ -231,7 +230,6 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
                     "in_kind": False,
                     "in_kind_reason": "",
                     "add_ten_percent": True,
-                    "indirect_rate_multiplier": Decimal("1.2"),
                 }
             },
         )

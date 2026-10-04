@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.test import TestCase
 
 from api.models import (
@@ -35,7 +33,6 @@ class NonStaffLineSerializerTestCase(TestCase):
             "description": "Travel expenses",
             "in_kind": False,
             "add_ten_percent": False,
-            "indirect_rate_multiplier": "1.00",
             "amounts": [
                 {
                     "year": 2025,
@@ -77,10 +74,6 @@ class NonStaffLineSerializerTestCase(TestCase):
         )
         self.assertFalse(
             validated_data["add_ten_percent"],
-        )
-        self.assertEqual(
-            validated_data["indirect_rate_multiplier"],
-            Decimal("1.00"),
         )
 
     def test_cost_group_and_expense_type_are_replaced_by_category(self):
@@ -152,18 +145,6 @@ class NonStaffLineSerializerTestCase(TestCase):
         self.assertEqual(
             validated_data["description"],
             "",
-        )
-
-    def test_indirect_rate_multiplier_can_be_null(self):
-        data = self.valid_data()
-        data["indirect_rate_multiplier"] = None
-
-        serializer = self.serializer(data)
-
-        self.assertTrue(serializer.is_valid(), get_errors(serializer))
-        validated_data = get_validated_data(serializer)
-        self.assertIsNone(
-            validated_data["indirect_rate_multiplier"],
         )
 
     def test_amounts_can_be_omitted(self):

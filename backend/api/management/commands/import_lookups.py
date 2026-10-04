@@ -43,7 +43,7 @@ from api.services.lookup_update import create_lookup_version
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
 
-# Cost groups that do not apply additional direct rate or indirect rate
+# Cost groups that do not apply the additional direct rate (the 10%)
 EXCLUDED_NON_STAFF_GROUPS = {
     "Student Support",
     "Shared Grant Payments",
@@ -89,8 +89,8 @@ LITERAL_CONSTANTS = {
         Decimal("0.30"),
         "The margin a new budget starts at. Editable per budget.",
     ),
-    # Matches backend/seeds/lookups.json. Held at the default margin until
-    # Frank sets the floor (#87), so an import doesn't drop Dean review.
+    # Matches backend/seeds/lookups.json. The Dean rules stay as they are
+    # (#192, #87): a margin below 30% needs the Dean.
     "minimum_margin": (
         Decimal("0.30"),
         "A budget priced below this margin needs the Dean as well as the HoD.",
@@ -413,7 +413,7 @@ def import_non_staff_categories(workbook, version):
         defaults={
             "cost_category": "Contingency",
             "cost_subcategory": "Contingency",
-            # Contingency does not apply additional direct rate or indirect rate
+            # Contingency does not apply the additional direct rate (the 10%)
             "excludes_additional_rate": True,
         },
     )

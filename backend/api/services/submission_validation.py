@@ -6,8 +6,6 @@ from api.models import (
     Budget,
     NonStaffCostLine,
     StaffCostLine,
-    YearAllocation,
-    YearAmount,
 )
 
 
@@ -48,8 +46,8 @@ def validate_submission(budget: Budget) -> list[str]:
     # Required fields in Budget are non-null by model definition
     # No additional checks are needed.
 
-    if not budget.staff_lines.exists() and not budget.non_staff_lines.exists():
-        reasons.append("At least one staff or non-staff cost line is required.")
+    # No check that the costing has any costs (#192): one with no staff or
+    # non-staff costs can be submitted, and approval is where it is caught.
 
     # Staff lines
     _validate_staff_lines(
@@ -91,9 +89,6 @@ def _validate_staff_lines(
         if line.in_kind and not line.in_kind_reason:
             reasons.append("Every in-kind staff cost line must have a reason.")
 
-    if not YearAllocation.objects.filter(staff_line__in=lines).exists():
-        reasons.append("Staff cost must have at least one value.")
-
 
 def _validate_non_staff_lines(
     lines: QuerySet[NonStaffCostLine],
@@ -108,6 +103,3 @@ def _validate_non_staff_lines(
 
         if line.in_kind and not line.in_kind_reason:
             reasons.append("Every in-kind non-staff cost line must have a reason.")
-
-    if not YearAmount.objects.filter(non_staff_line__in=lines).exists():
-        reasons.append("Non-staff cost must have at least one value.")

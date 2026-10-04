@@ -70,10 +70,10 @@ OPS = (CREATE, UPDATE, DELETE)
 MULTIPLIER_FLOOR = Decimal(1)
 MULTIPLIER_STEP = Decimal("0.01")
 
-# Constants that are rates, held as decimals: 0.30 is 30%. A costing's
-# margin runs from 0 to 100% (MAX_MARGIN in MarginPanel.tsx), so the margin
-# constants share that range and the floor can't sit where no costing could
-# reach it. #87 may move the margin's bounds; these follow (#151).
+# Constants that are rates, held as decimals: 0.30 is 30% (#151). Most run
+# from 0 to 100%. The margin constants share a costing's own range, which has
+# no cap but the column's (#192), so the floor can't sit where no costing could
+# reach it and a new costing can always take the default.
 RATE_CONSTANTS = {
     "default_margin",
     "minimum_margin",
@@ -82,6 +82,10 @@ RATE_CONSTANTS = {
     "override_uom_oncosts",
 }
 RATE_CEILING = Decimal(1)
+MARGIN_CEILINGS = {
+    "default_margin": Budget.MAX_MARGIN,
+    "minimum_margin": Budget.MAX_MARGIN,
+}
 
 # The engine reads every one of these by name or uses every row, so a set may
 # change their values but never add or take one away.
@@ -214,15 +218,22 @@ def _readable(name: str) -> str:
 
 def _check_rate(name: str, value: Decimal) -> None:
     """
-    A rate is a decimal from 0 to 1 (#151). Anything above 1 is far more
-    likely a percentage typed bare than a rate of over 100%, so it is refused
-    with the decimal it probably meant, never converted by guesswork.
+    A rate is a decimal from 0 to 1 (#151), or for a margin up to 9.9999
+    (#192). Anything above that is far more likely a percentage typed bare,
+    so it is refused with the decimal it probably meant, never converted by
+    guesswork.
     """
     if value < 0:
         raise ValidationError(f"{_readable(name)} can't be below 0.")
-    if value > RATE_CEILING:
+    ceiling = MARGIN_CEILINGS.get(name, RATE_CEILING)
+    if value > ceiling:
+        bounds = (
+            "from 0 to 1 (0% to 100%)"
+            if ceiling == RATE_CEILING
+            else f"from 0 to {ceiling.normalize():f} (0% to 999.99%)"
+        )
         raise ValidationError(
-            f"{_readable(name)} is a decimal from 0 to 1 (0% to 100%). "
+            f"{_readable(name)} is a decimal {bounds}. "
             f"Did you mean {value.normalize():f}%? Enter "
             f"{(value / 100).normalize():f} or {value.normalize():f}%."
         )
