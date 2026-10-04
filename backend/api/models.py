@@ -543,7 +543,7 @@ class NonStaffCostCategory(models.Model):
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
 
-    # Excluded cost groups should not apply additional direct rate and indirect rate
+    # Excluded cost groups do not take the additional direct rate (the 10%)
     excludes_additional_rate = models.BooleanField(default=False)
 
     version = models.ForeignKey(
@@ -1178,15 +1178,8 @@ class NonStaffCostLine(models.Model):
     # An estimate for extra cost
     add_ten_percent = models.BooleanField(default=False)
 
-    indirect_rate_multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        # Negative indirect rate is not allowed.
-        # The minimum multiplier is 1
-        validators=[MinValueValidator(Decimal(1))],
-    )
+    # No indirect rate multiplier: the workbook's PART C column T is not
+    # needed (#192, #148 option A). A line takes the 10% and nothing more.
 
     class Meta:
         ordering = ["position", "created_at"]

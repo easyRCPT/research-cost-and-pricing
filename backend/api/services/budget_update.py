@@ -366,7 +366,6 @@ def update_non_staff(
         "in_kind",
         "in_kind_reason",
         "add_ten_percent",
-        "indirect_rate_multiplier",
     }
 
     if field in fields_without_calculation:

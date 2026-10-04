@@ -48,7 +48,6 @@ FIELDS_BY_SECTION = {
         "in_kind",
         "in_kind_reason",
         "add_ten_percent",
-        "indirect_rate_multiplier",
         "category",
         "year_value",
         "position",

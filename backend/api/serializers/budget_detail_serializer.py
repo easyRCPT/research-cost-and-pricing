@@ -216,12 +216,6 @@ class NonStaffLineSerializer(serializers.Serializer):
     in_kind_reason = serializers.CharField(allow_blank=True)
     add_ten_percent = serializers.BooleanField()
 
-    indirect_rate_multiplier = serializers.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        allow_null=True,
-    )
-
     by_year = NonStaffYearSerializer(many=True)
 
     total = CostDecimalField(
@@ -257,7 +251,6 @@ class NonStaffCostSerializer(serializers.Serializer):
     lines = NonStaffLineSerializer(many=True)
 
     direct_total = NonStaffTotalSerializer()
-    indirect_total = NonStaffTotalSerializer()
     column_total = NonStaffTotalSerializer()
 
 
@@ -378,11 +371,6 @@ class NonStaffBudgetSerializer(serializers.Serializer):
     )
 
     direct_total = CostDecimalField(
-        max_digits=14,
-        decimal_places=2,
-    )
-
-    indirect_cost_recovery = CostDecimalField(
         max_digits=14,
         decimal_places=2,
     )
@@ -578,7 +566,6 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "in_kind": row["info"]["in_kind"],
                 "in_kind_reason": row["info"]["in_kind_reason"],
                 "add_ten_percent": row["info"]["add_ten_percent"],
-                "indirect_rate_multiplier": row["info"]["indirect_rate_multiplier"],
                 "by_year": [
                     {
                         "year": year,
@@ -593,7 +580,6 @@ class BudgetDetailSerializer(serializers.Serializer):
             if row_id
             not in {
                 "direct_total",
-                "indirect_total",
                 "column_total",
             }
         ]
@@ -607,13 +593,6 @@ class BudgetDetailSerializer(serializers.Serializer):
                     for year, amount in results["direct_total"]["numeric"].items()
                 ],
                 "total": results["direct_total"]["total"],
-            },
-            "indirect_total": {
-                "by_year": [
-                    {"year": year, "cost": amount}
-                    for year, amount in results["indirect_total"]["numeric"].items()
-                ],
-                "total": results["indirect_total"]["total"],
             },
             "column_total": {
                 "by_year": [

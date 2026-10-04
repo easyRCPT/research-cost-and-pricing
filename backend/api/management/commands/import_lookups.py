@@ -43,7 +43,7 @@ from api.services.lookup_update import create_lookup_version
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
 
-# Cost groups that do not apply additional direct rate or indirect rate
+# Cost groups that do not apply the additional direct rate (the 10%)
 EXCLUDED_NON_STAFF_GROUPS = {
     "Student Support",
     "Shared Grant Payments",
@@ -413,7 +413,7 @@ def import_non_staff_categories(workbook, version):
         defaults={
             "cost_category": "Contingency",
             "cost_subcategory": "Contingency",
-            # Contingency does not apply additional direct rate or indirect rate
+            # Contingency does not apply the additional direct rate (the 10%)
             "excludes_additional_rate": True,
         },
     )

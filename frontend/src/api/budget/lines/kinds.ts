@@ -60,7 +60,6 @@ const NON_STAFF_FIELDS = new Set<string>([
   'in_kind',
   'in_kind_reason',
   'add_ten_percent',
-  'indirect_rate_multiplier',
 ])
 
 /**
@@ -178,7 +177,6 @@ const nonStaff: LineKindSpec<'non_staff'> = {
           in_kind: line.in_kind,
           in_kind_reason: line.in_kind_reason,
           add_ten_percent: line.add_ten_percent,
-          indirect_rate_multiplier: line.indirect_rate_multiplier,
           amounts: line.by_year
             .filter((entry) => entry.amount > 0)
             .map(({ year, amount }) => ({ year, amount })),

@@ -180,7 +180,6 @@ class BudgetCloneTest(TestCase):
             description="Travel",
             in_kind=False,
             add_ten_percent=True,
-            indirect_rate_multiplier=Decimal("1.10"),
         )
 
         YearAmount.objects.create(

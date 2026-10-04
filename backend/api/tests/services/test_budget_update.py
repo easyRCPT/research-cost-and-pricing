@@ -63,7 +63,6 @@ class BudgetUpdateTestMixin:
             description="Equipment",
             in_kind=False,
             add_ten_percent=False,
-            indirect_rate_multiplier=None,
         )
 
     @staticmethod
