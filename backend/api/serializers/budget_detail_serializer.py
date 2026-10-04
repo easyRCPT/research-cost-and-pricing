@@ -467,6 +467,14 @@ class BudgetDetailSerializer(serializers.Serializer):
     approval = ApprovalRecordSerializer()
 
     def to_representation(self, instance):
+        if "approved_figures" in instance:
+            # Already in this shape, frozen at approval (#192). Only the
+            # approval trail is read fresh.
+            return {
+                **instance["approved_figures"],
+                "approval": ApprovalRecordSerializer(instance["approval"]).data,
+            }
+
         staff_table = instance["staff_table"]
         non_staff_table = instance["non_staff_table"]
 

@@ -858,6 +858,11 @@ class Budget(models.Model):
         default=Decimal(0),
     )
 
+    # An approved costing's figures as the API showed them when it was
+    # approved (#192). It was approved on those figures, so opening it shows
+    # them rather than pricing it again, even after the engine changes.
+    approved_figures = models.JSONField(null=True, blank=True, editable=False)
+
     # The attempt this one was cloned from, so a reviewer can put the two
     # side by side. Null on a first attempt.
     cloned_from = models.ForeignKey(

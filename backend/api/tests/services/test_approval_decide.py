@@ -8,11 +8,16 @@ from api.models import (
     AuditLog,
     Budget,
     LookupConfiguration,
-    LookupVersion,
     UserOrgAssignment,
 )
 from api.services.approval_decide import decide
-from api.tests.factories import make_budget, make_department, make_project, make_user
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_project,
+    make_user,
+    seed_lookups,
+)
 
 from .test_submission import ForceRollbackError
 
@@ -30,23 +35,11 @@ class ApprovalDecideTest(TestCase):
 
         cls.project = make_project(cls.owner, cls.department, end_year=2027)
 
-        cls.lookup_version = LookupVersion.objects.create()
-
-        config, _ = LookupConfiguration.objects.get_or_create(
-            id=1,
-            defaults={
-                "current_version": cls.lookup_version,
-            },
-        )
-
-        config.current_version = cls.lookup_version
-        config.referenced = False
-        config.save(
-            update_fields=[
-                "current_version",
-                "referenced",
-            ],
-        )
+        # Every rate, because approving a costing keeps its priced figures
+        # (#192).
+        seed_lookups()
+        config = LookupConfiguration.objects.get()
+        cls.lookup_version = config.current_version
 
         UserOrgAssignment.objects.create(
             user=cls.hod,
