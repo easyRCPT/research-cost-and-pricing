@@ -64,6 +64,16 @@ def get_lookup_tables() -> dict[str, list[models.Model]]:
     return lookup_models
 
 
+def lookup_tables_for(budget: Budget) -> dict[str, list[models.Model]]:
+    """
+    The tables one costing prices on (#198): the version stamped when it was
+    submitted, or today's for a draft. The same version constants_for reads.
+    """
+    if budget.lookup_version_id is None:
+        return get_lookup_tables()
+    return _get_lookup_models(budget.lookup_version_id)
+
+
 def _constants_cache_key(version_id: int) -> str:
     return f"lookup_version_{version_id}"
 

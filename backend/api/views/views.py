@@ -2,8 +2,8 @@ from typing import cast
 from uuid import UUID
 
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import status
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from rest_framework import serializers, status
 from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -287,8 +287,39 @@ class DeliverableView(APIView):
         )
 
 
+class LookupQuerySerializer(serializers.Serializer):
+    budget = serializers.IntegerField(required=False, min_value=1)
+
+
 class LookupView(APIView):
-    @extend_schema(responses=LookupTablesSerializer)
+    """
+    The lookup tables: the current ones, or with `budget` the ones that
+    costing is priced on (#198). A submitted or approved costing is priced on
+    the version stamped when it was submitted, so its tables can differ from
+    today's; a draft's are today's.
+    """
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "budget",
+                int,
+                required=False,
+                description="A costing whose own tables to return.",
+            )
+        ],
+        responses=LookupTablesSerializer,
+    )
     def get(self, request: Request) -> Response:
-        tables = lookup_loader.get_lookup_tables()
+        query = LookupQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        budget_id = cast(dict, query.validated_data).get("budget")
+        if budget_id is None:
+            tables = lookup_loader.get_lookup_tables()
+        else:
+            # Only a costing the caller may open.
+            budget = get_object_or_404(
+                project.visible_budgets(request.user), id=budget_id
+            )
+            tables = lookup_loader.lookup_tables_for(budget)
         return Response(LookupTablesSerializer(tables).data)
