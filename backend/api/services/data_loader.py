@@ -78,6 +78,7 @@ def build_staff_info_table(staff_lines: list[StaffCostLine]) -> dict:
             "time_basis": line.time_basis,
             "in_kind": line.in_kind,
             "in_kind_reason": line.in_kind_reason,
+            "is_ci": line.is_ci,
         }
         for line in staff_lines
     }

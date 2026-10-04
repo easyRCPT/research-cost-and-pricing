@@ -155,6 +155,8 @@ class StaffLineSerializer(serializers.Serializer):
     time_basis = serializers.ChoiceField(StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField()
     in_kind_reason = serializers.CharField(allow_blank=True)
+    # The chief investigator's own line (#166).
+    is_ci = serializers.BooleanField()
 
     rate = serializers.DecimalField(
         max_digits=12,
@@ -524,6 +526,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "time_basis": row["info"]["time_basis"],
                 "in_kind": row["info"]["in_kind"],
                 "in_kind_reason": row["info"]["in_kind_reason"],
+                "is_ci": row["info"]["is_ci"],
                 "rate": row["rate"],
                 "by_year": [
                     {

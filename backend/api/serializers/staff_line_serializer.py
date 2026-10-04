@@ -26,6 +26,7 @@ class StaffLineSerializer(serializers.Serializer):
     in_kind_reason = serializers.CharField(
         max_length=200, required=False, allow_blank=True, default=""
     )
+    is_ci = serializers.BooleanField(default=False)
 
     allocations = YearAllocationSerializer(many=True, required=False)
 

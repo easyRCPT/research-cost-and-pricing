@@ -40,6 +40,7 @@ FIELDS_BY_SECTION = {
         "time_basis",
         "in_kind",
         "in_kind_reason",
+        "is_ci",
         "year_value",
         "position",
     },
