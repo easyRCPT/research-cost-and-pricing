@@ -50,6 +50,14 @@ def _on_domain(host: str, domain: str) -> bool:
     return re.fullmatch(rf"(?:[a-z0-9-]+\.)*{re.escape(domain)}", host) is not None
 
 
+class SignupPendingSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class SignupConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)

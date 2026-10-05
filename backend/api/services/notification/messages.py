@@ -133,3 +133,22 @@ class Withdrawn(BudgetNotification):
 def approvals_url(budget: Budget) -> str:
     """The costing's approvals screen, where approvers decide and owners see the outcome."""
     return f"{settings.FRONTEND_URL}/projects/{budget.project_id}/approvals"
+
+
+class SignupConfirmation(Notification):
+    """The link a new account clicks to prove it owns its address."""
+
+    template = "signup_confirm"
+
+    def __init__(self, user: User, *, url: str) -> None:
+        self.user = user
+        self.url = url
+
+    def recipients(self) -> list[str]:
+        return [self.user.email]
+
+    def subject(self) -> str:
+        return "Confirm your email for easyRCPT"
+
+    def context(self) -> dict:
+        return {"title": self.subject(), "user": self.user, "url": self.url}
