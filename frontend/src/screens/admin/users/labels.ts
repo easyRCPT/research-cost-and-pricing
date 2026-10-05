@@ -6,7 +6,6 @@ import { messageOf } from '@/lib/api'
 export const ROLE_LABEL: Record<Role, string> = {
   hod: 'Head of Department',
   dean: 'Dean',
-  member: 'Member',
 }
 
 export const refused = (error: unknown) =>

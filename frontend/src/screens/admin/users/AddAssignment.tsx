@@ -49,7 +49,6 @@ export function AddAssignment({ user }: { user: AdminUser }) {
           options={[
             { value: 'hod', label: 'Head of Department' },
             { value: 'dean', label: 'Dean' },
-            { value: 'member', label: 'Member' },
           ]}
           size="sm"
           className="w-48"

@@ -107,7 +107,7 @@ export const STAFF = 'staff'
 
 /** Approving is an org assignment, never a group (#41). */
 export const isApprover = (me: Me) =>
-  me.assignments.some((assignment) => assignment.role !== 'member')
+  me.assignments.length > 0
 
 /**
  * Where signing in lands someone.

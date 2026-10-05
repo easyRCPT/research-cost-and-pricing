@@ -233,7 +233,6 @@ class UserOrgAssignment(models.Model):
         def get_role_display(self) -> str: ...
 
     class Role(models.TextChoices):
-        MEMBER = "member", "Member"
         HOD = "hod", "Head of Department"
         DEAN = "dean", "Dean"
 
@@ -264,13 +263,13 @@ class UserOrgAssignment(models.Model):
 
     class Meta:
         constraints = [
-            # A dean is assigned to a faculty; everyone else to a department.
+            # A dean is assigned to a faculty, a head to a department.
             # Spelled with string literals because a nested Meta cannot see the
             # names in the class body around it.
             models.CheckConstraint(
                 condition=(
                     models.Q(
-                        role__in=["member", "hod"],
+                        role="hod",
                         department__isnull=False,
                         faculty__isnull=True,
                     )
