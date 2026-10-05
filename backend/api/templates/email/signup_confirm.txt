@@ -1,0 +1,6 @@
+{% extends "email/base.txt" %}
+{% block heading %}Confirm your email{% endblock %}
+{% block intro %}Hi {{ user.first_name|default:user.email }}, confirm this is your address to finish creating your easyRCPT account. The link works for two days.{% endblock %}
+{% block details %}{% endblock %}
+{% block button %}Confirm my email{% endblock %}
+{% block footer %}You're getting this because someone signed up to easyRCPT with this address. If it wasn't you, ignore this email.{% endblock %}

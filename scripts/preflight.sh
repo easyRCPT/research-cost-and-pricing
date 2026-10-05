@@ -54,26 +54,29 @@ sh scripts/branch-env.sh
 #    that command is the rest of this file.
 if [ -z "${PREFLIGHT_LOCKED:-}" ]; then
 	if ! command -v flock >/dev/null 2>&1; then
-		fail "flock is missing. macOS: 'brew install flock'. Linux: it ships with util-linux."
+		echo ""
+		echo "  preflight: flock not found — skipping the cross-process lock."
+		echo "  Single user, so this is fine; use PREFLIGHT_LOCKED=1 to silence."
+		echo ""
+	else
+		project=$(sed -n 's/^COMPOSE_PROJECT_NAME=//p' .env 2>/dev/null | tail -n 1)
+		[ -n "$project" ] || project=rcpt
+
+		lock_dir="${XDG_CONFIG_HOME:-$HOME/.config}/rcpt/locks"
+		mkdir -p "$lock_dir"
+
+		# Waiting, not failing: the normal case is `make backend` and `pnpm dev`
+		# seconds apart, where the second one wants the first one's result. Five
+		# minutes is far past a cold migrate and seed, so reaching the timeout means
+		# something is stuck rather than slow, and -E tells the two apart.
+		export PREFLIGHT_LOCKED=1
+		status=0
+		flock -w 300 -E 75 "$lock_dir/$project.lock" sh "$repo_root/scripts/preflight.sh" || status=$?
+		if [ "$status" -eq 75 ]; then
+			fail "another preflight has held '$project' for 5 minutes. Look for a stuck 'make backend' or 'pnpm dev'."
+		fi
+		exit "$status"
 	fi
-
-	project=$(sed -n 's/^COMPOSE_PROJECT_NAME=//p' .env 2>/dev/null | tail -n 1)
-	[ -n "$project" ] || project=rcpt
-
-	lock_dir="${XDG_CONFIG_HOME:-$HOME/.config}/rcpt/locks"
-	mkdir -p "$lock_dir"
-
-	# Waiting, not failing: the normal case is `make backend` and `pnpm dev`
-	# seconds apart, where the second one wants the first one's result. Five
-	# minutes is far past a cold migrate and seed, so reaching the timeout means
-	# something is stuck rather than slow, and -E tells the two apart.
-	export PREFLIGHT_LOCKED=1
-	status=0
-	flock -w 300 -E 75 "$lock_dir/$project.lock" sh "$repo_root/scripts/preflight.sh" || status=$?
-	if [ "$status" -eq 75 ]; then
-		fail "another preflight has held '$project' for 5 minutes. Look for a stuck 'make backend' or 'pnpm dev'."
-	fi
-	exit "$status"
 fi
 
 # 5. Database. --wait blocks until the healthcheck passes, so the migrate below

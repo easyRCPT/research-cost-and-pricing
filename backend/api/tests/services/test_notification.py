@@ -1,8 +1,11 @@
 from unittest.mock import patch
 
+from django.core import mail
 from django.test import TestCase
+from django.utils import timezone
 
 from api.models import (
+    ApprovalStep,
     Budget,
     UserOrgAssignment,
 )
@@ -10,6 +13,7 @@ from api.services.notification import (
     notify_budget_decision,
     notify_dean_review,
     notify_hod_review,
+    notify_withdrawn,
 )
 from api.tests.factories import make_budget, make_department, make_project, make_user
 
@@ -37,7 +41,7 @@ class NotificationTest(TestCase):
             faculty=cls.faculty,
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_notify_hod_review_sends_to_hod(
         self,
         mock_email,
@@ -57,10 +61,10 @@ class NotificationTest(TestCase):
 
         self.assertEqual(
             kwargs["subject"],
-            "Budget requires HOD review",
+            "Approval needed: Test Project",
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_notify_dean_review_sends_to_dean(
         self,
         mock_email,
@@ -88,10 +92,10 @@ class NotificationTest(TestCase):
 
         self.assertEqual(
             kwargs["subject"],
-            "Budget requires Dean review",
+            "Dean approval needed: Test Project",
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_notify_budget_owner_after_rejection(
         self,
         mock_email,
@@ -116,10 +120,10 @@ class NotificationTest(TestCase):
 
         self.assertEqual(
             kwargs["subject"],
-            "Budget approval updated",
+            "Rejected: Test Project",
         )
 
-    @patch("api.services.notification.render_to_string")
+    @patch("api.services.notification.sender.render_to_string")
     def test_notify_budget_owner_passes_context(
         self,
         mock_render,
@@ -160,7 +164,31 @@ class NotificationTest(TestCase):
             context["requires_dean_review"],
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.render_to_string")
+    def test_links_to_the_costings_approvals_screen(self, mock_render) -> None:
+        budget = make_budget(self.project, status=Budget.Status.HOD_REVIEW)
+
+        with self.settings(FRONTEND_URL="https://easyrcpt.example"):
+            notify_hod_review(budget)
+
+        context = mock_render.call_args.args[1]
+        self.assertEqual(
+            context["url"],
+            f"https://easyrcpt.example/projects/{self.project.id}/approvals",
+        )
+
+    def test_dean_email_says_why_in_words(self) -> None:
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
+        budget.dean_triggers = ["margin_below_minimum", "something_new"]
+
+        notify_dean_review(budget)
+
+        [email] = mail.outbox
+        self.assertIn("The margin is below the University's minimum.", email.body)
+        self.assertIn("something_new", email.body)
+        self.assertNotIn("margin_below_minimum", email.body)
+
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_email_failure_does_not_raise(
         self,
         mock_email,
@@ -172,3 +200,62 @@ class NotificationTest(TestCase):
         )
 
         notify_hod_review(budget)
+
+    def test_withdrawn_goes_to_every_level_it_was_waiting_on(self) -> None:
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
+
+        notify_withdrawn(budget, levels=["department", "faculty"])
+
+        [email] = mail.outbox
+        self.assertEqual(email.to, ["dean@example.com", "hod@example.com"])
+        self.assertEqual(email.subject, "Withdrawn: Test Project")
+
+    def test_timeline_shows_each_step_that_applies(self) -> None:
+        budget = make_budget(
+            self.project, status=Budget.Status.REJECTED, submitted_at=timezone.now()
+        )
+        ApprovalStep.objects.create(
+            budget=budget,
+            level=ApprovalStep.Level.DEPARTMENT,
+            status=ApprovalStep.Status.REJECTED,
+            decided_by=self.hod,
+            decided_at=timezone.now(),
+            comment="No.",
+        )
+        ApprovalStep.objects.create(
+            budget=budget,
+            level=ApprovalStep.Level.FACULTY,
+            status=ApprovalStep.Status.NOT_REQUIRED,
+        )
+
+        notify_budget_decision(
+            budget, decision="reject", comment="No.", approver=self.hod
+        )
+
+        [email] = mail.outbox
+        self.assertIn("Submitted for approval:", email.body)
+        self.assertIn("Head of Department approval: rejected", email.body)
+        self.assertIn("  > No.", email.body)
+        self.assertEqual(email.body.count("No."), 1)
+        self.assertNotIn("Dean approval", email.body)
+
+    def test_timeline_shows_a_waiting_step_as_pending(self) -> None:
+        budget = make_budget(
+            self.project, status=Budget.Status.HOD_REVIEW, submitted_at=timezone.now()
+        )
+        ApprovalStep.objects.create(budget=budget, level=ApprovalStep.Level.DEPARTMENT)
+
+        notify_hod_review(budget)
+
+        [email] = mail.outbox
+        self.assertIn("Head of Department approval: pending", email.body)
+
+    def test_withdrawn_timeline_ends_with_the_withdrawal(self) -> None:
+        budget = make_budget(
+            self.project, status=Budget.Status.WITHDRAWN, submitted_at=timezone.now()
+        )
+
+        notify_withdrawn(budget, levels=["department"])
+
+        [email] = mail.outbox
+        self.assertIn("Withdrawn:", email.body.split("Progress:")[1])

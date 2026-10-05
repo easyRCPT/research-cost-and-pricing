@@ -4,6 +4,7 @@ import { NumberInput } from '@/components/ui/number-input'
 import { Slider } from '@/components/ui/slider'
 import { percent1 } from '@/lib/format/utils'
 import { toastOutOfRange } from '@/lib/range'
+import { describeTrigger } from '@/screens/approvals/triggers'
 
 // No negative margin and no cap (#192): a margin can be above 100%, up to
 // the 999.99% the server's column holds. The slider covers the usual range;
@@ -21,6 +22,7 @@ export function MarginPanel() {
 
   const summary = budget.budget_summary.price_summary
   const deanRequired = budget.budget_summary.dean_required
+  const deanTriggers = budget.budget_summary.dean_triggers
   const percent = asPercent(margin.value)
   const editable = useEditable()
   const setPercent = (next: number) => margin.onChange(asFraction(next))
@@ -58,12 +60,22 @@ export function MarginPanel() {
             {percent1(margin.value)}
           </span>
         )}
-        {deanRequired && (
-          <span className="rounded-md bg-warn-bg px-2 py-1 text-[12.5px] text-warn">
-            Dean's authorisation required
-          </span>
-        )}
       </div>
+
+      {deanRequired && deanTriggers.length > 0 && (
+        <div
+          className="mt-3 rounded-md bg-warn-bg px-3 py-2 text-[12.5px] text-warn"
+          role="status"
+          aria-label="Dean's authorisation required"
+        >
+          <p className="font-medium">Dean's authorisation required:</p>
+          <ul className="mt-1 list-disc pl-5">
+            {deanTriggers.map((trigger) => (
+              <li key={trigger}>{describeTrigger(trigger)}.</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <Ledger className="mt-4">
         <tbody>

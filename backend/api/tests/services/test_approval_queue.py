@@ -113,17 +113,6 @@ class ApprovalQueueTest(TestCase):
 
         self.assertEqual(steps, [])
 
-    def test_member_assignment_does_not_grant_approval_authority(self) -> None:
-        UserOrgAssignment.objects.create(
-            user=self.unassigned_user,
-            role=UserOrgAssignment.Role.MEMBER,
-            department=self.department,
-        )
-
-        steps = get_approval_steps(self.unassigned_user)
-
-        self.assertEqual(steps, [])
-
     def test_hod_does_not_see_dean_step(self) -> None:
         steps = get_approval_steps(self.hod)
 

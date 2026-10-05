@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -27,7 +29,8 @@ class SignupSerializer(serializers.Serializer):
 
     def validate_email(self, value: str) -> str:
         allowed = settings.ALLOWED_EMAIL_DOMAINS
-        if value.rsplit("@", 1)[-1].lower() not in allowed:
+        host = value.rsplit("@", 1)[-1].lower()
+        if not any(_on_domain(host, domain) for domain in allowed):
             addresses = " or ".join(f"@{domain}" for domain in allowed)
             raise serializers.ValidationError(f"Sign up with your {addresses} address.")
         return value
@@ -40,6 +43,19 @@ class SignupSerializer(serializers.Serializer):
         except DjangoValidationError as invalid:
             raise serializers.ValidationError(list(invalid.messages)) from invalid
         return value
+
+
+def _on_domain(host: str, domain: str) -> bool:
+    """The domain itself or any subdomain of it, e.g. student.unimelb.edu.au."""
+    return re.fullmatch(rf"(?:[a-z0-9-]+\.)*{re.escape(domain)}", host) is not None
+
+
+class SignupPendingSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class SignupConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
 
 
 class LoginSerializer(serializers.Serializer):

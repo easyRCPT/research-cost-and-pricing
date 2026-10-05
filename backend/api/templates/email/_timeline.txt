@@ -1,0 +1,5 @@
+{% if timeline %}
+Progress:
+{% for entry in timeline %}- {{ entry.label }}: {% if entry.at %}{% if entry.state == "rejected" %}rejected {% endif %}{{ entry.at|date:"j M Y, g:i A" }} - {{ entry.by }}{% else %}pending{% endif %}{% if entry.comment %}
+  > {{ entry.comment }}{% endif %}
+{% endfor %}{% endif %}

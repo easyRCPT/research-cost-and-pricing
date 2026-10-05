@@ -23,6 +23,7 @@ import { Projects as ProjectRegister } from '@/screens/admin/Projects'
 import { Users } from '@/screens/admin/Users'
 import { VersionHistory } from '@/screens/admin/VersionHistory'
 import { AdminLogin } from '@/screens/auth/AdminLogin'
+import { ConfirmEmail } from '@/screens/auth/ConfirmEmail'
 import { Login } from '@/screens/auth/Login'
 import { Signup } from '@/screens/auth/Signup'
 import type { AppScreen } from '@/screens/editor/AppContent'
@@ -70,6 +71,14 @@ const signupRoute = createRoute({
   component: Signup,
 })
 
+const signupConfirmRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/signup/confirm',
+  validateSearch: (search: Record<string, unknown>): { token?: string } =>
+    typeof search.token === 'string' ? { token: search.token } : {},
+  component: ConfirmEmail,
+})
+
 const adminLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/login',
@@ -91,7 +100,8 @@ const privateRoute = createRoute({
   beforeLoad: async ({ context, location }) => {
     const me = await context.queryClient.ensureQueryData(meQuery)
     // Carried so signing in finishes the trip they started.
-    if (!me) throw redirect({ to: '/login', search: { redirect: location.href } })
+    if (!me)
+      throw redirect({ to: '/login', search: { redirect: location.href } })
   },
 })
 
@@ -112,7 +122,11 @@ const adminRoute = createRoute({
   path: '/admin',
   beforeLoad: async ({ context, location }) => {
     const me = await context.queryClient.ensureQueryData(meQuery)
-    if (!me) throw redirect({ to: '/admin/login', search: { redirect: location.href } })
+    if (!me)
+      throw redirect({
+        to: '/admin/login',
+        search: { redirect: location.href },
+      })
     if (!me.groups.includes(SUPERADMIN)) throw redirect({ to: homeFor(me) })
   },
   component: AdminShell,
@@ -215,6 +229,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   signupRoute,
+  signupConfirmRoute,
   adminLoginRoute,
   privateRoute.addChildren([
     projectsRoute,
