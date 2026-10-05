@@ -24,6 +24,7 @@ def send(notification: Notification) -> None:
             body=render_to_string(f"email/{notification.template}.txt", context),
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=to,
+            cc=[address for address in notification.cc() if address not in to],
         )
         email.attach_alternative(
             render_to_string(f"email/{notification.template}.html", context),
