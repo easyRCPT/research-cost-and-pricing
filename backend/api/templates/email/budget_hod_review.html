@@ -1,27 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Budget Review Required</title>
-</head>
-<body>
-<p>
-  A budget requires <strong>Head of Department</strong> review.
-</p>
-
-<p>
-  <strong>Project:</strong>
-  {{ budget.project.title }}
-</p>
-
-<p>
-  <strong>Department:</strong>
-  {{ budget.project.department.name }}
-</p>
-
-<p>
-  <a href="{{ url }}">Open budget</a>
-</p>
-
-</body>
-</html>
+{% extends "email/base.html" %}
+{% block heading %}A costing needs your approval{% endblock %}
+{% block intro %}{{ project.created_by.display_name }} has submitted a costing for Head of Department approval.{% endblock %}
+{% block button %}Review and decide{% endblock %}
+{% block footer %}You're getting this because you're a Head of Department for {{ project.department.name }} in easyRCPT.{% endblock %}

@@ -1,25 +1,8 @@
-Your budget approval has been updated.
-
-Project:
-{{ budget.project.title }}
-
-Department:
-{{ budget.project.department.name }}
-
-Decision:
-{{ decision }}
-
-Reviewed by:
-{{ approver.email }}
-
-{% if requires_dean_review %}
-The Head of Department has approved this budget. It requires further Dean review before a final decision is made.
-
-{% elif decision == "reject" %}
+{% extends "email/base.txt" %}
+{% block heading %}{{ heading }}{% endblock %}
+{% block intro %}{% if decision == "reject" %}{{ approver.display_name }} rejected your costing. You can make a new draft from it and resubmit.{% elif requires_dean_review %}{{ approver.display_name }} approved your costing. It now goes to the Dean for a final decision.{% else %}{{ approver.display_name }} approved your costing. No further approval is needed.{% endif %}{% endblock %}
+{% block body %}{% if decision == "reject" and comment %}
 Reason:
 {{ comment }}
-
-{% endif %}
-
-Please review the budget in RCPT:
-{{ url }}
+{% endif %}{% endblock %}
+{% block footer %}You're getting this because you submitted this costing in easyRCPT.{% endblock %}

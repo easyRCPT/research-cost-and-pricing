@@ -5,7 +5,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup secretkey hooks preflight db-up db-down \
-        db-down-v db-reset db-logs db-shell db-list db-prune branch-env migrate \
+        db-down-v db-reset db-logs mail-up mail-down db-shell db-list db-prune branch-env migrate \
         makemigrations fixture seed seed-list superuser backend frontend test lint gen-api
 
 help: ## Show this help
@@ -52,6 +52,12 @@ db-down: ## Stop Postgres, keeping the data volume
 
 db-down-v: ## Stop this branch's Postgres and delete its volume
 	docker compose down -v
+
+mail-up: ## Start Mailpit; read sent mail at http://localhost:8025
+	docker compose up -d mailpit
+
+mail-down: ## Stop Mailpit
+	docker compose stop mailpit
 
 branch-env: ## Point this checkout at the current branch's database
 	@sh scripts/branch-env.sh

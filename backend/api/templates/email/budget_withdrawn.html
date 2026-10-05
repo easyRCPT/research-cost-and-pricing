@@ -1,32 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Budget Withdrawn</title>
-</head>
-<body>
-<p>
-  A budget waiting on your review has been <strong>withdrawn</strong> by its owner.
-</p>
-
-<p>
-  <strong>Project:</strong>
-  {{ budget.project.title }}
-</p>
-
-<p>
-  <strong>Department:</strong>
-  {{ budget.project.department.name }}
-</p>
-
-<p>
-  There is nothing for you to decide. If it is revised, it will come back to
-  you as a new submission.
-</p>
-
-<p>
-  <a href="{{ url }}">Open RCPT</a>
-</p>
-
-</body>
-</html>
+{% extends "email/base.html" %}
+{% block heading %}A costing was withdrawn{% endblock %}
+{% block intro %}{{ project.created_by.display_name }} withdrew this costing from review. There's nothing for you to decide.{% endblock %}
+{% block button %}View the costing{% endblock %}
+{% block footer %}You're getting this because the costing was waiting on your approval in easyRCPT.{% endblock %}

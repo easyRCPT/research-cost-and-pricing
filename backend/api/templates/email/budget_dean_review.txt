@@ -1,16 +1,9 @@
-A budget requires Dean review.
-
-Project:
-{{ budget.project.title }}
-
-Department:
-{{ budget.project.department.name }}
-
-Dean approval is required because:
-
-{% for trigger in triggers %}
-- {{ trigger }}
-{% endfor %}
-
-Please review the budget in RCPT:
-{{ url }}
+{% extends "email/base.txt" %}
+{% block heading %}A costing needs Dean approval{% endblock %}
+{% block intro %}The Head of Department has approved this costing. It also needs a Dean's approval before it's final.{% endblock %}
+{% block body %}{% if triggers %}
+Why it needs a Dean:
+{% for trigger in triggers %}- {{ trigger }}
+{% endfor %}{% endif %}{% endblock %}
+{% block button %}Review and decide{% endblock %}
+{% block footer %}You're getting this because you're a Dean for {{ project.department.faculty.name }} in easyRCPT.{% endblock %}
