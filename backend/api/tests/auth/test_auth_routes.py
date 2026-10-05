@@ -2,6 +2,7 @@ import time
 from unittest.mock import patch
 
 from django.conf import settings
+from django.core import mail
 from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -49,7 +50,7 @@ class TestSignup(AuthTestMixin, TestCase):
     def test_creates_an_account_in_exactly_one_group(self):
         response = self.signup(account_type="staff")
 
-        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.status_code, 202, response.content)
         user = User.objects.get(email="new@unimelb.edu.au")
         self.assertEqual([g.name for g in user.groups.all()], ["staff"])
 
@@ -84,7 +85,7 @@ class TestSignup(AuthTestMixin, TestCase):
     def test_the_domain_is_matched_without_case(self):
         response = self.signup(email="new@UniMelb.edu.au")
 
-        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.status_code, 202, response.content)
 
     def test_a_subdomain_is_not_the_domain(self):
         response = self.signup(email="new@student.unimelb.edu.au")
@@ -93,11 +94,84 @@ class TestSignup(AuthTestMixin, TestCase):
 
     @override_settings(ALLOWED_EMAIL_DOMAINS=["unimelb.edu.au", "example.org"])
     def test_the_allowed_domains_come_from_settings(self):
-        self.assertEqual(self.signup(email="new@example.org").status_code, 201)
+        self.assertEqual(self.signup(email="new@example.org").status_code, 202)
         self.assertEqual(self.signup(email="new@gmail.com").status_code, 400)
 
     def test_the_setting_defaults_to_the_university(self):
         self.assertEqual(settings.ALLOWED_EMAIL_DOMAINS, ["unimelb.edu.au"])
+
+
+class TestSignupConfirmation(AuthTestMixin, TestCase):
+    def confirm_link(self) -> str:
+        [email] = mail.outbox
+        return email.body.split("token=", 1)[1].split()[0]
+
+    def status(self):
+        return self.client.get(reverse("signup-status"))
+
+    def confirm(self, token: str):
+        return Client().post(
+            reverse("signup-confirm"), {"token": token}, "application/json"
+        )
+
+    def test_signing_up_emails_a_link_and_does_not_sign_in(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.signup()
+
+        self.assertEqual(response.json(), {"email": "new@unimelb.edu.au"})
+        self.assertEqual(mail.outbox[0].to, ["new@unimelb.edu.au"])
+        self.assertIn("/signup/confirm?token=", mail.outbox[0].body)
+        self.assertEqual(self.client.get(reverse("me")).status_code, 401)
+        self.assertEqual(self.status().status_code, 202)
+
+    def test_the_sign_up_tab_signs_in_once_the_link_is_opened_elsewhere(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.signup()
+
+        self.assertEqual(self.confirm(self.confirm_link()).status_code, 204)
+        response = self.status()
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()["user"]["email"], "new@unimelb.edu.au")
+        self.assertEqual(self.client.get(reverse("me")).status_code, 200)
+
+    def test_a_bad_link_is_refused(self):
+        self.assertEqual(self.confirm("not-a-token").status_code, 400)
+
+    def test_an_unconfirmed_account_cannot_sign_in(self):
+        self.signup()
+
+        response = self.login("new@unimelb.edu.au")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Confirm your email", str(response.content))
+
+    def test_signing_up_again_replaces_an_unconfirmed_account(self):
+        self.signup(first_name="Old")
+
+        response = Client().post(
+            reverse("signup"),
+            {
+                "email": "new@unimelb.edu.au",
+                "password": PASSWORD,
+                "first_name": "Again",
+                "last_name": "Person",
+                "account_type": "researcher",
+            },
+            "application/json",
+        )
+
+        self.assertEqual(response.status_code, 202, response.content)
+        self.assertEqual(
+            User.objects.get(email="new@unimelb.edu.au").first_name, "Again"
+        )
+
+    def test_resend_waits_between_sends(self):
+        self.signup()
+        self.assertEqual(self.client.post(reverse("signup-resend")).status_code, 429)
+
+    def test_status_without_a_sign_up_is_404(self):
+        self.assertEqual(self.status().status_code, 404)
 
 
 class TestStartSession(AuthTestMixin, TestCase):
@@ -107,8 +181,11 @@ class TestStartSession(AuthTestMixin, TestCase):
         self.make_user("ruth@unimelb.edu.au", groups=["researcher"])
         self.make_user("sam@unimelb.edu.au", groups=["staff", "superadmin"])
 
+        self.signup()
+        User.objects.filter(email="new@unimelb.edu.au").update(email_confirmed=True)
+
         with patch("api.views.auth.auth.start_session") as start_session:
-            self.signup()
+            self.client.get(reverse("signup-status"))
             self.login("ruth@unimelb.edu.au")
             self.client.post(
                 reverse("admin-login"),

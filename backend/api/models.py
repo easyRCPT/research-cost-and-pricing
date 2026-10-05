@@ -199,6 +199,8 @@ class User(AbstractUser):
         blank=True,
         on_delete=models.PROTECT,
     )
+    # False only between self sign-up and clicking the link in the email.
+    email_confirmed = models.BooleanField(default=True)
 
     class Meta(AbstractUser.Meta):
         constraints = [

@@ -42,6 +42,14 @@ class SignupSerializer(serializers.Serializer):
         return value
 
 
+class SignupPendingSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class SignupConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)

@@ -1,6 +1,6 @@
 from api.models import Budget, User
 
-from .messages import DeanReview, Decision, HodReview, Withdrawn
+from .messages import DeanReview, Decision, HodReview, SignupConfirmation, Withdrawn
 from .sender import send
 
 
@@ -24,3 +24,8 @@ def notify_budget_decision(
 def notify_withdrawn(budget: Budget, *, levels: list[str]) -> None:
     """Tell the approvers it was waiting on that it has been withdrawn (#95)."""
     send(Withdrawn(budget, levels=levels))
+
+
+def notify_signup_confirmation(user: User, *, url: str) -> None:
+    """Send a new account the link that confirms its email."""
+    send(SignupConfirmation(user, url=url))

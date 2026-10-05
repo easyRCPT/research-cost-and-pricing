@@ -523,6 +523,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/signup/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The emailed link. Confirms the address; the sign-up tab then signs itself in. */
+        post: operations["auth_signup_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/signup/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_signup_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/signup/status/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Polled by the sign-up tab: 202 while waiting, then 200 and signed in once confirmed. */
+        get: operations["auth_signup_status_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/budgets/{budget_id}/": {
         parameters: {
             query?: never;
@@ -1773,6 +1823,48 @@ export interface components {
         };
         AuthLogoutCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
         AuthMeRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AuthSignupConfirmCreateError: components["schemas"]["AuthSignupConfirmCreateNonFieldErrorsErrorComponent"] | components["schemas"]["AuthSignupConfirmCreateTokenErrorComponent"];
+        AuthSignupConfirmCreateErrorResponse400: components["schemas"]["AuthSignupConfirmCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
+        AuthSignupConfirmCreateNonFieldErrorsErrorComponent: {
+            /**
+             * @description * `non_field_errors` - non_field_errors (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "non_field_errors";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
+            detail: string;
+        };
+        AuthSignupConfirmCreateTokenErrorComponent: {
+            /**
+             * @description * `token` - token (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "token";
+            /**
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
+             *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
+             * @enum {string}
+             */
+            code: "blank" | "invalid" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        AuthSignupConfirmCreateValidationError: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "validation_error";
+            errors: components["schemas"]["AuthSignupConfirmCreateError"][];
+        };
         AuthSignupCreateAccountTypeErrorComponent: {
             /**
              * @description * `account_type` - account_type (enum property replaced by openapi-typescript)
@@ -1886,6 +1978,8 @@ export interface components {
             type: "validation_error";
             errors: components["schemas"]["AuthSignupCreateError"][];
         };
+        AuthSignupResendCreateErrorResponse400: components["schemas"]["ParseErrorResponse"];
+        AuthSignupStatusRetrieveErrorResponse400: components["schemas"]["ParseErrorResponse"];
         /** @enum {unknown} */
         BlankEnum: "";
         BudgetDetail: {
@@ -3540,6 +3634,13 @@ export interface components {
             first_name: string;
             last_name: string;
             account_type: components["schemas"]["AccountTypeEnum"];
+        };
+        SignupConfirm: {
+            token: string;
+        };
+        SignupPending: {
+            /** Format: email */
+            email: string;
         };
         StaffBudget: {
             category_totals: {
@@ -6481,12 +6582,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Me"];
+                    "application/json": components["schemas"]["SignupPending"];
                 };
             };
             400: {
@@ -6511,6 +6612,259 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_signup_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignupConfirm"];
+                "application/x-www-form-urlencoded": components["schemas"]["SignupConfirm"];
+                "multipart/form-data": components["schemas"]["SignupConfirm"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSignupConfirmCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_signup_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSignupResendCreateErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse403"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse404"];
+                };
+            };
+            405: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse405"];
+                };
+            };
+            406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse406"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse415"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse500"];
+                };
+            };
+        };
+    };
+    auth_signup_status_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignupPending"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSignupStatusRetrieveErrorResponse400"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse401"];
                 };
             };
             404: {

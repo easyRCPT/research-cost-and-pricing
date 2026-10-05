@@ -9,14 +9,19 @@ every unsafe method, which `me` hands out the cookie for.
 from typing import cast
 
 from django.contrib.auth import logout
-from django.contrib.auth.models import Group
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.http import HttpRequest
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import (
+    AuthenticationFailed,
+    NotFound,
+    PermissionDenied,
+    Throttled,
+    ValidationError,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -28,15 +33,18 @@ from api.serializers.auth_serializer import (
     AdminLoginSerializer,
     LoginSerializer,
     MeSerializer,
+    SignupConfirmSerializer,
+    SignupPendingSerializer,
     SignupSerializer,
 )
-from api.services import auth
+from api.services import auth, signup
 from api.throttles import SignInThrottle
 
 # One message for a wrong password, an unknown address, a deactivated account
 # and the wrong tab. Anything more specific says which accounts exist and what
 # kind they are.
 WRONG = "Incorrect email or password."
+UNCONFIRMED = "Confirm your email first. Check your inbox for the link, or sign up again for a new one."
 
 
 def _me(user: User) -> Response:
@@ -46,22 +54,14 @@ def _me(user: User) -> Response:
 class SignupView(APIView):
     permission_classes = [AllowAny, CsrfProtected]
 
-    @extend_schema(request=SignupSerializer, responses={201: MeSerializer})
+    @extend_schema(request=SignupSerializer, responses={202: SignupPendingSerializer})
     def post(self, request: Request) -> Response:
         serializer = SignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = cast(dict, serializer.validated_data)
 
         try:
-            with transaction.atomic():
-                user = User.objects.create_user(
-                    email=data["email"],
-                    password=data["password"],
-                    first_name=data["first_name"],
-                    last_name=data["last_name"],
-                )
-                # Exactly one, and never superadmin: nothing self-serves that.
-                user.groups.set(Group.objects.filter(name=data["account_type"]))
+            user = signup.start_signup(request, data)
         except IntegrityError:
             return Response(
                 {
@@ -77,10 +77,53 @@ class SignupView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
+        return Response({"email": user.email}, status=status.HTTP_202_ACCEPTED)
+
+
+class SignupStatusView(APIView):
+    """Polled by the sign-up tab: 202 while waiting, then 200 and signed in once confirmed."""
+
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses={200: MeSerializer, 202: SignupPendingSerializer})
+    def get(self, request: Request) -> Response:
+        user = signup.pending_user(request)
+        if user is None:
+            raise NotFound("No sign-up is waiting on this browser.")
+        if not user.email_confirmed:
+            return Response({"email": user.email}, status=status.HTTP_202_ACCEPTED)
+        signup.finish(request)
         auth.start_session(request, user)
-        return Response(
-            MeSerializer(auth.me_for(user)).data, status=status.HTTP_201_CREATED
-        )
+        return _me(user)
+
+
+class SignupResendView(APIView):
+    permission_classes = [AllowAny, CsrfProtected]
+
+    @extend_schema(request=None, responses={204: None})
+    def post(self, request: Request) -> Response:
+        user = signup.pending_user(request)
+        if user is None or user.email_confirmed:
+            raise NotFound("No sign-up is waiting on this browser.")
+        if not signup.resend(request, user):
+            raise Throttled(detail="Wait a few seconds before sending another.")
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SignupConfirmView(APIView):
+    """The emailed link. Confirms the address; the sign-up tab then signs itself in."""
+
+    permission_classes = [AllowAny, CsrfProtected]
+
+    @extend_schema(request=SignupConfirmSerializer, responses={204: None})
+    def post(self, request: Request) -> Response:
+        serializer = SignupConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if signup.confirm(cast(dict, serializer.validated_data)["token"]) is None:
+            raise ValidationError(
+                {"token": "This link has expired or was replaced. Sign up again."}
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LoginView(APIView):
@@ -100,6 +143,8 @@ class LoginView(APIView):
         if user is None or not auth.may_use_door(user, data["account_type"]):
             SignInThrottle.record_failure(request)
             raise AuthenticationFailed(WRONG)
+        if not user.email_confirmed:
+            raise AuthenticationFailed(UNCONFIRMED)
 
         auth.start_session(request, user)
         return _me(user)
