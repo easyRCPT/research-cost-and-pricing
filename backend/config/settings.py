@@ -173,12 +173,13 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 if RESEND_API_KEY:
     EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
     ANYMAIL = {"RESEND_API_KEY": RESEND_API_KEY}
+    # Resend's shared sender until a domain is verified; it only delivers to the account's own address.
+    _default_from = "easyRCPT <onboarding@resend.dev>"
 else:
     EMAIL_HOST = os.environ.get("EMAIL_HOST", "127.0.0.1")
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "1025"))
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DJANGO_DEFAULT_FROM_EMAIL", "easyRCPT <noreply@easyrcpt.local>"
-)
+    _default_from = "easyRCPT <noreply@easyrcpt.local>"
+DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", _default_from)
 
 # Where links in emails point. The browser app, not this API.
 FRONTEND_URL = os.environ.get("DJANGO_FRONTEND_URL", "http://localhost:5173").rstrip(

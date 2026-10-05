@@ -11,6 +11,7 @@ from api.services.notification import (
     notify_budget_decision,
     notify_dean_review,
     notify_hod_review,
+    notify_withdrawn,
 )
 from api.tests.factories import make_budget, make_department, make_project, make_user
 
@@ -38,7 +39,7 @@ class NotificationTest(TestCase):
             faculty=cls.faculty,
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_notify_hod_review_sends_to_hod(
         self,
         mock_email,
@@ -61,7 +62,7 @@ class NotificationTest(TestCase):
             "Approval needed: Test Project",
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_notify_dean_review_sends_to_dean(
         self,
         mock_email,
@@ -92,7 +93,7 @@ class NotificationTest(TestCase):
             "Dean approval needed: Test Project",
         )
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_notify_budget_owner_after_rejection(
         self,
         mock_email,
@@ -120,7 +121,7 @@ class NotificationTest(TestCase):
             "Rejected: Test Project",
         )
 
-    @patch("api.services.notification.render_to_string")
+    @patch("api.services.notification.sender.render_to_string")
     def test_notify_budget_owner_passes_context(
         self,
         mock_render,
@@ -161,7 +162,7 @@ class NotificationTest(TestCase):
             context["requires_dean_review"],
         )
 
-    @patch("api.services.notification.render_to_string")
+    @patch("api.services.notification.sender.render_to_string")
     def test_links_to_the_costings_approvals_screen(self, mock_render) -> None:
         budget = make_budget(self.project, status=Budget.Status.HOD_REVIEW)
 
@@ -185,7 +186,7 @@ class NotificationTest(TestCase):
         self.assertIn("something_new", email.body)
         self.assertNotIn("margin_below_minimum", email.body)
 
-    @patch("api.services.notification.EmailMultiAlternatives")
+    @patch("api.services.notification.sender.EmailMultiAlternatives")
     def test_email_failure_does_not_raise(
         self,
         mock_email,
@@ -197,3 +198,12 @@ class NotificationTest(TestCase):
         )
 
         notify_hod_review(budget)
+
+    def test_withdrawn_goes_to_every_level_it_was_waiting_on(self) -> None:
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
+
+        notify_withdrawn(budget, levels=["department", "faculty"])
+
+        [email] = mail.outbox
+        self.assertEqual(email.to, ["dean@example.com", "hod@example.com"])
+        self.assertEqual(email.subject, "Withdrawn: Test Project")
