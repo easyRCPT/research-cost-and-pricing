@@ -2,8 +2,10 @@ from unittest.mock import patch
 
 from django.core import mail
 from django.test import TestCase
+from django.utils import timezone
 
 from api.models import (
+    ApprovalStep,
     Budget,
     UserOrgAssignment,
 )
@@ -207,3 +209,53 @@ class NotificationTest(TestCase):
         [email] = mail.outbox
         self.assertEqual(email.to, ["dean@example.com", "hod@example.com"])
         self.assertEqual(email.subject, "Withdrawn: Test Project")
+
+    def test_timeline_shows_each_step_that_applies(self) -> None:
+        budget = make_budget(
+            self.project, status=Budget.Status.REJECTED, submitted_at=timezone.now()
+        )
+        ApprovalStep.objects.create(
+            budget=budget,
+            level=ApprovalStep.Level.DEPARTMENT,
+            status=ApprovalStep.Status.REJECTED,
+            decided_by=self.hod,
+            decided_at=timezone.now(),
+            comment="No.",
+        )
+        ApprovalStep.objects.create(
+            budget=budget,
+            level=ApprovalStep.Level.FACULTY,
+            status=ApprovalStep.Status.NOT_REQUIRED,
+        )
+
+        notify_budget_decision(
+            budget, decision="reject", comment="No.", approver=self.hod
+        )
+
+        [email] = mail.outbox
+        self.assertIn("Submitted for approval:", email.body)
+        self.assertIn("Head of Department approval: rejected", email.body)
+        self.assertIn("  > No.", email.body)
+        self.assertEqual(email.body.count("No."), 1)
+        self.assertNotIn("Dean approval", email.body)
+
+    def test_timeline_shows_a_waiting_step_as_pending(self) -> None:
+        budget = make_budget(
+            self.project, status=Budget.Status.HOD_REVIEW, submitted_at=timezone.now()
+        )
+        ApprovalStep.objects.create(budget=budget, level=ApprovalStep.Level.DEPARTMENT)
+
+        notify_hod_review(budget)
+
+        [email] = mail.outbox
+        self.assertIn("Head of Department approval: pending", email.body)
+
+    def test_withdrawn_timeline_ends_with_the_withdrawal(self) -> None:
+        budget = make_budget(
+            self.project, status=Budget.Status.WITHDRAWN, submitted_at=timezone.now()
+        )
+
+        notify_withdrawn(budget, levels=["department"])
+
+        [email] = mail.outbox
+        self.assertIn("Withdrawn:", email.body.split("Progress:")[1])

@@ -1,8 +1,4 @@
 {% extends "email/base.txt" %}
 {% block heading %}{{ heading }}{% endblock %}
 {% block intro %}{% if decision == "reject" %}{{ approver.display_name }} rejected your costing. You can make a new draft from it and resubmit.{% elif requires_dean_review %}{{ approver.display_name }} approved your costing. It now goes to the Dean for a final decision.{% else %}{{ approver.display_name }} approved your costing. No further approval is needed.{% endif %}{% endblock %}
-{% block body %}{% if decision == "reject" and comment %}
-Reason:
-{{ comment }}
-{% endif %}{% endblock %}
 {% block footer %}You're getting this because you submitted this costing in easyRCPT.{% endblock %}
