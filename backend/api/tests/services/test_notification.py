@@ -259,3 +259,36 @@ class NotificationTest(TestCase):
 
         [email] = mail.outbox
         self.assertIn("Withdrawn:", email.body.split("Progress:")[1])
+
+    def test_approver_emails_copy_in_the_researcher(self) -> None:
+        budget = make_budget(self.project, status=Budget.Status.DEAN_REVIEW)
+
+        notify_hod_review(budget)
+        notify_dean_review(budget)
+        notify_withdrawn(budget, levels=["faculty"])
+
+        self.assertEqual(
+            [email.cc for email in mail.outbox], [["owner@example.com"]] * 3
+        )
+
+    def test_decision_email_copies_no_one(self) -> None:
+        budget = make_budget(self.project, status=Budget.Status.REJECTED)
+
+        notify_budget_decision(budget, decision="reject", approver=self.hod)
+
+        [email] = mail.outbox
+        self.assertEqual(email.cc, [])
+
+    def test_researcher_who_is_also_the_hod_is_not_copied_twice(self) -> None:
+        UserOrgAssignment.objects.create(
+            user=self.owner,
+            role=UserOrgAssignment.Role.HOD,
+            department=self.department,
+        )
+        budget = make_budget(self.project, status=Budget.Status.HOD_REVIEW)
+
+        notify_hod_review(budget)
+
+        [email] = mail.outbox
+        self.assertIn("owner@example.com", email.to)
+        self.assertEqual(email.cc, [])

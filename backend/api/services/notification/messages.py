@@ -22,6 +22,9 @@ class Notification(ABC):
     @abstractmethod
     def recipients(self) -> list[str]: ...
 
+    def cc(self) -> list[str]:
+        return []
+
     @abstractmethod
     def subject(self) -> str: ...
 
@@ -49,7 +52,14 @@ class BudgetNotification(Notification):
         }
 
 
-class HodReview(BudgetNotification):
+class ApproverNotification(BudgetNotification):
+    """An email to approvers, with the researcher copied in."""
+
+    def cc(self) -> list[str]:
+        return recipients.owner(self.budget)
+
+
+class HodReview(ApproverNotification):
     template = "budget_hod_review"
 
     def recipients(self) -> list[str]:
@@ -59,7 +69,7 @@ class HodReview(BudgetNotification):
         return f"Approval needed: {self.title}"
 
 
-class DeanReview(BudgetNotification):
+class DeanReview(ApproverNotification):
     template = "budget_dean_review"
 
     def recipients(self) -> list[str]:
@@ -113,7 +123,7 @@ class Decision(BudgetNotification):
         }
 
 
-class Withdrawn(BudgetNotification):
+class Withdrawn(ApproverNotification):
     template = "budget_withdrawn"
 
     def __init__(self, budget: Budget, *, levels: list[str]) -> None:
