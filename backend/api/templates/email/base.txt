@@ -2,11 +2,11 @@
 
 {% block intro %}{% endblock %}
 
-Project: {{ title }}
+{% block details %}Project: {{ title }}
 Department: {{ project.department.name|default:"—" }}
 {% if project.chief_investigator %}Chief investigator: {{ project.chief_investigator }}
 {% endif %}Submitted by: {{ project.created_by.display_name }}
-{% include "email/_timeline.txt" %}{% block body %}{% endblock %}
+{% endblock %}{% include "email/_timeline.txt" %}{% block body %}{% endblock %}
 {% block button %}Open the costing{% endblock %}:
 {{ url }}
 

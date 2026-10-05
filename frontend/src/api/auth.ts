@@ -12,6 +12,7 @@ import type { components } from '@/types/api'
 export type Me = components['schemas']['Me']
 export type AccountType = components['schemas']['AccountTypeEnum']
 type Signup = components['schemas']['Signup']
+type SignupPending = components['schemas']['SignupPending']
 type Login = components['schemas']['Login']
 type AdminLogin = components['schemas']['AdminLogin']
 
@@ -78,11 +79,55 @@ export function useLogin() {
   }, queryClient)
 }
 
+/** Creates the account unconfirmed and emails the link; nobody is signed in yet. */
 export function useSignup() {
+  return useMutation({
+    mutationFn: async (body: Signup): Promise<SignupPending> => {
+      await ensureCsrf()
+      return unwrap(await api.POST('/api/auth/signup/', { body }))
+    },
+  })
+}
+
+/**
+ * Polls the sign-up this tab started. Resolves to the new account once the
+ * link has been opened anywhere, and the server has signed this tab in.
+ */
+export function useSignupStatus(enabled: boolean) {
   const queryClient = useQueryClient()
-  return useSignIn<Signup>(async (body) => {
-    return unwrap(await api.POST('/api/auth/signup/', { body }))
-  }, queryClient)
+  return useQuery({
+    queryKey: ['signup-status'],
+    queryFn: async (): Promise<Me | null> => {
+      const result = await api.GET('/api/auth/signup/status/')
+      if (result.response.status === 202) return null
+      const me = unwrap(result) as Me
+      queryClient.setQueryData(meKey, me)
+      return me
+    },
+    enabled,
+    refetchInterval: (query) => (query.state.data ? false : 3000),
+    // The link is opened in another tab, so this one is hidden while it waits.
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    retry: false,
+  })
+}
+
+export function useResendSignup() {
+  return useMutation({
+    mutationFn: async () => {
+      unwrap(await api.POST('/api/auth/signup/resend/', {}))
+    },
+  })
+}
+
+export function useConfirmSignup() {
+  return useMutation({
+    mutationFn: async (token: string) => {
+      await ensureCsrf()
+      unwrap(await api.POST('/api/auth/signup/confirm/', { body: { token } }))
+    },
+  })
 }
 
 export function useAdminLogin() {
@@ -107,7 +152,7 @@ export const STAFF = 'staff'
 
 /** Approving is an org assignment, never a group (#41). */
 export const isApprover = (me: Me) =>
-  me.assignments.some((assignment) => assignment.role !== 'member')
+  me.assignments.length > 0
 
 /**
  * Where signing in lands someone.

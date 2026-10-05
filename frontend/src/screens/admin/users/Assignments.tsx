@@ -33,7 +33,7 @@ export function Assignments({ user }: { user: AdminUser }) {
   return (
     <Panel
       title="Approves for"
-      description="Heads and members are assigned to a department, deans to a faculty."
+      description="Heads are assigned to a department, deans to a faculty."
     >
       {user.assignments.length === 0 && (
         <p className="rounded-md border px-3 py-6 text-center text-[13px] text-muted-foreground">

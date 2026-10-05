@@ -57,7 +57,7 @@ class TestTheScopeMatchesTheRole(OrgTestMixin, TestCase):
     def test_an_assignment_scoped_to_nothing_is_refused(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
             UserOrgAssignment.objects.create(
-                user=self.user, role=UserOrgAssignment.Role.MEMBER
+                user=self.user, role=UserOrgAssignment.Role.HOD
             )
 
     def test_an_assignment_scoped_to_both_is_refused(self):
@@ -98,20 +98,6 @@ class TestHowManyOneUserCanHold(OrgTestMixin, TestCase):
                 role=UserOrgAssignment.Role.HOD,
                 department=self.department,
             )
-
-    def test_a_head_of_one_department_can_be_a_member_of_it_too(self):
-        UserOrgAssignment.objects.create(
-            user=self.user,
-            role=UserOrgAssignment.Role.HOD,
-            department=self.department,
-        )
-        UserOrgAssignment.objects.create(
-            user=self.user,
-            role=UserOrgAssignment.Role.MEMBER,
-            department=self.department,
-        )
-
-        self.assertEqual(self.user.org_assignments.count(), 2)
 
     def test_assignments_are_what_the_approval_rule_reads(self):
         UserOrgAssignment.objects.create(
