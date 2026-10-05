@@ -150,10 +150,10 @@ def update_user(actor: User, user: User, data: dict) -> User:
 
 def _scope(role: str, department: str | None, faculty: str | None):
     """The scope a role needs, or a 422 saying which part is wrong."""
-    if role in (Role.MEMBER, Role.HOD):
+    if role == Role.HOD:
         if not department or faculty:
             raise UnprocessableEntity(
-                "A head of department or member is assigned to a department, not a faculty."
+                "A head of department is assigned to a department, not a faculty."
             )
         try:
             return Department.objects.get(code=department), None
