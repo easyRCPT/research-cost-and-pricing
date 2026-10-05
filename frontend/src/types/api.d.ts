@@ -3604,12 +3604,11 @@ export interface components {
             description: string;
         };
         /**
-         * @description * `member` - Member
-         *     * `hod` - Head of Department
+         * @description * `hod` - Head of Department
          *     * `dean` - Dean
          * @enum {string}
          */
-        RoleEnum: "member" | "hod" | "dean";
+        RoleEnum: "hod" | "dean";
         SalaryRate: {
             payroll_type: components["schemas"]["PayrollTypeEnum"];
             category: string;

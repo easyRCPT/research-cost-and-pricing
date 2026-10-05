@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0046_remove_budget_mode'),
+        ('api', '0047_remove_member_role'),
     ]
 
     operations = [

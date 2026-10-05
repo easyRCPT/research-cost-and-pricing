@@ -65,7 +65,7 @@ class AdminUsersTest(TestCase):
         for i in range(5):
             u = self.account(f"u{i}@unimelb.edu.au", "staff")
             UserOrgAssignment.objects.create(
-                user=u, role="member", department=self.department
+                user=u, role="hod", department=self.department
             )
         self.assertEqual(queries(), few)
 

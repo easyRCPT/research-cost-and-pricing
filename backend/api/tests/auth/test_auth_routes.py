@@ -87,10 +87,16 @@ class TestSignup(AuthTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 202, response.content)
 
-    def test_a_subdomain_is_not_the_domain(self):
+    def test_a_subdomain_is_allowed(self):
         response = self.signup(email="new@student.unimelb.edu.au")
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 202, response.content)
+
+    def test_a_lookalike_domain_is_not(self):
+        self.assertEqual(self.signup(email="a@notunimelb.edu.au").status_code, 400)
+        self.assertEqual(
+            self.signup(email="b@unimelb.edu.au.evil.com").status_code, 400
+        )
 
     @override_settings(ALLOWED_EMAIL_DOMAINS=["unimelb.edu.au", "example.org"])
     def test_the_allowed_domains_come_from_settings(self):
