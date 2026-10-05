@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
 from django.conf import settings
+from django.utils import timezone
 
-from api.models import Budget, User
+from api.models import ApprovalStep, Budget, User
 
 from . import recipients
 
@@ -44,6 +45,7 @@ class BudgetNotification(Notification):
             "project": self.budget.project,
             "title": self.title,
             "url": approvals_url(self.budget),
+            "timeline": timeline(self.budget),
         }
 
 
@@ -128,6 +130,47 @@ class Withdrawn(BudgetNotification):
 
     def subject(self) -> str:
         return f"Withdrawn: {self.title}"
+
+    def context(self) -> dict:
+        context = super().context()
+        # Withdrawal has no step of its own, and the email goes out as it happens.
+        context["timeline"].append(
+            {
+                "label": "Withdrawn",
+                "state": "withdrawn",
+                "at": timezone.now(),
+                "by": self.budget.project.created_by.display_name,
+            }
+        )
+        return context
+
+
+def timeline(budget: Budget) -> list[dict]:
+    """The submission and each approval step that applies, in order, for the email's progress list."""
+    entries = [
+        {
+            "label": "Submitted for approval",
+            "state": "approved",
+            "at": budget.submitted_at,
+            "by": budget.project.created_by.display_name,
+        }
+    ]
+    steps = (
+        budget.approval_steps.exclude(status=ApprovalStep.Status.NOT_REQUIRED)
+        .select_related("decided_by")
+        .order_by("id")
+    )
+    for step in steps:
+        entries.append(
+            {
+                "label": f"{step.get_level_display()} approval",
+                "state": step.status,
+                "at": step.decided_at,
+                "by": step.decided_by.display_name if step.decided_by else "",
+                "comment": step.comment,
+            }
+        )
+    return entries
 
 
 def approvals_url(budget: Budget) -> str:
