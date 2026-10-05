@@ -2,4 +2,4 @@
 {% block heading %}A costing needs your approval{% endblock %}
 {% block intro %}{{ project.created_by.display_name }} has submitted a costing for Head of Department approval.{% endblock %}
 {% block button %}Review and decide{% endblock %}
-{% block footer %}You're getting this because you're a Head of Department for {{ project.department.name }} in easyRCPT.{% endblock %}
+{% block footer %}You're getting this because you're a Head of Department for {{ project.department.name }} in easyRCPT. {{ project.created_by.display_name }} is copied in as the researcher.{% endblock %}

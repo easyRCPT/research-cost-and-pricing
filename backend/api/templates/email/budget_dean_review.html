@@ -10,4 +10,4 @@
 {% endif %}
 {% endblock %}
 {% block button %}Review and decide{% endblock %}
-{% block footer %}You're getting this because you're a Dean for {{ project.department.faculty.name }} in easyRCPT.{% endblock %}
+{% block footer %}You're getting this because you're a Dean for {{ project.department.faculty.name }} in easyRCPT. {{ project.created_by.display_name }} is copied in as the researcher.{% endblock %}
