@@ -13,6 +13,15 @@ if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
 
+# The salary table's payroll type for each employment type: the workbook keys
+# its rate lookup on CONCATENATE(payroll_type, category, classification).
+PAYROLL_TYPE_MAPPING = {
+    "Continuing": "Fortnight",
+    "Fixed-Term": "Fortnight",
+    "Casual": "Casual",
+}
+
+
 # ------------------- Schema for Lookup table data -------------
 class LookupVersion(models.Model):
     if TYPE_CHECKING:
@@ -22,7 +31,6 @@ class LookupVersion(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # TODO: replace with admin
     # initial version don't have editor
     updated_by = models.ForeignKey(
         "User",
@@ -326,11 +334,26 @@ class SalaryRateMultiplier(models.Model):
         return f"{self.time_basis} x{self.multiplier}"
 
 
-# TODO: Consider to remove. Not used in calculation. Max steps are maintained and checked in SalaryRate.
 # Defines the Salary Cap
 class IncrementCap(models.Model):
-    level = models.CharField(max_length=20, primary_key=True)
+    category = models.CharField(max_length=20)
+    level = models.CharField(max_length=20)
+    # 0 means the level is stepless (e.g. "UOM 10"): the classification is
+    # the level name itself, not "<level>.<step>". Stepped levels are >= 1.
     max_steps = models.PositiveSmallIntegerField()
+
+    version = models.ForeignKey(
+        "LookupVersion",
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["category", "level", "version"],
+                name="unique_increment_cap",
+            )
+        ]
 
 
 class Currency(models.Model):
@@ -396,6 +419,12 @@ class EbaIncrease(models.Model):
         ]
 
 
+def get_payroll_type_choices():
+    return (
+        (payroll_type, payroll_type) for payroll_type in PAYROLL_TYPE_MAPPING.values()
+    )
+
+
 class SalaryRate(models.Model):
     """
     Base rates from the RCPT workbook's tSalaryRate table.
@@ -404,17 +433,11 @@ class SalaryRate(models.Model):
     if TYPE_CHECKING:
         id: int
 
-    class PayrollType(models.TextChoices):
-        # MEMBER = value, label
-        FORTNIGHT = "Fortnight", "Fortnight"
-        CASUAL = "Casual", "Casual"
-
-    class Category(models.TextChoices):
-        ACADEMIC = "Academic", "Academic"
-        PROFESSIONAL = "Professional", "Professional"
-
-    payroll_type = models.CharField(max_length=20, choices=PayrollType.choices)
-    category = models.CharField(max_length=20, choices=Category.choices)
+    payroll_type = models.CharField(
+        max_length=20,
+        choices=get_payroll_type_choices(),
+    )
+    category = models.CharField(max_length=20)
     classification = models.CharField(max_length=20)
     rate = models.DecimalField(
         max_digits=12,
@@ -528,7 +551,7 @@ class NonStaffCostCategory(models.Model):
     cost_category = models.CharField(max_length=100)
     cost_subcategory = models.CharField(max_length=150)
 
-    # Excluded cost groups should not apply additional direct rate and indirect rate
+    # Excluded cost groups do not take the additional direct rate (the 10%)
     excludes_additional_rate = models.BooleanField(default=False)
 
     version = models.ForeignKey(
@@ -610,8 +633,6 @@ class RevenueCategory(models.Model):
     def __str__(self):
         return f"{self.description} ({self.budget_ledger_id})"
 
-
-# TODO: Consider to add Post-Graduate Stipend rates if required. not used, but present in the Excel workbook
 
 # ------------------- Schema for Data Derived From Application -------------
 
@@ -715,7 +736,6 @@ class Project(models.Model):
         return self.title
 
 
-# TODO: confirm whether there is a mode switch. Currently included in serializer.
 class Budget(models.Model):
     """
     One costed attempt at a project. A project can carry several: a first
@@ -732,10 +752,6 @@ class Budget(models.Model):
         cloned_from_id: int
 
         def get_status_display(self) -> str: ...
-
-    class Mode(models.TextChoices):
-        SIMPLE = "simple", "Simple"
-        FULL = "full", "Full"
 
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -768,7 +784,6 @@ class Budget(models.Model):
     project = models.ForeignKey(
         "Project", related_name="budgets", on_delete=models.CASCADE
     )
-    mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.FULL)
 
     # A record of the rate the budget was last priced at, kept in step by
     # services/budget_details.py. The engine reads the rate from the budget's
@@ -788,10 +803,18 @@ class Budget(models.Model):
     # earns over what it costs. Price = project_cost * (1 + margin), so the
     # default 0.30 prices a $100k project at $130k, not at $142,857. Settled
     # with RIC; the workbook's Summary of Price agrees.
+    #
+    # No negative margin and no cap (#192): a discount comes from a cash
+    # co-contribution or in-kind costs, and a margin can be above 100%. The
+    # most the column holds, 999.99%, is the only ceiling.
+    MAX_MARGIN = Decimal("9.9999")
     margin = models.DecimalField(
         max_digits=5,
         decimal_places=4,
-        validators=[MinValueValidator(Decimal(0))],
+        validators=[
+            MinValueValidator(Decimal(0), message="A margin can't be below 0%%."),
+            MaxValueValidator(MAX_MARGIN, message="A margin can be at most 999.99%%."),
+        ],
     )
 
     gst_applicable = models.BooleanField(default=True)
@@ -821,8 +844,6 @@ class Budget(models.Model):
 
     dean_triggers = models.JSONField(default=list, blank=True)
 
-    # TODO: Verify whether these fields are still required.
-    #  They appear to overlap with comments and dean_triggers.
     justification = models.CharField(max_length=200, blank=True, default="")
     justification_notes = models.TextField(blank=True, default="")
     dean_exemption_reason = models.TextField(blank=True, default="")
@@ -842,6 +863,11 @@ class Budget(models.Model):
         decimal_places=2,
         default=Decimal(0),
     )
+
+    # An approved costing's figures as the API showed them when it was
+    # approved (#192). It was approved on those figures, so opening it shows
+    # them rather than pricing it again, even after the engine changes.
+    approved_figures = models.JSONField(null=True, blank=True, editable=False)
 
     # The attempt this one was cloned from, so a reviewer can put the two
     # side by side. Null on a first attempt.
@@ -1058,7 +1084,7 @@ class StaffCostLine(models.Model):
     employment_type = models.CharField(
         max_length=20, choices=OnCostRate.EmploymentType.choices
     )
-    category = models.CharField(max_length=20, choices=SalaryRate.Category.choices)
+    category = models.CharField(max_length=20)
     classification = models.CharField(max_length=20)
     time_basis = models.CharField(max_length=10, choices=TimeBasis.choices)
 
@@ -1071,6 +1097,11 @@ class StaffCostLine(models.Model):
     # the University would absorb the cost, or on what grounds.
     in_kind_reason = models.CharField(max_length=200, blank=True, default="")
 
+    # The chief investigator's own line (#166), marked by the researcher
+    # rather than read off row position: naming a CI used to take over row one
+    # whatever it held, attributing someone else's costing to the CI.
+    is_ci = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["position", "created_at"]
         constraints = [
@@ -1080,6 +1111,11 @@ class StaffCostLine(models.Model):
             models.CheckConstraint(
                 condition=models.Q(in_kind=True) | models.Q(in_kind_reason=""),
                 name="%(class)s_reason_needs_the_tick",
+            ),
+            models.UniqueConstraint(
+                fields=["budget"],
+                condition=models.Q(is_ci=True),
+                name="one_ci_line_per_budget",
             ),
         ]
 
@@ -1150,15 +1186,8 @@ class NonStaffCostLine(models.Model):
     # An estimate for extra cost
     add_ten_percent = models.BooleanField(default=False)
 
-    indirect_rate_multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        # Negative indirect rate is not allowed.
-        # The minimum multiplier is 1
-        validators=[MinValueValidator(Decimal(1))],
-    )
+    # No indirect rate multiplier: the workbook's PART C column T is not
+    # needed (#192, #148 option A). A line takes the 10% and nothing more.
 
     class Meta:
         ordering = ["position", "created_at"]

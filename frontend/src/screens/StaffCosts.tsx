@@ -1,4 +1,4 @@
-import { useBudget, useCiFlag, useLines } from '@/api/budget'
+import { useBudget, useLines } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
 import { EditableGrid, Note, Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -14,13 +14,26 @@ export function StaffCosts() {
   const { data: budget } = useBudget()
   const { data: lookups } = useLookups()
   const staff = useLines('staff', budget.years)
-  const { included, setIncluded } = useCiFlag()
 
   const chiefInvestigator = budget.project_info.chief_investigator
-  const lines = withCiName(withCosts(staff.lines, budget), chiefInvestigator)
+  // The CI's row leads, as in the workbook, wherever it was added: a new row
+  // otherwise lands after the blank rows waiting to be filled.
+  const lines = withCiName(
+    withCosts(staff.lines, budget),
+    chiefInvestigator,
+  ).sort((a, b) => Number(b.is_ci) - Number(a.is_ci))
+  // The CI's cost is included when the costing has a CI row (#166): ticking
+  // adds one, named after the CI, and unticking removes it. No other row is
+  // ever taken for the CI's.
   const ciId = ciLineId(lines, chiefInvestigator)
-  // Nothing to leave out of the costing until the project names a CI.
-  const hasCi = ciId !== null
+  const ciNamed = chiefInvestigator.trim() !== ''
+  const setIncluded = (include: boolean) => {
+    if (include && ciId === null) {
+      staff.addLine({ is_ci: true, name_role: chiefInvestigator.trim() })
+    } else if (!include && ciId !== null) {
+      staff.removeLine(ciId)
+    }
+  }
 
   return (
     <>
@@ -32,15 +45,6 @@ export function StaffCosts() {
         </AlertDescription>
       </Alert>
 
-      {hasCi && !included && (
-        <Alert className="mt-3 border-warn-line bg-warn-bg text-warn">
-          <AlertDescription className="text-warn">
-            <b>CI time is not costed.</b> It is not charged to the funder, and
-            it is not counted as in-kind either.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <Panel
         title="Direct Salary and On-Costs Paid by the Project"
         className="mt-4"
@@ -48,17 +52,17 @@ export function StaffCosts() {
         <div className="mb-4 flex items-center gap-3 rounded-md border bg-muted/40 px-3 py-2.5">
           <Checkbox
             id="ci-costs"
-            disabled={!hasCi}
-            checked={included}
+            disabled={!ciNamed}
+            checked={ciId !== null}
             onCheckedChange={(value) => setIncluded(value === true)}
           />
           <Label
             htmlFor="ci-costs"
-            className={hasCi ? undefined : 'text-muted-foreground'}
+            className={ciNamed ? undefined : 'text-muted-foreground'}
           >
-            Include CI cost
+            Include Chief Investigator cost
           </Label>
-          {!hasCi && (
+          {!ciNamed && (
             <span className="text-[13px] text-muted-foreground">
               Name a chief investigator on Project Details first.
             </span>
@@ -73,7 +77,6 @@ export function StaffCosts() {
             salaryRates={lookups.salary_rates}
             multipliers={lookups.salary_rate_multipliers}
             ciId={ciId}
-            ciIncluded={included}
             patchLine={staff.patchLine}
             removeLine={staff.removeLine}
           />

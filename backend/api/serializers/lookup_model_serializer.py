@@ -67,7 +67,7 @@ class SalaryRateMultiplierSerializer(serializers.ModelSerializer):
 class IncrementCapSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncrementCap
-        fields = ["level", "max_steps"]
+        fields = ["category", "level", "max_steps"]
 
 
 class EbaIncreaseSerializer(serializers.ModelSerializer):

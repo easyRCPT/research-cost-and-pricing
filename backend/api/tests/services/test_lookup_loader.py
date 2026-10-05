@@ -5,10 +5,12 @@ from django.core.cache import cache
 from django.test import SimpleTestCase, TestCase
 
 from api.models import (
+    PAYROLL_TYPE_MAPPING,
     Budget,
     CalculationConstant,
     Currency,
     EbaIncrease,
+    IncrementCap,
     LookupConfiguration,
     OnCostRate,
     SalaryRate,
@@ -35,6 +37,7 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
         version_id = 7
 
         salary_rates = Mock()
+        caps = Mock()
         multipliers = Mock()
         eba_increases = Mock()
         on_cost_rates = Mock()
@@ -49,6 +52,9 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
 
         salary_model = Mock()
         salary_model.objects.filter.return_value.order_by.return_value = salary_rates
+
+        cap_model = Mock()
+        cap_model.objects.filter.return_value.order_by.return_value = caps
 
         multiplier_model = Mock()
         multiplier_model.objects.filter.return_value.order_by.return_value = multipliers
@@ -68,6 +74,13 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
                 definition(
                     salary_model,
                     ("payroll_type", "category", "classification"),
+                ),
+            ),
+            (
+                "increment_caps",
+                definition(
+                    cap_model,
+                    ("level",),
                 ),
             ),
             (
@@ -109,6 +122,10 @@ class TestGetVersionedLookupQuerySets(SimpleTestCase):
         self.assertIs(
             result["salary_rates"],
             salary_rates,
+        )
+        self.assertIs(
+            result["increment_caps"],
+            caps,
         )
         self.assertIs(
             result["salary_rate_multipliers"],
@@ -196,6 +213,17 @@ class TestGetConstants(SimpleTestCase):
         self.salary_rate_1.classification = "Level A.1"
         self.salary_rate_1.rate = Decimal(60000)
 
+        self.salary_rate_1_casual = Mock(spec=SalaryRate)
+        self.salary_rate_1_casual.payroll_type = "Casual"
+        self.salary_rate_1_casual.category = "Academic"
+        self.salary_rate_1_casual.classification = "Level A.1"
+        self.salary_rate_1_casual.rate = Decimal(55000)
+
+        self.cap_1 = Mock(spec=IncrementCap)
+        self.cap_1.category = "Academic"
+        self.cap_1.level = "Level A"
+        self.cap_1.max_steps = 1
+
         self.salary_rate_2 = Mock(spec=SalaryRate)
         self.salary_rate_2.payroll_type = "Casual"
         self.salary_rate_2.category = "Academic"
@@ -262,7 +290,11 @@ class TestGetConstants(SimpleTestCase):
         return {
             "salary_rates": [
                 self.salary_rate_1,
+                self.salary_rate_1_casual,
                 self.salary_rate_2,
+            ],
+            "increment_caps": [
+                self.cap_1,
             ],
             "salary_rate_multipliers": [
                 self.multiplier,
@@ -314,16 +346,16 @@ class TestGetConstants(SimpleTestCase):
         self.assertEqual(
             result["salary_rate"],
             {
-                (
-                    "Fortnight",
-                    "Academic",
-                    "Level A.1",
-                ): Decimal(60000),
-                (
-                    "Casual",
-                    "Academic",
-                    "RA Grade 1.1",
-                ): Decimal(50000),
+                ("Fortnight", "Academic", "Level A.1"): Decimal(60000),
+                ("Casual", "Academic", "Level A.1"): Decimal(55000),
+                ("Casual", "Academic", "RA Grade 1.1"): Decimal(50000),
+            },
+        )
+
+        self.assertEqual(
+            result["increment_cap"],
+            {
+                ("Academic", "Level A"): 1,
             },
         )
 
@@ -447,6 +479,51 @@ class TestGetConstants(SimpleTestCase):
             "Missing required calculation constants: gst_rate",
         ):
             get_constants(3)
+
+    @patch("api.services.lookup_loader._get_versioned_lookup_querysets")
+    def test_raises_error_when_salary_rate_for_increment_cap_is_missing(
+        self,
+        mock_get_versioned_lookup_querysets,
+    ):
+        tables = self._build_tables()
+        tables["salary_rates"] = []
+
+        mock_get_versioned_lookup_querysets.return_value = self._mock_querysets(tables)
+
+        with self.assertRaisesRegex(
+            KeyError,
+            "Salary rate for .* Academic, Level A.1 is missing",
+        ):
+            get_constants(3)
+
+    @patch("api.services.lookup_loader._get_versioned_lookup_querysets")
+    def test_accepts_stepless_increment_cap(
+        self,
+        mock_get_versioned_lookup_querysets,
+    ):
+        cap = Mock(spec=IncrementCap)
+        cap.category = "Professional"
+        cap.level = "UOM 10"
+        cap.max_steps = 0
+
+        rates = [
+            Mock(
+                spec=SalaryRate,
+                payroll_type=payroll_type,
+                category="Professional",
+                classification="UOM 10",
+                rate=Decimal(60000),
+            )
+            for payroll_type in set(PAYROLL_TYPE_MAPPING.values())
+        ]
+
+        tables = self._build_tables()
+        tables["increment_caps"] = [cap]
+        tables["salary_rates"] = rates
+
+        mock_get_versioned_lookup_querysets.return_value = self._mock_querysets(tables)
+
+        get_constants(3)
 
 
 class TestConstantsFor(SimpleTestCase):

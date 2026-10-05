@@ -142,10 +142,21 @@ class TestFindSalaryRate(SimpleTestCase):
                 ("Casual", "Academic", "RA Grade 1.1"): Decimal(50000),
                 ("Casual", "Academic", "RA Grade 1.2"): Decimal(55000),
             },
+            "increment_cap": {
+                ("Academic", "Level A"): 3,
+                ("Academic", "Level B"): 1,
+                ("Academic", "RA Grade 1"): 2,
+                ("Professional", "UOM 10"): 0,
+            },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
                 "Daily": Decimal("0.2"),
                 "Hourly": Decimal("0.9"),
+            },
+            "payroll_type_mapping": {
+                "Continuing": "Fortnight",
+                "Fixed-Term": "Fortnight",
+                "Casual": "Casual",
             },
         }
 
@@ -467,6 +478,9 @@ class TestCalculateStaffRow(SimpleTestCase):
             "salary_rate": {
                 ("Fortnight", "Academic", "Level A.1"): Decimal(60000),
             },
+            "increment_cap": {
+                ("Academic", "Level A"): 1,
+            },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
             },
@@ -510,6 +524,11 @@ class TestCalculateStaffRow(SimpleTestCase):
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
                 "salary_rate_year": Decimal(2025),
+            },
+            "payroll_type_mapping": {
+                "Continuing": "Fortnight",
+                "Fixed-Term": "Fortnight",
+                "Casual": "Casual",
             },
         }
 
@@ -777,6 +796,9 @@ class TestCalculateStaffTable(SimpleTestCase):
             "salary_rate": {
                 ("Fortnight", "Academic", "Level A.1"): Decimal(60000),
             },
+            "increment_cap": {
+                ("Academic", "Level A"): 1,
+            },
             "salary_rate_multiplier": {
                 "FTE": Decimal(1),
             },
@@ -820,6 +842,11 @@ class TestCalculateStaffTable(SimpleTestCase):
                 "max_payroll_tax": Decimal("0.05"),
                 "override_uom_oncosts": Decimal("0.01"),
                 "salary_rate_year": Decimal(2025),
+            },
+            "payroll_type_mapping": {
+                "Continuing": "Fortnight",
+                "Fixed-Term": "Fortnight",
+                "Casual": "Casual",
             },
         }
 

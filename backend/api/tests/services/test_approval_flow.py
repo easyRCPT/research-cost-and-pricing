@@ -22,21 +22,26 @@ from api.models import (
 )
 from api.services.approval_decide import decide
 from api.services.approval_queue import get_approval_steps
+from api.services.lookup_update import create_lookup_version
 from api.services.submission import submit_budget
-from api.tests.factories import make_budget, make_department, make_project, make_user
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_project,
+    make_user,
+    seed_lookups,
+)
 
 
 class FlowFixture(TestCase):
     """A department with a head, its faculty with a dean, and a researcher."""
 
     def setUp(self):
-        version = LookupVersion.objects.create()
-        LookupConfiguration.objects.update(current_version=version)
-        CalculationConstant.objects.create(
-            name="minimum_margin",
-            description="Minimum margin",
-            value=Decimal("0.20"),
-            version=version,
+        # Every rate, because approving a costing keeps its priced figures
+        # (#192), with the minimum margin these tests price either side of.
+        seed_lookups()
+        CalculationConstant.objects.filter(name="minimum_margin").update(
+            value=Decimal("0.20")
         )
 
         self.department = make_department(name="Science")
@@ -232,15 +237,9 @@ class RatesFrozenAtSubmitTest(FlowFixture):
 
     def new_rates(self) -> LookupVersion:
         """A later set of rates becoming current, as an admin edit or restore does."""
-        version = LookupVersion.objects.create()
-        CalculationConstant.objects.create(
-            name="minimum_margin",
-            description="Minimum margin",
-            value=Decimal("0.20"),
-            version=version,
+        return LookupVersion.objects.get(
+            id=create_lookup_version(LookupConfiguration.objects.get(), None)
         )
-        LookupConfiguration.objects.update(current_version=version)
-        return version
 
     def test_submitting_stamps_the_rates_it_was_priced_with(self):
         budget = self.a_budget("0.30")

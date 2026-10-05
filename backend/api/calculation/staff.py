@@ -123,15 +123,6 @@ def _get_salary_rate_year(constants: dict) -> int:
     return int(salary_rate_year)
 
 
-# The salary table's payroll type for each employment type: the workbook keys
-# its rate lookup on CONCATENATE(payroll_type, category, classification).
-PAYROLL_TYPE = {
-    "Continuing": "Fortnight",
-    "Fixed-Term": "Fortnight",
-    "Casual": "Casual",
-}
-
-
 def _get_eba_rate(eba: dict, year: int) -> Decimal:
     # First eba increase rate year is the next year of the tool's initiation.
     # First record is 2026: 3% in Excel workbook.
@@ -256,31 +247,34 @@ def find_salary_rate(
     classification = info_data["classification"]
     time_basis = info_data["time_basis"]
 
-    payroll_type = PAYROLL_TYPE.get(employment_type, employment_type)
+    payroll_type_mapping = constants["payroll_type_mapping"]
+    payroll_type = payroll_type_mapping.get(employment_type, employment_type)
 
-    # Continuing and Fixed-term staff progress based on years employed
-    # Casual staff do not progress classification.
-    # Assume classification level is in the range from 1 to 10
-    if employment_type == "Casual" or classification.endswith("10"):
+    # Continuing and Fixed-term staff progress one classification step per year
+    # employed. Casual staff do not progress.
+    # Classification strings are "<level>.<step>". Levels with max_steps == 0
+    # are stepless (e.g. "UOM 10"): the classification is the level name itself
+    # and stays unchanged.
+    if employment_type == "Casual":
         new_classification = classification
     else:
-        prefix = classification[:-1]
-        current = int(classification[-1])
+        level, _, step_str = classification.rpartition(".")
+        level = level or classification
+        cap_key = (category, level)
+        max_steps = constants["increment_cap"][cap_key]
 
-        max_step = current + year_employed
-
-        while max_step > current:
-            key = (payroll_type, category, f"{prefix}{max_step}")
-            if key in constants["salary_rate"]:
-                break
-            max_step -= 1
-        new_classification = f"{prefix}{max_step}"
+        if max_steps == 0:
+            new_classification = classification
+        else:
+            current = int(step_str)
+            target = min(current + year_employed, max_steps)
+            new_classification = f"{level}.{target}"
 
     # Find base salary rate in 2025 from lookup table
-    key = (payroll_type, category, new_classification)
+    salary_key = (payroll_type, category, new_classification)
     # A row can carry a category/classification pair with no rate while it is
     # still being filled in. Cost it at zero rather than failing the budget.
-    base_salary_rate = constants["salary_rate"].get(key, Decimal(0))
+    base_salary_rate = constants["salary_rate"].get(salary_key, Decimal(0))
 
     # Calculate salary rate
     salary_rate_multiplier = constants["salary_rate_multiplier"][time_basis]

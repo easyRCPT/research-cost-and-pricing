@@ -40,6 +40,7 @@ FIELDS_BY_SECTION = {
         "time_basis",
         "in_kind",
         "in_kind_reason",
+        "is_ci",
         "year_value",
         "position",
     },
@@ -48,7 +49,6 @@ FIELDS_BY_SECTION = {
         "in_kind",
         "in_kind_reason",
         "add_ten_percent",
-        "indirect_rate_multiplier",
         "category",
         "year_value",
         "position",
@@ -96,7 +96,6 @@ class _YearRowUpdate(_Update):
     row_id = serializers.UUIDField()
     year = serializers.IntegerField(required=False)
 
-    # TODO: annotate attrs/return as dict[str, Any] for strict pyright
     def validate(self, attrs):
         if (attrs["field"] == "year_value") != ("year" in attrs):
             raise serializers.ValidationError(

@@ -6,10 +6,12 @@ from django.db import models
 from django.db.models import QuerySet
 
 from ..models import (
+    PAYROLL_TYPE_MAPPING,
     Budget,
     CalculationConstant,
     Currency,
     EbaIncrease,
+    IncrementCap,
     LookupConfiguration,
     OnCostRate,
     SalaryRate,
@@ -62,6 +64,16 @@ def get_lookup_tables() -> dict[str, list[models.Model]]:
     return lookup_models
 
 
+def lookup_tables_for(budget: Budget) -> dict[str, list[models.Model]]:
+    """
+    The tables one costing prices on (#198): the version stamped when it was
+    submitted, or today's for a draft. The same version constants_for reads.
+    """
+    if budget.lookup_version_id is None:
+        return get_lookup_tables()
+    return _get_lookup_models(budget.lookup_version_id)
+
+
 def _constants_cache_key(version_id: int) -> str:
     return f"lookup_version_{version_id}"
 
@@ -72,6 +84,24 @@ def validate_constants(constants: dict) -> None:
         raise KeyError(
             f"Missing required calculation constants: {','.join(sorted(missing))}"
         )
+
+
+def _validate_increment_cap(rates: dict, caps: dict) -> None:
+    """Check that all rates defined by increment caps exist."""
+    for (category, level), max_steps in caps.items():
+        classifications = (
+            [level]
+            if max_steps == 0
+            else [f"{level}.{i}" for i in range(1, max_steps + 1)]
+        )
+
+        for payroll_type in set(PAYROLL_TYPE_MAPPING.values()):
+            for classification in classifications:
+                key = (payroll_type, category, classification)
+                if key not in rates:
+                    raise KeyError(
+                        f"Salary rate for {payroll_type}, {category}, {classification} is missing."
+                    )
 
 
 def _get_versioned_lookup_querysets(version_id: int) -> dict[str, QuerySet]:
@@ -129,6 +159,13 @@ def build_constants(version_id: int) -> dict:
         for row in salary_rates
     }
 
+    increment_caps = cast(
+        list[IncrementCap],
+        tables["increment_caps"],
+    )
+    increment_cap = {(row.category, row.level): row.max_steps for row in increment_caps}
+    _validate_increment_cap(salary_rate, increment_cap)
+
     salary_rate_multipliers = cast(
         list[SalaryRateMultiplier],
         tables["salary_rate_multipliers"],
@@ -182,10 +219,12 @@ def build_constants(version_id: int) -> dict:
     result = {
         "currencies": currencies,
         "salary_rate": salary_rate,
+        "increment_cap": increment_cap,
         "salary_rate_multiplier": salary_rate_multiplier,
         "eba": eba_rate,
         "on_cost_components": on_cost_components,
         "constants": constants,
+        "payroll_type_mapping": PAYROLL_TYPE_MAPPING,
     }
 
     return result

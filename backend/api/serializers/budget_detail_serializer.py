@@ -2,7 +2,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from rest_framework import serializers
 
-from api.models import ApprovalStep, Budget, OnCostRate, SalaryRate, StaffCostLine
+from api.models import ApprovalStep, Budget, OnCostRate, StaffCostLine
 
 from ..services.approval_record import EMPTY_RECORD
 
@@ -79,7 +79,6 @@ class DeliverableResultSerializer(serializers.Serializer):
 
 
 class BudgetInfoSerializer(serializers.Serializer):
-    mode = serializers.ChoiceField(choices=Budget.Mode.choices)
     cost_multiplier = serializers.DecimalField(
         max_digits=4,
         decimal_places=2,
@@ -150,11 +149,13 @@ class StaffLineSerializer(serializers.Serializer):
     position = serializers.IntegerField()
     name_role = serializers.CharField()
     employment_type = serializers.ChoiceField(OnCostRate.EmploymentType.choices)
-    category = serializers.ChoiceField(SalaryRate.Category.choices)
+    category = serializers.CharField()
     classification = serializers.CharField()
     time_basis = serializers.ChoiceField(StaffCostLine.TimeBasis.choices)
     in_kind = serializers.BooleanField()
     in_kind_reason = serializers.CharField(allow_blank=True)
+    # The chief investigator's own line (#166).
+    is_ci = serializers.BooleanField()
 
     rate = serializers.DecimalField(
         max_digits=12,
@@ -216,12 +217,6 @@ class NonStaffLineSerializer(serializers.Serializer):
     in_kind_reason = serializers.CharField(allow_blank=True)
     add_ten_percent = serializers.BooleanField()
 
-    indirect_rate_multiplier = serializers.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        allow_null=True,
-    )
-
     by_year = NonStaffYearSerializer(many=True)
 
     total = CostDecimalField(
@@ -257,7 +252,6 @@ class NonStaffCostSerializer(serializers.Serializer):
     lines = NonStaffLineSerializer(many=True)
 
     direct_total = NonStaffTotalSerializer()
-    indirect_total = NonStaffTotalSerializer()
     column_total = NonStaffTotalSerializer()
 
 
@@ -382,11 +376,6 @@ class NonStaffBudgetSerializer(serializers.Serializer):
         decimal_places=2,
     )
 
-    indirect_cost_recovery = CostDecimalField(
-        max_digits=14,
-        decimal_places=2,
-    )
-
     total_non_staff_costs = CostDecimalField(
         max_digits=14,
         decimal_places=2,
@@ -467,6 +456,14 @@ class BudgetDetailSerializer(serializers.Serializer):
     approval = ApprovalRecordSerializer()
 
     def to_representation(self, instance):
+        if "approved_figures" in instance:
+            # Already in this shape, frozen at approval (#192). Only the
+            # approval trail is read fresh.
+            return {
+                **instance["approved_figures"],
+                "approval": ApprovalRecordSerializer(instance["approval"]).data,
+            }
+
         staff_table = instance["staff_table"]
         non_staff_table = instance["non_staff_table"]
 
@@ -528,6 +525,7 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "time_basis": row["info"]["time_basis"],
                 "in_kind": row["info"]["in_kind"],
                 "in_kind_reason": row["info"]["in_kind_reason"],
+                "is_ci": row["info"]["is_ci"],
                 "rate": row["rate"],
                 "by_year": [
                     {
@@ -570,7 +568,6 @@ class BudgetDetailSerializer(serializers.Serializer):
                 "in_kind": row["info"]["in_kind"],
                 "in_kind_reason": row["info"]["in_kind_reason"],
                 "add_ten_percent": row["info"]["add_ten_percent"],
-                "indirect_rate_multiplier": row["info"]["indirect_rate_multiplier"],
                 "by_year": [
                     {
                         "year": year,
@@ -585,7 +582,6 @@ class BudgetDetailSerializer(serializers.Serializer):
             if row_id
             not in {
                 "direct_total",
-                "indirect_total",
                 "column_total",
             }
         ]
@@ -599,13 +595,6 @@ class BudgetDetailSerializer(serializers.Serializer):
                     for year, amount in results["direct_total"]["numeric"].items()
                 ],
                 "total": results["direct_total"]["total"],
-            },
-            "indirect_total": {
-                "by_year": [
-                    {"year": year, "cost": amount}
-                    for year, amount in results["indirect_total"]["numeric"].items()
-                ],
-                "total": results["indirect_total"]["total"],
             },
             "column_total": {
                 "by_year": [

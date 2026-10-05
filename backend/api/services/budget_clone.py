@@ -79,6 +79,7 @@ def _clone_staff_lines(source_budget: Budget, target_budget: Budget) -> None:
             time_basis=staff_line.time_basis,
             in_kind=staff_line.in_kind,
             in_kind_reason=staff_line.in_kind_reason,
+            is_ci=staff_line.is_ci,
         )
 
         for allocation in staff_line.allocations.all():
@@ -118,7 +119,6 @@ def _clone_non_staff_lines(source_budget: Budget, target_budget: Budget) -> None
             in_kind=non_staff_line.in_kind,
             in_kind_reason=non_staff_line.in_kind_reason,
             add_ten_percent=non_staff_line.add_ten_percent,
-            indirect_rate_multiplier=non_staff_line.indirect_rate_multiplier,
         )
 
         for amount in non_staff_line.amounts.all():

@@ -10,11 +10,15 @@ from unittest.mock import MagicMock
 from django.core.management import call_command
 from django.test import TestCase
 
-from api.management.commands.import_lookups import import_eba_increases
+from api.management.commands.import_lookups import (
+    import_eba_increases,
+    import_increment_caps,
+)
 from api.models import (
     CalculationConstant,
     Currency,
     EbaIncrease,
+    IncrementCap,
     LookupConfiguration,
     LookupVersion,
     SalaryRate,
@@ -158,3 +162,27 @@ class TestImportEbaIncreases(TestCase):
                 {"year": 2029, "rate": Decimal("0.04")},
             ],
         )
+
+
+class TestImportIncrementCaps(TestCase):
+    def setUp(self):
+        self.version = LookupVersion.objects.create()
+
+    def test_uom_10_max_steps_is_zero(self):
+        workbook = MagicMock()
+
+        rows = [
+            ("UOM 10", 1),
+        ]
+
+        from unittest.mock import patch
+
+        with patch(
+            "api.management.commands.import_lookups.rows",
+            return_value=rows,
+        ):
+            import_increment_caps(workbook, self.version)
+
+        cap = IncrementCap.objects.get(version=self.version, level="UOM 10")
+
+        self.assertEqual(cap.max_steps, 0)

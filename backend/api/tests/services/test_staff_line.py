@@ -49,8 +49,13 @@ class StaffLineTestMixin:
 
 
 class TestCreate(StaffLineTestMixin, TestCase):
+    @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
-    def test_creates_staff_line(self, mock_get_budget_details):
+    def test_creates_staff_line(
+        self,
+        mock_get_budget_details,
+        mock_validate_with_budget,
+    ):
         mock_get_budget_details.return_value = {}
 
         budget = self.create_budget()
@@ -102,11 +107,14 @@ class TestCreate(StaffLineTestMixin, TestCase):
         self.assertEqual(result, {})
 
         mock_get_budget_details.assert_called_once_with(budget)
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
+    @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_creates_staff_line_without_allocations(
         self,
         mock_get_budget_details,
+        mock_validate_with_budget,
     ):
         mock_get_budget_details.return_value = {}
 
@@ -136,9 +144,15 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_called_once_with(budget)
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
+    @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
-    def test_uses_default_values(self, mock_get_budget_details):
+    def test_uses_default_values(
+        self,
+        mock_get_budget_details,
+        mock_validate_with_budget,
+    ):
         mock_get_budget_details.return_value = {}
 
         budget = self.create_budget()
@@ -160,11 +174,14 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         self.assertFalse(line.in_kind)
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
+    @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_validates_staff_line_before_saving(
         self,
         mock_get_budget_details,
+        mock_validate_with_budget,
     ):
         budget = self.create_budget()
 
@@ -187,11 +204,14 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_not_called()
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
+    @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
     def test_validates_year_allocation_before_saving(
         self,
         mock_get_budget_details,
+        mock_validate_with_budget,
     ):
         budget = self.create_budget()
 
@@ -225,6 +245,7 @@ class TestCreate(StaffLineTestMixin, TestCase):
         )
 
         mock_get_budget_details.assert_not_called()
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")
 
 
 class TestDelete(StaffLineTestMixin, TestCase):
@@ -289,8 +310,13 @@ class TestDelete(StaffLineTestMixin, TestCase):
 
 
 class TestTouchesTheBudget(StaffLineTestMixin, TestCase):
+    @patch("api.services.classification.validate_with_budget")
     @patch("api.services.staff_line.budget_details.get_budget_details")
-    def test_creating_a_line_marks_the_budget_edited(self, mock_get_budget_details):
+    def test_creating_a_line_marks_the_budget_edited(
+        self,
+        mock_get_budget_details,
+        mock_validate_with_budget,
+    ):
         mock_get_budget_details.return_value = {}
 
         budget = self.create_budget()
@@ -312,3 +338,4 @@ class TestTouchesTheBudget(StaffLineTestMixin, TestCase):
 
         budget.refresh_from_db()
         self.assertGreater(budget.updated_at, datetime(2020, 1, 1, tzinfo=UTC))
+        mock_validate_with_budget.assert_called_once_with(budget, "Academic", "Level A")

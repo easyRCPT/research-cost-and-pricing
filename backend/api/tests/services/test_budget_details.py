@@ -27,6 +27,7 @@ class TestGetLookupVersionForBudget(TestCase):
         budget_version = LookupVersion.objects.create()
 
         budget = Mock()
+        budget.lookup_version_id = budget_version.id
         budget.lookup_version = budget_version
 
         result = get_lookup_version_for_budget(budget)
@@ -35,6 +36,7 @@ class TestGetLookupVersionForBudget(TestCase):
 
     def test_returns_current_lookup_version_when_budget_has_no_version(self):
         budget = Mock()
+        budget.lookup_version_id = None
         budget.lookup_version = None
 
         result = get_lookup_version_for_budget(budget)

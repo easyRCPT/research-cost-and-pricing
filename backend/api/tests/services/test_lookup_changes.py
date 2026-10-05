@@ -26,16 +26,19 @@ from api.models import (
     Department,
     EbaIncrease,
     Faculty,
+    IncrementCap,
     LookupChangeSet,
     LookupConfiguration,
     LookupVersion,
+    NonStaffCostCategory,
+    NonStaffCostLine,
     OnCostRate,
     Project,
     SalaryRate,
     StaffCostLine,
     User,
 )
-from api.services import lookup_changes
+from api.services import lookup_changes, lookup_update
 from api.services.lookup_changes import apply_changes
 from api.services.lookup_update import (
     changes_in,
@@ -475,7 +478,12 @@ class TestAddAndRemove(RatesMixin, TestCase):
             SalaryRate.objects.filter(version=self.version, **LEVEL_A1).exists()
         )
 
-    def test_a_rate_only_submitted_costings_used_can_be_removed(self):
+    @patch("api.services.lookup_changes.build_constants")
+    def test_a_rate_only_submitted_costings_used_can_be_removed(
+        self, mock_build_constants
+    ):
+        # This test is about lookup versioning; build_constants validation is tested separately.
+
         # They keep the version they were stamped with, which still has it.
         self.draft_line_on("Level A.1", submitted=True)
         self.submitted_on_current()
@@ -521,6 +529,172 @@ class TestAddAndRemove(RatesMixin, TestCase):
             OnCostRate.objects.filter(
                 version=self.version, employment_type=None
             ).exists()
+        )
+
+    def test_a_category_a_draft_line_uses_is_refused_saying_what_uses_it(self):
+        category = NonStaffCostCategory.objects.filter(version=self.version).first()
+        assert category is not None
+        self.draft_line_on("Level A.1")
+        NonStaffCostLine.objects.create(
+            budget=Budget.objects.get(lookup_version=None), category=category
+        )
+
+        # The same refusal as a reference row in use, from the shared delete_row.
+        with self.assertRaisesRegex(
+            ValidationError,
+            "1 non staff cost line uses this non staff cost category, so it "
+            "can't be removed.",
+        ):
+            self.save(
+                {
+                    "table": "non_staff_cost_categories",
+                    "op": "delete",
+                    "lookup": {"ledger_id": category.ledger_id},
+                }
+            )
+
+        self.assertTrue(NonStaffCostCategory.objects.filter(pk=category.pk).exists())
+
+
+def salary_rate_changes(
+    classification: str,
+    rate: str = "100000",
+) -> list[dict]:
+    return [
+        {
+            "table": "salary_rates",
+            "op": "create",
+            "values": {
+                "payroll_type": payroll_type,
+                "category": "Academic",
+                "classification": classification,
+                "rate": rate,
+            },
+        }
+        for payroll_type in ("Fortnight", "Casual")
+    ]
+
+
+class TestSalaryRateIncrementCaps(RatesMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.make_rates()
+
+    def test_adding_first_salary_rate_creates_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+
+        cap = IncrementCap.objects.get(
+            version_id=self.current(),
+            category="Academic",
+            level="Level Test",
+        )
+        self.assertEqual(cap.max_steps, 1)
+
+    def test_adding_higher_salary_rate_increases_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+
+        self.save(*salary_rate_changes("Level Test.2", "105000"))
+
+        cap = IncrementCap.objects.get(
+            version_id=self.current(),
+            category="Academic",
+            level="Level Test",
+        )
+        self.assertEqual(cap.max_steps, 2)
+
+    def test_deleting_highest_step_updates_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+        self.save(*salary_rate_changes("Level Test.2"))
+        self.save(*salary_rate_changes("Level Test.3"))
+
+        self.save(
+            *[
+                {
+                    "table": "salary_rates",
+                    "op": "delete",
+                    "lookup": {
+                        "payroll_type": payroll_type,
+                        "category": "Academic",
+                        "classification": "Level Test.3",
+                    },
+                }
+                for payroll_type in ("Fortnight", "Casual")
+            ]
+        )
+
+        cap = IncrementCap.objects.get(
+            version_id=self.current(),
+            category="Academic",
+            level="Level Test",
+        )
+        self.assertEqual(cap.max_steps, 2)
+
+    def test_deleting_last_salary_rate_removes_increment_cap(self):
+        self.save(*salary_rate_changes("Level Test.1"))
+
+        self.assertTrue(
+            IncrementCap.objects.filter(
+                version_id=self.current(),
+                category="Academic",
+                level="Level Test",
+            ).exists()
+        )
+
+        self.save(
+            *[
+                {
+                    "table": "salary_rates",
+                    "op": "delete",
+                    "lookup": {
+                        "payroll_type": payroll_type,
+                        "category": "Academic",
+                        "classification": "Level Test.1",
+                    },
+                }
+                for payroll_type in ("Fortnight", "Casual")
+            ]
+        )
+
+        self.assertFalse(
+            IncrementCap.objects.filter(
+                version_id=self.current(),
+                category="Academic",
+                level="Level Test",
+            ).exists()
+        )
+
+
+class TestOneWritePath(RatesMixin, TestCase):
+    """
+    A rate set and a reference table's single-row write save rows the same
+    way, through lookup_update's insert_row, write_row and delete_row, so a
+    change to how a row is saved reaches both.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.make_rates()
+
+    def test_both_entry_points_share_the_row_writes(self):
+        self.assertIs(lookup_changes.insert_row, lookup_update.insert_row)
+        self.assertIs(lookup_changes.write_row, lookup_update.write_row)
+        self.assertIs(lookup_changes.delete_row, lookup_update.delete_row)
+
+    def test_both_entry_points_validate_through_the_same_save(self):
+        faculty = Faculty.objects.order_by("code").first()
+        assert faculty is not None
+        save = lookup_update.save_validated_instance
+        with patch(
+            "api.services.lookup_update.save_validated_instance", wraps=save
+        ) as saved:
+            self.save(set_rate(LEVEL_A1, "110000"))
+            lookup_update.update(
+                "faculties", lookup={"code": faculty.code}, data={"name": "Sciences"}
+            )
+
+        self.assertEqual(
+            [type(call.args[0]) for call in saved.call_args_list],
+            [SalaryRate, Faculty],
         )
 
 
@@ -609,7 +783,10 @@ class TestConstants(RatesMixin, TestCase):
 
 
 class TestRateConstants(RatesMixin, TestCase):
-    """The rate constants are decimals from 0 to 1 (#151)."""
+    """
+    The rate constants are decimals from 0 to 1 (#151), but the margins have
+    no cap but the column's (#192).
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -627,22 +804,37 @@ class TestRateConstants(RatesMixin, TestCase):
 
     def test_a_bare_percentage_is_refused_with_the_decimal_it_meant(self):
         with self.assertRaises(ValidationError) as refused:
-            self.save(set_constant("minimum_margin", "25"))
+            self.save(set_constant("gst_rate", "10"))
 
         message = str(refused.exception)
-        self.assertIn("Minimum margin is a decimal from 0 to 1", message)
-        self.assertIn("Did you mean 25%? Enter 0.25 or 25%.", message)
-        self.assertEqual(self.value("minimum_margin"), Decimal("0.300000"))
+        self.assertIn("Gst rate is a decimal from 0 to 1", message)
+        self.assertIn("Did you mean 10%? Enter 0.1 or 10%.", message)
+        self.assertEqual(self.value("gst_rate"), Decimal("0.100000"))
 
-    def test_every_rate_is_held_between_0_and_1(self):
-        for name in (
-            "default_margin",
-            "minimum_margin",
-            "gst_rate",
-            "max_payroll_tax",
-            "override_uom_oncosts",
+    def test_a_margin_can_be_above_100_percent(self):
+        for name in ("default_margin", "minimum_margin"):
+            with self.subTest(name=name):
+                self.save(set_constant(name, "1.5"))
+
+                self.assertEqual(self.value(name), Decimal("1.5"))
+
+    def test_a_margin_past_the_column_is_refused_with_the_decimal_it_meant(self):
+        with self.assertRaises(ValidationError) as refused:
+            self.save(set_constant("default_margin", "25"))
+
+        message = str(refused.exception)
+        self.assertIn("from 0 to 9.9999 (0% to 999.99%)", message)
+        self.assertIn("Did you mean 25%? Enter 0.25 or 25%.", message)
+
+    def test_every_rate_is_held_between_0_and_its_ceiling(self):
+        for name, above in (
+            ("default_margin", "10"),
+            ("minimum_margin", "10"),
+            ("gst_rate", "1.01"),
+            ("max_payroll_tax", "1.01"),
+            ("override_uom_oncosts", "1.01"),
         ):
-            for value in ("-0.01", "1.01"):
+            for value in ("-0.01", above):
                 with (
                     self.subTest(name=name, value=value),
                     self.assertRaises(ValidationError),

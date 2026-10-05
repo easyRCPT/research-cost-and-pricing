@@ -7,7 +7,7 @@ from django.db import models, transaction
 from django.db.models import Model
 from rest_framework.exceptions import ValidationError
 
-from ..models import (
+from api.models import (
     Activity,
     Budget,
     Deliverable,
@@ -20,7 +20,8 @@ from ..models import (
     YearAllocation,
     YearAmount,
 )
-from . import lookup_loader
+
+from . import classification, lookup_loader
 from .budget_details import exchange_rate_for, get_budget_details
 from .staff_time_validation import check_time
 
@@ -271,6 +272,19 @@ def _set_in_kind(line, field: str, value: object) -> None:
     _set_field(line, field, value)
 
 
+def _set_ci(budget: Budget, line: StaffCostLine, value: object) -> None:
+    """
+    Mark the chief investigator's line (#166). At most one per budget, so
+    marking a line takes the mark from any other.
+    """
+    if not isinstance(value, bool):
+        raise ValidationError("is_ci must be true or false.")
+    if value:
+        budget.staff_lines.exclude(id=line.id).filter(is_ci=True).update(is_ci=False)
+    line.is_ci = value
+    _save(line, ["is_ci"])
+
+
 def update_staff(
     budget: Budget,
     row_id: UUID,
@@ -290,6 +304,10 @@ def update_staff(
         "position",
     }
 
+    if field == "is_ci":
+        _set_ci(budget, staff_line, value)
+        return False
+
     fields_requiring_calculation = {
         "classification",
         "employment_type",
@@ -307,6 +325,17 @@ def update_staff(
         if field in {"in_kind", "in_kind_reason"}:
             _set_in_kind(staff_line, field, value)
         else:
+            # Validate category and classification before update
+            # Other fields are validated through model validation
+            if field == "classification":
+                classification.validate_with_budget(
+                    budget, staff_line.category, str(value)
+                )
+            if field == "category":
+                classification.validate_with_budget(
+                    budget, str(value), staff_line.classification
+                )
+
             _set_field(staff_line, field, value)
         return True
 
@@ -360,7 +389,6 @@ def update_non_staff(
         "in_kind",
         "in_kind_reason",
         "add_ten_percent",
-        "indirect_rate_multiplier",
     }
 
     if field in fields_without_calculation:

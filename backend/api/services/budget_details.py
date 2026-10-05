@@ -1,21 +1,39 @@
+import json
 from decimal import ROUND_HALF_UP, Decimal
+from typing import cast
+
+from rest_framework.utils.encoders import JSONEncoder
 
 from ..calculation import pricing
 from ..models import Budget, LookupVersion
 from . import approval_record, data_loader, lookup_loader
 
 
+def get_lookup_version_id_for_budget(budget: Budget) -> int:
+    return budget.lookup_version_id or lookup_loader.current_version_id()
+
+
 def get_lookup_version_for_budget(budget: Budget) -> LookupVersion:
-    return budget.lookup_version or LookupVersion.objects.get(
-        id=lookup_loader.current_version_id()
-    )
+    return LookupVersion.objects.get(id=get_lookup_version_id_for_budget(budget))
 
 
 def get_budget_details(budget: Budget) -> dict:
     """
     Get project details from database.
     Calculate cost and price result.
+
+    An approved costing is not priced again: it shows the figures it was
+    approved at (#192).
     """
+    if budget.status == Budget.Status.APPROVED:
+        if budget.approved_figures is None:
+            # Approved before its figures were kept: they are kept from now.
+            freeze_approved_figures(budget)
+        return {
+            "approved_figures": budget.approved_figures,
+            "approval": approval_record.approval_record(budget),
+        }
+
     details = build_budget_details(
         lookup_loader.constants_for(budget),
         data_loader.load_budget_data(budget),
@@ -24,6 +42,33 @@ def get_budget_details(budget: Budget) -> dict:
     store_multipliers(budget, details)
     details["approval"] = approval_record.approval_record(budget)
     return details
+
+
+def freeze_approved_figures(budget: Budget) -> None:
+    """
+    Keep an approved costing's figures as the API shows them (#192). Its rates
+    were already frozen by the version stamped at submit (#52); this freezes
+    the result too, so a later change to the engine can't move an approved
+    price.
+    """
+    # Imported here: the serializer module imports from services.
+    from ..serializers.budget_detail_serializer import BudgetDetailSerializer
+
+    details = build_budget_details(
+        lookup_loader.constants_for(budget),
+        data_loader.load_budget_data(budget),
+    )
+    store_price(budget, details)
+    store_multipliers(budget, details)
+    # Without the approval trail, which is read fresh each time.
+    figures = {
+        key: value
+        for key, value in cast(dict, BudgetDetailSerializer(details).data).items()
+        if key != "approval"
+    }
+    # As JSON: decimals are kept as the API sends them.
+    budget.approved_figures = json.loads(json.dumps(figures, cls=JSONEncoder))
+    budget.save(update_fields=["approved_figures"])
 
 
 def store_price(budget: Budget, details: dict) -> None:

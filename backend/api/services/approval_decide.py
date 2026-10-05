@@ -10,6 +10,7 @@ from api.models import (
     UserOrgAssignment,
 )
 from api.services.audit import write_audit
+from api.services.budget_details import freeze_approved_figures
 from api.services.notification import notify_budget_decision, notify_dean_review
 
 
@@ -84,6 +85,10 @@ def decide(
     # The rates were stamped at submit and are not touched here: a decision
     # is on the price that was submitted, not on whatever the rates are now.
     budget.save(update_fields=["status"])
+
+    # Approved on these figures, so they are kept as they are (#192).
+    if budget.status == Budget.Status.APPROVED:
+        freeze_approved_figures(budget)
 
     transaction.on_commit(
         lambda: notify_budget_decision(

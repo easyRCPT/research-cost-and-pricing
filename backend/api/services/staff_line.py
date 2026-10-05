@@ -2,12 +2,22 @@ from django.db import transaction
 from django.db.models import Max
 
 from ..models import Budget, StaffCostLine, YearAllocation
-from . import budget_details
+from . import budget_details, classification
 
 
 @transaction.atomic
 def create(budget: Budget, data: dict) -> dict:
+    # Validate category and classification before create
+    # Other fields are validated by serializer
+    classification.validate_with_budget(
+        budget, data["category"], data["classification"]
+    )
+
     allocations = data.pop("allocations", [])
+
+    if data.get("is_ci"):
+        # One CI line per budget: a new one takes the mark.
+        budget.staff_lines.filter(is_ci=True).update(is_ci=False)
 
     last = budget.staff_lines.aggregate(Max("position"))["position__max"]
     staff_line = StaffCostLine(
