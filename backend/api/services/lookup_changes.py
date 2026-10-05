@@ -11,6 +11,11 @@ the new rates for good (#52).
 When a version is made does not change: a set writes into the current version
 until a costing is submitted on it, and the first set after that copies the
 rates into a new version and writes there.
+
+Each row is written through lookup_update's insert_row, write_row and
+delete_row, the same as the reference tables' single-row writes. This module
+adds what a set needs on top: the lock, the version, the rate checks, and one
+change set and audit entry for the whole set.
 """
 
 from decimal import Decimal
@@ -18,15 +23,16 @@ from typing import Any, cast
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import models, transaction
-from django.db.models import ProtectedError
 from django.forms.models import model_to_dict
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.fields import get_error_detail
 
-from ..calculation.staff import PAYROLL_TYPE
 from ..models import (
+    PAYROLL_TYPE_MAPPING,
+    Budget,
     CalculationConstant,
+    Currency,
     LookupChangeSet,
     LookupConfiguration,
     OnCostRate,
@@ -36,15 +42,22 @@ from ..models import (
     User,
 )
 from .audit import write_audit
+from .classification import (
+    update_increment_cap_in_creation,
+    update_increment_cap_in_deletion,
+    validate_classification,
+)
 from .lookup_definitions import LookupDefinition
 from .lookup_loader import build_constants, invalidate_lookup_cache
 from .lookup_update import (
     create_lookup_version,
+    delete_row,
     get_definition,
+    insert_row,
     is_baseline,
     plain,
     priced_on,
-    save_validated_instance,
+    write_row,
 )
 
 CREATE = "create"
@@ -58,10 +71,10 @@ OPS = (CREATE, UPDATE, DELETE)
 MULTIPLIER_FLOOR = Decimal(1)
 MULTIPLIER_STEP = Decimal("0.01")
 
-# Constants that are rates, held as decimals: 0.30 is 30%. A costing's
-# margin runs from 0 to 100% (MAX_MARGIN in MarginPanel.tsx), so the margin
-# constants share that range and the floor can't sit where no costing could
-# reach it. #87 may move the margin's bounds; these follow (#151).
+# Constants that are rates, held as decimals: 0.30 is 30% (#151). Most run
+# from 0 to 100%. The margin constants share a costing's own range, which has
+# no cap but the column's (#192), so the floor can't sit where no costing could
+# reach it and a new costing can always take the default.
 RATE_CONSTANTS = {
     "default_margin",
     "minimum_margin",
@@ -70,6 +83,10 @@ RATE_CONSTANTS = {
     "override_uom_oncosts",
 }
 RATE_CEILING = Decimal(1)
+MARGIN_CEILINGS = {
+    "default_margin": Budget.MAX_MARGIN,
+    "minimum_margin": Budget.MAX_MARGIN,
+}
 
 # The engine reads every one of these by name or uses every row, so a set may
 # change their values but never add or take one away.
@@ -202,15 +219,22 @@ def _readable(name: str) -> str:
 
 def _check_rate(name: str, value: Decimal) -> None:
     """
-    A rate is a decimal from 0 to 1 (#151). Anything above 1 is far more
-    likely a percentage typed bare than a rate of over 100%, so it is refused
-    with the decimal it probably meant, never converted by guesswork.
+    A rate is a decimal from 0 to 1 (#151), or for a margin up to 9.9999
+    (#192). Anything above that is far more likely a percentage typed bare,
+    so it is refused with the decimal it probably meant, never converted by
+    guesswork.
     """
     if value < 0:
         raise ValidationError(f"{_readable(name)} can't be below 0.")
-    if value > RATE_CEILING:
+    ceiling = MARGIN_CEILINGS.get(name, RATE_CEILING)
+    if value > ceiling:
+        bounds = (
+            "from 0 to 1 (0% to 100%)"
+            if ceiling == RATE_CEILING
+            else f"from 0 to {ceiling.normalize():f} (0% to 999.99%)"
+        )
         raise ValidationError(
-            f"{_readable(name)} is a decimal from 0 to 1 (0% to 100%). "
+            f"{_readable(name)} is a decimal {bounds}. "
             f"Did you mean {value.normalize():f}%? Enter "
             f"{(value / 100).normalize():f} or {value.normalize():f}%."
         )
@@ -237,13 +261,24 @@ def _create(definition: LookupDefinition, version_id: int, change: dict) -> dict
             f"There is already a {_label(definition)} for {_describe(key)}."
         )
 
-    save_validated_instance(model(**values, version_id=version_id))
+    # Update increment caps
+    # Creating a salary rate automatically creates new level and increment cap if needed.
+    if model is SalaryRate:
+        update_increment_cap_in_creation(
+            values["category"], values["classification"], version_id
+        )
+
+    insert_row(model, {**values, "version_id": version_id})
     return {"key": key, "before": None, "after": values}
 
 
 def _update(definition: LookupDefinition, version_id: int, change: dict) -> dict:
     key = _typed_key(definition, change.get("lookup"))
     instance = _find(definition, version_id, key)
+
+    # Category and classification are validated through increment caps, not serializer.
+    if definition.model == SalaryRate:
+        validate_classification(key["category"], key["classification"], version_id)
 
     renamed = set(change.get("values") or {}) & set(definition.key)
     if renamed:
@@ -254,13 +289,10 @@ def _update(definition: LookupDefinition, version_id: int, change: dict) -> dict
 
     values = _typed_values(definition, change.get("values"), instance)
     _check_constant(instance, values)
+    _check_aud(instance, values)
 
-    before = model_to_dict(instance, fields=list(values))
-    for field, value in values.items():
-        setattr(instance, field, value)
-    save_validated_instance(instance, update_fields=list(values))
-
-    return {"key": key, "before": before, "after": values}
+    before, after = write_row(instance, values)
+    return {"key": key, "before": before, "after": after}
 
 
 def _reject_removing_a_rate_in_use(instance: models.Model) -> None:
@@ -276,7 +308,7 @@ def _reject_removing_a_rate_in_use(instance: models.Model) -> None:
         budget__lookup_version__isnull=True,
         employment_type__in=[
             employment
-            for employment, payroll in PAYROLL_TYPE.items()
+            for employment, payroll in PAYROLL_TYPE_MAPPING.items()
             if payroll == instance.payroll_type
         ],
         category=instance.category,
@@ -286,6 +318,37 @@ def _reject_removing_a_rate_in_use(instance: models.Model) -> None:
         raise ValidationError(
             f"{lines} draft staff {'line is' if lines == 1 else 'lines are'} costed "
             "at this rate, so it can't be removed: they would be costed at nothing."
+        )
+
+
+def _check_aud(instance: models.Model, values: dict) -> None:
+    """AUD is what every rate is quoted against, so 1 AUD is always 1 AUD."""
+    if (
+        isinstance(instance, Currency)
+        and instance.code == "AUD"
+        and "rate" in values
+        and values["rate"] != 1
+    ):
+        raise ValidationError("AUD is the base currency: its rate is always 1.")
+
+
+def _reject_removing_a_currency_in_use(instance: models.Model) -> None:
+    """
+    AUD is the base, and a currency a draft costing is priced in is still in
+    use: without its rate that costing could not be priced. Only drafts, as
+    for salary rates: a submitted costing keeps its stamped version.
+    """
+    if not isinstance(instance, Currency):
+        return
+    if instance.code == "AUD":
+        raise ValidationError("AUD is the base currency and can't be removed.")
+    drafts = Budget.objects.filter(
+        lookup_version__isnull=True, currency=instance.code
+    ).count()
+    if drafts:
+        raise ValidationError(
+            f"{drafts} draft {'costing is' if drafts == 1 else 'costings are'} "
+            f"priced in {instance.code}, so it can't be removed."
         )
 
 
@@ -307,16 +370,17 @@ def _delete(definition: LookupDefinition, version_id: int, change: dict) -> dict
     instance = _find(definition, version_id, key)
     _reject_removing_a_rate_in_use(instance)
     _reject_removing_a_default_on_cost(instance)
+    _reject_removing_a_currency_in_use(instance)
     before = model_to_dict(instance, exclude=["id", "version"])
 
     # Only from this version. Costings priced on older versions keep the row,
     # because each version holds every row of its own.
-    try:
-        instance.delete()
-    except ProtectedError:
-        raise ValidationError(
-            f"Draft costings use this {_label(definition)}, so it can't be removed."
-        )
+    delete_row(instance)
+
+    # Update increment caps
+    # Removing the last salary rate automatically removes its classification level
+    if model is SalaryRate:
+        update_increment_cap_in_deletion(key, version_id)
 
     return {"key": key, "before": before, "after": None}
 

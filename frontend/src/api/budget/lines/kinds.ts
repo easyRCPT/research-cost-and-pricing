@@ -53,6 +53,7 @@ const STAFF_FIELDS = new Set<string>([
   'time_basis',
   'in_kind',
   'in_kind_reason',
+  'is_ci',
 ])
 
 const NON_STAFF_FIELDS = new Set<string>([
@@ -60,7 +61,6 @@ const NON_STAFF_FIELDS = new Set<string>([
   'in_kind',
   'in_kind_reason',
   'add_ten_percent',
-  'indirect_rate_multiplier',
 ])
 
 /**
@@ -112,6 +112,7 @@ const staff: LineKindSpec<'staff'> = {
           time_basis: line.time_basis,
           in_kind: line.in_kind,
           in_kind_reason: line.in_kind_reason,
+          is_ci: line.is_ci,
           allocations: line.by_year
             .filter((entry) => entry.time > 0)
             .map(({ year, time }) => ({ year, time })),
@@ -178,7 +179,6 @@ const nonStaff: LineKindSpec<'non_staff'> = {
           in_kind: line.in_kind,
           in_kind_reason: line.in_kind_reason,
           add_ten_percent: line.add_ten_percent,
-          indirect_rate_multiplier: line.indirect_rate_multiplier,
           amounts: line.by_year
             .filter((entry) => entry.amount > 0)
             .map(({ year, amount }) => ({ year, amount })),

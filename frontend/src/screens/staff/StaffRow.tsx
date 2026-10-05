@@ -13,7 +13,6 @@ import {
   timeBasesFor,
   timeBasisPatch,
 } from '@/lib/staff'
-import { cn } from '@/lib/utils'
 import type {
   EditableStaffLine,
   SalaryRate,
@@ -32,7 +31,6 @@ interface StaffRowProps {
   classifications: string[]
   bases: string[]
   isCi: boolean
-  ciIncluded: boolean
   patchLine: (id: string, patch: Partial<EditableStaffLine>) => void
   removeLine: (id: string) => void
 }
@@ -46,16 +44,11 @@ export function StaffRow({
   classifications,
   bases,
   isCi,
-  ciIncluded,
   patchLine,
   removeLine,
 }: StaffRowProps) {
-  // An excluded row is neither charged nor in-kind: it is simply not part
-  // of what the project costs, so it carries no figures.
-  const excluded = isCi && !ciIncluded
-
   return (
-    <tr className={excluded ? 'opacity-55' : undefined}>
+    <tr>
       <CellTd>
         {isCi ? (
           // The CI's name is typed on Project Details. The read-only
@@ -66,10 +59,7 @@ export function StaffRow({
               disabled
               title="Set on Project Details"
               value={line.name_role}
-              className={cn(
-                'disabled:bg-transparent',
-                excluded && 'line-through',
-              )}
+              className="disabled:bg-transparent"
             />
             <Badge variant="secondary" className="shrink-0">
               CI
@@ -127,17 +117,12 @@ export function StaffRow({
           }
         />
       </CellTd>
-      <StaffFigureCell value={line.rate} excluded={excluded} />
-      <StaffYearCells
-        line={line}
-        years={years}
-        excluded={excluded}
-        patchLine={patchLine}
-      />
-      <StaffFigureCell value={line.total} excluded={excluded} struck />
+      <StaffFigureCell value={line.rate} />
+      <StaffYearCells line={line} years={years} patchLine={patchLine} />
+      <StaffFigureCell value={line.total} />
       <RemoveRowButton
         label={`Remove ${line.name_role || 'row'}`}
-        // The CI's row belongs to the project, so it stays.
+        // Added and removed by the Include Chief Investigator cost tick (#166).
         disabled={isCi}
         onRemove={() => removeLine(line.id)}
       />

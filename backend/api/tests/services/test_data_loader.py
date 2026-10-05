@@ -110,6 +110,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
         line_1.time_basis = "FTE"
         line_1.in_kind = False
         line_1.in_kind_reason = ""
+        line_1.is_ci = True
 
         line_2 = Mock(spec=StaffCostLine)
         line_2.id = 2
@@ -121,6 +122,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
         line_2.time_basis = "Hourly"
         line_2.in_kind = True
         line_2.in_kind_reason = ""
+        line_2.is_ci = False
 
         result = build_staff_info_table([line_1, line_2])
 
@@ -136,6 +138,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "time_basis": "FTE",
                     "in_kind": False,
                     "in_kind_reason": "",
+                    "is_ci": True,
                 },
                 2: {
                     "position": 1,
@@ -146,6 +149,7 @@ class TestBuildStaffInfoTable(SimpleTestCase):
                     "time_basis": "Hourly",
                     "in_kind": True,
                     "in_kind_reason": "",
+                    "is_ci": False,
                 },
             },
         )
@@ -215,7 +219,6 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
         line.in_kind = False
         line.in_kind_reason = ""
         line.add_ten_percent = True
-        line.indirect_rate_multiplier = Decimal("1.2")
 
         result = build_non_staff_info_table([line])
 
@@ -231,7 +234,6 @@ class TestBuildNonStaffInfoTable(SimpleTestCase):
                     "in_kind": False,
                     "in_kind_reason": "",
                     "add_ten_percent": True,
-                    "indirect_rate_multiplier": Decimal("1.2"),
                 }
             },
         )
@@ -302,12 +304,13 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.deliverable.sponsor = "Test Sponsor"
 
         self.budget = Mock(spec=Budget)
-        self.budget.mode = "full"
         self.budget.cost_multiplier = Decimal("1.0")
         self.budget.in_kind_multiplier = Decimal("1.0")
         self.budget.margin = Decimal("0.30")
         self.budget.gst_applicable = True
         self.budget.cash_co_contribution = Decimal(500)
+        self.budget.currency = "USD"
+        self.budget.exchange_rate_override = Decimal("0.7")
         self.budget.comments = "Comments"
         self.budget.justification = "Justification"
         self.budget.justification_notes = "Notes"
@@ -322,12 +325,13 @@ class TestBuildBudgetInfo(SimpleTestCase):
         self.assertEqual(
             result,
             {
-                "mode": "full",
                 "cost_multiplier": Decimal("1.0"),
                 "in_kind_multiplier": Decimal("1.0"),
                 "margin": Decimal("0.30"),
                 "gst_applicable": True,
                 "cash_co_contribution": Decimal(500),
+                "currency": "USD",
+                "exchange_rate_override": Decimal("0.7"),
                 "comments": "Comments",
                 "justification": "Justification",
                 "justification_notes": "Notes",

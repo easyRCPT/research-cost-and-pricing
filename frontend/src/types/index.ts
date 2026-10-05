@@ -19,6 +19,7 @@ export type ProjectInfo = S['ProjectInfo']
 export type BudgetInfo = S['BudgetInfo']
 export type Activity = S['Activity']
 export type Region = S['Region']
+export type Currency = S['Currency']
 
 // Response types
 export type BudgetDetail = S['BudgetDetail']
@@ -63,11 +64,10 @@ export type Section = BudgetUpdate['section']
 
 // Choices
 export type EmploymentType = S['EmploymentTypeEnum']
-export type StaffCategory = S['CategoryEnum']
+export type StaffCategory = S['IncrementCap']['category']
 export type TimeBasis = S['TimeBasisEnum']
 
 /** model.py enums  */
-export type Mode = S['ModeEnum']
 export type Status = S['StatusEnum']
 
 /**

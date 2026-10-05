@@ -24,6 +24,7 @@ def pricing(
         project_duration["end_month"],
         budget_info["cost_multiplier"],
         budget_info["in_kind_multiplier"],
+        budget_info.get("exchange_rate", Decimal(1)),
     )
 
     # non staff cost table result
@@ -83,8 +84,6 @@ def calculate_budget_summary(
     non_staff_budget = calculate_non_staff_budget(non_staff_result["cost_results"])
 
     # in kind costs
-    # non-staff total not include indirect costs
-    # If in-kind non-staff cost has indirect rate multiplier, additional direct rate will not be considered
     in_kind_staff_budget = calculate_staff_budget(
         staff_info_table,
         staff_result["in_kind_cost_results"],
@@ -129,10 +128,11 @@ def calculate_dean_required(
     """
     Dean review on top of the Head of Department's, when the price is below
     the margin floor or the University is contributing in kind.
+
+    Confirmed with Frank as they are (#192, #87): the floor is the minimum
+    margin rate, seeded at 30%.
     """
     triggers = []
-    # TODO(#87): the floor is seeded at 0.30, the default margin, so any cut to
-    # the margin needs a Dean until Frank sets the margin policy.
     if margin < minimum_margin:
         triggers.append("margin_below_minimum")
     if has_in_kind:
@@ -247,7 +247,7 @@ def calculate_non_staff_budget(
     # Calculate total result according to cost group
     # Ignore expense type for non-staff budget
     result = {}
-    summary_rows = {"direct_total", "indirect_total", "column_total"}
+    summary_rows = {"direct_total", "column_total"}
     for row_id, row in non_staff_result.items():
         if row_id in summary_rows:
             continue
@@ -256,11 +256,9 @@ def calculate_non_staff_budget(
 
     # Add summary
     direct_total = sum(result.values())
-    indirect_total = non_staff_result["indirect_total"]["total"]
 
     return {
         "category_totals": result,
         "direct_total": direct_total,
-        "indirect_cost_recovery": indirect_total,
-        "total_non_staff_costs": direct_total + indirect_total,
+        "total_non_staff_costs": direct_total,
     }

@@ -724,6 +724,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description The lookup tables: the current ones, or with `budget` the ones that
+         *     costing is priced on (#198). A submitted or approved costing is priced on
+         *     the version stamped when it was submitted, so its tables can differ from
+         *     today's; a draft's are today's.
+         */
         get: operations["lookups_retrieve"];
         put?: never;
         post?: never;
@@ -1897,7 +1903,9 @@ export interface components {
          * @description * `cash_co_contribution` - cash_co_contribution
          *     * `comments` - comments
          *     * `cost_multiplier` - cost_multiplier
+         *     * `currency` - currency
          *     * `dean_exemption_reason` - dean_exemption_reason
+         *     * `exchange_rate_override` - exchange_rate_override
          *     * `gst_applicable` - gst_applicable
          *     * `in_kind_multiplier` - in_kind_multiplier
          *     * `justification` - justification
@@ -1906,7 +1914,7 @@ export interface components {
          *     * `mode` - mode
          * @enum {string}
          */
-        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "dean_exemption_reason" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode";
+        BudgetFieldEnum: "cash_co_contribution" | "comments" | "cost_multiplier" | "currency" | "dean_exemption_reason" | "exchange_rate_override" | "gst_applicable" | "in_kind_multiplier" | "justification" | "justification_notes" | "margin" | "mode";
         BudgetFieldUpdate: {
             value: unknown;
             field: components["schemas"]["BudgetFieldEnum"];
@@ -1917,7 +1925,6 @@ export interface components {
             section: "budget";
         };
         BudgetInfo: {
-            mode: components["schemas"]["ModeEnum"];
             /** Format: double */
             cost_multiplier: number;
             /** Format: double */
@@ -1927,6 +1934,13 @@ export interface components {
             gst_applicable: boolean;
             /** Format: double */
             cash_co_contribution: number;
+            currency: string;
+            /** Format: double */
+            exchange_rate: number;
+            /** Format: double */
+            table_exchange_rate: number;
+            /** Format: double */
+            exchange_rate_override: number | null;
             comments: string;
             justification: string;
             justification_notes: string;
@@ -1937,6 +1951,7 @@ export interface components {
         };
         BudgetSummary: {
             price_summary: components["schemas"]["PriceSummary"];
+            in_aud: components["schemas"]["InAud"];
             staff_budget: components["schemas"]["StaffBudget"];
             non_staff_budget: components["schemas"]["NonStaffBudget"];
             in_kind_costs: components["schemas"]["InKindCosts"];
@@ -2200,7 +2215,7 @@ export interface components {
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
             detail: string;
         };
-        BudgetsNonStaffLinesCreateError: components["schemas"]["BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIndirectRateMultiplierErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
+        BudgetsNonStaffLinesCreateError: components["schemas"]["BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateCostGroupErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateExpenseTypeErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateDescriptionErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAddTenPercentErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXYearErrorComponent"] | components["schemas"]["BudgetsNonStaffLinesCreateAmountsINDEXAmountErrorComponent"];
         BudgetsNonStaffLinesCreateErrorResponse400: components["schemas"]["BudgetsNonStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         BudgetsNonStaffLinesCreateExpenseTypeErrorComponent: {
             /**
@@ -2263,23 +2278,6 @@ export interface components {
              * @enum {string}
              */
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
-            detail: string;
-        };
-        BudgetsNonStaffLinesCreateIndirectRateMultiplierErrorComponent: {
-            /**
-             * @description * `indirect_rate_multiplier` - indirect_rate_multiplier (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            attr: "indirect_rate_multiplier";
-            /**
-             * @description * `invalid` - invalid
-             *     * `max_decimal_places` - max_decimal_places
-             *     * `max_digits` - max_digits
-             *     * `max_string_length` - max_string_length
-             *     * `max_whole_digits` - max_whole_digits
-             * @enum {string}
-             */
-            code: "invalid" | "max_decimal_places" | "max_digits" | "max_string_length" | "max_whole_digits";
             detail: string;
         };
         BudgetsNonStaffLinesCreateNonFieldErrorsErrorComponent: {
@@ -2368,11 +2366,10 @@ export interface components {
             attr: "value";
             /**
              * @description * `invalid` - invalid
-             *     * `null` - null
              *     * `required` - required
              * @enum {string}
              */
-            code: "invalid" | "null" | "required";
+            code: "invalid" | "required";
             detail: string;
         };
         BudgetsPartialUpdateYearErrorComponent: {
@@ -2461,12 +2458,16 @@ export interface components {
              */
             attr: "category";
             /**
-             * @description * `invalid_choice` - invalid_choice
+             * @description * `blank` - blank
+             *     * `invalid` - invalid
+             *     * `max_length` - max_length
              *     * `null` - null
+             *     * `null_characters_not_allowed` - null_characters_not_allowed
              *     * `required` - required
+             *     * `surrogate_characters_not_allowed` - surrogate_characters_not_allowed
              * @enum {string}
              */
-            code: "invalid_choice" | "null" | "required";
+            code: "blank" | "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "required" | "surrogate_characters_not_allowed";
             detail: string;
         };
         BudgetsStaffLinesCreateClassificationErrorComponent: {
@@ -2503,7 +2504,7 @@ export interface components {
             code: "invalid_choice" | "null" | "required";
             detail: string;
         };
-        BudgetsStaffLinesCreateError: components["schemas"]["BudgetsStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateCategoryErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateClassificationErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXTimeErrorComponent"];
+        BudgetsStaffLinesCreateError: components["schemas"]["BudgetsStaffLinesCreateNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIdErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateNameRoleErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateEmploymentTypeErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateCategoryErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateClassificationErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateTimeBasisErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateInKindReasonErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateIsCiErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXNonFieldErrorsErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXYearErrorComponent"] | components["schemas"]["BudgetsStaffLinesCreateAllocationsINDEXTimeErrorComponent"];
         BudgetsStaffLinesCreateErrorResponse400: components["schemas"]["BudgetsStaffLinesCreateValidationError"] | components["schemas"]["ParseErrorResponse"];
         BudgetsStaffLinesCreateIdErrorComponent: {
             /**
@@ -2548,6 +2549,20 @@ export interface components {
              * @enum {string}
              */
             code: "invalid" | "max_length" | "null" | "null_characters_not_allowed" | "surrogate_characters_not_allowed";
+            detail: string;
+        };
+        BudgetsStaffLinesCreateIsCiErrorComponent: {
+            /**
+             * @description * `is_ci` - is_ci (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            attr: "is_ci";
+            /**
+             * @description * `invalid` - invalid
+             *     * `null` - null
+             * @enum {string}
+             */
+            code: "invalid" | "null";
             detail: string;
         };
         BudgetsStaffLinesCreateNameRoleErrorComponent: {
@@ -2615,12 +2630,6 @@ export interface components {
             /** Format: double */
             value: number;
         };
-        /**
-         * @description * `Academic` - Academic
-         *     * `Professional` - Professional
-         * @enum {string}
-         */
-        CategoryEnum: "Academic" | "Professional";
         ChangeSet: {
             id: number;
             note: string;
@@ -2641,6 +2650,17 @@ export interface components {
          * @enum {string}
          */
         ClientErrorEnum: "client_error";
+        Currency: {
+            code: string;
+            name: string;
+            /**
+             * Format: double
+             * @description How much of this currency 1 AUD buys.
+             */
+            rate: number;
+            /** Format: double */
+            readonly inverse: number;
+        };
         /**
          * @description * `approve` - approve
          *     * `reject` - reject
@@ -2843,6 +2863,12 @@ export interface components {
             group: string;
             count: number;
         };
+        /** @description The costing's totals in AUD, beside its own currency's (#152). */
+        InAud: {
+            price_summary: components["schemas"]["PriceSummary"];
+            staff_cost_by_year: components["schemas"]["YearAmountInAud"][];
+            non_staff_cost_by_year: components["schemas"]["YearAmountInAud"][];
+        };
         InKindCosts: {
             in_kind_staff_budget: components["schemas"]["StaffBudget"];
             in_kind_non_staff_budget: components["schemas"]["NonStaffBudget"];
@@ -2850,6 +2876,7 @@ export interface components {
             total_in_kind_costs: number;
         };
         IncrementCap: {
+            category: string;
             level: string;
             max_steps: number;
         };
@@ -2889,6 +2916,7 @@ export interface components {
             on_cost_rates: components["schemas"]["OnCostRate"][];
             non_staff_cost_categories: components["schemas"]["NonStaffCostCategory"][];
             calculation_constants: components["schemas"]["CalculationConstant"][];
+            currencies: components["schemas"]["Currency"][];
             activities: components["schemas"]["Activity"][];
             regions: components["schemas"]["Region"][];
             deliverable_types: components["schemas"]["DeliverableType"][];
@@ -2926,12 +2954,6 @@ export interface components {
             groups: string[];
             assignments: components["schemas"]["Assignment"][];
         };
-        /**
-         * @description * `simple` - Simple
-         *     * `full` - Full
-         * @enum {string}
-         */
-        ModeEnum: "simple" | "full";
         NonStaffBudget: {
             category_totals: {
                 [key: string]: number;
@@ -2939,14 +2961,11 @@ export interface components {
             /** Format: double */
             direct_total: number;
             /** Format: double */
-            indirect_cost_recovery: number;
-            /** Format: double */
             total_non_staff_costs: number;
         };
         NonStaffCost: {
             lines: components["schemas"]["NonStaffLine"][];
             direct_total: components["schemas"]["NonStaffTotal"];
-            indirect_total: components["schemas"]["NonStaffTotal"];
             column_total: components["schemas"]["NonStaffTotal"];
         };
         NonStaffCostCategory: {
@@ -2961,12 +2980,11 @@ export interface components {
          *     * `description` - description
          *     * `in_kind` - in_kind
          *     * `in_kind_reason` - in_kind_reason
-         *     * `indirect_rate_multiplier` - indirect_rate_multiplier
          *     * `position` - position
          *     * `year_value` - year_value
          * @enum {string}
          */
-        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "in_kind_reason" | "indirect_rate_multiplier" | "position" | "year_value";
+        NonStaffFieldEnum: "add_ten_percent" | "category" | "description" | "in_kind" | "in_kind_reason" | "position" | "year_value";
         NonStaffLine: {
             /** Format: uuid */
             id: string;
@@ -2977,8 +2995,6 @@ export interface components {
             in_kind: boolean;
             in_kind_reason: string;
             add_ten_percent: boolean;
-            /** Format: double */
-            indirect_rate_multiplier: number | null;
             by_year: components["schemas"]["NonStaffYear"][];
             /** Format: double */
             total: number;
@@ -2997,8 +3013,6 @@ export interface components {
             in_kind_reason: string;
             /** @default false */
             add_ten_percent: boolean;
-            /** Format: double */
-            indirect_rate_multiplier?: number | null;
             amounts?: components["schemas"]["YearAmount"][];
         };
         NonStaffTotal: {
@@ -3504,7 +3518,7 @@ export interface components {
         RoleEnum: "member" | "hod" | "dean";
         SalaryRate: {
             payroll_type: components["schemas"]["PayrollTypeEnum"];
-            category: components["schemas"]["CategoryEnum"];
+            category: string;
             classification: string;
             /** Format: double */
             rate: number;
@@ -3550,24 +3564,26 @@ export interface components {
          *     * `employment_type` - employment_type
          *     * `in_kind` - in_kind
          *     * `in_kind_reason` - in_kind_reason
+         *     * `is_ci` - is_ci
          *     * `name_role` - name_role
          *     * `position` - position
          *     * `time_basis` - time_basis
          *     * `year_value` - year_value
          * @enum {string}
          */
-        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "in_kind_reason" | "name_role" | "position" | "time_basis" | "year_value";
+        StaffFieldEnum: "category" | "classification" | "employment_type" | "in_kind" | "in_kind_reason" | "is_ci" | "name_role" | "position" | "time_basis" | "year_value";
         StaffLine: {
             /** Format: uuid */
             id: string;
             position: number;
             name_role: string;
             employment_type: components["schemas"]["EmploymentTypeEnum"];
-            category: components["schemas"]["CategoryEnum"];
+            category: string;
             classification: string;
             time_basis: components["schemas"]["TimeBasisEnum"];
             in_kind: boolean;
             in_kind_reason: string;
+            is_ci: boolean;
             /** Format: double */
             rate: number;
             by_year: components["schemas"]["StaffYear"][];
@@ -3579,13 +3595,15 @@ export interface components {
             id?: string;
             name_role: string;
             employment_type: components["schemas"]["EmploymentTypeEnum"];
-            category: components["schemas"]["CategoryEnum"];
+            category: string;
             classification: string;
             time_basis: components["schemas"]["TimeBasisEnum"];
             /** @default false */
             in_kind: boolean;
             /** @default  */
             in_kind_reason: string;
+            /** @default false */
+            is_ci: boolean;
             allocations?: components["schemas"]["YearAllocation"][];
         };
         StaffTotal: {
@@ -3655,13 +3673,15 @@ export interface components {
         /**
          * @description * `salary_rates` - salary_rates
          *     * `salary_rate_multipliers` - salary_rate_multipliers
+         *     * `increment_caps` - increment_caps
          *     * `eba_increases` - eba_increases
          *     * `on_cost_rates` - on_cost_rates
          *     * `non_staff_cost_categories` - non_staff_cost_categories
          *     * `calculation_constants` - calculation_constants
+         *     * `currencies` - currencies
          * @enum {string}
          */
-        TableEnum: "salary_rates" | "salary_rate_multipliers" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants";
+        TableEnum: "salary_rates" | "salary_rate_multipliers" | "increment_caps" | "eba_increases" | "on_cost_rates" | "non_staff_cost_categories" | "calculation_constants" | "currencies";
         /**
          * @description * `FTE` - FTE
          *     * `Daily` - Daily
@@ -3749,6 +3769,11 @@ export interface components {
             time: number;
         };
         YearAmount: {
+            year: number;
+            /** Format: double */
+            amount: number;
+        };
+        YearAmountInAud: {
             year: number;
             /** Format: double */
             amount: number;
@@ -7574,7 +7599,10 @@ export interface operations {
     };
     lookups_retrieve: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A costing whose own tables to return. */
+                budget?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;

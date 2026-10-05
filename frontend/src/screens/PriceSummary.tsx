@@ -19,6 +19,8 @@ export function PriceSummary() {
         summary={summary}
         multiplier={multiplier}
         basis={multiplier}
+        inAud={budget.budget_summary.in_aud.price_summary}
+        info={budget.budget_info}
       />
       <UniversityPositionPanel summary={summary} />
     </>

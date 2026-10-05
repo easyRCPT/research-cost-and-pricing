@@ -63,7 +63,6 @@ class BudgetUpdateTestMixin:
             description="Equipment",
             in_kind=False,
             add_ten_percent=False,
-            indirect_rate_multiplier=None,
         )
 
     @staticmethod
@@ -410,6 +409,7 @@ class TestUpdateBudget(SimpleTestCase):
 class TestUpdateStaff(SimpleTestCase):
     def setUp(self):
         self.budget = Mock(spec=Budget)
+        self.budget.lookup_version_id = 1
         self.staff_line = Mock(spec=StaffCostLine)
         self.budget.staff_lines.get.return_value = self.staff_line
 
@@ -432,7 +432,9 @@ class TestUpdateStaff(SimpleTestCase):
             update_fields=["name_role", "updated_at"]
         )
 
-    def test_updates_calculation_field(self):
+    @patch("api.services.classification.validate_with_budget")
+    def test_updates_calculation_field(self, mock_validate_with_budget):
+        self.staff_line.category = "Academic"
         result = budget_update.update_staff(
             self.budget,
             LINE_ID,
@@ -444,6 +446,11 @@ class TestUpdateStaff(SimpleTestCase):
         self.assertTrue(result)
         self.assertEqual(
             self.staff_line.classification,
+            "Level A.2",
+        )
+        mock_validate_with_budget.assert_called_once_with(
+            self.budget,
+            "Academic",
             "Level A.2",
         )
 

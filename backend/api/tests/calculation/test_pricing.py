@@ -360,11 +360,8 @@ class TestCalculateNonStaffBudget(SimpleTestCase):
             "direct_total": {
                 "total": Decimal(1700),
             },
-            "indirect_total": {
-                "total": Decimal(300),
-            },
             "column_total": {
-                "total": Decimal(2000),
+                "total": Decimal(1700),
             },
         }
 
@@ -378,8 +375,9 @@ class TestCalculateNonStaffBudget(SimpleTestCase):
             },
         )
         self.assertEqual(result["direct_total"], Decimal(1700))
-        self.assertEqual(result["indirect_cost_recovery"], Decimal(300))
-        self.assertEqual(result["total_non_staff_costs"], Decimal(2000))
+        # No indirect rate (#192): the non-staff total is the direct total.
+        self.assertNotIn("indirect_cost_recovery", result)
+        self.assertEqual(result["total_non_staff_costs"], Decimal(1700))
 
 
 class TestCalculateBudgetSummary(SimpleTestCase):
@@ -415,11 +413,8 @@ class TestCalculateBudgetSummary(SimpleTestCase):
                 "direct_total": {
                     "total": Decimal(500),
                 },
-                "indirect_total": {
-                    "total": Decimal(100),
-                },
                 "column_total": {
-                    "total": Decimal(600),
+                    "total": Decimal(500),
                 },
             },
             "in_kind_cost_results": {
@@ -429,9 +424,6 @@ class TestCalculateBudgetSummary(SimpleTestCase):
                 },
                 "direct_total": {
                     "total": Decimal(300),
-                },
-                "indirect_total": {
-                    "total": Decimal(0),
                 },
                 "column_total": {
                     "total": Decimal(300),
@@ -465,7 +457,7 @@ class TestCalculateBudgetSummary(SimpleTestCase):
 
         self.assertEqual(
             result["price_summary"]["project_cost"],
-            Decimal(1600),
+            Decimal(1500),
         )
         self.assertEqual(
             result["staff_budget"]["total_staff_costs"],
@@ -473,7 +465,7 @@ class TestCalculateBudgetSummary(SimpleTestCase):
         )
         self.assertEqual(
             result["non_staff_budget"]["total_non_staff_costs"],
-            Decimal(600),
+            Decimal(500),
         )
         self.assertEqual(
             result["in_kind_costs"]["total_in_kind_costs"],
@@ -544,6 +536,8 @@ class TestPricing(SimpleTestCase):
             2026,
             12,
             Decimal("1.2"),
+            Decimal(1),
+            # The exchange rate: AUD, since this budget names no currency.
             Decimal(1),
         )
 

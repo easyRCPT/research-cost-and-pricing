@@ -2,8 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon } from 'lucide-react'
 import { type ComponentType, createElement } from 'react'
 
-import { useEditable, useMissingDetails } from '@/api/budget'
-import { useLookups } from '@/api/lookups'
+import { useBudget, useEditable, useMissingDetails } from '@/api/budget'
 import { LOOKUP_SCREEN } from '@/components/lookups-tabs/lookupScreen'
 import { AppShell } from '@/components/shell/AppShell'
 import { DetailsNeededNotice } from '@/components/shell/DetailsNeededNotice'
@@ -19,6 +18,7 @@ import {
   SideBar as Sidebar,
 } from '@/components/shell/Sidebar'
 import { useBackTarget } from '@/components/shell/useBackTarget'
+import { CurrencyContext } from '@/lib/format/currency'
 
 import { AdjustPrice } from '../AdjustPrice'
 import { Approvals } from '../Approvals'
@@ -66,7 +66,7 @@ export function AppContent({
   setScreen,
   onLeave,
 }: AppContentProps) {
-  const { data: lookups } = useLookups()
+  const currency = useBudget().data.budget_info.currency
   const editable = useEditable()
   const locked = useMissingDetails().length > 0
   const sections = locked ? DETAILS_ONLY : SECTIONS
@@ -82,72 +82,77 @@ export function AppContent({
   const goBack = back ? () => navigate({ to: back.to }) : onLeave
   const openLookups = () => setScreen(LOOKUP_SCREEN)
   return (
-    <AppShell
-      sidebar={
-        <Sidebar
-          sections={sections}
-          current={lookupsOpen ? null : screen}
-          onSelect={setScreen}
-          head={
-            <>
-              <RailItem
-                icon={<ArrowLeftIcon className="-mx-[4.5px] size-4 shrink-0" />}
-                onClick={goBack}
-              >
-                {backLabel}
-              </RailItem>
-              <RailItem active={lookupsOpen} onClick={openLookups}>
-                Lookup Tables
-              </RailItem>
-            </>
-          }
+    // Every amount on the costing's screens reads in its currency (#152).
+    <CurrencyContext value={currency}>
+      <AppShell
+        sidebar={
+          <Sidebar
+            sections={sections}
+            current={lookupsOpen ? null : screen}
+            onSelect={setScreen}
+            head={
+              <>
+                <RailItem
+                  icon={
+                    <ArrowLeftIcon className="-mx-[4.5px] size-4 shrink-0" />
+                  }
+                  onClick={goBack}
+                >
+                  {backLabel}
+                </RailItem>
+                <RailItem active={lookupsOpen} onClick={openLookups}>
+                  Lookup Tables
+                </RailItem>
+              </>
+            }
+          />
+        }
+        mobileNav={
+          <MobileNav
+            sections={sections}
+            current={lookupsOpen ? null : screen}
+            onSelect={setScreen}
+            head={
+              <>
+                <NavPill onClick={goBack}>
+                  <ArrowLeftIcon />
+                  {backLabel}
+                </NavPill>
+                <NavPill active={lookupsOpen} onClick={openLookups}>
+                  Lookup Tables
+                </NavPill>
+              </>
+            }
+          />
+        }
+      >
+        <PageHead
+          title={pageHeading.title}
+          subtitle={pageHeading.subtitle}
+          right={screen === 'budget' ? <ExportPdfButton /> : undefined}
         />
-      }
-      mobileNav={
-        <MobileNav
-          sections={sections}
-          current={lookupsOpen ? null : screen}
-          onSelect={setScreen}
-          head={
-            <>
-              <NavPill onClick={goBack}>
-                <ArrowLeftIcon />
-                {backLabel}
-              </NavPill>
-              <NavPill active={lookupsOpen} onClick={openLookups}>
-                Lookup Tables
-              </NavPill>
-            </>
-          }
-        />
-      }
-    >
-      <PageHead
-        title={pageHeading.title}
-        subtitle={pageHeading.subtitle}
-        right={screen === 'budget' ? <ExportPdfButton /> : undefined}
-      />
-      {lookupsOpen ? (
-        <LookupsScreen lookups={lookups} />
-      ) : (
-        <>
-          <ReadOnlyNotice />
-          <DetailsNeededNotice />
-          {/*
+        {lookupsOpen ? (
+          <LookupsScreen />
+        ) : (
+          <>
+            <ReadOnlyNotice />
+            <DetailsNeededNotice />
+            {/*
             One switch for every control on every screen: a disabled fieldset
             disables each input, select, button and checkbox inside it. The
             Approvals screen stays outside, because its Export PDF has to keep
             working on a submitted costing and it handles its own fields.
           */}
-          <fieldset
-            disabled={!editable && screen !== 'approvals'}
-            className="min-w-0"
-          >
-            {createElement(EDITOR_SCREENS[screen])}
-          </fieldset>
-          <ScreenNav screen={screen} onSelect={setScreen} locked={locked} />
-        </>
-      )}
-    </AppShell>
+            <fieldset
+              disabled={!editable && screen !== 'approvals'}
+              className="min-w-0"
+            >
+              {createElement(EDITOR_SCREENS[screen])}
+            </fieldset>
+            <ScreenNav screen={screen} onSelect={setScreen} locked={locked} />
+          </>
+        )}
+      </AppShell>
+    </CurrencyContext>
   )
 }

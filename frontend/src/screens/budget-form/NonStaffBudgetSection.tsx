@@ -1,5 +1,5 @@
 import { Ledger, LedgerRow, PartBar } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { useMoney } from '@/lib/format/currency'
 import { costGroups } from '@/lib/non-staff'
 import type { LookupTables, NonStaffBudget } from '@/types'
 
@@ -12,6 +12,7 @@ export function NonStaffBudgetSection({
   nonStaffBudget,
   lookups,
 }: NonStaffBudgetSectionProps) {
+  const money = useMoney()
   return (
     <>
       <PartBar>Part F — Non-Staff Budget</PartBar>

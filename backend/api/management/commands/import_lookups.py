@@ -23,6 +23,7 @@ from openpyxl.cell.cell import Cell
 from api.models import (
     Activity,
     CalculationConstant,
+    Currency,
     DeliverableType,
     Department,
     EbaIncrease,
@@ -42,7 +43,7 @@ from api.services.lookup_update import create_lookup_version
 # 0 represents a non-ledger category for "contingency".
 CONTINGENCY_LEDGER_ID = 0
 
-# Cost groups that do not apply additional direct rate or indirect rate
+# Cost groups that do not apply the additional direct rate (the 10%)
 EXCLUDED_NON_STAFF_GROUPS = {
     "Student Support",
     "Shared Grant Payments",
@@ -51,6 +52,11 @@ EXCLUDED_NON_STAFF_GROUPS = {
 WORKBOOK_NAME = "Demo_Research-Costing-and-Pricing-Tool-v4.5.xlsm"
 
 EMPLOYMENT_TYPES = {"Continuing", "Fixed-Term", "Casual"}
+
+CATEGORY_MAPPING = {
+    "Academic": {"Level", "RA Grade"},
+    "Professional": {"UOM"},
+}
 
 # Tables here are shaped (employment_type, rate) with no year
 FLAT_ONCOSTS = {
@@ -83,8 +89,8 @@ LITERAL_CONSTANTS = {
         Decimal("0.30"),
         "The margin a new budget starts at. Editable per budget.",
     ),
-    # Matches backend/seeds/lookups.json. Held at the default margin until
-    # Frank sets the floor (#87), so an import doesn't drop Dean review.
+    # Matches backend/seeds/lookups.json. The Dean rules stay as they are
+    # (#192, #87): a margin below 30% needs the Dean.
     "minimum_margin": (
         Decimal("0.30"),
         "A budget priced below this margin needs the Dean as well as the HoD.",
@@ -217,7 +223,14 @@ def import_salary_rates(workbook, version):
     return count
 
 
-def import_increment_caps(workbook):
+def category_for(level: str):
+    for category, prefixes in CATEGORY_MAPPING.items():
+        if any(level.startswith(prefix) for prefix in prefixes):
+            return category
+    raise ValueError(f"No category mapping for level: {level}")
+
+
+def import_increment_caps(workbook, version):
     """
     The highest step within each level. Continuing and fixed-term staff
     move up one step per project year. Take the scenario where
@@ -230,8 +243,23 @@ def import_increment_caps(workbook):
         if not level or not is_number(max_steps):
             continue
 
+        if not isinstance(level, str):
+            raise TypeError(f"Level {level} is not a string")
+
+        category = category_for(level)
+
+        # "UOM 10" is stepless: the classification is the level name itself,
+        # not "<level>.<step>". The workbook records max_steps = 1 for it,
+        # which is ambiguous (it reads as if "UOM 10.1" exists), so normalise
+        # it to 0, the marker for stepless levels.
+        if level == "UOM 10":
+            max_steps = 0
+
         IncrementCap.objects.update_or_create(
-            level=level, defaults={"max_steps": int(max_steps)}
+            category=category,
+            level=level,
+            version=version,
+            defaults={"max_steps": int(max_steps)},
         )
 
         count += 1
@@ -385,7 +413,7 @@ def import_non_staff_categories(workbook, version):
         defaults={
             "cost_category": "Contingency",
             "cost_subcategory": "Contingency",
-            # Contingency does not apply additional direct rate or indirect rate
+            # Contingency does not apply the additional direct rate (the 10%)
             "excludes_additional_rate": True,
         },
     )
@@ -407,6 +435,31 @@ def import_salary_rate_multipliers(workbook, version):
             defaults={"multiplier": dec(multiplier)},
         )
 
+        count += 1
+
+    return count
+
+
+def import_currencies(workbook, version):
+    """
+    The currencies a costing can be priced in (#152): dCurrencyRates, Lookup
+    Tables U35:Y56. "AUD - Australian Dollar" names the currency; "1 AUD ="
+    is the rate a costing is priced at. The inverse column is display only.
+    """
+    count = 0
+    for row in rows(workbook, "dCurrencyRates"):
+        display, code, _description, rate = row[:4]
+        if not code or not is_number(rate) or len(str(code)) != 3:
+            continue
+
+        Currency.objects.update_or_create(
+            version=version,
+            code=code,
+            defaults={
+                "name": str(display).split(" - ", 1)[-1],
+                "rate": dec(rate),
+            },
+        )
         count += 1
 
     return count
@@ -543,7 +596,6 @@ class Command(BaseCommand):
 
         unversioned_importers = (
             ("departments", import_departments),
-            ("increment caps", import_increment_caps),
             ("regions", import_regions),
             ("activities", import_activities),
             ("deliverable types", import_deliverable_types),
@@ -552,11 +604,13 @@ class Command(BaseCommand):
 
         versioned_importers = (
             ("salary rates", import_salary_rates),
+            ("increment caps", import_increment_caps),
             ("EBA increases", import_eba_increases),
             ("on-cost rates", import_on_costs),
             ("salary rate multipliers", import_salary_rate_multipliers),
             ("constants", import_constants),
             ("non-staff categories", import_non_staff_categories),
+            ("currencies", import_currencies),
         )
 
         # One transaction, a failure halfway leaves no partial lookup

@@ -29,6 +29,8 @@ FIELDS_BY_SECTION = {
         "margin",
         "cash_co_contribution",
         "gst_applicable",
+        "currency",
+        "exchange_rate_override",
     },
     "staff": {
         "name_role",
@@ -38,6 +40,7 @@ FIELDS_BY_SECTION = {
         "time_basis",
         "in_kind",
         "in_kind_reason",
+        "is_ci",
         "year_value",
         "position",
     },
@@ -46,7 +49,6 @@ FIELDS_BY_SECTION = {
         "in_kind",
         "in_kind_reason",
         "add_ten_percent",
-        "indirect_rate_multiplier",
         "category",
         "year_value",
         "position",
@@ -80,7 +82,10 @@ class SectionSerializer(serializers.Serializer):
 #   _RowUpdate:     `row_id`, `value`, `field`
 #   _YearRowUpdate: `year`, `row_id` (a cost line's UUID), `value`, `field`
 class _Update(serializers.Serializer):
-    value = serializers.JSONField()
+    # Null clears a field that can be empty: a project's region, or a
+    # costing's own exchange rate (#152). A field that can't be empty refuses
+    # it in the model's own validation.
+    value = serializers.JSONField(allow_null=True)
 
 
 class _RowUpdate(_Update):
@@ -91,7 +96,6 @@ class _YearRowUpdate(_Update):
     row_id = serializers.UUIDField()
     year = serializers.IntegerField(required=False)
 
-    # TODO: annotate attrs/return as dict[str, Any] for strict pyright
     def validate(self, attrs):
         if (attrs["field"] == "year_value") != ("year" in attrs):
             raise serializers.ValidationError(

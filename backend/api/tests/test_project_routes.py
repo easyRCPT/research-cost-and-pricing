@@ -1,10 +1,17 @@
 from decimal import Decimal
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
 from api.models import Budget, Project
-from api.tests.factories import make_budget, make_department, make_project, make_user
+from api.tests.factories import (
+    make_budget,
+    make_department,
+    make_project,
+    make_user,
+    seed_lookups,
+)
 
 
 class ProjectRoutesTestCase(TestCase):
@@ -50,6 +57,11 @@ class ProjectRoutesTestCase(TestCase):
         self.assertEqual(body["reference"], f"RCP-2026-{body['id']:04d}")
 
     def test_an_empty_project_opens_and_prices_at_nothing(self):
+        # Opening it prices it, which reads the rates: the seeded ones, rather
+        # than whatever an earlier test left in the cache.
+        seed_lookups()
+        cache.clear()
+        self.addCleanup(cache.clear)
         response = self.client.post(self.url, {}, content_type="application/json")
 
         self.assertEqual(response.status_code, 201, response.content)

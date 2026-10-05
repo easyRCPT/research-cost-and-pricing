@@ -1,26 +1,15 @@
 import { Calc, Derived } from '@/components/shell'
-import { dash } from '@/lib/format/utils'
-import { cn } from '@/lib/utils'
+import { useDash } from '@/lib/format/currency'
 
 interface StaffFigureCellProps {
   value: number
-  excluded: boolean
-  struck?: boolean
 }
 
-export function StaffFigureCell({
-  value,
-  excluded,
-  struck = false,
-}: StaffFigureCellProps) {
+export function StaffFigureCell({ value }: StaffFigureCellProps) {
+  const dash = useDash()
   return (
-    <Calc
-      className={cn(
-        !excluded && value ? undefined : 'text-muted-foreground',
-        struck && excluded && 'line-through',
-      )}
-    >
-      <Derived>{dash(excluded ? 0 : value)}</Derived>
+    <Calc className={value ? undefined : 'text-muted-foreground'}>
+      <Derived>{dash(value)}</Derived>
     </Calc>
   )
 }

@@ -1,5 +1,5 @@
 import { Ledger, LedgerRow, PartBar } from '@/components/shell'
-import { money } from '@/lib/format/utils'
+import { useMoney } from '@/lib/format/currency'
 import type { StaffBudget } from '@/types'
 
 interface StaffBudgetSectionProps {
@@ -7,6 +7,7 @@ interface StaffBudgetSectionProps {
 }
 
 export function StaffBudgetSection({ staffBudget }: StaffBudgetSectionProps) {
+  const money = useMoney()
   return (
     <>
       <PartBar>Part E — Staff Budget</PartBar>

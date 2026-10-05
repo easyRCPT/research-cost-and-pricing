@@ -1,21 +1,39 @@
+import json
 from decimal import ROUND_HALF_UP, Decimal
+from typing import cast
+
+from rest_framework.utils.encoders import JSONEncoder
 
 from ..calculation import pricing
 from ..models import Budget, LookupVersion
 from . import approval_record, data_loader, lookup_loader
 
 
+def get_lookup_version_id_for_budget(budget: Budget) -> int:
+    return budget.lookup_version_id or lookup_loader.current_version_id()
+
+
 def get_lookup_version_for_budget(budget: Budget) -> LookupVersion:
-    return budget.lookup_version or LookupVersion.objects.get(
-        id=lookup_loader.current_version_id()
-    )
+    return LookupVersion.objects.get(id=get_lookup_version_id_for_budget(budget))
 
 
 def get_budget_details(budget: Budget) -> dict:
     """
     Get project details from database.
     Calculate cost and price result.
+
+    An approved costing is not priced again: it shows the figures it was
+    approved at (#192).
     """
+    if budget.status == Budget.Status.APPROVED:
+        if budget.approved_figures is None:
+            # Approved before its figures were kept: they are kept from now.
+            freeze_approved_figures(budget)
+        return {
+            "approved_figures": budget.approved_figures,
+            "approval": approval_record.approval_record(budget),
+        }
+
     details = build_budget_details(
         lookup_loader.constants_for(budget),
         data_loader.load_budget_data(budget),
@@ -26,10 +44,40 @@ def get_budget_details(budget: Budget) -> dict:
     return details
 
 
+def freeze_approved_figures(budget: Budget) -> None:
+    """
+    Keep an approved costing's figures as the API shows them (#192). Its rates
+    were already frozen by the version stamped at submit (#52); this freezes
+    the result too, so a later change to the engine can't move an approved
+    price.
+    """
+    # Imported here: the serializer module imports from services.
+    from ..serializers.budget_detail_serializer import BudgetDetailSerializer
+
+    details = build_budget_details(
+        lookup_loader.constants_for(budget),
+        data_loader.load_budget_data(budget),
+    )
+    store_price(budget, details)
+    store_multipliers(budget, details)
+    # Without the approval trail, which is read fresh each time.
+    figures = {
+        key: value
+        for key, value in cast(dict, BudgetDetailSerializer(details).data).items()
+        if key != "approval"
+    }
+    # As JSON: decimals are kept as the API sends them.
+    budget.approved_figures = json.loads(json.dumps(figures, cls=JSONEncoder))
+    budget.save(update_fields=["approved_figures"])
+
+
 def store_price(budget: Budget, details: dict) -> None:
     """
     Keep Budget.total_price_inc_gst in step with what the engine just returned,
     so the projects list can read a price without pricing every project.
+
+    In AUD whatever the costing's currency (#152): the lists and the approval
+    queue compare costings with one another, which needs one currency.
 
     Every route that changes a priced field comes through here, and so does a
     plain GET, which makes a row that somehow fell behind heal on next read.
@@ -37,7 +85,7 @@ def store_price(budget: Budget, details: dict) -> None:
     read-only in the ordinary case. updated_at is left out of update_fields
     deliberately: syncing a price is not an edit to the budget.
     """
-    price = details["budget_summary"]["price_summary"]["total_price_inc_gst"]
+    price = details["budget_summary"]["in_aud"]["price_summary"]["total_price_inc_gst"]
     price = Decimal(price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     if budget.total_price_inc_gst == price:
@@ -77,10 +125,64 @@ def priced_budget_info(constants: dict, budget_info: dict) -> dict:
     version it was stamped with. In-kind staff are costed at the same rate.
     """
     multiplier = constants["constants"]["full_cost_recovery_multiplier"]
+    currency = budget_info.get("currency", "AUD")
+    override = budget_info.get("exchange_rate_override")
+    # The exchange rate comes from the same version, for the same reason: a
+    # submitted costing keeps the rate it was submitted at (#152). The
+    # researcher's own rate, when they set one, is the costing's to keep.
+    table_rate = constants["currencies"][currency]
+    exchange_rate = exchange_rate_for(currency, override, constants)
     return {
         **budget_info,
         "cost_multiplier": multiplier,
         "in_kind_multiplier": multiplier,
+        "currency": currency,
+        "table_exchange_rate": table_rate,
+        "exchange_rate": exchange_rate,
+    }
+
+
+def exchange_rate_for(
+    currency: str, override: Decimal | None, constants: dict
+) -> Decimal:
+    """
+    What 1 AUD buys of the costing's currency: the researcher's own rate when
+    they set one, as the workbook's override allows, otherwise the table's
+    rate in the lookup version the costing prices against. AUD is always 1.
+    """
+    if currency == "AUD":
+        return Decimal(1)
+    return override or constants["currencies"][currency]
+
+
+# The price summary's figures that are not money: they read the same in any
+# currency.
+NOT_MONEY = {"margin", "staff_cost_percentage", "non_staff_cost_percentage"}
+
+
+def in_aud(calculation: dict, exchange_rate: Decimal) -> dict:
+    """
+    The costing's totals in AUD, beside the figures in its own currency, as
+    the workbook shows them (PART B row 42, PART C rows 47 and 54, Summary of
+    Price G41 and G42): each divided by the exchange rate. For an AUD costing
+    they are the same figures.
+    """
+    price_summary = calculation["budget_summary"]["price_summary"]
+    staff_years = calculation["staff_result"]["cost_results"]["column_total"]
+    non_staff_years = calculation["non_staff_result"]["cost_results"]["column_total"]
+    return {
+        "price_summary": {
+            key: value if key in NOT_MONEY else value / exchange_rate
+            for key, value in price_summary.items()
+        },
+        "staff_cost_by_year": [
+            {"year": year, "amount": amount / exchange_rate}
+            for year, amount in staff_years["results"].items()
+        ],
+        "non_staff_cost_by_year": [
+            {"year": year, "amount": amount / exchange_rate}
+            for year, amount in non_staff_years["numeric"].items()
+        ],
     }
 
 
@@ -121,7 +223,10 @@ def build_budget_details(constants: dict, budget_data: dict) -> dict:
         "budget_info": budget_info,
         "staff_table": staff_table,
         "non_staff_table": calculation_result["non_staff_result"],
-        "budget_summary": calculation_result["budget_summary"],
+        "budget_summary": {
+            **calculation_result["budget_summary"],
+            "in_aud": in_aud(calculation_result, budget_info["exchange_rate"]),
+        },
     }
 
 

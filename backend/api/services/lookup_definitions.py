@@ -6,6 +6,7 @@ from rest_framework import serializers
 from api.models import (
     Activity,
     CalculationConstant,
+    Currency,
     DeliverableType,
     Department,
     EbaIncrease,
@@ -21,6 +22,7 @@ from api.models import (
 from api.serializers.lookup_model_serializer import (
     ActivitySerializer,
     CalculationConstantSerializer,
+    CurrencySerializer,
     DeliverableTypeSerializer,
     DepartmentSerializer,
     EbaIncreaseSerializer,
@@ -83,9 +85,15 @@ LOOKUP_DEFINITIONS = {
     "increment_caps": LookupDefinition(
         model=IncrementCap,
         serializer=IncrementCapSerializer,
-        versioned=False,
-        order_by=("level",),
-        key=("level",),
+        versioned=True,
+        order_by=(
+            "category",
+            "level",
+        ),
+        key=(
+            "category",
+            "level",
+        ),
     ),
     "eba_increases": LookupDefinition(
         model=EbaIncrease,
@@ -121,6 +129,14 @@ LOOKUP_DEFINITIONS = {
         versioned=True,
         order_by=("name",),
         key=("name",),
+    ),
+    # Versioned, because the rate prices a costing (#152).
+    "currencies": LookupDefinition(
+        model=Currency,
+        serializer=CurrencySerializer,
+        versioned=True,
+        order_by=("code",),
+        key=("code",),
     ),
     "activities": LookupDefinition(
         model=Activity,

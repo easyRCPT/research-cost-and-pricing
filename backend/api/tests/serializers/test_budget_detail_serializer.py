@@ -72,6 +72,10 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 "margin": Decimal("0.3000"),
                 "gst_applicable": True,
                 "cash_co_contribution": Decimal("100.00"),
+                "currency": "AUD",
+                "exchange_rate": Decimal(1),
+                "table_exchange_rate": Decimal(1),
+                "exchange_rate_override": None,
                 "comments": "",
                 "justification": "",
                 "justification_notes": "",
@@ -92,6 +96,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "time_basis": "FTE",
                             "in_kind": False,
                             "in_kind_reason": "",
+                            "is_ci": False,
                         },
                         "rate": Decimal("50000.0000"),
                         "numeric": {
@@ -133,7 +138,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                             "in_kind": False,
                             "in_kind_reason": "",
                             "add_ten_percent": False,
-                            "indirect_rate_multiplier": Decimal("1.00"),
                         },
                         "numeric": {
                             2025: Decimal("1000.125"),
@@ -150,14 +154,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                         },
                         "total": Decimal("3000.581"),
                     },
-                    "indirect_total": {
-                        "numeric": {
-                            2025: Decimal("100.125"),
-                            2026: Decimal(0),
-                            2027: Decimal("200.456"),
-                        },
-                        "total": Decimal("300.581"),
-                    },
                     "column_total": {
                         "numeric": {
                             2025: Decimal("1100.250"),
@@ -169,10 +165,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                 },
                 "in_kind_cost_results": {
                     "direct_total": {
-                        "numeric": {},
-                        "total": Decimal(0),
-                    },
-                    "indirect_total": {
                         "numeric": {},
                         "total": Decimal(0),
                     },
@@ -216,7 +208,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                         "Travel": Decimal("3000.456"),
                     },
                     "direct_total": Decimal("3000.456"),
-                    "indirect_cost_recovery": Decimal("300.581"),
                     "total_non_staff_costs": Decimal("3301.037"),
                 },
                 "in_kind_costs": {
@@ -230,13 +221,35 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "in_kind_non_staff_budget": {
                         "category_totals": {},
                         "direct_total": Decimal(0),
-                        "indirect_cost_recovery": Decimal(0),
                         "total_non_staff_costs": Decimal(0),
                     },
                     "total_in_kind_costs": Decimal(0),
                 },
                 "dean_required": False,
                 "dean_triggers": [],
+                "in_aud": {
+                    "price_summary": {
+                        "margin": Decimal("0.3000"),
+                        "margin_amount": Decimal("1000.125"),
+                        "staff_cost": Decimal("37500.125"),
+                        "non_staff_cost": Decimal("3000.456"),
+                        "project_cost": Decimal("40500.581"),
+                        "in_kind_staff_cost": Decimal(0),
+                        "in_kind_non_staff_cost": Decimal(0),
+                        "in_kind_project_cost": Decimal(0),
+                        "staff_cost_percentage": Decimal("0.925000"),
+                        "non_staff_cost_percentage": Decimal("0.075000"),
+                        "total_project_cost": Decimal("40500.581"),
+                        "total_price_exc_gst": Decimal("52500.125"),
+                        "total_price_inc_gst": Decimal("57750.137"),
+                        "cash_benefit": Decimal("1000.125"),
+                        "total_in_kind_contribution": Decimal(0),
+                        "total_cash_co_contribution": Decimal("100.00"),
+                        "university_position": Decimal("41500.456"),
+                    },
+                    "staff_cost_by_year": [],
+                    "non_staff_cost_by_year": [],
+                },
             },
         }
 
@@ -267,6 +280,7 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "time_basis": "FTE",
                     "in_kind": False,
                     "in_kind_reason": "",
+                    "is_ci": False,
                     "rate": Decimal("50000.0000"),
                     "by_year": [
                         {
@@ -329,7 +343,6 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
                     "in_kind": False,
                     "in_kind_reason": "",
                     "add_ten_percent": False,
-                    "indirect_rate_multiplier": Decimal("1.00"),
                     "by_year": [
                         {
                             "year": 2025,
@@ -374,26 +387,8 @@ class BudgetDetailSerializerTestCase(SimpleTestCase):
             },
         )
 
-        self.assertEqual(
-            data["non_staff_cost"]["indirect_total"],
-            {
-                "by_year": [
-                    {
-                        "year": 2025,
-                        "cost": Decimal("100.13"),
-                    },
-                    {
-                        "year": 2026,
-                        "cost": Decimal("0.00"),
-                    },
-                    {
-                        "year": 2027,
-                        "cost": Decimal("200.46"),
-                    },
-                ],
-                "total": Decimal("300.58"),
-            },
-        )
+        # No indirect rate (#192): only the direct and column totals.
+        self.assertNotIn("indirect_total", data["non_staff_cost"])
 
         self.assertEqual(
             data["non_staff_cost"]["column_total"],

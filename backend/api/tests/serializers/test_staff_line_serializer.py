@@ -287,15 +287,6 @@ class StaffLineSerializerTestCase(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn("employment_type", get_errors(serializer))
 
-    def test_invalid_category(self):
-        data = self.valid_data()
-        data["category"] = "Invalid"
-
-        serializer = self.serializer(data)
-
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("category", get_errors(serializer))
-
     def test_invalid_time_basis(self):
         data = self.valid_data()
         data["time_basis"] = "Invalid"

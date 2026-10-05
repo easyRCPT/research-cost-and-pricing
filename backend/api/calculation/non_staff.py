@@ -15,7 +15,6 @@ def calculate_non_staff_table(
         'cost_results': {
             '<row_id>': {'info': {}, 'numeric': {}, 'total': number, 'direct_total': number},
             'direct_total': {'numeric': {}, 'total': number},
-            'indirect_total': {'numeric': {}, 'total': number},
             'column_total': {'numeric': {}, 'total': number},
         },
         'in_kind_cost_results': {...}
@@ -32,7 +31,7 @@ def calculate_non_staff_table(
         else:
             non_staff_costs[row_id] = row_result
 
-    # Column calculation for direct cost, indirect cost and total cost
+    # Column calculation for direct cost and total cost
     non_staff_costs = calculate_non_staff_column(non_staff_costs, start_year, end_year)
     in_kind_non_staff_costs = calculate_non_staff_column(
         in_kind_non_staff_costs, start_year, end_year
@@ -53,7 +52,6 @@ def calculate_non_staff_row(
     """
     Calculate non staff cost line item
     Return input with row total and direct total.
-    Not consider indirect cost rate multiplier
     """
     total = sum(
         num_data.get(year) or Decimal(0) for year in range(start_year, end_year + 1)
@@ -75,39 +73,31 @@ def calculate_non_staff_column(
     end_year: int,
 ) -> dict:
     """
-    Calculate direct and indirect non-staff cost
+    Calculate the direct non-staff cost for each year
     Add results into input data dictionary
+
+    The column total is the direct total: a non-staff line takes the 10% and
+    nothing more. The workbook's indirect rate multiplier (PART C column T) is
+    not needed (#192, #148 option A).
     """
     direct_total = {}
-    indirect_total = {}
     column_total = {}
 
     for year in range(start_year, end_year + 1):
         direct = 0
-        total = 0
 
         for row in data.values():
             value = row["numeric"].get(year) or 0
 
             # direct rate
-            value *= find_direct_rate_multiplier(row["info"])
-            direct += value
-
-            # indirect rate
-            indirect_rate_multiplier = find_indirect_rate_multiplier(row["info"])
-            total += value * indirect_rate_multiplier
+            direct += value * find_direct_rate_multiplier(row["info"])
 
         direct_total[year] = direct
-        indirect_total[year] = total - direct
-        column_total[year] = total
+        column_total[year] = direct
 
     data["direct_total"] = {
         "numeric": direct_total,
         "total": sum(direct_total.values()),
-    }
-    data["indirect_total"] = {
-        "numeric": indirect_total,
-        "total": sum(indirect_total.values()),
     }
     data["column_total"] = {
         "numeric": column_total,
@@ -122,27 +112,10 @@ def find_direct_rate_multiplier(
 ) -> Decimal:
     """
     Find direct rate multiplier according to selected additional direct rate.
-
-    Indirect rate does not suppress direct rate.
     """
     has_additional_direct_rate = info_data.get("add_ten_percent", False)
 
     if not info_data["excludes_additional_rate"] and has_additional_direct_rate:
         return Decimal("1.1")
-    else:
-        return Decimal(1)
-
-
-def find_indirect_rate_multiplier(
-    info_data: dict,
-) -> Decimal:
-    """
-    Find indirect rate multiplier according to input indirect rate multiplier.
-
-    Blank or excluded indirect rate reads as 1.
-    """
-    multiplier = info_data.get("indirect_rate_multiplier")
-    if not info_data["excludes_additional_rate"] and multiplier is not None:
-        return multiplier
     else:
         return Decimal(1)

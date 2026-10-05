@@ -302,6 +302,10 @@ class FieldConfigurationTestCase(SimpleTestCase):
                 "in_kind_multiplier",
                 "margin",
                 "cash_co_contribution",
+                # The currency it is priced in, and the researcher's own
+                # rate (#152).
+                "currency",
+                "exchange_rate_override",
                 "gst_applicable",
             },
         )
