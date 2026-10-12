@@ -15,6 +15,7 @@ export function ProjectFunderRow({ project, onChange }: ProjectFunderRowProps) {
     <>
       <FieldRow label="External party" required>
         <OptionSelect
+          id="funder"
           value={project.funder}
           onValueChange={(v) => onChange({ funder: v })}
           options={EXTERNAL_PARTIES}

@@ -19,7 +19,7 @@ export function PriceSummarySection({
 
   return (
     <>
-      <PartBar>PART B — Price Summary</PartBar>
+      <PartBar>PART B — Cost and Price Summary</PartBar>
       <div className="grid gap-x-10 gap-y-4 md:grid-cols-2">
         <Ledger>
           <tbody>

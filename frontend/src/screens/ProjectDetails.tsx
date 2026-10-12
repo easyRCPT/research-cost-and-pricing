@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
+
 import { useBudget, useUpdateProject } from '@/api/budget'
 import { useLookups } from '@/api/lookups'
 import { Panel } from '@/components/shell'
+import { editorRoute } from '@/router'
 
 import { ProjectAttributesRow } from './project-details/ProjectAttributesRow'
 import { ProjectCurrencyRow } from './project-details/ProjectCurrencyRow'
@@ -16,6 +19,16 @@ export function ProjectDetails() {
 
   const project = budget.project_info
   const { departments, activities, regions } = lookups
+
+  // A submission error's "go to" action names the field to fix; land on it.
+  const { focus } = editorRoute.useSearch()
+  useEffect(() => {
+    if (!focus) return
+    const field = document.getElementById(focus)
+    if (!field) return
+    field.scrollIntoView({ block: 'center' })
+    field.focus()
+  }, [focus])
 
   // Each typed field holds what is typed itself and commits once it settles,
   // so a keystroke never re-renders this screen and the selects on it. The

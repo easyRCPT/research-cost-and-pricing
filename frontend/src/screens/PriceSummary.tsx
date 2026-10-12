@@ -2,7 +2,6 @@ import { useBudget } from '@/api/budget'
 
 import { CayuseSummaryPanel } from './price-summary/CayuseSummaryPanel'
 import { PriceBreakdownPanel } from './price-summary/PriceBreakdownPanel'
-import { UniversityPositionPanel } from './price-summary/UniversityPositionPanel'
 
 export function PriceSummary() {
   const { data: budget } = useBudget()
@@ -18,11 +17,10 @@ export function PriceSummary() {
       <PriceBreakdownPanel
         summary={summary}
         multiplier={multiplier}
-        basis={multiplier}
+        gstApplicable={budget.budget_info.gst_applicable}
         inAud={budget.budget_summary.in_aud.price_summary}
         info={budget.budget_info}
       />
-      <UniversityPositionPanel summary={summary} />
     </>
   )
 }

@@ -39,6 +39,15 @@ import type { AppScreen } from '@/screens/editor/AppContent'
 const isScreen = (value: string): value is AppScreen =>
   value === LOOKUP_SCREEN || value in SCREEN_HEADINGS
 
+/**
+ * What a submission error's "go to" action carries: the field or line to
+ * focus, and the reason to show beside it (#215).
+ */
+export interface EditorSearch {
+  focus?: string
+  error?: string
+}
+
 interface RouterContext {
   queryClient: QueryClient
 }
@@ -200,6 +209,13 @@ export const editorRoute = createRoute({
       screen,
     }),
   },
+  // A submission error's "go to" action lands here with the field or line to
+  // focus and the reason to show, so the destination can take the researcher
+  // straight to the fix (#215).
+  validateSearch: (search: Record<string, unknown>): EditorSearch => ({
+    focus: typeof search.focus === 'string' ? search.focus : undefined,
+    error: typeof search.error === 'string' ? search.error : undefined,
+  }),
   // A pasted or stale URL is the normal way an unknown screen arrives, so it
   // lands on the first screen rather than rendering blank. A project id that is
   // not a number never had a row behind it.

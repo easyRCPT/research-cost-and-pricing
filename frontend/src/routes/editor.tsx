@@ -37,6 +37,9 @@ function Editor() {
     navigate({
       to: '/projects/$projectId/$screen',
       params: { projectId, screen: next },
+      // A submission error's focus/error must not follow the researcher onto
+      // the next screen (#215).
+      search: {},
     })
 
   return (
