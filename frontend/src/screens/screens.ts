@@ -25,8 +25,8 @@ export const SCREEN_HEADINGS: Record<
     subtitle: 'In-kind contributions, then the margin',
   },
   price: {
-    title: 'Price Summary',
-    subtitle: 'Review the complete costing and pricing position',
+    title: 'Cost and Price Summary',
+    subtitle: 'Follow the full project cost through to the amount requested from the funder',
   },
   budget: {
     title: 'Budget Form',

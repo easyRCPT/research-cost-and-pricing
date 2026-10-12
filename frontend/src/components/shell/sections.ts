@@ -14,7 +14,7 @@ export const SECTIONS = [
     label: 'Pricing',
     items: [
       { id: 'adjust', label: 'Adjust Price' },
-      { id: 'price', label: 'Price Summary' },
+      { id: 'price', label: 'Cost and Price Summary' },
     ],
   },
   {

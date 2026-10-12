@@ -1,5 +1,5 @@
 import { useBudget, useEditable, useField } from '@/api/budget'
-import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
+import { Panel } from '@/components/shell'
 import { NumberInput } from '@/components/ui/number-input'
 import { Slider } from '@/components/ui/slider'
 import { percent1 } from '@/lib/format/utils'
@@ -20,7 +20,6 @@ export function MarginPanel() {
   const { data: budget } = useBudget()
   const margin = useField('margin')
 
-  const summary = budget.budget_summary.price_summary
   const deanRequired = budget.budget_summary.dean_required
   const deanTriggers = budget.budget_summary.dean_triggers
   const percent = asPercent(margin.value)
@@ -61,6 +60,9 @@ export function MarginPanel() {
           </span>
         )}
       </div>
+      <p className="mt-3 text-[13px] text-muted-foreground">
+        Margin is applied to project costs excluding in-kind contributions.
+      </p>
 
       {deanRequired && deanTriggers.length > 0 && (
         <div
@@ -76,28 +78,6 @@ export function MarginPanel() {
           </ul>
         </div>
       )}
-
-      <Ledger className="mt-4">
-        <tbody>
-          <LedgerRow
-            label="Project cost (excluding in-kind)"
-            value={<Money value={summary.project_cost} />}
-          />
-          <LedgerRow
-            label={`Margin at ${percent1(budget.budget_info.margin)}`}
-            value={<Money value={summary.margin_amount} />}
-          />
-          <LedgerRow
-            tone="rule"
-            label="Price excluding GST"
-            value={<Money value={summary.total_price_exc_gst} />}
-          />
-          <LedgerRow
-            label="Price including GST"
-            value={<Money value={summary.total_price_inc_gst} />}
-          />
-        </tbody>
-      </Ledger>
     </Panel>
   )
 }

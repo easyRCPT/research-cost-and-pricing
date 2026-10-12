@@ -1,136 +1,174 @@
 import { InAud, Ledger, LedgerRow, Money, Panel } from '@/components/shell'
-import { useCurrency } from '@/lib/format/currency'
+import { percent1 } from '@/lib/format/utils'
 import type { BudgetInfo, PriceSummary } from '@/types'
-
-import { DASH, percent } from './format'
 
 interface PriceBreakdownPanelProps {
   summary: PriceSummary
-  multiplier: number
-  basis: number | undefined
-  /** The same figures in AUD, beside the price when it is in another currency (#152). */
   inAud: PriceSummary
   info: Pick<
     BudgetInfo,
-    'currency' | 'exchange_rate' | 'exchange_rate_override'
+    | 'currency'
+    | 'exchange_rate'
+    | 'exchange_rate_override'
+    | 'gst_applicable'
   >
 }
 
 export function PriceBreakdownPanel({
   summary,
-  multiplier,
-  basis,
   inAud,
   info,
 }: PriceBreakdownPanelProps) {
   const foreign = info.currency !== 'AUD'
-  const currency = useCurrency()
+  const gst = summary.total_price_inc_gst - summary.total_price_exc_gst
+  const inAudGst = inAud.total_price_inc_gst - inAud.total_price_exc_gst
+
   return (
     <Panel
-      title="Price Summary"
-      className="mt-4"
+      title="Cost and Price Summary"
       description={
         foreign
-          ? `Priced in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. The price in AUD is shown beneath it. Margin not applied to in-kind contributions.`
-          : 'Margin not applied to in-kind contributions.'
+          ? `Amounts are shown in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. In AUD figures are shown beneath the totals.`
+          : undefined
       }
     >
-      <div className="overflow-x-auto">
-        <Ledger>
-          <thead>
-            <tr className="border-b text-[12px] text-muted-foreground">
-              <th className="py-1.5 text-left font-semibold" />
-              <th className="w-[190px] py-1.5 text-right font-semibold">
-                Full Project Cost ({currency})
-              </th>
-              <th className="w-[190px] py-1.5 text-right font-semibold">
-                Price to be charged to Funder ({currency})
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+      <p className="mb-4 text-[13px] text-muted-foreground">
+        Margin is calculated on project costs excluding in-kind. Margin not
+        applied to in-kind contributions.
+      </p>
+
+      <h4 className="mb-2 text-[13.5px] font-semibold text-primary">
+        Full project cost
+      </h4>
+      <Ledger>
+        <tbody>
+          <LedgerRow
+            label="Staff costs (excluding in-kind)"
+            value={<Money value={summary.staff_cost} />}
+          />
+          <LedgerRow
+            label="Non-staff costs (excluding in-kind)"
+            value={<Money value={summary.non_staff_cost} />}
+          />
+          <LedgerRow
+            tone="rule"
+            label="Project costs subject to margin"
+            value={<Money value={summary.project_cost} />}
+          />
+          <LedgerRow
+            label="In-kind staff costs (margin not applied)"
+            value={<Money value={summary.in_kind_staff_cost} />}
+          />
+          <LedgerRow
+            label="In-kind non-staff costs (margin not applied)"
+            value={<Money value={summary.in_kind_non_staff_cost} />}
+          />
+          <LedgerRow
+            tone="sub"
+            label="Total in-kind contribution (University investment)"
+            value={<Money value={summary.total_in_kind_contribution} />}
+          />
+          <LedgerRow
+            tone="rule"
+            label="Full Project Cost (project costs + in-kind)"
+            value={<Money value={summary.total_project_cost} />}
+          />
+          {foreign && (
             <LedgerRow
-              label="Indirect Cost Recovery multiplier (applied to salaries)"
-              secondValue={basis === undefined ? DASH : basis.toFixed(2)}
-              value={multiplier.toFixed(2)}
+              tone="sub"
+              label="In AUD"
+              value={<InAud value={inAud.total_project_cost} />}
             />
+          )}
+        </tbody>
+      </Ledger>
+
+      <h4 className="mt-6 mb-2 text-[13.5px] font-semibold text-primary">
+        Price requested from the funder
+      </h4>
+      <Ledger>
+        <tbody>
+          <LedgerRow
+            label={
+              <>
+                Margin at {percent1(summary.margin)} on project costs excluding
+                in-kind (<Money value={summary.project_cost} />)
+              </>
+            }
+            value={<Money value={summary.margin_amount} />}
+          />
+          <LedgerRow
+            tone="rule"
+            label="Price excluding GST (eligible project costs + margin)"
+            value={<Money value={summary.total_price_exc_gst} />}
+          />
+          {foreign && (
             <LedgerRow
-              label="Staff Costs (excluding in-kind)"
-              secondValue={<Money value={summary.staff_cost} />}
-              value={DASH}
+              tone="sub"
+              label="In AUD"
+              value={<InAud value={inAud.total_price_exc_gst} />}
             />
+          )}
+          <LedgerRow
+            label={`GST (applicable: ${info.gst_applicable ? 'Yes' : 'No'})`}
+            value={<Money value={gst} />}
+          />
+          {foreign && (
             <LedgerRow
-              label="Non-Staff Costs (excluding in-kind)"
-              secondValue={<Money value={summary.non_staff_cost} />}
-              value={DASH}
+              tone="sub"
+              label="GST in AUD"
+              value={<InAud value={inAudGst} />}
             />
+          )}
+          <LedgerRow
+            tone="rule"
+            label="Amount requested from funder (including GST)"
+            value={<Money value={summary.total_price_inc_gst} />}
+          />
+          {foreign && (
             <LedgerRow
-              tone="rule"
-              label="Project Cost (excluding in-kind)"
-              secondValue={<Money value={summary.project_cost} />}
-              value={DASH}
+              tone="sub"
+              label="In AUD"
+              value={<InAud value={inAud.total_price_inc_gst} />}
             />
-            <LedgerRow
-              label="In-kind (University investment) Staff Costs"
-              secondValue={<Money value={summary.in_kind_staff_cost} />}
-              value={DASH}
-            />
-            <LedgerRow
-              label="In-kind (University investment) Non-Staff Costs"
-              secondValue={<Money value={summary.in_kind_non_staff_cost} />}
-              value={DASH}
-            />
-            <LedgerRow
-              tone="rule"
-              label="Total In-kind (University investment) Project Costs"
-              secondValue={<Money value={summary.in_kind_project_cost} />}
-              value={DASH}
-            />
-            <LedgerRow
-              tone="rule"
-              label="Total Project Cost (including in-kind)"
-              secondValue={<Money value={summary.total_project_cost} />}
-              value={DASH}
-            />
-            <LedgerRow
-              label="Staff Costs % (excluding in-kind)"
-              secondValue={percent(summary.staff_cost_percentage)}
-              value={DASH}
-            />
-            <LedgerRow
-              label="Non-Staff Costs % (excluding in-kind)"
-              secondValue={percent(summary.non_staff_cost_percentage)}
-              value={DASH}
-            />
-            <LedgerRow
-              label="Total Price to be charged to Funder (Excluding GST)"
-              secondValue=""
-              value={<Money value={summary.total_price_exc_gst} />}
-            />
-            {foreign && (
-              <LedgerRow
-                tone="sub"
-                label="In AUD"
-                secondValue=""
-                value={<InAud value={inAud.total_price_exc_gst} />}
-              />
-            )}
-            <LedgerRow
-              label="Total Price to be charged to Funder (Including GST)"
-              secondValue=""
-              value={<Money value={summary.total_price_inc_gst} />}
-            />
-            {foreign && (
-              <LedgerRow
-                tone="sub"
-                label="In AUD"
-                secondValue=""
-                value={<InAud value={inAud.total_price_inc_gst} />}
-              />
-            )}
-          </tbody>
-        </Ledger>
-      </div>
+          )}
+        </tbody>
+      </Ledger>
+
+      <h4 className="mt-6 mb-2 text-[13.5px] font-semibold text-primary">
+        University contribution and position
+      </h4>
+      <p className="mb-2 text-[13px] text-muted-foreground">
+        Cash co-contributions are University funding and do not change the price
+        requested from the funder.
+      </p>
+      <Ledger>
+        <tbody>
+          <LedgerRow
+            label="Cash co-contribution (Department, Faculty and Chancellery)"
+            value={<Money value={summary.total_cash_co_contribution} />}
+          />
+          <LedgerRow
+            label="Cash benefit (price excluding GST less project costs excluding in-kind)"
+            value={<Money value={summary.cash_benefit} />}
+          />
+          <LedgerRow
+            tone="sub"
+            label="Less in-kind contribution"
+            value={<Money value={summary.total_in_kind_contribution} />}
+          />
+          <LedgerRow
+            tone="sub"
+            label="Less cash co-contribution"
+            value={<Money value={summary.total_cash_co_contribution} />}
+          />
+          <LedgerRow
+            tone="rule"
+            label="University position (cash benefit less contributions)"
+            value={<Money value={summary.university_position} tone="sign" />}
+          />
+        </tbody>
+      </Ledger>
     </Panel>
   )
 }
