@@ -38,9 +38,9 @@ test('a costing priced in USD reads in USD, with AUD beside the price (#152)', a
   ).json()
   expect(detail.non_staff_cost.lines[0].by_year[0].amount).toBe(702.85)
 
-  await page.goto(`/projects/${project.id}/price`)
+await page.goto(`/projects/${project.id}/price`)
   await expect(
-    page.getByRole('columnheader', { name: 'Full Project Cost (USD)' }),
+    page.getByRole('cell', { name: 'Full project cost (including in-kind)' }),
   ).toBeVisible()
   await expect(
     page.getByText(
