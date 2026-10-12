@@ -215,10 +215,57 @@ test("an approver's register lists their area at any status, and Back returns to
   await expect(page.getByText('30.0%', { exact: true })).toBeVisible()
   await expect(page.getByRole('slider')).toHaveCount(0)
 
-  // Back goes to the register it came from, not the queue.
+// Back goes to the register it came from, not the queue.
   await page
     .getByRole('navigation', { name: 'Costing sections' })
     .getByRole('button', { name: 'Register' })
     .click()
   await expect(page).toHaveURL('/approvals/register')
+})
+
+test('a missing in-kind reason takes the researcher to the line (#215)', async ({
+  page,
+}) => {
+  const project = await readyProject(page, 'In-kind reason missing')
+  // readyProject's staff line is not in-kind; make it so, without a reason.
+  const budget = await (
+    await page.request.get(`/api/budgets/${project.budget_id}/`)
+  ).json()
+  const lineId = budget.staff_cost.lines[0].id
+  await apiWrite(page, 'patch', `/api/budgets/${project.budget_id}/`, {
+    data: { section: 'staff', field: 'in_kind', row_id: lineId, value: true },
+  })
+
+  await page.goto(`/projects/${project.id}/approvals`)
+  await page.getByRole('button', { name: 'Submit for approval' }).click()
+  await expect(
+    page.getByText('Every in-kind staff cost line must have a reason.'),
+  ).toBeVisible()
+
+  // The "go to" lands on the line that needs the reason, and focuses it.
+  await page.getByRole('button', { name: 'Go to Adjust Price' }).click()
+  await expect(page).toHaveURL(new RegExp(`/projects/${project.id}/adjust`))
+  await expect(
+    page.getByRole('textbox', { name: /Reason the University/ }),
+  ).toBeFocused()
+})
+
+test('a missing project detail takes the researcher to the field (#215)', async ({
+  page,
+}) => {
+  // createProject fills title, department and dates, but no chief investigator.
+  const project = await createProject(page, uniqueTitle('Missing CI'))
+
+  await page.goto(`/projects/${project.id}/approvals`)
+  await page.getByRole('button', { name: 'Submit for approval' }).click()
+  await expect(page.getByText('Chief investigator is required.')).toBeVisible()
+
+  // The "go to" lands on Project Details, on the field that needs it.
+  await page
+    .locator('li')
+    .filter({ hasText: 'Chief investigator is required.' })
+    .getByRole('button', { name: 'Go to Project Details' })
+    .click()
+  await expect(page).toHaveURL(new RegExp(`/projects/${project.id}/details`))
+  await expect(page.getByLabel(/Lead UoM chief investigator/)).toBeFocused()
 })

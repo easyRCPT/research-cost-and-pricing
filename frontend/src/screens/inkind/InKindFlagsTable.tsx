@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
+
 import { CellText, Grid, Money, Td, Th } from '@/components/shell'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useCurrency, useMoney } from '@/lib/format/currency'
+import { editorRoute } from '@/router'
 
 export interface CostRow {
   key: string
@@ -19,6 +22,17 @@ export interface CostRow {
 export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
   const currency = useCurrency()
   const money = useMoney()
+  // A submission error's "go to" action names the line to fix; land on it.
+  const { focus } = editorRoute.useSearch()
+
+  useEffect(() => {
+    if (!focus) return
+    const row = document.getElementById(`row-${focus}`)
+    if (!row) return
+    row.scrollIntoView({ block: 'center' })
+    document.getElementById(`reason-${focus}`)?.focus()
+  }, [focus])
+
   return (
     <Grid>
       <thead>
@@ -36,7 +50,11 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
       </thead>
       <tbody>
         {rows.map((row) => (
-          <tr key={row.key}>
+          <tr
+            key={row.key}
+            id={`row-${row.key}`}
+            className={focus === row.key ? 'bg-destructive/5' : undefined}
+          >
             <Td>{row.label}</Td>
             <Td className="text-muted-foreground">{row.detail}</Td>
             <Td align="right" className="tabular">
@@ -54,7 +72,7 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
               />
             </Td>
             <Td>
-              <ReasonCell row={row} />
+              <ReasonCell row={row} invalid={focus === row.key} />
             </Td>
           </tr>
         ))}
@@ -80,7 +98,7 @@ export function InKindFlagsTable({ rows }: { rows: CostRow[] }) {
  * CellText rather than a plain input, so this settles like every other text
  * cell in the editor instead of recosting the budget on each keystroke.
  */
-function ReasonCell({ row }: { row: CostRow }) {
+function ReasonCell({ row, invalid }: { row: CostRow; invalid?: boolean }) {
   if (!row.inKind) {
     return (
       <span className="text-muted-foreground">Tick the box to say why</span>
@@ -89,11 +107,13 @@ function ReasonCell({ row }: { row: CostRow }) {
 
   return (
     <CellText
+      id={`reason-${row.key}`}
       value={row.reason}
       onChange={row.setReason}
       maxLength={200}
       placeholder="Why the University absorbs it"
       aria-label={`Reason the University absorbs ${row.label}`}
+      aria-invalid={invalid}
     />
   )
 }
