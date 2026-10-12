@@ -31,8 +31,8 @@ export function PriceBreakdownPanel({
       className="mt-4"
       description={
         foreign
-          ? `Priced in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. The price in AUD is shown beneath it.`
-          : undefined
+          ? `Priced in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. The price in AUD is shown beneath it. Margin not applied to in-kind contributions.`
+          : 'Margin not applied to in-kind contributions.'
       }
     >
       <div className="overflow-x-auto">
@@ -56,51 +56,51 @@ export function PriceBreakdownPanel({
             />
             <LedgerRow
               label="Staff Costs (excluding in-kind)"
-              secondValue={DASH}
-              value={<Money value={summary.staff_cost} />}
+              secondValue={<Money value={summary.staff_cost} />}
+              value={DASH}
             />
             <LedgerRow
               label="Non-Staff Costs (excluding in-kind)"
               secondValue={<Money value={summary.non_staff_cost} />}
-              value={<Money value={summary.non_staff_cost} />}
+              value={DASH}
             />
             <LedgerRow
               tone="rule"
               label="Project Cost (excluding in-kind)"
-              secondValue={DASH}
-              value={<Money value={summary.project_cost} />}
+              secondValue={<Money value={summary.project_cost} />}
+              value={DASH}
             />
             <LedgerRow
               label="In-kind (University investment) Staff Costs"
-              secondValue={DASH}
-              value={<Money value={summary.in_kind_staff_cost} />}
+              secondValue={<Money value={summary.in_kind_staff_cost} />}
+              value={DASH}
             />
             <LedgerRow
               label="In-kind (University investment) Non-Staff Costs"
               secondValue={<Money value={summary.in_kind_non_staff_cost} />}
-              value={<Money value={summary.in_kind_non_staff_cost} />}
+              value={DASH}
             />
             <LedgerRow
               tone="rule"
               label="Total In-kind (University investment) Project Costs"
-              secondValue={DASH}
-              value={<Money value={summary.in_kind_project_cost} />}
-            />
-            <LedgerRow
-              label="Staff Costs % (excluding in-kind)"
-              secondValue={DASH}
-              value={percent(summary.staff_cost_percentage)}
-            />
-            <LedgerRow
-              label="Non-Staff Costs % (excluding in-kind)"
-              secondValue={DASH}
-              value={percent(summary.non_staff_cost_percentage)}
+              secondValue={<Money value={summary.in_kind_project_cost} />}
+              value={DASH}
             />
             <LedgerRow
               tone="rule"
               label="Total Project Cost (including in-kind)"
-              secondValue={DASH}
-              value={<Money value={summary.total_project_cost} />}
+              secondValue={<Money value={summary.total_project_cost} />}
+              value={DASH}
+            />
+            <LedgerRow
+              label="Staff Costs % (excluding in-kind)"
+              secondValue={percent(summary.staff_cost_percentage)}
+              value={DASH}
+            />
+            <LedgerRow
+              label="Non-Staff Costs % (excluding in-kind)"
+              secondValue={percent(summary.non_staff_cost_percentage)}
+              value={DASH}
             />
             <LedgerRow
               label="Total Price to be charged to Funder (Excluding GST)"

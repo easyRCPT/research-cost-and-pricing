@@ -181,7 +181,7 @@ class TestCalculatePriceSummary(SimpleTestCase):
             "gst_rate": Decimal("0.10"),
         }
 
-    def test_calculates_price_summary_with_gst(self):
+    def test_keeps_in_kind_and_cash_contributions_separate_from_funder_price(self):
         result = calculate_price_summary(
             self.staff_result,
             self.non_staff_result,
@@ -216,6 +216,52 @@ class TestCalculatePriceSummary(SimpleTestCase):
         self.assertEqual(result["total_in_kind_contribution"], Decimal(500))
         self.assertEqual(result["total_cash_co_contribution"], Decimal(100))
         self.assertEqual(result["university_position"], Decimal(-300))
+
+        # In-kind resources increase full project cost, but receive no margin
+        # and do not change the amount charged to the funder. Cash contributions
+        # are also recorded separately from that price.
+        without_in_kind = {
+            **self.staff_result,
+            "in_kind_cost_results": {
+                "column_total": {"total": Decimal(0)},
+            },
+        }
+        without_in_kind_non_staff = {
+            **self.non_staff_result,
+            "in_kind_cost_results": {
+                "column_total": {"total": Decimal(0)},
+            },
+        }
+        result_without_in_kind = calculate_price_summary(
+            without_in_kind,
+            without_in_kind_non_staff,
+            Decimal(100),
+            True,
+            self.general,
+            Decimal("0.20"),
+        )
+        self.assertEqual(
+            result["total_project_cost"]
+            - result_without_in_kind["total_project_cost"],
+            Decimal(500),
+        )
+        self.assertEqual(
+            result["total_price_exc_gst"],
+            result_without_in_kind["total_price_exc_gst"],
+        )
+
+        result_without_cash_contribution = calculate_price_summary(
+            self.staff_result,
+            self.non_staff_result,
+            Decimal(0),
+            True,
+            self.general,
+            Decimal("0.20"),
+        )
+        self.assertEqual(
+            result["total_price_exc_gst"],
+            result_without_cash_contribution["total_price_exc_gst"],
+        )
 
     def test_does_not_apply_gst_when_not_applicable(self):
         result = calculate_price_summary(

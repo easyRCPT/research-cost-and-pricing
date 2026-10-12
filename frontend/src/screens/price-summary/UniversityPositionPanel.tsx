@@ -11,7 +11,7 @@ export function UniversityPositionPanel({
   return (
     <Panel
       title="University position"
-      description="The surplus or deficit resulting from the project as priced: price to be charged to funder less full project cost, including in-kind and cash contributions."
+      description="The price excluding GST less the full project cost and cash co-contribution. Full project cost includes in-kind costs; in-kind and cash contributions are listed separately."
       className="mt-4"
     >
       <Ledger>

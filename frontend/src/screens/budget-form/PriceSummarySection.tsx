@@ -47,7 +47,7 @@ export function PriceSummarySection({
             />
             <LedgerRow
               tone="rule"
-              label="Total Price"
+              label="Amount requested from funder (including GST)"
               value={<Money value={summary.total_price_inc_gst} />}
             />
             {foreign && (
@@ -62,9 +62,16 @@ export function PriceSummarySection({
         <Ledger>
           <tbody>
             <LedgerRow
-              label="Full Project Cost (excluding in-kind)"
-              value={<Money value={summary.project_cost} />}
+              label="Full Project Cost (including in-kind)"
+              value={<Money value={summary.total_project_cost} />}
             />
+            {foreign && (
+              <LedgerRow
+                tone="sub"
+                label="In AUD"
+                value={<InAud value={inAud.total_project_cost} />}
+              />
+            )}
             <LedgerRow
               label="Cash benefit/cost"
               value={<Money value={summary.cash_benefit} />}
@@ -72,6 +79,10 @@ export function PriceSummarySection({
             <LedgerRow
               label="Total In-kind (University investment)"
               value={<Money value={summary.total_in_kind_contribution} />}
+            />
+            <LedgerRow
+              label="Cash co-contribution (Department, Faculty and Chancellery)"
+              value={<Money value={summary.total_cash_co_contribution} />}
             />
             <LedgerRow
               tone="rule"

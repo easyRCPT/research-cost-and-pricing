@@ -42,6 +42,10 @@ export function CayuseSummaryPanel({
               value={<Money value={summary.total_project_cost} />}
             />
             <LedgerRow
+              label="In-kind contributions (University investment)"
+              value={<Money value={summary.total_in_kind_contribution} />}
+            />
+            <LedgerRow
               label="Cash co-contributions (university investment)"
               value={<Money value={summary.total_cash_co_contribution} />}
             />
