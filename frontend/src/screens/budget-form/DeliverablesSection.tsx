@@ -25,7 +25,7 @@ export function DeliverablesSection() {
 
   return (
     <>
-      <PartBar description="Must be completed for Grants. Record all technical and financial deliverables and invoicing dates.">
+      <PartBar>
         PART J — Deliverables{' '}
         <span className="font-normal text-muted-foreground">
           optional for contracts
