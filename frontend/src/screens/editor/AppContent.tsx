@@ -18,7 +18,10 @@ import {
   SideBar as Sidebar,
 } from '@/components/shell/Sidebar'
 import { useBackTarget } from '@/components/shell/useBackTarget'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CurrencyContext } from '@/lib/format/currency'
+import { isStillMissing, reasonTarget } from '@/lib/submission-errors'
+import { editorRoute } from '@/router'
 
 import { AdjustPrice } from '../AdjustPrice'
 import { Approvals } from '../Approvals'
@@ -66,13 +69,21 @@ export function AppContent({
   setScreen,
   onLeave,
 }: AppContentProps) {
-  const currency = useBudget().data.budget_info.currency
+  const { data: budget } = useBudget()
+  const currency = budget.budget_info.currency
   const editable = useEditable()
   const locked = useMissingDetails().length > 0
   const sections = locked ? DETAILS_ONLY : SECTIONS
   const screen = locked && requested !== LOOKUP_SCREEN ? 'details' : requested
   const navigate = useNavigate()
   const back = useBackTarget()
+
+  // A submission error's "go to" action lands here with the reason to show.
+  // It stays up only while the field or line it names is still missing it.
+  const { error } = editorRoute.useSearch()
+  const target = error ? reasonTarget(error, budget) : null
+  const showError =
+    error !== undefined && (target === null || isStillMissing(target, budget))
 
   const lookupsOpen = screen === LOOKUP_SCREEN
   const pageHeading = lookupsOpen
@@ -137,6 +148,11 @@ export function AppContent({
           <>
             <ReadOnlyNotice />
             <DetailsNeededNotice />
+            {showError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             {/*
             One switch for every control on every screen: a disabled fieldset
             disables each input, select, button and checkbox inside it. The
