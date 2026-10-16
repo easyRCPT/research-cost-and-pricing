@@ -26,8 +26,17 @@ test('a margin above 100% is entered on Adjust Price and saved (#192)', async ({
     })(),
   ])
 
-  await expect(page.getByText('Margin at 150')).toBeVisible()
+  await page
+    .getByRole('navigation', { name: 'Costing sections' })
+    .getByRole('button', { name: 'Cost and Price Summary', exact: true })
+    .click()
+  await expect(
+    page.getByText(
+      /Margin at 150\.0% — not applied to in-kind contributions/,
+    ),
+  ).toBeVisible()
 
+  await goToScreen(page, 'Adjust Price')
   await page.reload()
   await expect(
     page.getByRole('spinbutton', { name: 'Margin percentage' }),

@@ -1,14 +1,11 @@
-import { useBudget, useField } from '@/api/budget'
-import { Ledger, LedgerRow, Money, Panel } from '@/components/shell'
+import { useField } from '@/api/budget'
+import { Panel } from '@/components/shell'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { NumberInput } from '@/components/ui/number-input'
 import { MAX_MONEY, toastOutOfRange } from '@/lib/range'
 
 export function CashCoContributions() {
-  const { data: budget } = useBudget()
   const cash = useField('cash_co_contribution')
-
-  const summary = budget.budget_summary.price_summary
 
   return (
     <>
@@ -41,31 +38,6 @@ export function CashCoContributions() {
         </div>
       </Panel>
 
-      <Panel title="Effect on the University position" className="mt-4">
-        <Ledger>
-          <tbody>
-            <LedgerRow
-              label="Cash benefit from the price"
-              value={<Money value={summary.cash_benefit} />}
-            />
-            <LedgerRow
-              tone="sub"
-              label="less in-kind contributions (University investment)"
-              value={<Money value={summary.total_in_kind_contribution} />}
-            />
-            <LedgerRow
-              tone="sub"
-              label="less cash co-contribution"
-              value={<Money value={summary.total_cash_co_contribution} />}
-            />
-            <LedgerRow
-              tone="rule"
-              label="University position"
-              value={<Money value={summary.university_position} tone="sign" />}
-            />
-          </tbody>
-        </Ledger>
-      </Panel>
     </>
   )
 }
