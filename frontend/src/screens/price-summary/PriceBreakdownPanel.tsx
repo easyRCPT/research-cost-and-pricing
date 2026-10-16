@@ -14,6 +14,12 @@ interface PriceBreakdownPanelProps {
   >
 }
 
+/**
+ * One coherent account of cost and price (#213): the full project cost, the
+ * University contributions, and the steps that turn the cost into the price
+ * requested from the funder. The figures are the engine's own, so the display
+ * explains the calculation rather than inventing one.
+ */
 export function PriceBreakdownPanel({
   summary,
   inAud,
