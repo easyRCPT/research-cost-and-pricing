@@ -28,7 +28,7 @@ export function PriceBreakdownPanel({
       title="Cost and Price Summary"
       description={
         foreign
-          ? `Amounts are shown in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. In AUD figures are shown beneath the totals.`
+          ? `Priced in ${info.currency} at 1 AUD = ${info.exchange_rate} ${info.currency}${info.exchange_rate_override === null ? ', the rates table rate' : ', a rate set for this costing'}. In AUD figures are shown beneath the totals.`
           : undefined
       }
     >
@@ -41,6 +41,14 @@ export function PriceBreakdownPanel({
         Full project cost
       </h4>
       <Ledger>
+        <thead>
+          <tr className="border-b text-[12px] text-muted-foreground">
+            <th className="py-1.5 text-left font-semibold" />
+            <th className="py-1.5 text-right font-semibold">
+              Full Project Cost ({info.currency})
+            </th>
+          </tr>
+        </thead>
         <tbody>
           <LedgerRow
             label="Staff costs (excluding in-kind)"
@@ -65,12 +73,12 @@ export function PriceBreakdownPanel({
           />
           <LedgerRow
             tone="sub"
-            label="Total in-kind contribution (University investment)"
+            label="In-kind contributions (University investment)"
             value={<Money value={summary.total_in_kind_contribution} />}
           />
           <LedgerRow
             tone="rule"
-            label="Full Project Cost (project costs + in-kind)"
+            label="Full project cost (including in-kind)"
             value={<Money value={summary.total_project_cost} />}
           />
           {foreign && (

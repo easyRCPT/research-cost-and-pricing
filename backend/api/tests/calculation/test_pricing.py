@@ -241,8 +241,7 @@ class TestCalculatePriceSummary(SimpleTestCase):
             Decimal("0.20"),
         )
         self.assertEqual(
-            result["total_project_cost"]
-            - result_without_in_kind["total_project_cost"],
+            result["total_project_cost"] - result_without_in_kind["total_project_cost"],
             Decimal(500),
         )
         self.assertEqual(
