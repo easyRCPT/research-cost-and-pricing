@@ -47,7 +47,7 @@ export function PriceSummarySection({
             />
             <LedgerRow
               tone="rule"
-              label="Amount requested from funder (including GST)"
+              label="Price to be charged to the funder (including GST)"
               value={<Money value={summary.total_price_inc_gst} />}
             />
             {foreign && (

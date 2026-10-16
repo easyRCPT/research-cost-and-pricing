@@ -39,8 +39,8 @@ export function PriceBreakdownPanel({
       }
     >
       <p className="mb-4 text-[13px] text-muted-foreground">
-        Margin is calculated on project costs excluding in-kind. Margin not
-        applied to in-kind contributions.
+        In-kind contributions are included in full project cost and remain
+        outside the margin calculation.
       </p>
 
       <h4 className="mb-2 text-[13.5px] font-semibold text-primary">
@@ -105,8 +105,9 @@ export function PriceBreakdownPanel({
           <LedgerRow
             label={
               <>
-                Margin at {percent1(summary.margin)} on project costs excluding
-                in-kind (<Money value={summary.project_cost} />)
+                Margin at {percent1(summary.margin)} — not applied to in-kind
+                contributions (project costs excluding in-kind:{' '}
+                <Money value={summary.project_cost} />)
               </>
             }
             value={<Money value={summary.margin_amount} />}
@@ -136,7 +137,7 @@ export function PriceBreakdownPanel({
           )}
           <LedgerRow
             tone="rule"
-            label="Amount requested from funder (including GST)"
+            label="Price to be charged to the funder (including GST)"
             value={<Money value={summary.total_price_inc_gst} />}
           />
           {foreign && (
@@ -153,13 +154,14 @@ export function PriceBreakdownPanel({
         University contribution and position
       </h4>
       <p className="mb-2 text-[13px] text-muted-foreground">
-        Cash co-contributions are University funding and do not change the price
-        requested from the funder.
+        Cash co-contributions from the Department, Faculty and Chancellery are
+        University funding and do not change the price requested from the
+        funder.
       </p>
       <Ledger>
         <tbody>
           <LedgerRow
-            label="Cash co-contribution (Department, Faculty and Chancellery)"
+            label="Cash co-contributions"
             value={<Money value={summary.total_cash_co_contribution} />}
           />
           <LedgerRow
