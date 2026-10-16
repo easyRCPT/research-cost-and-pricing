@@ -31,7 +31,9 @@ test('a margin above 100% is entered on Adjust Price and saved (#192)', async ({
     .getByRole('button', { name: 'Cost and Price Summary', exact: true })
     .click()
   await expect(
-    page.getByText(/Margin at 150\.0% on project costs excluding in-kind/),
+    page.getByText(
+      /Margin at 150\.0% — not applied to in-kind contributions/,
+    ),
   ).toBeVisible()
 
   await goToScreen(page, 'Adjust Price')
